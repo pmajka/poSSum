@@ -4,6 +4,7 @@ import sys
 import os
 import subprocess as sub
 import numpy as np
+from collections import namedtuple
 
 import networkx as nx
 import json
@@ -16,9 +17,9 @@ def listToChain(listToSplit):
         return zip(listToSplit[:-1], listToSplit[1:])
 
 def getVectorString(iterable):
-    #TODO: Assert checking if the argument is
-    # iterable
     return "x".join(map(str, map(int,iterable)))
+
+antsParam = namedtuple('antsParam', 'antsName defValue')
 
 class antsWrapper(object):
     pass
@@ -38,52 +39,119 @@ class antsIntensityMetric(antsWrapper):
         return retStr
 
 class antsLinearRegistrationWrapper(antsWrapper):
-    boolParams = ['verbose', 'geodesic', 'continueAffine', 'useNN', 
-                  'useHistogramMatching', 'rigidAffine', 
-                  'useAllMetricsForConvergence']
+    _boolParams = \
+           {'verbose'        : antsParam('verbose', True),
+            'continueAffine' : antsParam('continue-affine', True),
+            'useNN'          : antsParam('use-NN', False),
+            'rigidAffine'    : antsParam('rigid-affine', False),
+            'hiistogramMatching' : antsParam('use-Histogram-Matching', True),
+            'allMetricsConverge' : antsParam('use-all-metrics-for-convergence', False)}
     
-    def __init__(self, outputNaming, metrics, dimension = 2):
-        self.metrics = []
-        self.dimension = dimension        #
-        self.outputNaming  = outputNaming #
+    _filenameParams = \
+           {'initialAffine' : antsParam('initial-affine', None),
+            'fixedImageInitialAffine' : antsParam('fixed-image-initial-affine', None),
+            'outputNaming' : antsParam('output-naming', None)}
+    
+    _vectorParams = \
+            {'iterations' : antsParam('number-of-iterations', (5000,)*4),
+             'affineIterations' : antsParam('number-of-affine-iterations', (10000,)*5),
+             'affineGradientDescent' : antsParam('affine-gradient-descent-option', None)}
+    
+    def __init__(self, outputNaming, metrics, dimension = 2, parameters = None):
         
-        self.regularization = None        # (str,(float,float)
-        self.transformation = None        # (str, (float, [float, ... ]))
+        self._assignDefaultValues()
         
-        self.iterations = None              # iterable of ints
-        self.affineIterations = None        # 
+        self.transformation = ('SyN', (0.15,))  # (str, (float, [float, ... ]))
+        self.regularization = ('Gauss', (3,1))  # (str,(float,float)
         
-        self.affineGradientDescent = None   # sequence of 3 floats
-        self.initialAffine = None           # str - filename
-        self.fixedImageInitialAffine = None # str - filename
-        self.affineMetricType = None        # str Metric
+        # Load setting provided by the user
+        self.dimension = dimension       #
+        self.outputNaming = outputNaming #
         
-        self.rigidAffine = None                   # bool
-        self.continueAffine = None                # bool
-        self.geodesic = None                      # .
-        self.useHistogramMatching = None          # .
-        self.useAllMetricsForConvergence = None   # . 
-        self.useNN = None                         # . 
-        self.verbose = None                       # .
+        # Load metrics
+        self.metrics = metrics
+        
+        # Update parameters when the custom parameters
+        # dictionary is provided. This will override default parameters
+        # values with the custom one.
+        if parameters != None:
+            self.updateParameters(parameters)
+    
+    def _assignDefaultValues(self):
+        for parameterSet in [self._boolParams, self._filenameParams, self._vectorParams]:
+            for parameter, data in parameterSet.iteritems():
+                setattr(self, parameter, data.defValue)
     
     def updateParameters(self, parameters):
         for (name, value) in parameters:
             setattr(self, name, value)
-    
+     
     def generateWrapCommand(self):
         pass
     
     def getParametricPrefix(self):
         pass
     
+    def _getReguralizationString(self):
+        """
+        """
+        regType = self.regularization[0]
+        regParams =  self.regularization[1]
+        
+        retStr = " -r " + regType + "["
+        retStr+= ",".join(map(str, regParams))
+        retStr+="] "
+        return retStr
+    
+    def _getTransformationString(self):
+        """
+        """
+        # Split transformation attribute into
+        # transformation type
+        # and transformation properties
+        transfType = self.transformation[0]
+        transfParameters = self.transformation[1]
+        
+        retStr = " -t " + transfType + "["
+        retStr+= ",".join(map(str, transfParameters))
+        retStr+="] "
+        
+        return retStr
+    
     def __str__(self):
-        retStr = "-m " + self.name 
-        retStr+= "[" + self.fixedImage + "," + self.movingImage + "," + str(self.weight)
-        retStr+= "," + str(self.param) + "]"
+        # Initialize the command"
+        retStr = "ANTS " + str(self.dimension) + " "
+        
+        # Handle the parameters with a complex structure:
+        retStr+= self._getTransformationString() 
+        retStr+= self._getReguralizationString() 
+        
+        # Append all metrics that the registration framework
+        # image to image metrics
+        retStr += " ".join(map(str, self.metrics))
+        
+        # Now, append all vector arguments
+        parameters = [(self._vectorParams,  getVectorString),
+                      (self._boolParams,    str),
+                      (self._filenameParams,str)]
+        
+        for parameterSet, serial in parameters:
+            for parameter, data in parameterSet.iteritems():
+                parameterValue = getattr(self, parameter)
+                if parameterValue != None:
+                    retStr += " --" + data.antsName + " " \
+                            + serial(getattr(self, parameter)) \
+                            + " "
+        # Now support all the other parameter:
+        
         return retStr
      
-    def __str__(self):
-        pass
+    def __call__(self):
+        command = str(self)
+        p = sub.Popen(command.split(), stdout=sub.PIPE, stderr=sub.PIPE)
+        output, errors = p.communicate()
+        print  output, errors
+     
 
 """
 r = antsLinearRegistrationWrapper(outPrefix, metrics)
@@ -151,4 +219,6 @@ class TestAntsMetric(unittest.TestCase):
 
         
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
+    a = antsLinearRegistrationWrapper("out", [antsIntensityMetric('f.nii.gz','m.nii.gz')])
+    print a()
