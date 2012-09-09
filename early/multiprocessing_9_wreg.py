@@ -303,7 +303,6 @@ class TestAntsMetric(unittest.TestCase):
 
 
 class TestAntsWrapImage(unittest.TestCase):
-    
     def test_simple_run(self):
         wrapParams = {'defomableWarpsList' : 'x', 'affineWarp': 'x'}
         result = \

@@ -104,7 +104,7 @@ class ants_transformation_parameter(ants_specific_parameter):
 class ants_regularization_parameter(ants_specific_parameter):
     _switch = '-r'
 
-class antsIntensityMetric(object):
+class ants_intensity_meric(object):
     _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
     
     _parameters = {\
@@ -115,13 +115,13 @@ class antsIntensityMetric(object):
             'parameter'   : value_parameter('parameter', None)
             }
     
-    def __init__(self, fixed_image, moving_image, metric='CC', weight = 1, param = 4):
+    def __init__(self, fixed_image, moving_image, metric='CC', weight = 1, parameter = 4):
         pass
         self.fixed_image  = fixed_image
         self.moving_image = moving_image
         self.metric = metric
         self.weight = weight
-        self.param = param
+        self.parameter = parameter
     
     def __getattr__(self, attr):
         if attr in self._parameters.keys():
@@ -137,7 +137,6 @@ class antsIntensityMetric(object):
     
     def __str__(self):
         replacement = dict(map(lambda (k,v): (k, v.value), self._parameters.iteritems()))
-        print replacement
         return self._template.format(**replacement)
 
 class ants_registration(object):
@@ -230,6 +229,82 @@ Out[2]: '{_value}'
 
 In [3]: print p
 file.txt
+
+In [37]: print ants_transformation_parameter("transformation", ("SyN",(0,0)))
+ -t SyN[0,0] 
+
+ In [38]: transf = ants_transformation_parameter("transformation", ("SyN",(0,0)))
+
+ In [39]: print transf
+  -t SyN[0,0] 
+
+In [40]: transf.value
+Out[40]: ('SyN', (0, 0))
+
+In [41]: transf.value = ("Elast",(0,1))
+
+In [42]: print transf
+ -t Elast[0,1] 
+
+In [46]: transf._switch
+Out[46]: '-t'
+
+In [47]: transf._switch = '-h'
+
+In [48]: print transf
+ -h Elast[0,1] 
+
+In [49]: transf.name
+Out[49]: 'transformation'
+
+In [50]: transf.name = 'whatever'
+
+In [51]: print transf
+ -h Elast[0,1] 
+
+
+In [53]: transf._serialize()
+Out[53]: ' -h Elast[0,1] '
+
+
+In [55]: a = ants_intensity_meric('fixed.nii.gz',',moving.nii.gz')
+
+In [56]: print a
+-m CC[fixed.nii.gz,,moving.nii.gz,1,4]
+
+
+In [57]: a.fixed_image = 'f.nii.gz'
+^[[A
+In [58]: print a
+-m CC[f.nii.gz,,moving.nii.gz,1,4]
+
+In [59]: a.moving_image = 'm.nii.gz'
+
+In [60]: print a
+-m CC[f.nii.gz,m.nii.gz,1,4]
+
+In [61]: a.weight = 3
+
+In [62]: print a
+-m CC[f.nii.gz,m.nii.gz,3,4]
+In [65]: a.parameter = 44
+
+In [66]: print a
+-m CC[f.nii.gz,m.nii.gz,3,44]
+
+In [67]: a.parameter = '44'
+
+In [68]: print a
+-m CC[f.nii.gz,m.nii.gz,3,44]
+
+
+In [75]: metric_settings = {'weight':2, 'metric' : 'MSQ', 'parameter' : 8}
+
+In [76]: a=antsIntensityMetric('_f_.nii.gz','_m_.nii.gz', **metric_settings)
+
+In [77]: print a
+{'moving_image': '_m_.nii.gz', 'metric': 'MSQ', 'parameter': 8, 'weight': 2, 'fixed_image': '_f_.nii.gz'}
+-m MSQ[_f_.nii.gz,_m_.nii.gz,2,8]
 
 
 """
