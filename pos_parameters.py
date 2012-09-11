@@ -1,5 +1,6 @@
 import sys, os
 import unittest
+import subprocess as sub
 
 # type
 # serialization function
@@ -51,7 +52,6 @@ class generic_parameter(object):
     name = property(_get_name, _set_name)
 
 class switch_parameter(generic_parameter):
-    
     def _serialize(self):
         if self.value:
             return self._str_template.format(**self.__dict__)
@@ -59,7 +59,6 @@ class switch_parameter(generic_parameter):
             return ""
 
 class string_parameter(generic_parameter):
-        
     def _serialize(self):
         if self.value:
             return self._str_template.format(**self.__dict__)
@@ -73,11 +72,12 @@ class value_parameter(string_parameter):
     _str_template = "{_value}"
 
 class list_parameter(generic_parameter):
+    _str_template = "{_list}"
     _delimiter = " "
     
     def _serialize(self):
         if self.value:
-            self._list = self._delimiter.join(map(str,self._value))
+            self._list = self._delimiter.join(map(str, self.value))
             return self._str_template.format(**self.__dict__)
         else:
             return ""
@@ -104,24 +104,13 @@ class ants_transformation_parameter(ants_specific_parameter):
 class ants_regularization_parameter(ants_specific_parameter):
     _switch = '-r'
 
-class ants_intensity_meric(object):
-    _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
+class generic_wrapper(object):
+    _template = None
     
-    _parameters = {\
-            'metric' : string_parameter('metric', 'CC'),
-            'fixed_image' : filename_parameter('fixed_image', None),
-            'moving_image': filename_parameter('fixed_image', None),
-            'weight'      : value_parameter('weight', None),
-            'parameter'   : value_parameter('parameter', None)
-            }
+    _parameters = {}
     
-    def __init__(self, fixed_image, moving_image, metric='CC', weight = 1, parameter = 4):
-        pass
-        self.fixed_image  = fixed_image
-        self.moving_image = moving_image
-        self.metric = metric
-        self.weight = weight
-        self.parameter = parameter
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError, "Reimplement this method in a subclass"
     
     def __getattr__(self, attr):
         if attr in self._parameters.keys():
@@ -136,12 +125,74 @@ class ants_intensity_meric(object):
             return super(self.__class__, self).__setattr__(attr, value)
     
     def __str__(self):
-        replacement = dict(map(lambda (k,v): (k, v.value), self._parameters.iteritems()))
+        replacement = dict(map(lambda (k,v): (k, str(v)), self._parameters.iteritems()))
         return self._template.format(**replacement)
+    
+    def __call__(self):
+        command = str(self)
+        p = sub.Popen(command.split(), stdout=sub.PIPE, stderr=sub.PIPE)
+        output, errors = p.communicate()
+        print  output, errors
 
-class ants_registration(object):
-    _parameters = { \
+class ants_intensity_meric(generic_wrapper):
+    _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
+    
+    _parameters = {\
+            'metric' : string_parameter('metric', 'CC'),
+            'fixed_image' : filename_parameter('fixed_image', None),
+            'moving_image': filename_parameter('moving_image', None),
+            'weight'      : value_parameter('weight', None),
+            'parameter'   : value_parameter('parameter', None)
             }
+    
+    def __init__(self, fixed_image, moving_image, metric='CC', weight = 1, parameter = 4):
+        self.fixed_image  = fixed_image
+        self.moving_image = moving_image
+        self.metric = metric
+        self.weight = weight
+        self.parameter = parameter
+    
+    def _get_value(self):
+        return str(self)
+     
+    def _set_value(self, value):
+        pass
+    
+    value = property(_get_value, _set_value)
+
+class ants_registration(generic_wrapper):
+    _parameters = {  }
+    _template = """ANTS {dimension} \
+       {verbose} \
+       {transformation} {regularization} {outputNaming} \
+       {iterations} {affineIterations}\
+       {rigidAffine} {continueAffine}\
+       {useNN} {histogramMatching} {allMetricsConverge} \
+       {initialAffine} {fixedImageInitialAffine} \
+       {affineGradientDescent} {imageMetrics}"""
+    
+    _parameters = { \
+            'dimension'      : value_parameter('dimension', 2),
+            'verbose'        : switch_parameter('verbose', True, str_template = '--{_name} {_value}'),
+            'transformation' : ants_transformation_parameter('transformation', ('SyN', [0.25])),
+            'regularization' : ants_regularization_parameter('regularization', ('Gausas', (3.0, 1.0))),
+            'outputNaming'   : filename_parameter('output-naming', None, str_template = '--{_name} {_value}'),
+            'iterations'     : vector_parameter('number-of-iterations', (5000,)*4, '--{_name} {_list}'),
+            'affineIterations'      : vector_parameter('number-of-affine-iterations', (10000,)*5, '--{_name} {_list}'),
+            'rigidAffine'    : switch_parameter('rigid-affine', True, str_template = '--{_name} {_value}'),
+            'continueAffine' : switch_parameter('continue-affine', True, str_template = '--{_name} {_value}'),
+            'useNN'          : switch_parameter('use-NN', True, str_template = '--{_name} {_value}'),
+            'histogramMatching' : switch_parameter('use-Histogram-Matching', True, str_template = '--{_name} {_value}'),
+            'allMetricsConverge': switch_parameter('use-all-metrics-for-convergence', True, str_template = '--{_name} {_value}'),
+            'initialAffine'     : filename_parameter('initial-affine', None, str_template = '--{_name} {_value}'),
+            'fixedImageInitialAffine': filename_parameter('fixed-image-initial-affine', None, str_template = '--{_name} {_value}'),
+            'affineGradientDescent' : vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
+            'imageMetrics'          : list_parameter('image_to_image_metrics', [], '{_value}')
+            }
+    
+    def __init__(self):
+        pass
+    
 
 """
 switch_parameter('useNN', False, "--{_name}")
@@ -303,7 +354,6 @@ In [75]: metric_settings = {'weight':2, 'metric' : 'MSQ', 'parameter' : 8}
 In [76]: a=antsIntensityMetric('_f_.nii.gz','_m_.nii.gz', **metric_settings)
 
 In [77]: print a
-{'moving_image': '_m_.nii.gz', 'metric': 'MSQ', 'parameter': 8, 'weight': 2, 'fixed_image': '_f_.nii.gz'}
 -m MSQ[_f_.nii.gz,_m_.nii.gz,2,8]
 
 
