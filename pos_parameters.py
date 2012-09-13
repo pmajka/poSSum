@@ -52,6 +52,7 @@ class generic_parameter(object):
     name = property(_get_name, _set_name)
 
 class switch_parameter(generic_parameter):
+    
     def _serialize(self):
         if self.value:
             return self._str_template.format(**self.__dict__)
@@ -59,6 +60,8 @@ class switch_parameter(generic_parameter):
             return ""
 
 class string_parameter(generic_parameter):
+    _str_template = "{_value}"
+    
     def _serialize(self):
         if self.value:
             return self._str_template.format(**self.__dict__)
@@ -109,8 +112,8 @@ class generic_wrapper(object):
     
     _parameters = {}
     
-    def __init__(self, *args, **kwargs):
-        raise NotImplementedError, "Reimplement this method in a subclass"
+    def __init__(self, **kwargs):
+        self.updateParameters(kwargs)
     
     def __getattr__(self, attr):
         if attr in self._parameters.keys():
@@ -122,8 +125,9 @@ class generic_wrapper(object):
         if attr in self._parameters.keys():
             return setattr(self._parameters[attr],'value',value)
         else:
-            return super(self.__class__, self).__setattr__(attr, value)
-    
+            return object.__setattr__(self, attr, value)
+            #return super(self.__class__, self).__setattr__(attr, value)
+
     def __str__(self):
         replacement = dict(map(lambda (k,v): (k, str(v)), self._parameters.iteritems()))
         return self._template.format(**replacement)
@@ -132,7 +136,17 @@ class generic_wrapper(object):
         command = str(self)
         p = sub.Popen(command.split(), stdout=sub.PIPE, stderr=sub.PIPE)
         output, errors = p.communicate()
-        print  output, errors
+        execution = {'output' : output, 'error' : errors, 'port' : {}}
+        
+        for k, v in self._io_pass.iteritems():
+            execution['port'][v] = self._parameters[k].value
+        return execution
+    
+    def updateParameters(self, parameters):
+        for (name, value) in parameters.items():
+            setattr(self, name, value)
+        return self
+    
 
 class ants_intensity_meric(generic_wrapper):
     _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
@@ -160,16 +174,17 @@ class ants_intensity_meric(generic_wrapper):
     
     value = property(_get_value, _set_value)
 
+
 class ants_registration(generic_wrapper):
-    _parameters = {  }
     _template = """ANTS {dimension} \
        {verbose} \
        {transformation} {regularization} {outputNaming} \
+       {imageMetrics} \
        {iterations} {affineIterations}\
        {rigidAffine} {continueAffine}\
        {useNN} {histogramMatching} {allMetricsConverge} \
        {initialAffine} {fixedImageInitialAffine} \
-       {affineGradientDescent} {imageMetrics}"""
+       {affineGradientDescent} """
     
     _parameters = { \
             'dimension'      : value_parameter('dimension', 2),
@@ -187,34 +202,74 @@ class ants_registration(generic_wrapper):
             'initialAffine'     : filename_parameter('initial-affine', None, str_template = '--{_name} {_value}'),
             'fixedImageInitialAffine': filename_parameter('fixed-image-initial-affine', None, str_template = '--{_name} {_value}'),
             'affineGradientDescent' : vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
-            'imageMetrics'          : list_parameter('image_to_image_metrics', [], '{_value}')
+            'imageMetrics'          : list_parameter('image_to_image_metrics', [], '{_list}')
             }
     
-    def __init__(self):
-        pass
+    _io_pass = { \
+            'dimension' : 'dimension',
+            }
     
+    def __call__(self, *args, **kwargs):
+        execution = super(self.__class__, self).__call__(*args, **kwargs)
+        execution['port']['deformable_list'] = [self.outputNaming + 'Warp.nii.gz']
+        
+        if self.affineIterations:
+            execution['port']['affine_list'] = [self.outputNaming + 'Affine.txt']
+        
+        execution['port']['moving_image'] = self.imageMetrics[0].moving_image
+        
+        return execution
 
+class ants_reslice(generic_wrapper):
+    _template = """WarpImageMultiTransform {dimension} \
+                  {moving_image} {output_image} \
+                  {deformable_list} \
+                  {affine_list}"""
+    
+    _parameters = { \
+        'dimension'      : value_parameter('dimension', 2),
+        'moving_image'  : filename_parameter('moving_image', None),
+        'output_image'  : filename_parameter('output_image', None),
+        'reference_image'  : filename_parameter('reference_image', None, str_template = '-R {_value}'),
+        'deformable_list'  : list_parameter('deformable_list', [], str_template = '{_list}'),
+        'affine_list'  : list_parameter('affine_list', [], str_template = '{_list}')
+                }
+    
+    _io_pass = { \
+            'dimension'    : 'dimension',
+            'output_image' : 'input_image'
+            }
+
+
+class average_images(generic_wrapper):
+    _template = """c{dimension}d  {input_images} -mean -type uchar -o {output_image}"""
+    
+    _parameters = { \
+            'dimension'    : value_parameter('dimension', 2),
+            'input_images' : list_parameter('input_images', [], str_template = '{_list}'), 
+            'output_image' : filename_parameter('output_image')
+            }
+    
+    _io_pass = { \
+            'dimension'    : 'dimension',
+            'output_image' : 'input_image'
+            }
+
+class chain_affine_transforms(generic_wrapper):
+    _template = """ComposeMultiTransform {dimension} {output_filename} {input_images}"""
+    
+    _parameters = { \
+            'dimension'    : value_parameter('dimension', 2),
+            'input_images' : list_parameter('input_images', [], str_template = '{_list}'), 
+            'output_filename' : filename_parameter('output_filename')
+            }
+    
+    _io_pass = { \
+            'dimension'    : 'dimension',
+            'output_filename' : 'filename_filename'
+            }
+    
 """
-switch_parameter('useNN', False, "--{_name}")
-
-param = switch_parameter():
-    _boolParams = \
-           {'verbose'        : antsParam('verbose', True),
-            'continueAffine' : antsParam('continue-affine', True),
-            'useNN'          : antsParam('use-NN', False),
-            'rigidAffine'    : antsParam('rigid-affine', False),
-            'hiistogramMatching' : antsParam('use-Histogram-Matching', True),
-            'allMetricsConverge' : antsParam('use-all-metrics-for-convergence', False)}
-    
-    _filenameParams = \
-           {'initialAffine' : antsParam('initial-affine', None),
-            'fixedImageInitialAffine' : antsParam('fixed-image-initial-affine', None),
-            'outputNaming' : antsParam('output-naming', None)}
-    
-    _vectorParams = \
-            {'iterations' : antsParam('number-of-iterations', (5000,)*4),
-             'affineIterations' : antsParam('number-of-affine-iterations', (10000,)*5),
-             'affineGradientDescent' : antsParam('affine-gradient-descent-option', None)}
 
 In [1]: p =  switch_parameter('useNN', False, "--{_name}")
 
