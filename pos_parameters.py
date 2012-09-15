@@ -132,14 +132,25 @@ class generic_wrapper(object):
         replacement = dict(map(lambda (k,v): (k, str(v)), self._parameters.iteritems()))
         return self._template.format(**replacement)
     
+#   def __call__(self):
+#       command = str(self)
+#       p = sub.Popen(command.split(), stdout=sub.PIPE, stderr=sub.PIPE)
+#       output, errors = p.communicate()
+#       execution = {'command': command, 'output' : output, 'error' : errors, 'port' : {}}
+#       
+#       if hasattr(self, '_io_pass'):
+#           for k, v in self._io_pass.iteritems():
+#               execution['port'][v] = self._parameters[k].value
+#       return execution
+
     def __call__(self):
         command = str(self)
-        p = sub.Popen(command.split(), stdout=sub.PIPE, stderr=sub.PIPE)
-        output, errors = p.communicate()
-        execution = {'output' : output, 'error' : errors, 'port' : {}}
+        os.system(command)
         
-        for k, v in self._io_pass.iteritems():
-            execution['port'][v] = self._parameters[k].value
+        execution = {}
+        if hasattr(self, '_io_pass'):
+            for k, v in self._io_pass.iteritems():
+                execution['port'][v] = self._parameters[k].value
         return execution
     
     def updateParameters(self, parameters):
@@ -147,6 +158,8 @@ class generic_wrapper(object):
             setattr(self, name, value)
         return self
     
+class filename_wrapper(generic_wrapper):
+    pass
 
 class ants_intensity_meric(generic_wrapper):
     _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
@@ -168,7 +181,7 @@ class ants_intensity_meric(generic_wrapper):
     
     def _get_value(self):
         return str(self)
-     
+    
     def _set_value(self, value):
         pass
     
@@ -206,7 +219,7 @@ class ants_registration(generic_wrapper):
             }
     
     _io_pass = { \
-            'dimension' : 'dimension',
+            'dimension' : 'dimension'
             }
     
     def __call__(self, *args, **kwargs):
