@@ -1,14 +1,16 @@
 import numpy as np
 from itertools import izip
 import datetime, time
+from optparse import OptionParser, OptionGroup
 
 from pos_parameters import generic_wrapper, filename_parameter, string_parameter, list_parameter
 
 txtdata = open('/home/pmajka/03_01_NN3_rejestracja.txt', 'r').readlines()
-datafile = 'a.txt'
 plotfile = 'a.plt'
 
 # Define numpy datatype in order to read reconrdings from the file
+# Supported input file format: TSV format with a number of header lines starting
+# with hash character
 record_data = np.dtype([
         ('seconds', np.uint64),
         ('bpm', np.float),
@@ -34,7 +36,7 @@ class anesthesia_plot(generic_wrapper):
     set yrange [{respiration_range}]
     
     set y2tics
-    set ytics
+    set ytics nomirror
     set y2range [{temperature_range}]
     
     set format x "%1H:%M"
@@ -73,20 +75,23 @@ class gnuplot_wrapper(generic_wrapper):
             }
 
 class draw_anesthesia_plot(object):
-    def __init__(self):
-        pass
+    def __init__(self, options, args):
+        self._options = options
+        self._args = args
     
-    def run(self):
+    def _prepare_dataset(self):
         # Load data with loadtxt
+        txtdata = open(self._args[0]).readlines()
+        datafile = self._options.dataTempFilename
+
         data = np.loadtxt(txtdata, dtype=record_data, skiprows=4, delimiter=',')
         
-        # Extract metadata information
-        metadata = map(lambda x: x.strip().replace('"',""), txtdata[0].strip().split(","))
-        metadata = dict(list(izip(*[iter(metadata)]*2)))
+        # Extract self._metadata information
+        self._metadata = map(lambda x: x.strip().replace('"',""), txtdata[0].strip().split(","))
+        self._metadata = dict(list(izip(*[iter(self._metadata)]*2)))
         
-        date_start_day = datetime.datetime.strptime(metadata['Date'], '%m/%d/%y')
-        date_start = datetime.datetime.strptime(metadata['Date'] + " " + metadata['Start'], '%m/%d/%y %H:%M:%S')
-        date_stop  = datetime.datetime.strptime(metadata['Date'] + " " + metadata['Stop'], '%m/%d/%y %H:%M:%S')
+        date_start_day = datetime.datetime.strptime(self._metadata['Date'], '%m/%d/%y')
+        date_start = datetime.datetime.strptime(self._metadata['Date'] + " " + self._metadata['Start'], '%m/%d/%y %H:%M:%S')
         
         global_time_points   = map(lambda x: date_start + datetime.timedelta(seconds=int(x)), data['seconds'])
         relative_time_points = map(lambda x: date_start_day + datetime.timedelta(seconds=int(x)), data['seconds'])
@@ -98,19 +103,81 @@ class draw_anesthesia_plot(object):
             line = "\t".join(map(str, final_array[i])) + "\n"
             fh.write(line)
         fh.close()
+    
+    def _plot_chart(self):
+        print self._options
+        plot_file_kwargs = { \
+                'specimen_name'     : self._options.specimenName,
+                'output_filename'   : self._options.outputFilename,
+                'respiration_range' : self._options.respirationRange,
+                'temperature_range' : self._options.temparatureRange,
+                'input_filename'     : self._options.dataTempFilename,
+                'plot_date' : self._metadata['Date'],
+                'plot_start': self._metadata['Start'],
+                'plot_stop' : self._metadata['Stop']
+                }
         
-        plot_file = anesthesia_plot(specimen_name = '02\_02\_NN2',
-                                    respiration_range = (15,40),
-                                    temperature_range = (25,30),
-                                    output_filename = 'a.svg',
-                                    input_filename = 'a.txt',
-                                    plot_date = metadata['Date'],
-                                    plot_start = metadata['Start'],
-                                    plot_stop = metadata['Stop'])
+        gnuplot_kwargs = {
+                'plot_file'   : self._options.tempFilename,
+                'svg_file'    : self._options.outputFilename,
+                'output_file' : self._options.outputImageFilename
+                }
         
-        gnuplot = gnuplot_wrapper(plot_file='a.plt',
-                                  svg_file ='a.svg',
-                                  output_file = 'a.png')
+        plot_file = anesthesia_plot(**plot_file_kwargs)
         
-        fh = open(plotfile, 'w').write(str(plot_file))
+        gnuplot = gnuplot_wrapper(**gnuplot_kwargs)
+        
+        # Execute plotting
+        plotfile = self._options.tempFilename
+        open(plotfile, 'w').write(str(plot_file))
         gnuplot()
+    
+    def run(self):
+        self._prepare_dataset()
+        self._plot_chart()
+    
+    @staticmethod
+    def parseArgs():
+        usage = "python draw_aneshesia_plot.py input_file [options]"
+        
+        parser = OptionParser(usage = usage)
+         
+        parser.add_option('--specimenName', default=None,
+                dest='specimenName', action='store', type='str',
+                help='Name of the specimen')
+        parser.add_option('--outputFilename', default='plot.svg',
+                dest='outputFilename', action='store', type='str',
+                help='Name of the output svg image.')
+        parser.add_option('--outputImageFilename', default='plot.png',
+                dest='outputImageFilename', action='store', type='str',
+                help='Name of the output svg image.')
+        parser.add_option('--respirationRange', default=(15,40),
+                dest='respirationRange', action='store', type='int',
+                nargs = 2, help='Range of respiration range scale')
+        parser.add_option('--temparatureRange', default=(25,30),
+                dest='temparatureRange', action='store', type='int',
+                nargs = 2, help='Range of temperature range scale')
+        parser.add_option('--tempFilename', default='temp.plt',
+                dest='tempFilename', action='store', type='str',
+                help="Name of the temponary file. Do not change it if you don't need to")
+        parser.add_option('--dataFilename', default='data_temp.txt',
+                dest='dataTempFilename', action='store', type='str',
+                help="Name of the temponary data file. Do not change it if you don't need to")
+        
+        (options, args) = parser.parse_args()
+        return (options, args)
+
+if __name__ == '__main__':
+    options, args = draw_anesthesia_plot.parseArgs()
+    plotter = draw_anesthesia_plot(options, args)
+    plotter.run()
+
+"""
+python draw_aneshesia_plot.py 03_01_NN3_rejestracja.txt  --specimenName '03_01_NN3'  --outputImageFilename 03_01_NN3.png --outputFilename 03_01_NN3.sv
+
+ python draw_aneshesia_plot.py 03_02_NN4_rejestracja.txt  --specimenName '03_02_NN4'  --outputImageFilename 03_02_NN4.png --outputFilename 03_02_NN4.svg  --temparatureRange 25 31
+ --respirationRange 15 50
+
+ python draw_aneshesia_plot.py 03_03_NN5_rejestracja.txt  --specimenName '03_03_NN5'  --outputImageFilename 03_03_NN5.png --outputFilename 03_03_NN5.svg  --temparatureRange 27 31
+ --respirationRange 13 35
+"""

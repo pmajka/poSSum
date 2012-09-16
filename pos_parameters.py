@@ -127,7 +127,7 @@ class generic_wrapper(object):
         else:
             return object.__setattr__(self, attr, value)
             #return super(self.__class__, self).__setattr__(attr, value)
-
+    
     def __str__(self):
         replacement = dict(map(lambda (k,v): (k, str(v)), self._parameters.iteritems()))
         return self._template.format(**replacement)
