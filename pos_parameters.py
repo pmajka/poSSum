@@ -253,7 +253,6 @@ class ants_reslice(generic_wrapper):
             'output_image' : 'input_image'
             }
 
-
 class average_images(generic_wrapper):
     _template = """c{dimension}d  {input_images} -mean -type uchar -o {output_image}"""
     
