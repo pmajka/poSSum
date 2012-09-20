@@ -5,9 +5,6 @@ from optparse import OptionParser, OptionGroup
 
 from pos_parameters import generic_wrapper, filename_parameter, string_parameter, list_parameter
 
-txtdata = open('/home/pmajka/03_01_NN3_rejestracja.txt', 'r').readlines()
-plotfile = 'a.plt'
-
 # Define numpy datatype in order to read reconrdings from the file
 # Supported input file format: TSV format with a number of header lines starting
 # with hash character

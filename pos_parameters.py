@@ -119,7 +119,8 @@ class generic_wrapper(object):
         if attr in self._parameters.keys():
             return  self._parameters[attr].value
         else:
-            return super(self.__class__, self).__getattr__(attr)
+            #return super(self.__class__, self).__getattr__(attr)
+            return object.__getattr__(self, attr)
     
     def __setattr__(self, attr, value):
         if attr in self._parameters.keys():
@@ -145,9 +146,10 @@ class generic_wrapper(object):
 
     def __call__(self):
         command = str(self)
+        print command
         os.system(command)
         
-        execution = {}
+        execution = {'port': {}}
         if hasattr(self, '_io_pass'):
             for k, v in self._io_pass.iteritems():
                 execution['port'][v] = self._parameters[k].value
@@ -158,9 +160,6 @@ class generic_wrapper(object):
             setattr(self, name, value)
         return self
     
-class filename_wrapper(generic_wrapper):
-    pass
-
 class ants_intensity_meric(generic_wrapper):
     _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
     
@@ -254,12 +253,13 @@ class ants_reslice(generic_wrapper):
             }
 
 class average_images(generic_wrapper):
-    _template = """c{dimension}d  {input_images} -mean -type uchar -o {output_image}"""
+    _template = """c{dimension}d  {input_images} -mean {output_type} -o {output_image}"""
     
     _parameters = { \
             'dimension'    : value_parameter('dimension', 2),
             'input_images' : list_parameter('input_images', [], str_template = '{_list}'), 
-            'output_image' : filename_parameter('output_image')
+            'output_image' : filename_parameter('output_image'),
+            'output_type'  : string_parameter('output_type', 'uchar', str_template = '-type {_value}')
             }
     
     _io_pass = { \
@@ -279,6 +279,20 @@ class chain_affine_transforms(generic_wrapper):
     _io_pass = { \
             'dimension'    : 'dimension',
             'output_filename' : 'filename_filename'
+            }
+
+class mkdir_wrapper(generic_wrapper):
+    _template = """mkdir -p {dir_list}"""
+    
+    _parameters = { \
+            'dir_list' : list_parameter('dir_list', [], str_template = '{_list}')
+            }
+
+class rmdir_wrapper(generic_wrapper):
+    _template = """rm -rfv {dir_list}"""
+    
+    _parameters = { \
+            'dir_list' : list_parameter('dir_list', [], str_template = '{_list}')
             }
     
 """
