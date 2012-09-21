@@ -113,24 +113,15 @@ class generic_wrapper(object):
     _parameters = {}
     
     def __init__(self, **kwargs):
+        
+        # Hardcopy the parameters to split instance parameters
+        # from default class parameters
+        self.p = dict(self._parameters)
+        
         self.updateParameters(kwargs)
     
-    def __getattr__(self, attr):
-        if attr in self._parameters.keys():
-            return  self._parameters[attr].value
-        else:
-            #return super(self.__class__, self).__getattr__(attr)
-            return object.__getattr__(self, attr)
-    
-    def __setattr__(self, attr, value):
-        if attr in self._parameters.keys():
-            return setattr(self._parameters[attr],'value',value)
-        else:
-            return object.__setattr__(self, attr, value)
-            #return super(self.__class__, self).__setattr__(attr, value)
-    
     def __str__(self):
-        replacement = dict(map(lambda (k,v): (k, str(v)), self._parameters.iteritems()))
+        replacement = dict(map(lambda (k,v): (k, str(v)), self.p.iteritems()))
         return self._template.format(**replacement)
     
 #   def __call__(self):
@@ -144,20 +135,20 @@ class generic_wrapper(object):
 #               execution['port'][v] = self._parameters[k].value
 #       return execution
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         command = str(self)
         print command
-        os.system(command)
+        #os.system(command)
         
         execution = {'port': {}}
         if hasattr(self, '_io_pass'):
             for k, v in self._io_pass.iteritems():
-                execution['port'][v] = self._parameters[k].value
+                execution['port'][v] = self.p[k]
         return execution
     
     def updateParameters(self, parameters):
         for (name, value) in parameters.items():
-            setattr(self, name, value)
+            self.p[name].value = value
         return self
     
 class ants_intensity_meric(generic_wrapper):
@@ -167,17 +158,10 @@ class ants_intensity_meric(generic_wrapper):
             'metric' : string_parameter('metric', 'CC'),
             'fixed_image' : filename_parameter('fixed_image', None),
             'moving_image': filename_parameter('moving_image', None),
-            'weight'      : value_parameter('weight', None),
-            'parameter'   : value_parameter('parameter', None)
+            'weight'      : value_parameter('weight', 1),
+            'parameter'   : value_parameter('parameter', 4)
             }
-    
-    def __init__(self, fixed_image, moving_image, metric='CC', weight = 1, parameter = 4):
-        self.fixed_image  = fixed_image
-        self.moving_image = moving_image
-        self.metric = metric
-        self.weight = weight
-        self.parameter = parameter
-    
+     
     def _get_value(self):
         return str(self)
     
@@ -208,7 +192,7 @@ class ants_registration(generic_wrapper):
             'affineIterations'      : vector_parameter('number-of-affine-iterations', (10000,)*5, '--{_name} {_list}'),
             'rigidAffine'    : switch_parameter('rigid-affine', True, str_template = '--{_name} {_value}'),
             'continueAffine' : switch_parameter('continue-affine', True, str_template = '--{_name} {_value}'),
-            'useNN'          : switch_parameter('use-NN', True, str_template = '--{_name} {_value}'),
+            'useNN'          : switch_parameter('use-NN', False, str_template = '--{_name} {_value}'),
             'histogramMatching' : switch_parameter('use-Histogram-Matching', True, str_template = '--{_name} {_value}'),
             'allMetricsConverge': switch_parameter('use-all-metrics-for-convergence', True, str_template = '--{_name} {_value}'),
             'initialAffine'     : filename_parameter('initial-affine', None, str_template = '--{_name} {_value}'),
@@ -223,20 +207,20 @@ class ants_registration(generic_wrapper):
     
     def __call__(self, *args, **kwargs):
         execution = super(self.__class__, self).__call__(*args, **kwargs)
-        execution['port']['deformable_list'] = [self.outputNaming + 'Warp.nii.gz']
+        execution['port']['deformable_list'] = [str(self.p['outputNaming']) + 'Warp.nii.gz']
         
-        if self.affineIterations:
-            execution['port']['affine_list'] = [self.outputNaming + 'Affine.txt']
+        if self.p['affineIterations']:
+            execution['port']['affine_list'] = [str(self.p['outputNaming']) + 'Affine.txt']
         
-        execution['port']['moving_image'] = self.imageMetrics[0].moving_image
+        execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
         
         return execution
 
 class ants_reslice(generic_wrapper):
     _template = """WarpImageMultiTransform {dimension} \
                   {moving_image} {output_image} \
-                  {deformable_list} \
-                  {affine_list}"""
+                  {reference_image} \
+                  {deformable_list} {affine_list}"""
     
     _parameters = { \
         'dimension'      : value_parameter('dimension', 2),
@@ -279,6 +263,33 @@ class chain_affine_transforms(generic_wrapper):
     _io_pass = { \
             'dimension'    : 'dimension',
             'output_filename' : 'filename_filename'
+            }
+
+class stack_slices_gray_wrapper(generic_wrapper):
+    _template = """StackSlices {temp_volume_fn} -1 -1 0 {stack_mask};\
+            reorientImage.py -i {temp_volume_fn} \
+            --permutationOrder {permutation_order} \
+            --orientationCode {orientation_code} \
+            --outputVolumeScalarType {output_type} \
+            --setSpacing {spacing} \
+            --setOrigin {origin} \
+            {interpolation} \
+            {resample} \
+            -o {output_volume_fn} \
+            --cleanup | bash -xe;
+            rm {temp_volume_fn};"""
+    
+    _parameters = { \
+            'temp_volume_fn' : filename_parameter('temp_volume_fn', None),
+            'output_volume_fn' : filename_parameter('output_volume_fn', None),
+            'stack_mask' : filename_parameter('stack_mask', None),
+            'permutation_order' : list_parameter('permutation_order', [0,2,1], str_template = '{_list}'),
+            'orientation_code' : string_parameter('orientation_code', 'RAS'),
+            'output_type'  : string_parameter('output_type', 'uchar'),
+            'spacing' : list_parameter('spacing', [1.,1.,1.], str_template = '{_list}'),
+            'origin' : list_parameter('origin', [0,0,0], str_template = '{_list}'),
+            'interpolation' : string_parameter('interpolation', None, str_template = '--{_name} {_value}'),
+            'resample' : list_parameter('resample', [], str_template = '--{_name} {_list}')
             }
 
 class mkdir_wrapper(generic_wrapper):
@@ -442,4 +453,4 @@ In [77]: print a
 
 
 if __name__ == '__main__':
-    switch_parameter('useNN', False, " --{_name} ")
+    pass
