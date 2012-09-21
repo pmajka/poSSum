@@ -137,8 +137,8 @@ class generic_wrapper(object):
 
     def __call__(self, *args, **kwargs):
         command = str(self)
-        print command
-        #os.system(command)
+        #print command
+        os.system(command)
         
         execution = {'port': {}}
         if hasattr(self, '_io_pass'):
