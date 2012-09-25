@@ -40,13 +40,17 @@ class generic_workflow(object):
         
         self.f = dict(self._f)
         
+        # Get number of cpus for parallel processing
+        # even if parallel processing is disabled
+        if not self.options.cpuNo:
+            self.options.cpuNo = multiprocessing.cpu_count()
+        
         # If no cpu pool is provided, create and 
         # assign a new pool
         if pool:
             self.pool = pool
         else:
-            #self.pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
-            self.pool = multiprocessing.Pool(processes=4)
+            self.pool = multiprocessing.Pool(processes=self.options.cpuNo)
         
         self._initializeOptions()
         self._initializeDirectories()
@@ -116,7 +120,8 @@ class generic_workflow(object):
             #self.pool.map(execute_callable, commands)
             command_filename = os.path.join(self.options.workdir, str(time.time()))
             open(command_filename, 'w').write("\n".join(map(str,commands)))
-            os.system('cat %s | parallel -k -j 8 ' % command_filename)
+            os.system('cat %s | parallel -k -j %d ' % \
+                    (command_filename, self.options.cpuNo))
         else:
             map(lambda x: x(), commands)
     
@@ -148,6 +153,9 @@ class generic_workflow(object):
         workflowSettings.add_option('--dryRun', default=False,
                 action='store_const', const=True,
                 help='Prints commands instead of executing them')
+        workflowSettings.add_option('--cpuNo', '-n', default=None,
+                type='int', dest='cpuNo',
+                help='Number of cpus during parallel processing')
         
         parser.add_option_group(workflowSettings)
         return parser
@@ -213,7 +221,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                                output_image = self.f['processed'](idx=i))
             commands.append(copy.deepcopy(command))
         
-        self.execute(commands)
+        #self.execute(commands)
     
     def _calculate_transformations(self):
         start, end, eps = self._get_edges()
@@ -242,7 +250,7 @@ class deformable_reconstruction_iteration(generic_workflow):
             
             commands.append(copy.deepcopy(registration))
         
-        self.execute(commands)
+        #self.execute(commands)
     
     def launch(self):
         self._assign_weights()

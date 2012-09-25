@@ -170,7 +170,6 @@ class ants_intensity_meric(generic_wrapper):
     
     value = property(_get_value, _set_value)
 
-
 class ants_registration(generic_wrapper):
     _template = """ANTS {dimension} \
        {verbose} \
@@ -242,6 +241,22 @@ class average_images(generic_wrapper):
     _parameters = { \
             'dimension'    : value_parameter('dimension', 2),
             'input_images' : list_parameter('input_images', [], str_template = '{_list}'), 
+            'output_image' : filename_parameter('output_image'),
+            'output_type'  : string_parameter('output_type', 'uchar', str_template = '-type {_value}')
+            }
+    
+    _io_pass = { \
+            'dimension'    : 'dimension',
+            'output_image' : 'input_image'
+            }
+    
+class images_weighted_average(generic_wrapper):
+    _template = """c{dimension}d  {input_images} -weighted-sum {weights} {output_type} -o {output_image}"""
+    
+    _parameters = { \
+            'dimension'    : value_parameter('dimension', 2),
+            'input_images' : list_parameter('input_images', [], str_template = '{_list}'), 
+            'weights'      : list_parameter('weights', [], str_template = '{_list}'), 
             'output_image' : filename_parameter('output_image'),
             'output_type'  : string_parameter('output_type', 'uchar', str_template = '-type {_value}')
             }
