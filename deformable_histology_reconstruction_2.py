@@ -221,7 +221,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                                output_image = self.f['processed'](idx=i))
             commands.append(copy.deepcopy(command))
         
-        #self.execute(commands)
+        self.execute(commands)
     
     def _calculate_transformations(self):
         start, end, eps = self._get_edges()
@@ -250,7 +250,7 @@ class deformable_reconstruction_iteration(generic_workflow):
             
             commands.append(copy.deepcopy(registration))
         
-        #self.execute(commands)
+        self.execute(commands)
     
     def launch(self):
         self._assign_weights()

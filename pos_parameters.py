@@ -307,6 +307,15 @@ class stack_slices_gray_wrapper(generic_wrapper):
             'resample' : list_parameter('resample', [], str_template = '--{_name} {_list}')
             }
 
+class blank_slice_deformation_wrapper(generic_wrapper):
+    _template = """c{dimension}d  {input_image} -scale 0 -dup -omc {dimension} {output_image}"""
+    
+    _parameters = {\
+        'dimension'      : value_parameter('dimension', 2),
+        'input_image'  : filename_parameter('input_image', None),
+        'output_image'  : filename_parameter('output_image', None),
+         }
+
 class mkdir_wrapper(generic_wrapper):
     _template = """mkdir -p {dir_list}"""
     
