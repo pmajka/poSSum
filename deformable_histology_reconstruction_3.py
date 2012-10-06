@@ -10,9 +10,9 @@ from optparse import OptionParser, OptionGroup
 import copy
 
 from pos_parameters import mkdir_wrapper, rmdir_wrapper, images_weighted_average, \
-        ants_intensity_meric, ants_registration, ants_reslice, stack_slices_gray_wrapper,\
-        blank_slice_deformation_wrapper
+        ants_intensity_meric, ants_registration, ants_reslice, stack_slices_gray_wrapper
 
+from pos_deformable_wrappers import preprocess_slice_volume, blank_slice_deformation_wrapper
 from pos_filenames import filename
 from pos_wrapper_skel import generic_workflow
 
@@ -23,10 +23,11 @@ class deformable_reconstruction_iteration(generic_workflow):
     _f = { \
         'src_slice'  : filename('src_slice',  work_dir = '00_src_slices',      str_template =  '{idx:04d}.nii.gz'),
         'processed'  : filename('processed',  work_dir = '01_process_slices',  str_template =  '{idx:04d}.nii.gz'),
-        'labelling'  : filename('labelling',  work_dir = '02_labelling',       str_template =  '{idx:04d}.nii.gz'),
+        'outline'    : filename('outline',    work_dir = '02_outline',         str_template =  '{idx:04d}.nii.gz'),
         'transform'  : filename('transform',  work_dir = '11_transformations', str_template =  '{idx:04d}Warp.nii.gz'),
         'out_naming' : filename('out_naming', work_dir = '11_transformations', str_template = '{idx:04d}'),
-        'resliced'   : filename('resliced',   work_dir = '21_resliced',        str_template = '{idx:04d}.nii.gz')
+        'resliced'   : filename('resliced',   work_dir = '21_resliced',        str_template = '{idx:04d}.nii.gz'),
+        'resliced_outline' : filename('resliced', work_dir = '22_resliced_outline', str_template = '{idx:04d}.nii.gz')
         }
     
     _usage = ""
@@ -155,12 +156,22 @@ class deformable_reconstruction_iteration(generic_workflow):
     
 class deformable_reconstruction_workflow(generic_workflow):
     _f = { \
+         # Initial grayscale slices
         'init_slice' : filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
+        'init_slice_mask' : filename('init_slice_mask', work_dir = '01_init_slices', str_template = '????.png'),
+        'init_slice_naming' : filename('init_slice_naming', work_dir = '01_init_slices', str_template = '%04d.png'),
+        # Initial outline mask
+        'init_outline' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '{idx:04d}.nii.gz'),
+        'init_outline_mask' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '????.png'),
+        'init_outline_naming' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.png'),
+        # Iteration
         'iteration'  : filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
         'iteration_out_naming' : filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
         'iteration_transform'  : filename('iteration_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}Warp.nii.gz'),
         'iteration_resliced'   : filename('iteration_resliced' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/'),
         'iteration_resliced_slice' : filename('iteration_resliced_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/{idx:04d}.nii.gz'),
+        'iteration_resliced_outline'   : filename('iteration_resliced_outline' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/'),
+        'iteration_resliced_outline_slice' : filename('iteration_resliced_outline_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/{idx:04d}.nii.gz'),
         'inter_res'  : filename('inter_res',  work_dir = '08_intermediate_results', str_template = ''),
         'tmp_gray_vol' : filename('tmp_gray_vol', work_dir = '08_intermediate_results', str_template = '__temp__vol__gray.vtk'),
         'inter_res_gray_vol'   : filename('inter_res_gray_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_{iter:04d}.nii.gz'),
@@ -170,7 +181,28 @@ class deformable_reconstruction_workflow(generic_workflow):
     _usage = ""
     
     def prepare_slices(self):
-        pass
+        preprocess_grayscale_slices = preprocess_slice_volume(\
+                input_image = self.options.inputGrayscaleVolume,
+                output_naming = self.f['init_slice_naming'](), \
+                start_slice = self.options.startSlice, \
+                end_slice = self.options.endSlice +1, \
+                shift_indexes = self.options.shiftIndexes, \
+                slice_mask = self.f['init_slice_mask'](),
+                output_dir = self.f['init_slice'].base_dir)
+        
+        preprocess_grayscale_slices()
+         
+        if self.options.outlineVolume:
+            prepare_outline_volume = preprocess_slice_volume(\
+                    input_image = self.options.outlineVolume,
+                    output_naming = self.f['init_outline_naming'](),\
+                    start_slice = self.options.startSlice, \
+                    end_slice = self.options.endSlice, \
+                    shift_indexes = self.options.shiftIndexes,\
+                    slice_mask = self.f['init_outline_mask'],\
+                    output_dir = self['init_outline_naming'].base_dir)
+            
+            prepare_outline_volume()
     
     def transform(self):
         pass
@@ -178,6 +210,9 @@ class deformable_reconstruction_workflow(generic_workflow):
     def launch(self):
         """
         """
+        if self.options.inputGrayscaleVolume:
+            self.prepare_slices()
+        
         for iteration in range(self.options.startFromIteration,\
                                self.options.iterations):
             self.current_iteration = iteration
@@ -264,6 +299,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         parser.add_option('--endSlice', default=None,
                 type='int', dest='endSlice',
                 help='Index of the last slice of the stack')
+        parser.add_option('--shiftIndexes', default=None,
+                type='int', dest='shiftIndexes',
+                help='Shift indexes')
         parser.add_option('--neighbourhood', default=1, type='int',
                 dest='neighbourhood',  help='Epsilon')
         parser.add_option('--iterations', default=10,
@@ -275,6 +313,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         parser.add_option('--inputGrayscaleVolume','-i', default=None,
                 type='str', dest='inputGrayscaleVolume',
                 help='Input grayscale volume to be reconstructed')
+        parser.add_option('--outlineVolume','-o', default=None,
+                type='str', dest='outlineVolume',
+                help='Labels for driving the registration')
         parser.add_option('--weightsFile', default=None, type='str',
                 dest='weightsFile', help="Include weights during the reconstruction")
         parser.add_option('--registerSubset', default=None, type='str',
@@ -285,9 +326,6 @@ class deformable_reconstruction_workflow(generic_workflow):
 #       parser.add_option('--maskedVolume','-m', default=None,
 #               type='str', dest='maskedVolume',
 #               help='Slice mask for driving the registration')
-#       parser.add_option('--inputSlicesDir', default = None,
-#               type='str', dest = 'inputSlicesDir',
-#               help = 'Directory with the input slices')
         parser.add_option('--outputNaming', default="_", type='str',
                 dest='outputNaming', help="Ouput naming scheme for all the results")
         

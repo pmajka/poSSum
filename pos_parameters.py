@@ -54,7 +54,7 @@ class generic_parameter(object):
 class switch_parameter(generic_parameter):
     
     def _serialize(self):
-        if self.value:
+        if self.value != None:
             return self._str_template.format(**self.__dict__)
         else:
             return ""
@@ -63,7 +63,7 @@ class string_parameter(generic_parameter):
     _str_template = "{_value}"
     
     def _serialize(self):
-        if self.value:
+        if self.value != None:
             return self._str_template.format(**self.__dict__)
         else:
             return ""
@@ -137,7 +137,6 @@ class generic_wrapper(object):
 
     def __call__(self, *args, **kwargs):
         command = str(self)
-        #print command
         os.system(command)
         
         execution = {'port': {}}
@@ -306,15 +305,6 @@ class stack_slices_gray_wrapper(generic_wrapper):
             'interpolation' : string_parameter('interpolation', None, str_template = '--{_name} {_value}'),
             'resample' : list_parameter('resample', [], str_template = '--{_name} {_list}')
             }
-
-class blank_slice_deformation_wrapper(generic_wrapper):
-    _template = """c{dimension}d  {input_image} -scale 0 -dup -omc {dimension} {output_image}"""
-    
-    _parameters = {\
-        'dimension'      : value_parameter('dimension', 2),
-        'input_image'  : filename_parameter('input_image', None),
-        'output_image'  : filename_parameter('output_image', None),
-         }
 
 class mkdir_wrapper(generic_wrapper):
     _template = """mkdir -p {dir_list}"""
