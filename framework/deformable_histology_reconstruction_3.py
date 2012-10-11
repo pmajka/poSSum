@@ -39,6 +39,10 @@ class deformable_reconstruction_iteration(generic_workflow):
         self.slice_range = range(start, end +1)
         
         self._load_subset_file()
+       
+        # Convert the number of iterations string to list of integers
+        self.options.antsIterations = \
+                map(int, self.options.antsIterations.strip().split("x"))
     
     def _get_edges(self):
         """
@@ -228,8 +232,9 @@ class deformable_reconstruction_workflow(generic_workflow):
             else:
                 single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
             
-            # Do registration
-            single_step()
+            # Do registration 
+            if not self.options.skipTransformations:
+                single_step()
             
             # Generate volume holding the intermediate results
             # and prepare images for the next iteration
@@ -328,6 +333,9 @@ class deformable_reconstruction_workflow(generic_workflow):
 #               help='Slice mask for driving the registration')
         parser.add_option('--outputNaming', default="_", type='str',
                 dest='outputNaming', help="Ouput naming scheme for all the results")
+        parser.add_option('--skipTransformations', default=False,
+                dest='skipTransformations', action='store_const', const=True,
+                help='Skip transformations.')
         
         regSettings = \
                 OptionGroup(parser, 'Registration setttings.')
@@ -346,8 +354,8 @@ class deformable_reconstruction_workflow(generic_workflow):
         regSettings.add_option('--antsRegularization', default=[3.0,1.0],
                 type='float', nargs =2, dest='antsRegularization',
                 help='Ants regulatization.')
-        regSettings.add_option('--antsIterations', default=[1000]*5,
-                type='int', nargs = 5, dest='antsIterations',
+        regSettings.add_option('--antsIterations', default="1000x1000x1000x1000x1000",
+                type='str', dest='antsIterations',
                 help='Number of deformable registration iterations.')
         
         outputVolumeSettings = \
