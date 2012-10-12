@@ -102,7 +102,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                 single_step.f['outline'].override_dir = self.f['init_outline'].base_dir
             else:
                 single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
-                single_step.f['outline'].override_dir = self.f['init_outline'](iter=iteration-1)
+                single_step.f['outline'].override_dir = self.f['iteration_resliced_outline'](iter=iteration-1)
             
             # Do registration 
             if not self.options.skipTransformations:
