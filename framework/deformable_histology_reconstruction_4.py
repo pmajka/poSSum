@@ -38,13 +38,14 @@ class deformable_reconstruction_workflow(generic_workflow):
         'inter_res'  : filename('inter_res',  work_dir = '08_intermediate_results', str_template = ''),
         'tmp_gray_vol' : filename('tmp_gray_vol', work_dir = '08_intermediate_results', str_template = '__temp__vol__gray.vtk'),
         'inter_res_gray_vol'   : filename('inter_res_gray_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_{iter:04d}.nii.gz'),
+        'final_deformations'   : filename('final_deformations',   work_dir = '09_final_deformation', str_template = 'final_deformation_{output_naming}_{iter:04d}.nii.gz'),
         'iteration_stack_mask' : filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/????.nii.gz')
         }
     
     _usage = ""
     
     def _get_prepare_volume_command_template(self):
-        preprocess_grayscale_slices = preprocess_slice_volume(\
+        preprocess_slices = preprocess_slice_volume(\
                 input_image = self.options.inputGrayscaleVolume,
                 output_naming = self.f['init_slice_naming'](), \
                 start_slice = self.options.startSlice, \
@@ -52,28 +53,30 @@ class deformable_reconstruction_workflow(generic_workflow):
                 shift_indexes = self.options.shiftIndexes, \
                 slice_mask = self.f['init_slice_mask'](),
                 output_dir = self.f['init_slice'].base_dir)
+        return preprocess_slices
     
     def prepare_slices(self):
-        preprocess_grayscale_slices = \
-                self._get_prepare_volume_command_template()
-        
-        preprocess_slice_volume.update_parameters({
-            'input_image' : self.options.inputGrayscaleVolume,
-            'output_naming' : self.f['init_slice_naming'](), \
-            'slice_mask' : self.f['init_slice_mask'](),
-            'output_dir' : self.f['init_slice'].base_dir})
-        preprocess_grayscale_slices()
-        
-        if self.options.outlineVolume:
-            prepare_outline_volume = \
-                    self._get_prepare_volume_command_template()
-            
-            preprocess_slice_volume.update_parameters({
-                'input_image' = self.options.outlineVolume,
-                'output_naming' = self.f['init_outline_naming'](),\
-                'slice_mask' = self.f['init_outline_mask'],\
-                'output_dir' = self['init_outline_naming'].base_dir})
-            prepare_outline_volume()
+        pass
+   #    preprocess_grayscale_slices = \
+   #            self._get_prepare_volume_command_template()
+   #    
+   #    preprocess_grayscale_slices.updateParameters({
+   #        'input_image' : self.options.inputGrayscaleVolume,
+   #        'output_naming' : self.f['init_slice_naming'](), \
+   #        'slice_mask' : self.f['init_slice_mask'](),
+   #        'output_dir' : self.f['init_slice'].base_dir})
+   #    preprocess_grayscale_slices()
+   #    
+   #    if self.options.outlineVolume:
+   #        prepare_outline_volume = \
+   #                self._get_prepare_volume_command_template()
+   #        
+   #        prepare_outline_volume.updateParameters({ 
+   #            'input_image' : self.options.outlineVolume, 
+   #            'output_naming' : self.f['init_outline_naming'](),
+   #            'slice_mask' : self.f['init_outline_mask'],
+   #            'output_dir' : self.f['init_outline_naming'].base_dir})
+   #        prepare_outline_volume()
     
     def transform(self):
         pass
@@ -96,8 +99,10 @@ class deformable_reconstruction_workflow(generic_workflow):
             
             if iteration == 0:
                 single_step.f['src_slice'].override_dir = self.f['init_slice'].base_dir
+                single_step.f['outline'].override_dir = self.f['init_outline'].base_dir
             else:
                 single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
+                single_step.f['outline'].override_dir = self.f['init_outline'](iter=iteration-1)
             
             # Do registration 
             if not self.options.skipTransformations:
@@ -117,24 +122,48 @@ class deformable_reconstruction_workflow(generic_workflow):
                 self.options.neighbourhood,
                 self.current_iteration)
     
+    def _get_reslice_command(self, slice_number, slice_type, output_slice_type):
+        start, end, eps, iteration = self._get_edges()
+        
+        i= slice_number # Just an alias
+        
+        deformable_list = map(lambda j: self.f['iteration_transform'](idx=i,iter=j), range(iteration+1))
+        moving_image = self.f[slice_type](idx=i)
+        
+        command = ants_reslice(
+                dimension = 2,
+                moving_image = moving_image,
+                output_image = self.f[output_slice_type](idx=i,iter=iteration),
+                reference_image = moving_image,
+                deformable_list = deformable_list,
+                affine_list = [])
+        return command
+    
     def _reslice(self):
         start, end, eps, iteration = self._get_edges()
         
         commands = []
         for i in range(start, end +1):
-            deformable_list = map(lambda j: self.f['iteration_transform'](idx=i,iter=j), range(iteration+1))
-            moving_image = self.f['init_slice'](idx=i)
-            
-            command = ants_reslice(
-                    dimension = 2,
-                    moving_image = moving_image,
-                    output_image = self.f['iteration_resliced_slice'](idx=i,iter=iteration),
-                    reference_image = moving_image,
-                    deformable_list = deformable_list,
-                    affine_list = [])
+            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice')
             commands.append(copy.deepcopy(command))
         
         self.execute(commands)
+        
+        if self.options.outlineVolume:
+            self._reslice_outline()
+    
+    def _reslice_outline(self):
+        start, end, eps, iteration = self._get_edges()
+        
+        commands = []
+        for i in range(start, end +1):
+            command = self._get_reslice_command(i, 'init_outline', 'iteration_resliced_outline_slice')
+            commands.append(copy.deepcopy(command))
+         
+        self.execute(commands)
+    
+    def _generate_final_transforms(self):
+        pass
     
     def _stack_intermediate(self):
         iteration = self.current_iteration
@@ -221,8 +250,8 @@ class deformable_reconstruction_workflow(generic_workflow):
         regSettings.add_option('--antsRegularization', default=[3.0,1.0],
                 type='float', nargs =2, dest='antsRegularization',
                 help='Ants regulatization.')
-        regSettings.add_option('--antsIterations', default=[1000]*5,
-                type='int', nargs = 5, dest='antsIterations',
+        regSettings.add_option('--antsIterations', default="1000x1000x1000x1000x1000",
+                type='str', dest='antsIterations',
                 help='Number of deformable registration iterations.')
         
         outputVolumeSettings = \
