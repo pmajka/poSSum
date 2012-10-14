@@ -204,7 +204,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                     end_slice = self.options.endSlice, \
                     shift_indexes = self.options.shiftIndexes,\
                     slice_mask = self.f['init_outline_mask'],\
-                    output_dir = self['init_outline_naming'].base_dir)
+                    output_dir = self.f['init_outline_naming'].base_dir)
             
             prepare_outline_volume()
     

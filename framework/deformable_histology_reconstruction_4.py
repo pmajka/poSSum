@@ -27,6 +27,10 @@ class deformable_reconstruction_workflow(generic_workflow):
         'init_outline' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '{idx:04d}.nii.gz'),
         'init_outline_mask' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '????.png'),
         'init_outline_naming' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.png'),
+        # Initial custom outlier mask
+        'init_custom' : filename('init_custom_naming', work_dir = '05_custom_mask', str_template = '{idx:04d}.nii.gz'),
+        'init_custom_mask' : filename('init_custom_naming', work_dir = '05_custom_slices', str_template = '????.png'),
+        'init_custom_naming' : filename('init_custom_naming', work_dir = '05_custom_slices', str_template = '%04d.png'),
         # Iteration
         'iteration'  : filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
         'iteration_out_naming' : filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
@@ -35,6 +39,8 @@ class deformable_reconstruction_workflow(generic_workflow):
         'iteration_resliced_slice' : filename('iteration_resliced_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/{idx:04d}.nii.gz'),
         'iteration_resliced_outline'   : filename('iteration_resliced_outline' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/'),
         'iteration_resliced_outline_slice' : filename('iteration_resliced_outline_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/{idx:04d}.nii.gz'),
+        'iteration_resliced_custom'   : filename('iteration_resliced_custom' , work_dir = '05_iterations', str_template  = '{iter:04d}/25_resliced_custom/'),
+        'iteration_resliced_custom_slice' : filename('iteration_resliced_custom_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/25_resliced_custom/{idx:04d}.nii.gz'),
         'inter_res'  : filename('inter_res',  work_dir = '08_intermediate_results', str_template = ''),
         'tmp_gray_vol' : filename('tmp_gray_vol', work_dir = '08_intermediate_results', str_template = '__temp__vol__gray.vtk'),
         'inter_res_gray_vol'   : filename('inter_res_gray_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_{iter:04d}.nii.gz'),

@@ -157,7 +157,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                             fixed_image  = self.f['poutline'](idx=i),
                             moving_image = self.f['outline'](idx=i),
                             metric = self.options.antsImageMetric,
-                            weight = 1,
+                            weight = 0.2,
                             parameter = self.options.antsImageMetricOpt)
                 metrics.append(outline_metric)
             
