@@ -177,8 +177,9 @@ class ants_registration(generic_wrapper):
        {iterations} {affineIterations}\
        {rigidAffine} {continueAffine}\
        {useNN} {histogramMatching} {allMetricsConverge} \
-       {initialAffine} {fixedImageInitialAffine} \
-       {affineGradientDescent} """
+       {initialAffine} {fixedImageInitialAffine} {affineGradientDescent} \
+       {maskImage}
+       """
     
     _parameters = { \
             'dimension'      : value_parameter('dimension', 2),
@@ -190,13 +191,14 @@ class ants_registration(generic_wrapper):
             'affineIterations'      : vector_parameter('number-of-affine-iterations', (10000,)*5, '--{_name} {_list}'),
             'rigidAffine'    : switch_parameter('rigid-affine', True, str_template = '--{_name} {_value}'),
             'continueAffine' : switch_parameter('continue-affine', True, str_template = '--{_name} {_value}'),
-            'useNN'          : switch_parameter('use-NN', False, str_template = '--{_name} {_value}'),
+            'useNN'          : switch_parameter('use-NN', False, str_template = '--{_name}'),
             'histogramMatching' : switch_parameter('use-Histogram-Matching', True, str_template = '--{_name} {_value}'),
             'allMetricsConverge': switch_parameter('use-all-metrics-for-convergence', True, str_template = '--{_name} {_value}'),
             'initialAffine'     : filename_parameter('initial-affine', None, str_template = '--{_name} {_value}'),
             'fixedImageInitialAffine': filename_parameter('fixed-image-initial-affine', None, str_template = '--{_name} {_value}'),
             'affineGradientDescent' : vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
-            'imageMetrics'          : list_parameter('image_to_image_metrics', [], '{_list}')
+            'imageMetrics'          : list_parameter('image_to_image_metrics', [], '{_list}'),
+            'maskImage'      : filename_parameter('--mask-image', None, str_template = '--{_name} {_value}')
             }
     
     _io_pass = { \
@@ -218,6 +220,7 @@ class ants_reslice(generic_wrapper):
     _template = """WarpImageMultiTransform {dimension} \
                   {moving_image} {output_image} \
                   {reference_image} \
+                  {useNN} {useBspline} \
                   {deformable_list} {affine_list}"""
     
     _parameters = { \
@@ -225,6 +228,8 @@ class ants_reslice(generic_wrapper):
         'moving_image'  : filename_parameter('moving_image', None),
         'output_image'  : filename_parameter('output_image', None),
         'reference_image'  : filename_parameter('reference_image', None, str_template = '-R {_value}'),
+        'useNN'            : switch_parameter('use-NN', False, str_template = '--{_name}'),
+        'useBspline'       : switch_parameter('use-BSpline', False, str_template = '--{_name}'),
         'deformable_list'  : list_parameter('deformable_list', [], str_template = '{_list}'),
         'affine_list'  : list_parameter('affine_list', [], str_template = '{_list}')
                 }

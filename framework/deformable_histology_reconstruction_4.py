@@ -28,9 +28,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         'init_outline_mask' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '????.png'),
         'init_outline_naming' : filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.png'),
         # Initial custom outlier mask
-        'init_custom' : filename('init_custom_naming', work_dir = '05_custom_mask', str_template = '{idx:04d}.nii.gz'),
-        'init_custom_mask' : filename('init_custom_naming', work_dir = '05_custom_slices', str_template = '????.png'),
-        'init_custom_naming' : filename('init_custom_naming', work_dir = '05_custom_slices', str_template = '%04d.png'),
+        'init_custom' : filename('init_custom_naming', work_dir = '04_custom_mask', str_template = '{idx:04d}.nii.gz'),
+        'init_custom_mask' : filename('init_custom_mask', work_dir = '04_custom_slices', str_template = '????.png'),
+        'init_custom_naming' : filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '%04d.png'),
         # Iteration
         'iteration'  : filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
         'iteration_out_naming' : filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
@@ -50,9 +50,24 @@ class deformable_reconstruction_workflow(generic_workflow):
     
     _usage = ""
     
+    def __init__(self, options, args, pool = None):
+        super(self.__class__, self).__init__(options, args, pool)
+        
+        if self.options.inputVolume:
+            self.options.inputVolumeWeight = float(self.options.inputVolume[0]]
+            self.options.inputVolume = self.options.inputVolume[1]
+        
+        if self.options.outlineVolume:
+            self.options.outlineVolumeWeight = float(self.options.outlineVolume[0]]
+            self.options.outlineVolume = self.options.outlineVolume[1]
+        
+        if self.options.maskedVolume:
+            self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])
+            self.options.maskedVolume = self.options.makedVolume[1]
+    
     def _get_prepare_volume_command_template(self):
         preprocess_slices = preprocess_slice_volume(\
-                input_image = self.options.inputGrayscaleVolume,
+                input_image = self.options.inputVolume,
                 output_naming = self.f['init_slice_naming'](), \
                 start_slice = self.options.startSlice, \
                 end_slice = self.options.endSlice +1, \
@@ -62,35 +77,42 @@ class deformable_reconstruction_workflow(generic_workflow):
         return preprocess_slices
     
     def prepare_slices(self):
-        pass
-   #    preprocess_grayscale_slices = \
-   #            self._get_prepare_volume_command_template()
-   #    
-   #    preprocess_grayscale_slices.updateParameters({
-   #        'input_image' : self.options.inputGrayscaleVolume,
-   #        'output_naming' : self.f['init_slice_naming'](), \
-   #        'slice_mask' : self.f['init_slice_mask'](),
-   #        'output_dir' : self.f['init_slice'].base_dir})
-   #    preprocess_grayscale_slices()
-   #    
-   #    if self.options.outlineVolume:
-   #        prepare_outline_volume = \
-   #                self._get_prepare_volume_command_template()
-   #        
-   #        prepare_outline_volume.updateParameters({ 
-   #            'input_image' : self.options.outlineVolume, 
-   #            'output_naming' : self.f['init_outline_naming'](),
-   #            'slice_mask' : self.f['init_outline_mask'],
-   #            'output_dir' : self.f['init_outline_naming'].base_dir})
-   #        prepare_outline_volume()
-    
-    def transform(self):
-        pass
+        preprocess_grayscale_slices = \
+                self._get_prepare_volume_command_template()
+        
+        preprocess_grayscale_slices.updateParameters({
+            'input_image' : self.options.inputVolume,
+            'output_naming' : self.f['init_slice_naming'](), \
+            'slice_mask' : self.f['init_slice_mask'](),
+            'output_dir' : self.f['init_slice'].base_dir})
+        preprocess_grayscale_slices()
+        
+        if self.options.outlineVolume:
+            prepare_outline_volume = \
+                    self._get_prepare_volume_command_template()
+            
+            prepare_outline_volume.updateParameters({ 
+                'input_image' : self.options.outlineVolume, 
+                'output_naming' : self.f['init_outline_naming'](),
+                'slice_mask' : self.f['init_outline_mask'],
+                'output_dir' : self.f['init_outline_naming'].base_dir})
+            prepare_outline_volume()
+        
+        if self.options.maskedVolume:
+            prepare_masked_volume = \
+                    self._get_prepare_volume_command_template()
+            
+            prepare_masked_volume.updateParameters({ 
+                'input_image' : self.options.maskedVolume, 
+                'output_naming' : self.f['init_custom_naming'](),
+                'slice_mask' : self.f['init_custom_mask'],
+                'output_dir' : self.f['init_custom_naming'].base_dir})
+            prepare_masked_volume()
     
     def launch(self):
         """
         """
-        if self.options.inputGrayscaleVolume:
+        if self.options.inputVolume:
             self.prepare_slices()
         
         for iteration in range(self.options.startFromIteration,\
@@ -102,13 +124,16 @@ class deformable_reconstruction_workflow(generic_workflow):
             
             step_options.workdir = os.path.join(self.f['iteration'](iter=iteration))
             single_step = deformable_reconstruction_iteration(step_options, step_args, pool = self.pool)
+            single_step.parent_process = self
             
             if iteration == 0:
                 single_step.f['src_slice'].override_dir = self.f['init_slice'].base_dir
                 single_step.f['outline'].override_dir = self.f['init_outline'].base_dir
+                single_step.f['cmask'].override_dir = self.f['init_custom'].base_dir
             else:
                 single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
                 single_step.f['outline'].override_dir = self.f['iteration_resliced_outline'](iter=iteration-1)
+                single_step.f['cmask'].override_dir = self.f['iteration_resliced_custom'](iter=iteration-1)
             
             # Do registration 
             if not self.options.skipTransformations:
@@ -144,8 +169,18 @@ class deformable_reconstruction_workflow(generic_workflow):
                 deformable_list = deformable_list,
                 affine_list = [])
         return command
-    
+
     def _reslice(self):
+        if self.options.inputVolume:
+            self._reslice_input_volume()        
+        
+        if self.options.outlineVolume:
+            self._reslice_outline()
+        
+        if self.options.maskedVolume:
+            self._reslice_custom_masks()
+    
+    def _reslice_input_volume(self):
         start, end, eps, iteration = self._get_edges()
         
         commands = []
@@ -155,8 +190,7 @@ class deformable_reconstruction_workflow(generic_workflow):
         
         self.execute(commands)
         
-        if self.options.outlineVolume:
-            self._reslice_outline()
+        if self.
     
     def _reslice_outline(self):
         start, end, eps, iteration = self._get_edges()
@@ -164,6 +198,18 @@ class deformable_reconstruction_workflow(generic_workflow):
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_outline', 'iteration_resliced_outline_slice')
+            command.updateParameters({'useNN':True})
+            commands.append(copy.deepcopy(command))
+         
+        self.execute(commands)
+    
+    def _reslice_custom_masks(self):
+        start, end, eps, iteration = self._get_edges()
+        
+        commands = []
+        for i in range(start, end +1):
+            command = self._get_reslice_command(i, 'init_custom', 'iteration_resliced_custom_slice')
+            command.updateParameters({'useNN':True})
             commands.append(copy.deepcopy(command))
          
         self.execute(commands)
@@ -190,12 +236,6 @@ class deformable_reconstruction_workflow(generic_workflow):
         
         self.execute(stack_grayscale)
     
-    def prepare_calculations(self):
-        pass
-    
-    def process_results(self):
-        pass
-    
     @classmethod
     def _getCommandLineParser(cls):
         parser = generic_workflow._getCommandLineParser()
@@ -217,22 +257,23 @@ class deformable_reconstruction_workflow(generic_workflow):
         parser.add_option('--startFromIteration', default=0,
                 type='int', dest='startFromIteration',
                 help='startFromIteration')
-        parser.add_option('--inputGrayscaleVolume','-i', default=None,
-                type='str', dest='inputGrayscaleVolume',
+        parser.add_option('--inputVolume','-i', default=None,
+                type='str', dest='inputVolume', nargs = 2,
                 help='Input grayscale volume to be reconstructed')
         parser.add_option('--outlineVolume','-o', default=None,
-                type='str', dest='outlineVolume',
-                help='Labels for driving the registration')
-        parser.add_option('--weightsFile', default=None, type='str',
-                dest='weightsFile', help="Include weights during the reconstruction")
+                type='str', dest='outlineVolume', nargs = 2,
+                help='Outline label driving the registration')
+        parser.add_option('--maskedVolume','-m', default=None,
+                type='str', dest='maskedVolume', nargs = 2,
+                help='Slice mask for driving the registration')
+        parser.add_option('--maskedVolumeFile', default=None,
+                type='str', dest='maskedVolumeFile', nargs = 1,
+                help='File determining fixed and moving slices for custom registration')
         parser.add_option('--registerSubset', default=None, type='str',
                 dest='registerSubset',  help='registerSubset')
 #       parser.add_option('--labelledVolume','-l', default=None,
 #               type='str', dest='labelledVolume',
 #               help='Labels for driving the registration')
-#       parser.add_option('--maskedVolume','-m', default=None,
-#               type='str', dest='maskedVolume',
-#               help='Slice mask for driving the registration')
         parser.add_option('--outputNaming', default="_", type='str',
                 dest='outputNaming', help="Ouput naming scheme for all the results")
         parser.add_option('--skipTransformations', default=False,

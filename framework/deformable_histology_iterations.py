@@ -14,6 +14,8 @@ class deformable_reconstruction_iteration(generic_workflow):
         'processed'  : filename('processed',  work_dir = '01_process_slices',  str_template =  '{idx:04d}.nii.gz'),
         'outline'    : filename('outline',    work_dir = '02_outline',         str_template =  '{idx:04d}.nii.gz'),
         'poutline'   : filename('poutline',   work_dir = '03_poutline',        str_template =  '{idx:04d}.nii.gz'),
+        'cmask'      : filename('cmask',      work_dir = '04_cmask',           str_template =  '{idx:04d}.nii.gz'),
+        'pcmask'     : filename('pcmask',     work_dir = '05_pcmask',          str_template =  '{idx:04d}.nii.gz'),
         'transform'  : filename('transform',  work_dir = '11_transformations', str_template =  '{idx:04d}Warp.nii.gz'),
         'out_naming' : filename('out_naming', work_dir = '11_transformations', str_template = '{idx:04d}'),
         'resliced'   : filename('resliced',   work_dir = '21_resliced',        str_template = '{idx:04d}.nii.gz'),
@@ -29,10 +31,18 @@ class deformable_reconstruction_iteration(generic_workflow):
         self.slice_range = range(start, end +1)
         
         self._load_subset_file()
+        self._read_custom_registration_assignment()
         
         # Convert the number of iterations string to list of integers
         self.options.antsIterations = \
                 map(int, self.options.antsIterations.strip().split("x"))
+    
+    def _read_custom_registration_assignment(self):
+        if self.options.maskedVolume and self.options.maskedVolumeWeight > 0:
+            masked_registraion = np.loadtxt(self.options.maskedVolumeFile)
+            self.masked_registraion= dict(map(lambda x: (x[0], x[1]), masked_registraion)
+        else:
+            self.masked_registraion = {}
     
     def _get_edges(self):
         """
@@ -63,22 +73,8 @@ class deformable_reconstruction_iteration(generic_workflow):
                 if j!=i and j<=end and j>=start:
                     self.weights[(i,j)] = 1
     
-    def _assign_weights_from_file(self):
-        """
-        """
-        # File is constructed as follows:
-        # Col(0) slice no.
-        # Col(1) - Col(n) weight for slice in col 0 for iteration j
-        # But for the first time we use constant weights for
-        # every iteration
-        weights = np.loadtxt(self.options.weightsFile)
-        self.weights_from_file = dict(map(lambda x: (int(x[0]), x[1]), weights))
-    
     def _assign_weights(self):
-        if self.options.weightsFile:
-            self._assign_weights_from_file()
-        else:
-            self._assign_weights_from_func()
+        self._assign_weights_from_func()
     
     def get_weight(self, i, j):
         if self.options.weightsFile:
@@ -135,6 +131,65 @@ class deformable_reconstruction_iteration(generic_workflow):
             
             self.execute(commands)
     
+    def _calculate_transformations_masked(self):
+        start, end, eps = self._get_edges()
+        
+        commands = []
+        
+        for i in self.slice_range:
+            metrics  = []
+            j = self.masked_registraion.get(i, None) 
+            
+            if j == None:
+                fixed_image_type = 'processed'
+                fixed_outline_type='poutline'
+                mask_image = None
+                j=i
+            else:
+                fixed_image_type = 'src_slice'
+                fixed_outline_type='outline'
+                mask_image =  self.f['cmask'](idx=j)
+            
+            if self.options.inputVolume and self.options.inputVolumeWeight > 0:
+                metric = ants_intensity_meric(
+                            fixed_image  = self.f[fixed_image_type](idx=j),
+                            moving_image = self.f['src_slice'](idx=i),
+                            metric = self.options.antsImageMetric,
+                            weight = self.options.inputVolumeWeight,
+                            parameter = self.options.antsImageMetricOpt)
+                metrics.append(metric)
+            
+            if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
+                outline_metric = ants_intensity_meric(
+                            fixed_image  = self.f[fixed_outline_type](idx=j),
+                            moving_image = self.f['src_slice'](idx=i),
+                            metric = self.options.antsImageMetric,
+                            weight = self.options.outlineVolumeWeight,
+                            parameter = self.options.antsImageMetricOpt)
+                metrics.append(outline_metric)
+            
+            if i in self.subset:
+                registration = ants_registration(
+                            dimension = 2,
+                            outputNaming = self.f['out_naming'](idx=i),
+                            iterations = self.options.antsIterations,
+                            transformation = ('SyN', [self.options.antsTransformation]),
+                            regularization = (self.options.antsRegularizationType, self.options.antsRegularization),
+                            affineIterations = [0],
+                            continueAffine = False,
+                            rigidAffine = False,
+                            imageMetrics = metrics,
+                            maskImage = mask_image,
+                            allMetricsConverge = True)
+            else:
+                registration = blank_slice_deformation_wrapper(\
+                        input_image = self.f['src_slice'](idx=i),
+                        output_image = self.f['transform'](idx=i)
+                        )
+            commands.append(copy.deepcopy(registration))
+        
+        self.execute(commands)
+    
     def _calculate_transformations(self):
         start, end, eps = self._get_edges()
         
@@ -152,12 +207,12 @@ class deformable_reconstruction_iteration(generic_workflow):
                         parameter = self.options.antsImageMetricOpt)
             metrics.append(metric)
             
-            if self.options.outlineVolume:
+            if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
                 outline_metric = ants_intensity_meric(
                             fixed_image  = self.f['poutline'](idx=i),
                             moving_image = self.f['outline'](idx=i),
                             metric = self.options.antsImageMetric,
-                            weight = 0.2,
+                            weight = self.options.outlineVolumeWeight,
                             parameter = self.options.antsImageMetricOpt)
                 metrics.append(outline_metric)
             
