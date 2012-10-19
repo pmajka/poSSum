@@ -19,7 +19,8 @@ class deformable_reconstruction_iteration(generic_workflow):
         'transform'  : filename('transform',  work_dir = '11_transformations', str_template =  '{idx:04d}Warp.nii.gz'),
         'out_naming' : filename('out_naming', work_dir = '11_transformations', str_template = '{idx:04d}'),
         'resliced'   : filename('resliced',   work_dir = '21_resliced',        str_template = '{idx:04d}.nii.gz'),
-        'resliced_outline' : filename('resliced', work_dir = '22_resliced_outline', str_template = '{idx:04d}.nii.gz')
+        'resliced_outline' : filename('resliced_outline', work_dir = '22_resliced_outline', str_template = '{idx:04d}.nii.gz'),
+        'resliced_custom'  : filename('resliced_custom', work_dir = '24_resliced_custom', str_template = '{idx:04d}.nii.gz')
         }
     
     _usage = ""
@@ -38,9 +39,15 @@ class deformable_reconstruction_iteration(generic_workflow):
                 map(int, self.options.antsIterations.strip().split("x"))
     
     def _read_custom_registration_assignment(self):
-        if self.options.maskedVolume and self.options.maskedVolumeWeight > 0:
+        if self.options.maskedVolume and \
+                self.options.maskedVolumeWeight > 0 and \
+                self.options.maskedVolumeFile:
+            
             masked_registraion = np.loadtxt(self.options.maskedVolumeFile)
-            self.masked_registraion= dict(map(lambda x: (x[0], x[1]), masked_registraion)
+            print masked_registraion
+            self.masked_registraion = \
+                    dict(map(lambda x: (int(x[0]), int(x[1])), masked_registraion))
+            self.subset = self.masked_registraion.keys()
         else:
             self.masked_registraion = {}
     
@@ -77,10 +84,7 @@ class deformable_reconstruction_iteration(generic_workflow):
         self._assign_weights_from_func()
     
     def get_weight(self, i, j):
-        if self.options.weightsFile:
-            return self.weights_from_file[j]
-        else:
-            return self.weights[(i,j)]
+        return self.weights[(i,j)]
     
     def _preprocess_images(self):
         return self._average_images()
@@ -88,28 +92,29 @@ class deformable_reconstruction_iteration(generic_workflow):
     def _average_images(self):
         start, end, eps = self._get_edges()
         
-        commands = []
-        
-        for i in self.slice_range:
-            files_to_average = []
-            weights = []
+        if self.options.inputVolume and self.options.inputVolumeWeight > 0:
+            commands = []
             
-            for j in range(i - eps, i + eps+1):
-                if j!=i and j<=end and j>=start:
-                   files_to_average.append(self.f['src_slice'](idx=j))
-                   weights.append(self.get_weight(i,j))
+            for i in self.slice_range:
+                files_to_average = []
+                weights = []
+                
+                for j in range(i - eps, i + eps+1):
+                    if j!=i and j<=end and j>=start:
+                       files_to_average.append(self.f['src_slice'](idx=j))
+                       weights.append(self.get_weight(i,j))
+                
+                command = images_weighted_average(\
+                            dimension = 2,
+                            input_images = files_to_average,
+                            weights = weights,
+                            output_type = 'float',
+                            output_image = self.f['processed'](idx=i))
+                commands.append(copy.deepcopy(command))
             
-            command = images_weighted_average(\
-                        dimension = 2,
-                        input_images = files_to_average,
-                        weights = weights,
-                        output_type = 'float',
-                        output_image = self.f['processed'](idx=i))
-            commands.append(copy.deepcopy(command))
+            self.execute(commands)
         
-        self.execute(commands)
-
-        if self.options.outlineVolume:
+        if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
             commands = []
             
             for i in self.slice_range:
@@ -157,16 +162,16 @@ class deformable_reconstruction_iteration(generic_workflow):
                             metric = self.options.antsImageMetric,
                             weight = self.options.inputVolumeWeight,
                             parameter = self.options.antsImageMetricOpt)
-                metrics.append(metric)
+                metrics.append(copy.deepcopy(metric))
             
             if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
                 outline_metric = ants_intensity_meric(
                             fixed_image  = self.f[fixed_outline_type](idx=j),
-                            moving_image = self.f['src_slice'](idx=i),
+                            moving_image = self.f['outline'](idx=i),
                             metric = self.options.antsImageMetric,
                             weight = self.options.outlineVolumeWeight,
                             parameter = self.options.antsImageMetricOpt)
-                metrics.append(outline_metric)
+                metrics.append(copy.deepcopy(outline_metric))
             
             if i in self.subset:
                 registration = ants_registration(
@@ -190,58 +195,59 @@ class deformable_reconstruction_iteration(generic_workflow):
         
         self.execute(commands)
     
-    def _calculate_transformations(self):
-        start, end, eps = self._get_edges()
-        
-        commands = []
-        metrics  = []
-        
-        for i in self.slice_range:
-            metrics = []
-            
-            metric = ants_intensity_meric(
-                        fixed_image  = self.f['processed'](idx=i),
-                        moving_image = self.f['src_slice'](idx=i),
-                        metric = self.options.antsImageMetric,
-                        weight = 1,
-                        parameter = self.options.antsImageMetricOpt)
-            metrics.append(metric)
-            
-            if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
-                outline_metric = ants_intensity_meric(
-                            fixed_image  = self.f['poutline'](idx=i),
-                            moving_image = self.f['outline'](idx=i),
-                            metric = self.options.antsImageMetric,
-                            weight = self.options.outlineVolumeWeight,
-                            parameter = self.options.antsImageMetricOpt)
-                metrics.append(outline_metric)
-            
-            if i in self.subset:
-                registration = ants_registration(
-                            dimension = 2,
-                            outputNaming = self.f['out_naming'](idx=i),
-                            iterations = self.options.antsIterations,
-                            transformation = ('SyN', [self.options.antsTransformation]),
-                            regularization = (self.options.antsRegularizationType, self.options.antsRegularization),
-                            affineIterations = [0],
-                            continueAffine = False,
-                            rigidAffine = False,
-                            imageMetrics = metrics,
-                            allMetricsConverge = True)
-            else:
-                registration = blank_slice_deformation_wrapper(\
-                        input_image = self.f['src_slice'](idx=i),
-                        output_image = self.f['transform'](idx=i)
-                        )
-            
-            commands.append(copy.deepcopy(registration))
-        
-        self.execute(commands)
+#   def _calculate_transformations(self):
+#       start, end, eps = self._get_edges()
+#       
+#       commands = []
+#       metrics  = []
+#       
+#       for i in self.slice_range:
+#           metrics = []
+#           
+#           metric = ants_intensity_meric(
+#                       fixed_image  = self.f['processed'](idx=i),
+#                       moving_image = self.f['src_slice'](idx=i),
+#                       metric = self.options.antsImageMetric,
+#                       weight = 1,
+#                       parameter = self.options.antsImageMetricOpt)
+#           metrics.append(metric)
+#           
+#           if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
+#               outline_metric = ants_intensity_meric(
+#                           fixed_image  = self.f['poutline'](idx=i),
+#                           moving_image = self.f['outline'](idx=i),
+#                           metric = self.options.antsImageMetric,
+#                           weight = self.options.outlineVolumeWeight,
+#                           parameter = self.options.antsImageMetricOpt)
+#               metrics.append(outline_metric)
+#           
+#           if i in self.subset:
+#               registration = ants_registration(
+#                           dimension = 2,
+#                           outputNaming = self.f['out_naming'](idx=i),
+#                           iterations = self.options.antsIterations,
+#                           transformation = ('SyN', [self.options.antsTransformation]),
+#                           regularization = (self.options.antsRegularizationType, self.options.antsRegularization),
+#                           affineIterations = [0],
+#                           continueAffine = False,
+#                           rigidAffine = False,
+#                           imageMetrics = metrics,
+#                           allMetricsConverge = True)
+#           else:
+#               registration = blank_slice_deformation_wrapper(\
+#                       input_image = self.f['src_slice'](idx=i),
+#                       output_image = self.f['transform'](idx=i)
+#                       )
+#           
+#           commands.append(copy.deepcopy(registration))
+#       
+#       self.execute(commands)
     
     def launch(self):
         self._assign_weights()
         self._preprocess_images()
-        self._calculate_transformations()
+        #self._calculate_transformations()
+        self._calculate_transformations_masked()
      
     def __call__(self, *args, **kwargs):
         return self.launch()

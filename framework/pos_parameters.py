@@ -178,8 +178,7 @@ class ants_registration(generic_wrapper):
        {rigidAffine} {continueAffine}\
        {useNN} {histogramMatching} {allMetricsConverge} \
        {initialAffine} {fixedImageInitialAffine} {affineGradientDescent} \
-       {maskImage}
-       """
+       {maskImage} """
     
     _parameters = { \
             'dimension'      : value_parameter('dimension', 2),
@@ -198,7 +197,7 @@ class ants_registration(generic_wrapper):
             'fixedImageInitialAffine': filename_parameter('fixed-image-initial-affine', None, str_template = '--{_name} {_value}'),
             'affineGradientDescent' : vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
             'imageMetrics'          : list_parameter('image_to_image_metrics', [], '{_list}'),
-            'maskImage'      : filename_parameter('--mask-image', None, str_template = '--{_name} {_value}')
+            'maskImage'      : filename_parameter('mask-image', None, str_template = '--{_name} {_value}')
             }
     
     _io_pass = { \
@@ -228,8 +227,8 @@ class ants_reslice(generic_wrapper):
         'moving_image'  : filename_parameter('moving_image', None),
         'output_image'  : filename_parameter('output_image', None),
         'reference_image'  : filename_parameter('reference_image', None, str_template = '-R {_value}'),
-        'useNN'            : switch_parameter('use-NN', False, str_template = '--{_name}'),
-        'useBspline'       : switch_parameter('use-BSpline', False, str_template = '--{_name}'),
+        'useNN'            : switch_parameter('use-NN', None, str_template = '--{_name}'),
+        'useBspline'       : switch_parameter('use-BSpline', None, str_template = '--{_name}'),
         'deformable_list'  : list_parameter('deformable_list', [], str_template = '{_list}'),
         'affine_list'  : list_parameter('affine_list', [], str_template = '{_list}')
                 }
