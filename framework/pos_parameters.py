@@ -238,6 +238,25 @@ class ants_reslice(generic_wrapper):
             'output_image' : 'input_image'
             }
 
+class ants_compose_multi_transform(generic_wrapper):
+    _template = """ComposeMultiTransform {dimension} \
+                  {output_image} \
+                  {reference_image} \
+                  {deformable_list} {affine_list}"""
+    
+    _parameters = { \
+        'dimension'      : value_parameter('dimension', 2),
+        'output_image'  : filename_parameter('output_image', None),
+        'reference_image'  : filename_parameter('reference_image', None, str_template = '-R {_value}'),
+        'deformable_list'  : list_parameter('deformable_list', [], str_template = '{_list}'),
+        'affine_list'  : list_parameter('affine_list', [], str_template = '{_list}')
+                }
+    
+    _io_pass = { \
+            'dimension'    : 'dimension',
+            'output_image' : 'input_image'
+            }
+
 class average_images(generic_wrapper):
     _template = """c{dimension}d  {input_images} -mean {output_type} -o {output_image}"""
     

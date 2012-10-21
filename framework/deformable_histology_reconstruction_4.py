@@ -6,7 +6,8 @@ import numpy as np
 from optparse import OptionParser, OptionGroup
 import copy
 
-from pos_parameters import ants_reslice, stack_slices_gray_wrapper
+from pos_parameters import ants_reslice, stack_slices_gray_wrapper, \
+                           ants_compose_multi_transform
 
 from pos_deformable_wrappers import preprocess_slice_volume
 from pos_filenames import filename
@@ -46,7 +47,7 @@ class deformable_reconstruction_workflow(generic_workflow):
         'inter_res_gray_vol'   : filename('inter_res_gray_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_{iter:04d}.nii.gz'),
         'inter_res_outline_vol'   : filename('inter_res_outline_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_outline_{iter:04d}.nii.gz'),
         'inter_res_custom_vol'   : filename('inter_res_custom_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_cmask_{iter:04d}.nii.gz'),
-        'final_deformations'   : filename('final_deformations',   work_dir = '09_final_deformation', str_template = 'final_deformation_{output_naming}_{iter:04d}.nii.gz'),
+        'final_deformations'   : filename('final_deformations',   work_dir = '09_final_deformation', str_template = '{idx:04d}.nii.gz'),
         'iteration_stack_mask' : filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/????.nii.gz'),
         'iteration_stack_outline' : filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/????.nii.gz'),
         'iteration_stack_cmask' : filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/????.nii.gz')
@@ -83,7 +84,7 @@ class deformable_reconstruction_workflow(generic_workflow):
         return preprocess_slices
     
     def prepare_slices(self):
-
+        
         if self.options.inputVolume:
             preprocess_grayscale_slices = \
                     self._get_prepare_volume_command_template()
@@ -156,6 +157,9 @@ class deformable_reconstruction_workflow(generic_workflow):
             # and prepare images for the next iteration
             self._reslice() 
             self._stack_intermediate()
+        
+        if self.options.stackFinalDeformation:
+            self._generate_final_transforms()
     
     def _get_edges(self):
         """
@@ -166,7 +170,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                 self.options.neighbourhood,
                 self.current_iteration)
     
-    def _get_reslice_command(self, slice_number, slice_type, output_slice_type):
+    def _get_reslice_command(self, slice_number, slice_type, output_slice_type, method = ants_reslice):
         start, end, eps, iteration = self._get_edges()
         
         i= slice_number # Just an alias
@@ -174,14 +178,24 @@ class deformable_reconstruction_workflow(generic_workflow):
         deformable_list = map(lambda j: self.f['iteration_transform'](idx=i,iter=j), range(iteration+1))
         moving_image = self.f[slice_type](idx=i)
         
-        command = ants_reslice(
-                dimension = 2,
-                moving_image = moving_image,
-                output_image = self.f[output_slice_type](idx=i,iter=iteration),
-                reference_image = moving_image,
-                deformable_list = deformable_list,
-                affine_list = [])
-        return command
+        if method == ants_reslice:
+            command = method(
+                    dimension = 2,
+                    moving_image = moving_image,
+                    output_image = self.f[output_slice_type](idx=i,iter=iteration),
+                    reference_image = moving_image,
+                    deformable_list = deformable_list,
+                    affine_list = [])
+            return command
+        
+        if method == ants_compose_multi_transform:
+            command = method(
+                    dimension = 2,
+                    output_image = self.f[output_slice_type](idx=i,iter=iteration),
+                    reference_image = moving_image,
+                    deformable_list = deformable_list,
+                    affine_list = [])
+            return command
 
     def _reslice(self):
         if self.options.inputVolume:
@@ -230,7 +244,18 @@ class deformable_reconstruction_workflow(generic_workflow):
         self.execute(commands)
     
     def _generate_final_transforms(self):
-        pass
+        start, end, eps, iteration = self._get_edges()
+        
+        commands = []
+        for i in range(start, end +1):
+            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice', 
+                                                method = ants_compose_multi_transform)
+            command.updateParameters({\
+                    'output_image': self.f['final_deformations'](idx=i)
+                    })
+            commands.append(copy.deepcopy(command))
+         
+        self.execute(commands)
     
     def _get_stack_intermediate_command(self):
         iteration = self.current_iteration
@@ -252,7 +277,7 @@ class deformable_reconstruction_workflow(generic_workflow):
         iteration = self.current_iteration
         
         commands = []
-
+        
         if self.options.inputVolume:
             stack_input_volume = self._get_stack_intermediate_command()
             stack_input_volume.updateParameters({
@@ -318,9 +343,6 @@ class deformable_reconstruction_workflow(generic_workflow):
                 help='File determining fixed and moving slices for custom registration')
         parser.add_option('--registerSubset', default=None, type='str',
                 dest='registerSubset',  help='registerSubset')
-#       parser.add_option('--labelledVolume','-l', default=None,
-#               type='str', dest='labelledVolume',
-#               help='Labels for driving the registration')
         parser.add_option('--outputNaming', default="_", type='str',
                 dest='outputNaming', help="Ouput naming scheme for all the results")
         parser.add_option('--skipTransformations', default=False,
@@ -329,6 +351,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         parser.add_option('--skipSlicePreprocess', default=False,
                 dest='skipSlicePreprocess', action='store_const', const=True,
                 help='Skip slice preprocessing.')
+        parser.add_option('--stackFinalDeformation', default=False, const=True,
+                dest='stackFinalDeformation', action='store_const',
+                help='Stack filnal deformation fileld.')
         
         regSettings = \
                 OptionGroup(parser, 'Registration setttings.')
