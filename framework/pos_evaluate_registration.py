@@ -21,17 +21,13 @@ def norm_corr_coeff_2d(a1, a2):
     
     \frac{1}{n} \sum_{x,y}\frac{(f(x,y) - \overline{f})(t(x,y) - \overline{t})}{\sigma_f \sigma_t}
     
-    TODO: Create doctest entries!!!
     """
     a1m, a2m = np.mean(a1),  np.mean(a2)
     
     num = np.sum( (a1 - a1m) * (a2 - a2m) )
-    den = np.sum( np.sqrt(np.sum(np.square(a1 - a1m)) / float((a1.size -1))) *\
-                  np.sqrt(np.sum(np.square(a2 - a2m)) / float((a2.size -1))) )
-
-    print num
-    print den
-    return num / den
+    den = np.std(a1) * np.std(a2) 
+    
+    return  num / den  * (1./a1.size)
 
 def msq(a1, a2):
     """
