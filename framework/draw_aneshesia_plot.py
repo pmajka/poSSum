@@ -3,7 +3,8 @@ from itertools import izip
 import datetime, time
 from optparse import OptionParser, OptionGroup
 
-from pos_parameters import generic_wrapper, filename_parameter, string_parameter, list_parameter
+from pos_parameters import generic_wrapper, filename_parameter, string_parameter, list_parameter,\
+        boolean_parameter
 
 # Define numpy datatype in order to read reconrdings from the file
 # Supported input file format: TSV format with a number of header lines starting

@@ -195,58 +195,9 @@ class deformable_reconstruction_iteration(generic_workflow):
         
         self.execute(commands)
     
-#   def _calculate_transformations(self):
-#       start, end, eps = self._get_edges()
-#       
-#       commands = []
-#       metrics  = []
-#       
-#       for i in self.slice_range:
-#           metrics = []
-#           
-#           metric = ants_intensity_meric(
-#                       fixed_image  = self.f['processed'](idx=i),
-#                       moving_image = self.f['src_slice'](idx=i),
-#                       metric = self.options.antsImageMetric,
-#                       weight = 1,
-#                       parameter = self.options.antsImageMetricOpt)
-#           metrics.append(metric)
-#           
-#           if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
-#               outline_metric = ants_intensity_meric(
-#                           fixed_image  = self.f['poutline'](idx=i),
-#                           moving_image = self.f['outline'](idx=i),
-#                           metric = self.options.antsImageMetric,
-#                           weight = self.options.outlineVolumeWeight,
-#                           parameter = self.options.antsImageMetricOpt)
-#               metrics.append(outline_metric)
-#           
-#           if i in self.subset:
-#               registration = ants_registration(
-#                           dimension = 2,
-#                           outputNaming = self.f['out_naming'](idx=i),
-#                           iterations = self.options.antsIterations,
-#                           transformation = ('SyN', [self.options.antsTransformation]),
-#                           regularization = (self.options.antsRegularizationType, self.options.antsRegularization),
-#                           affineIterations = [0],
-#                           continueAffine = False,
-#                           rigidAffine = False,
-#                           imageMetrics = metrics,
-#                           allMetricsConverge = True)
-#           else:
-#               registration = blank_slice_deformation_wrapper(\
-#                       input_image = self.f['src_slice'](idx=i),
-#                       output_image = self.f['transform'](idx=i)
-#                       )
-#           
-#           commands.append(copy.deepcopy(registration))
-#       
-#       self.execute(commands)
-    
     def launch(self):
         self._assign_weights()
         self._preprocess_images()
-        #self._calculate_transformations()
         self._calculate_transformations_masked()
      
     def __call__(self, *args, **kwargs):

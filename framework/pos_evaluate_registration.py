@@ -69,8 +69,17 @@ class evaluation_plot(generic_wrapper):
     set ylabel "{ylabel}"
     
     set format y "{yformat}"
+     
+    gray(n) =  255-255*(n+0.0)/({args_len}.0+5.0)
+#   red(n)   = 255*( 3.0 * (n+0.0)/({args_len}+0.0) -2.0 )
+#   green(n) = 255 * abs( 3.0 * (n+0.0)/({args_len}+0.0) -1.0 ) * 0.5
+#   blue(n)  = 255 * (n+0.0)/({args_len}+0.0)
     
-    plot for [n=1:{args_len}] '{input_filename}' u 0:n w lines ls n title sprintf("%d",n)
+    gscale(n) = sprintf("#%X%X%X", gray(n), gray(n), gray(n))
+#   plt(n) = sprintf("#%X%X%X", red(n), green(n), blue(n))
+    
+    plot for [n=1:{args_len}] '{input_filename}' u 0:n w lines lc rgb gscale(n) lw 0.3 title sprintf("%d",n)
+#   plot for [n=1:{args_len}] '{input_filename}' u 0:n w lines lc rgb plt(n)    lw 1 title sprintf("%d",n)
     """
     
     _parameters = {
@@ -285,13 +294,12 @@ class serial_alignment_evaluation(object):
         # and output png file for the the MSQ evaluation plot.
         plot_file, svg_file, png_file, = \
                 self._get_plot_filenames(self.options.plotMsqFilename)
-        #        'yformat' : '%.0s*10^{%S}',
         
         evaluation_plot_kwargs = { \
                 'output_filename' : svg_file,
                 'xlabel' : 'Slice index',
                 'ylabel' : 'MSQ',
-                'yformat' : '%2.2f',
+                'yformat' : '%2.0f',
                 'title' : 'Mean sqare difference between slice n and n + 1',
                 'args_len' : len(self.args),
                 'input_filename' : self.options.msqFilename}
