@@ -1,9 +1,11 @@
 import os
-import nifti
-import numpy as np
-from optparse import OptionParser, OptionGroup
 import sys
 import datetime, time
+from optparse import OptionParser, OptionGroup
+
+import nifti
+import numpy as np
+from scipy import stats
 
 from pos_parameters import generic_wrapper, filename_parameter, string_parameter, list_parameter,\
                            value_parameter
@@ -89,6 +91,48 @@ class evaluation_plot(generic_wrapper):
             'ylabel' : string_parameter('ylabel', None),
             'yformat' : string_parameter('yformat', None),
             'args_len' : value_parameter('args_len', None),
+            'input_filename' : string_parameter('input_filename', None),
+            }
+    
+    _io_pass = { \
+            'input_filename' : 'output_filename'
+            }
+
+class candlestick_plot(generic_wrapper):
+    _template = """
+    set terminal svg size 700,450 dynamic enhanced fname "Verdana" fsize 12 
+    set out '{output_filename}'
+    
+    set border 2
+    set style fill solid
+    unset grid
+    
+    set title "Comparison of slices simmilarity for consecutive steps of reconstructions"
+    
+    set boxwidth 0.2 absolute
+    set format x ""
+    set xlabel ""
+    set format y "%1.1f"
+    set ylabel "Normalized correlation coefficient"
+    
+    
+    set xtics scale 0
+    set ytics border in scale 2,0.5 nomirror norotate  offset character 0, 0, 0
+    set yrange [0:1]
+    set mytics 2
+    
+    lines=system(" cat '{input_filename}' | wc -l")
+    set xrange[0:lines+1]
+
+#    factors = "Coarse Fine Final Deformable"
+#    set for [i=1:lines] xtics add (word(factors,i) i) 
+
+    plot '{input_filename}' using ($0+1):2:1:5:4 with candlesticks notitle whiskerbars lw 2 lc rgb "#aabbcc", \
+         '{input_filename}' using ($0+1):3:3:3:3 with candlesticks lt -1 lw 2 lc rgb "#445566" notitle
+    """
+    
+    _parameters = {
+            'output_filename' : filename_parameter('output_filename', None),
             'input_filename' : string_parameter('input_filename', None),
             }
     
@@ -273,6 +317,7 @@ class serial_alignment_evaluation(object):
         
         if self.options.plotNcorrFilename:
             self._plot_results_ncorr()
+            self._plot_reaults_ncorr_boxplot()
     
     def _get_plot_filenames(self, naming_base):
         """
@@ -347,6 +392,61 @@ class serial_alignment_evaluation(object):
         # Execute plotting
         open(plot_file, 'w').write(str(plot))
         gnuplot()
+    
+    def _plot_reaults_ncorr_boxplot(self):
+        """
+        Plot the normalized correlation coefficient as boxplot.
+        """        
+        
+        # Get names of the gnuplot plot file, output svg file,
+        # and output png file for the the normalized correlation coefficient
+        # plot
+        plot_file, svg_file, png_file, = \
+                self._get_plot_filenames(self.options.plotNcorrFilename + '_box')
+        box_data_file = self.options.plotNcorrFilename + '_box'
+        
+        # Generate data for the boxplot and save it to disk
+        np.savetxt(box_data_file, self._get_boxplot_data())
+        
+        plot_kwargs = { \
+                'output_filename' : svg_file,
+                'input_filename' : box_data_file}
+        
+        gnuplot_kwargs = {
+                'plot_file'   : plot_file,
+                'svg_file'    : svg_file,
+                'output_file' : png_file}
+        
+        plot    = candlestick_plot(**plot_kwargs)
+        gnuplot = gnuplot_wrapper(**gnuplot_kwargs)
+        
+        # Execute plotting
+        open(plot_file, 'w').write(str(plot))
+        gnuplot()
+    
+    def _get_boxplot_data(self):
+        """
+        Calculate the data for the boxplot:
+        min, 1st quartile, mean,  3rd quartile and max value from the array
+        """
+        
+        # Just create aliases to make the code less obscured
+        f  = stats.scoreatpercentile
+        a  = self.results_ncor
+        print a.shape
+        ar = range(a.shape[0])
+        pc = [0, 25, 50, 75, 100]
+        
+        # Calculate data for the boxplot: min, 1st quartile, mean
+        # 3rd quartile and max value from the array
+        result = np.array( \
+                 map(lambda y: \
+                     map(lambda x: f(a[y,:],x),  pc), \
+                 ar)\
+                 )
+        
+        # And return the result
+        return result
     
     @staticmethod
     def parseArgs():
