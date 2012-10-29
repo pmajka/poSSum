@@ -17,7 +17,7 @@ OUTPUT_NAMING=02_02_NN2_deformable_hist_reconstruction_nissl
 ARCHIVE_DIR=/home/pmajka/possum/`date +"deformable_nissl_summary_%Y-%m-%d_%H-%M"`
 
 EVALUATE_REGISTRATION_SCRIPT=framework/pos_evaluate_registration.py
-DEFORMABLE_REGISTRATION_SCRIPT=framework/deformable_histology_reconstruction_5.py
+DEFORMABLE_REGISTRATION_SCRIPT=framework/deformable_histology_reconstruction.py
 
 DO_PREPROCESS='true'
 DO_REGISTRATION='true'

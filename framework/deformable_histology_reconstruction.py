@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os
+import os,sys
 import numpy as np
 
 from optparse import OptionParser, OptionGroup
@@ -14,10 +14,6 @@ from pos_filenames import filename
 from pos_wrapper_skel import generic_workflow
 from deformable_histology_iterations import deformable_reconstruction_iteration
 
-def execute_callable(callable):
-    return callable()
-
-    
 class deformable_reconstruction_workflow(generic_workflow):
     _f = { \
          # Initial grayscale slices
@@ -59,6 +55,11 @@ class deformable_reconstruction_workflow(generic_workflow):
         super(self.__class__, self).__init__(options, args, pool)
         
         # Handling situation when no volume is provided
+        if not any([self.options.inputVolume, \
+                   self.options.outlineVolume, \
+                   self.options.maskedVolume]):
+            print >> sys.stderr, "No input volumes provided. Exit"
+            sys.exit(1)
         
         if self.options.inputVolume:
             self.options.inputVolumeWeight = float(self.options.inputVolume[0])
@@ -73,18 +74,31 @@ class deformable_reconstruction_workflow(generic_workflow):
             self.options.maskedVolume = self.options.maskedVolume[1]
     
     def _get_prepare_volume_command_template(self):
+        """
+        """
         preprocess_slices = preprocess_slice_volume(\
                 input_image = self.options.inputVolume,
                 output_naming = self.f['init_slice_naming'](), \
                 start_slice = self.options.startSlice, \
-                end_slice = self.options.endSlice +1, \
+                end_slice = self.options.endSlice + 1, \
                 shift_indexes = self.options.shiftIndexes, \
                 slice_mask = self.f['init_slice_mask'](),
                 output_dir = self.f['init_slice'].base_dir)
         return preprocess_slices
     
     def prepare_slices(self):
+        """
+        Split provided input volumes into slices. The proceure requires the
+        prvided volumes to be in grayscale mode (it's gonna work also with rgb
+        volumes but the further registration process will collapse). 
         
+        Volumes are sectioned separately. If the swich for given volume is
+        provided, the sections `startSlice` to `endSlice` are extracted. The
+        process is repeated separately for each volume (grayscale, outline,
+        custom mask volume, segmentation volume, etc...)
+        """
+        
+        # Handle inputVolume (grayscale volume, aka THE registereg image volume)
         if self.options.inputVolume:
             preprocess_grayscale_slices = \
                     self._get_prepare_volume_command_template()
@@ -96,6 +110,8 @@ class deformable_reconstruction_workflow(generic_workflow):
                 'output_dir' : self.f['init_slice'].base_dir})
             preprocess_grayscale_slices()
         
+        # Handle the outline volume. This volume is a binary volume (it can
+        # contain only 0 and 1 values).
         if self.options.outlineVolume:
             prepare_outline_volume = \
                     self._get_prepare_volume_command_template()
@@ -107,6 +123,8 @@ class deformable_reconstruction_workflow(generic_workflow):
                 'output_dir' : self.f['init_outline_naming'].base_dir})
             prepare_outline_volume()
         
+        # Handling custom mask volume. This volume is a mask volume which means
+        # that it is a binary volume and contains only 0 and 1 values.
         if self.options.maskedVolume:
             prepare_masked_volume = \
                     self._get_prepare_volume_command_template()
@@ -126,10 +144,15 @@ class deformable_reconstruction_workflow(generic_workflow):
         if not self.options.skipSlicePreprocess:
             self.prepare_slices()
         
+        # If 'startFromIteration' switch is enabled,
+        # the reconstruction starts from a given iteration
+        # instead of starting from the beginning - iteration 0
         for iteration in range(self.options.startFromIteration,\
                                self.options.iterations):
-            print "-------------------------------------------------"
-            print iteration
+            
+            print >> sys.stderr, "-------------------------------------------------"
+            print >> sys.stderr, "Staring iteration: %d" % iteration
+            print >> sys.stderr, "-------------------------------------------------"
             
             self.current_iteration = iteration
             
@@ -213,20 +236,18 @@ class deformable_reconstruction_workflow(generic_workflow):
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice')
-            command.updateParameters({'useBspline':True})
-            command.updateParameters({'useNN':None})
+            command.updateParameters({'useBspline':True, 'useNN':None})
             commands.append(copy.deepcopy(command))
         
         self.execute(commands)
-        
+    
     def _reslice_outline(self):
         start, end, eps, iteration = self._get_edges()
         
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_outline', 'iteration_resliced_outline_slice')
-            command.updateParameters({'useNN':None})
-            command.updateParameters({'useBspline':None})
+            command.updateParameters({'useNN':None, 'useBspline':None})
             commands.append(copy.deepcopy(command))
          
         self.execute(commands)
@@ -237,15 +258,22 @@ class deformable_reconstruction_workflow(generic_workflow):
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_custom', 'iteration_resliced_custom_slice')
-            command.updateParameters({'useBspline':None})
-            command.updateParameters({'useNN':True})
+            command.updateParameters({'useBspline':None, 'useNN':True})
             commands.append(copy.deepcopy(command))
-         
+        
         self.execute(commands)
     
     def _generate_final_transforms(self):
+        """
+        Compose the individual deformation fields calculated in each iteration
+        into a single deformation field that can be analysed. In other words,
+        this procedure just sums up all the individual deformation filelds.
+        """
+         
+        # As usually, get the slice range:
         start, end, eps, iteration = self._get_edges()
         
+        # For each slice, compose all the separated deformation fields:
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice', 
@@ -331,16 +359,16 @@ class deformable_reconstruction_workflow(generic_workflow):
                 help='startFromIteration')
         parser.add_option('--inputVolume','-i', default=None,
                 type='str', dest='inputVolume', nargs = 2,
-                help='Input grayscale volume to be reconstructed')
+                help='Input volume which undergoes smooth nonlinear reconstruction.')
         parser.add_option('--outlineVolume','-o', default=None,
                 type='str', dest='outlineVolume', nargs = 2,
                 help='Outline label driving the registration')
         parser.add_option('--maskedVolume','-m', default=None,
                 type='str', dest='maskedVolume', nargs = 2,
-                help='Slice mask for driving the registration')
+                help='Custom slice mask for driving the registration')
         parser.add_option('--maskedVolumeFile', default=None,
                 type='str', dest='maskedVolumeFile',
-                help='File determining fixed and moving slices for custom registration')
+                help='File determining fixed and moving slices for custom registration.')
         parser.add_option('--registerSubset', default=None, type='str',
                 dest='registerSubset',  help='registerSubset')
         parser.add_option('--outputNaming', default="_", type='str',
