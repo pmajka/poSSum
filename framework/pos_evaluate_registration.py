@@ -115,7 +115,6 @@ class candlestick_plot(generic_wrapper):
     set format y "%1.1f"
     set ylabel "Normalized correlation coefficient"
     
-    
     set xtics scale 0
     set ytics border in scale 2,0.5 nomirror norotate  offset character 0, 0, 0
     set yrange [0:1]
@@ -127,13 +126,20 @@ class candlestick_plot(generic_wrapper):
 #    factors = "Coarse Fine Final Deformable"
 #    set for [i=1:lines] xtics add (word(factors,i) i) 
 
+    upper_limit = "{upper_limit}"
+    lower_limit = "{lower_limit}"
+
     plot '{input_filename}' using ($0+1):2:1:5:4 with candlesticks notitle whiskerbars lw 2 lc rgb "#aabbcc", \
-         '{input_filename}' using ($0+1):3:3:3:3 with candlesticks lt -1 lw 2 lc rgb "#445566" notitle
+         '{input_filename}' using ($0+1):3:3:3:3 with candlesticks lt -1 lw 2 lc rgb "#445566" notitle,\
+         for [n=1:18] '{input_data_filename}' u (n):( (column(n)> word(upper_limit,n)+0.01) || (column(n) <  word(lower_limit,n)-0.01) ? column(n) : 1/0) w p pt 7 lc rgb "#444444" ps 0.5 notitle
     """
     
     _parameters = {
             'output_filename' : filename_parameter('output_filename', None),
-            'input_filename' : string_parameter('input_filename', None),
+            'input_data_filename' : filename_parameter('input_data_filename', None),
+            'input_filename' : filename_parameter('input_filename', None),
+            'upper_limit' : list_parameter('upper_limit', None),
+            'lower_limit' : list_parameter('lower_limit', None),
             }
     
     _io_pass = { \
@@ -406,11 +412,17 @@ class serial_alignment_evaluation(object):
         box_data_file = self.options.plotNcorrFilename + '_box'
         
         # Generate data for the boxplot and save it to disk
-        np.savetxt(box_data_file, self._get_boxplot_data())
+        box_plot_data = self._get_boxplot_data()
+        np.savetxt(box_data_file, box_plot_data)
+        upper_limit = list(box_plot_data[:,4].flatten())
+        lower_limit = list(box_plot_data[:,0].flatten())
         
         plot_kwargs = { \
                 'output_filename' : svg_file,
-                'input_filename' : box_data_file}
+                'input_data_filename' : self.options.ncorrFilename,
+                'input_filename' : box_data_file,
+                'upper_limit' : upper_limit,
+                'lower_limit' : lower_limit}
         
         gnuplot_kwargs = {
                 'plot_file'   : plot_file,
@@ -435,7 +447,7 @@ class serial_alignment_evaluation(object):
         a  = self.results_ncor
         print a.shape
         ar = range(a.shape[0])
-        pc = [0, 25, 50, 75, 100]
+        pc = [5, 25, 50, 75, 95]
         
         # Calculate data for the boxplot: min, 1st quartile, mean
         # 3rd quartile and max value from the array
