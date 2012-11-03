@@ -31,6 +31,7 @@ class deformable_reconstruction_iteration(generic_workflow):
         start, end, eps = self._get_edges()
         self.slice_range = range(start, end +1)
         
+        # Load data for outlier removal rutines 
         self._load_subset_file()
         self._read_custom_registration_assignment()
         
@@ -39,12 +40,24 @@ class deformable_reconstruction_iteration(generic_workflow):
                 map(int, self.options.antsIterations.strip().split("x"))
     
     def _read_custom_registration_assignment(self):
+        """
+        Helper method for correcting outlier slices. 
+        """
+        
+        # If custom mask is provided and its weight is more than zero, it means
+        # that 'outlier removal mechanism' should be used. This mechanism
+        # corrects only a part of the slices indicated by masks to the slices
+        # which are enumerated in self.options.maskedVolumeFile.
         if self.options.maskedVolume and \
                 self.options.maskedVolumeWeight > 0 and \
                 self.options.maskedVolumeFile:
             
+            # Load the fixed and moving slice assignment for the outlier removal
+            # mechanism
             masked_registraion = np.loadtxt(self.options.maskedVolumeFile)
-            print masked_registraion
+            
+            # Override the 'registration subset' attribute as outlier removal
+            # mechanism supreses 'register subset' mechanism :)
             self.masked_registraion = \
                     dict(map(lambda x: (int(x[0]), int(x[1])), masked_registraion))
             self.subset = self.masked_registraion.keys()
@@ -72,6 +85,10 @@ class deformable_reconstruction_iteration(generic_workflow):
             self.subset = self.slice_range
     
     def _assign_weights_from_func(self):
+        """
+        Assing weights for image averaging. Currently just constants weights are
+        assigned and that seems to be quite a good solution. 
+        """
         start, end, eps = self._get_edges()
         
         self.weights = {}
@@ -131,12 +148,19 @@ class deformable_reconstruction_iteration(generic_workflow):
                             input_images = files_to_average,
                             weights = weights,
                             output_type = 'float',
-                            output_image = self.f['poutline'](idx=i))
+                            outut_image = self.f['poutline'](idx=i))
                 commands.append(copy.deepcopy(command))
             
             self.execute(commands)
     
     def _calculate_transformations_masked(self):
+        """
+        Generate and invoke commands for generating deformation fields. Commands
+        are generated based on a number of factors. The actual dependencies
+        what is registered to what and how its quite complicated and it is my
+        sweet secret how it is actually calculated.
+        """
+        
         start, end, eps = self._get_edges()
         
         commands = []
@@ -196,10 +220,22 @@ class deformable_reconstruction_iteration(generic_workflow):
         self.execute(commands)
     
     def launch(self):
+        """
+        Launching a deformable registration iteration means: 
+
+            * Assigning weights for the images by reading them from files or
+              applying weighting functions.
+            * Preprocessing images: calculating images that will be used to
+              perform registration based on the resliced images from previous
+              iteration.
+            * Launching actual registration process and calculating deformation
+              fields.
+        """
+        
         self._assign_weights()
         self._preprocess_images()
         self._calculate_transformations_masked()
-     
+    
     def __call__(self, *args, **kwargs):
         return self.launch()
 

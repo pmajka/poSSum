@@ -52,7 +52,6 @@ class evaluation_plot(generic_wrapper):
     set ylabel "{ylabel}"
     
     set format y "{yformat}"
-    set ytics 0.2 0.2 1
      
     plot '{input_filename}' u 1:2 w lines lc rgb "blue" lw 0.3 notitle
     """
@@ -285,8 +284,8 @@ class serial_alignment_evaluation(object):
                 'input_data_filename' : results_filename,
                 'input_filename' : box_data_file,
                 'args_len'   : 2,
-                'lower_limit_name' : self.options.plotComparisonNaming + "_lower",
-                'upper_limit_name' : self.options.plotComparisonNaming + "_upper",
+                'lower_limit_name' : os.path.basename(self.options.plotComparisonNaming) + "_lower",
+                'upper_limit_name' : os.path.basename(self.options.plotComparisonNaming) + "_upper",
                 'upper_limit' : upper_limit,
                 'lower_limit' : lower_limit}
         

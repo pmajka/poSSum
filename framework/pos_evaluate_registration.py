@@ -131,7 +131,7 @@ class candlestick_plot(generic_wrapper):
 
     plot '{input_filename}' using ($0+1):2:1:5:4 with candlesticks notitle whiskerbars lw 2 lc rgb "#aabbcc", \
          '{input_filename}' using ($0+1):3:3:3:3 with candlesticks lt -1 lw 2 lc rgb "#445566" notitle,\
-         for [n=1:18] '{input_data_filename}' u (n):( (column(n)> word(upper_limit,n)+0.01) || (column(n) <  word(lower_limit,n)-0.01) ? column(n) : 1/0) w p pt 7 lc rgb "#444444" ps 0.5 notitle
+         for [n=1:{args_len}] '{input_data_filename}' u (n):( (column(n)> word(upper_limit,n)+0.01) || (column(n) <  word(lower_limit,n)-0.01) ? column(n) : 1/0) w p pt 7 lc rgb "#444444" ps 0.5 notitle
     """
     
     _parameters = {
@@ -140,6 +140,7 @@ class candlestick_plot(generic_wrapper):
             'input_filename' : filename_parameter('input_filename', None),
             'upper_limit' : list_parameter('upper_limit', None),
             'lower_limit' : list_parameter('lower_limit', None),
+            'args_len' : value_parameter('args_len', None),
             }
     
     _io_pass = { \
@@ -421,6 +422,7 @@ class serial_alignment_evaluation(object):
                 'output_filename' : svg_file,
                 'input_data_filename' : self.options.ncorrFilename,
                 'input_filename' : box_data_file,
+                'args_len'   : len(self.args),
                 'upper_limit' : upper_limit,
                 'lower_limit' : lower_limit}
         
