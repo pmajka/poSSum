@@ -19,7 +19,7 @@ ARCHIVE_DIR=/home/pmajka/possum/`date +"deformable_nissl_summary_%Y-%m-%d_%H-%M"
 EVALUATE_REGISTRATION_SCRIPT=framework/pos_evaluate_registration.py
 DEFORMABLE_REGISTRATION_SCRIPT=framework/deformable_histology_reconstruction.py
 
-DO_PREPROCESS='true'
+DO_PREPROCESS='false'
 DO_REGISTRATION='true'
 DO_ARCHIVE='true'
 
@@ -140,6 +140,7 @@ then
         --outlineVolume 0 ${MASK_FILENAME} \
         --maskedVolume  1 ${OUTLIER_MASK_FILENAME} \
         --maskedVolumeFile ${CUSTOM_MASK_FILENAME} \
+        --stackFinalDeformation \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
         --iterations 4 \
@@ -180,6 +181,7 @@ then
         --outlineVolume 1 ${MASK_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
+        --skipSlicePreprocess \
         --startFromIteration 8 \
         --iterations 13 \
         --neighbourhood 1 \

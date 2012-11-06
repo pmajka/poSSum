@@ -31,13 +31,13 @@ class deformable_reconstruction_iteration(generic_workflow):
         start, end, eps = self._get_edges()
         self.slice_range = range(start, end +1)
         
-        # Load data for outlier removal rutines 
-        self._load_subset_file()
-        self._read_custom_registration_assignment()
-        
         # Convert the number of iterations string to list of integers
         self.options.antsIterations = \
                 map(int, self.options.antsIterations.strip().split("x"))
+        
+        # Load data for outlier removal rutines 
+        self._load_subset_file()
+        self._read_custom_registration_assignment()
     
     def _read_custom_registration_assignment(self):
         """
@@ -52,17 +52,63 @@ class deformable_reconstruction_iteration(generic_workflow):
                 self.options.maskedVolumeWeight > 0 and \
                 self.options.maskedVolumeFile:
             
-            # Load the fixed and moving slice assignment for the outlier removal
-            # mechanism
-            masked_registraion = np.loadtxt(self.options.maskedVolumeFile)
-            
-            # Override the 'registration subset' attribute as outlier removal
-            # mechanism supreses 'register subset' mechanism :)
             self.masked_registraion = \
-                    dict(map(lambda x: (int(x[0]), int(x[1])), masked_registraion))
+            self._get_outliers_registration_assignment(self.options.maskedVolumeFile)
             self.subset = self.masked_registraion.keys()
         else:
             self.masked_registraion = {}
+    
+    def _get_outliers_registration_assignment(self, fileName, delimiter = " "):
+        """
+        """
+        
+        returnDictionary = {}
+        columns = {'fixed': 1, 'moving' : 0, 'metric' : 2, 'met_opt': 3,\
+                   'iters': 4, 'trval'  : 5, 'regtype': 6, 'regam': 7}
+        
+        for sourceLine in open(fileName):
+            if sourceLine.strip().startswith('#') or sourceLine.strip() == "":
+                continue
+            line = sourceLine.split("#")[0].strip().split(delimiter)
+            key = int(line[columns['moving']])
+            
+            # There are two options possible, either
+            # 1) There is only moving_image => fixed image assignment
+            # 2) There are full registration settings provided for
+            #    each of the entries
+            # The two options can be mixed within single assignment file
+            
+            # Check, if there is only one assignment per file
+
+            if returnDictionary.has_key(key):
+                print >>sys,stderr, "Entry %s defined more than once. Skipping..." % key
+                continue
+            
+            if len(line) > 2:
+                value = {}
+                value['moving']  = key
+                value['fixed']   = int(line[columns['fixed']])
+                value['metric']  = line[columns['metric']]
+                value['met_opt'] = float(line[columns['met_opt']])
+                value['iters']   = map(int, line[columns['iters']].split("x"))
+                value['trval']   = float(line[columns['trval']])
+                value['regtype'] = line[columns['regtype']]
+                value['regam']   = map(float, line[columns['regam']].split(","))
+            
+            elif len(line) == 2:
+                value = {}
+                value['moving']  = key
+                value['fixed']   = int(line[columns['fixed']])
+                value['metric']  = self.options.antsImageMetric
+                value['met_opt'] = self.options.antsImageMetricOpt
+                value['iters']   = self.options.antsIterations
+                value['trval']   = self.options.antsTransformation
+                value['regtype'] = self.options.antsRegularizationType
+                value['regam']   = self.options.antsRegularization
+             
+            returnDictionary[key] = value
+         
+        return returnDictionary
     
     def _get_edges(self):
         """
@@ -148,10 +194,23 @@ class deformable_reconstruction_iteration(generic_workflow):
                             input_images = files_to_average,
                             weights = weights,
                             output_type = 'float',
-                            outut_image = self.f['poutline'](idx=i))
+                            output_image = self.f['poutline'](idx=i))
                 commands.append(copy.deepcopy(command))
             
             self.execute(commands)
+    
+    def _get_default_reg_settings(self):
+        return (self.options.antsImageMetric, 
+                self.options.antsImageMetricOpt,
+                self.options.antsIterations,
+                self.options.antsTransformation,
+                self.options.antsRegularizationType,
+                self.options.antsRegularization)
+    
+    def _get_custom_reg_settings(self, mov_slice_idx):
+        src = self.masked_registraion[mov_slice_idx]
+        return (src['metric'], src['met_opt'], src['iters'],
+                src['trval'], src['regtype'], src['regam'])
     
     def _calculate_transformations_masked(self):
         """
@@ -167,43 +226,49 @@ class deformable_reconstruction_iteration(generic_workflow):
         
         for i in self.slice_range:
             metrics  = []
-            j = self.masked_registraion.get(i, None) 
+            j_data = self.masked_registraion.get(i, None) 
             
-            if j == None:
+            if j_data == None:
                 fixed_image_type = 'processed'
                 fixed_outline_type='poutline'
                 mask_image = None
                 j=i
+                r_metric, parameter, iterations, transf_grad, reg_type, reg_ammount =\
+                        self._get_default_reg_settings()
+            
             else:
                 fixed_image_type = 'src_slice'
                 fixed_outline_type='outline'
+                j = j_data['fixed']
                 mask_image =  self.f['cmask'](idx=j)
+                r_metric, parameter, iterations, transf_grad, reg_type, reg_ammount =\
+                        self._get_custom_reg_settings(i)
             
             if self.options.inputVolume and self.options.inputVolumeWeight > 0:
                 metric = ants_intensity_meric(
                             fixed_image  = self.f[fixed_image_type](idx=j),
                             moving_image = self.f['src_slice'](idx=i),
-                            metric = self.options.antsImageMetric,
+                            metric = r_metric,
                             weight = self.options.inputVolumeWeight,
-                            parameter = self.options.antsImageMetricOpt)
+                            parameter = parameter)
                 metrics.append(copy.deepcopy(metric))
             
             if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
                 outline_metric = ants_intensity_meric(
                             fixed_image  = self.f[fixed_outline_type](idx=j),
                             moving_image = self.f['outline'](idx=i),
-                            metric = self.options.antsImageMetric,
+                            metric = r_metric,
                             weight = self.options.outlineVolumeWeight,
-                            parameter = self.options.antsImageMetricOpt)
+                            parameter = parameter)
                 metrics.append(copy.deepcopy(outline_metric))
             
             if i in self.subset:
                 registration = ants_registration(
                             dimension = 2,
                             outputNaming = self.f['out_naming'](idx=i),
-                            iterations = self.options.antsIterations,
-                            transformation = ('SyN', [self.options.antsTransformation]),
-                            regularization = (self.options.antsRegularizationType, self.options.antsRegularization),
+                            iterations = iterations,
+                            transformation = ('SyN', [transf_grad]),
+                            regularization = (reg_type, reg_ammount),
                             affineIterations = [0],
                             continueAffine = False,
                             rigidAffine = False,

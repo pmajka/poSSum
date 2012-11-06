@@ -8,11 +8,13 @@ END_SLICE=263
 GRAYSCALE_VOLUME=/home/pmajka/possum/data/02_02_NN2/70_blockface_to_histology_registration/02_02_NN2_final_myelin_r.nii.gz
 RGB_VOLUME=/home/pmajka/possum/data/02_02_NN2/70_blockface_to_histology_registration/02_02_NN2_final_myelin_rgb.nii.gz
 VOLUME_MASK=/home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_final_myelin_mask.nii.gz
-MASK_FILENAME=/home/pmajka/possum/data/02_02_NN2/73_deformable_histology_reconstruction/02_02_NN2_deformable_histology_reconstruction_myelin_outline.nii.gz
+MASK_FILENAME=/home/pmajka/possum/data/02_02_NN2/73_deformable_histology_reconstruction/02_02_NN2_deformable_histology_reconstruction_myelin_mask.nii.gz
+OUTLINE_FILENAME=/home/pmajka/possum/data/02_02_NN2/73_deformable_histology_reconstruction/02_02_NN2_deformable_histology_reconstruction_myelin_outline.nii.gz
 MASKED_FILENAME=/home/pmajka/possum/data/02_02_NN2/73_deformable_histology_reconstruction/02_02_NN2_deformable_histology_reconstruction_myelin_masked.nii.gz
 OUTLIER_MASK_FILENAME=/home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_final_myelin_mask_outlier_removal.nii.gz
 CUSTOM_MASK_FILENAME=processing/02_02_NN2_myelin_masked_custom.csv
 REGISTER_SUBSET_FILENAME=processing/02_02_NN2_myelin_outliers.csv
+REGISTER_SUBSET_FILENAME_ANTERIOR=processing/02_02_NN2_myelin_outliers_anteriror.csv
 OUTPUT_NAMING=02_02_NN2_deformable_hist_reconstruction_myelin
 ARCHIVE_DIR=/home/pmajka/possum/`date +"deformable_myelin_summary_%Y-%m-%d_%H-%M"`
 
@@ -40,12 +42,12 @@ function archive_results {
     cp -v ${OUTLIER_MASK_FILENAME} ${TARGET_DIR}/custom_outliers_mask.nii.gz
     cp -v ${REGISTER_SUBSET_FILENAME} ${TARGET_DIR}
     
-    python ${EVALUATE_REGISTRATION_SCRIPT}     \
-        --msqFilename ${TARGET_DIR}/msq.txt    \
-        --plotMsqFilename ${TARGET_DIR}/msq    \
-        --ncorrFilename ${TARGET_DIR}/corr.txt \
-        --plotNcorrFilename ${TARGET_DIR}/corr  \
-        ${TARGET_DIR}/08_intermediate_results/intermediate_${OUTPUT_NAMING}_00*.nii.gz
+#   python ${EVALUATE_REGISTRATION_SCRIPT}     \
+#       --msqFilename ${TARGET_DIR}/msq.txt    \
+#       --plotMsqFilename ${TARGET_DIR}/msq    \
+#       --ncorrFilename ${TARGET_DIR}/corr.txt \
+#       --plotNcorrFilename ${TARGET_DIR}/corr  \
+#       ${TARGET_DIR}/08_intermediate_results/intermediate_${OUTPUT_NAMING}_00*.nii.gz
 }
 
 function reslice_multichannel {
@@ -120,14 +122,21 @@ function reslice_multichannel {
 if [ ${DO_PREPROCESS} = 'true' ]
 then
     c3d ${VOLUME_MASK} \
-        -replace 2 1 \
+        -replace 2 0 \
+        -replace 3 0 \
         -type uchar \
         -o ${MASK_FILENAME}
+    
+    c3d ${VOLUME_MASK} \
+        -replace 2 1 \
+        -replace 3 0 \
+        -type uchar \
+        -o ${OUTLINE_FILENAME}
     
     c3d \
         ${GRAYSCALE_VOLUME} \
         -scale -1 -shift 255 \
-        ${MASK_FILENAME} \
+        ${OUTLINE_FILENAME} \
         -times \
         -scale -1 -shift 255 \
         -type uchar -o ${MASKED_FILENAME}
@@ -135,34 +144,36 @@ fi
 
 if [ ${DO_REGISTRATION} = 'true' ]
 then
-#   python ${DEFORMABLE_REGISTRATION_SCRIPT} \
-#       --inputVolume   1 ${MASKED_FILENAME} \
-#       --outlineVolume 0 ${MASK_FILENAME} \
-#       --maskedVolume  1 ${OUTLIER_MASK_FILENAME} \
-#       --maskedVolumeFile ${CUSTOM_MASK_FILENAME} \
-#       --startSlice ${START_SLICE} \
-#       --endSlice ${END_SLICE} \
-#       --iterations 4 \
-#       --neighbourhood 1 \
-#       -d $WORK_DIR \
-#       --outputNaming ${OUTPUT_NAMING} \
-#       --antsImageMetricOpt 16 \
-#       --antsTransformation 0.1 \
-#       --antsRegularization 3.0 1.0 \
-#       --antsIterations 1000x1000x1000x0x0 \
-#       --outputVolumePermutationOrder 0 2 1 \
-#       --outputVolumeSpacing 0.01584 0.08 0.01584 \
-#       --outputVolumeOrigin 0 -0.04 0 \
-#       --outputVolumeOrientationCode RAS
-#   
+    python ${DEFORMABLE_REGISTRATION_SCRIPT} \
+        --inputVolume   1 ${MASKED_FILENAME} \
+        --outlineVolume 0 ${MASK_FILENAME} \
+        --maskedVolume  1 ${OUTLIER_MASK_FILENAME} \
+        --maskedVolumeFile ${CUSTOM_MASK_FILENAME} \
+        --startSlice ${START_SLICE} \
+        --endSlice ${END_SLICE} \
+        --iterations 1 \
+        --neighbourhood 1 \
+        -d $WORK_DIR \
+        --outputNaming ${OUTPUT_NAMING} \
+        --antsImageMetricOpt 16 \
+        --antsTransformation 0.1 \
+        --antsRegularization 3.0 1.0 \
+        --antsIterations 1000x1000x1000x0x0 \
+        --outputVolumePermutationOrder 0 2 1 \
+        --outputVolumeSpacing 0.01584 0.08 0.01584 \
+        --outputVolumeOrigin 0 -0.04 0 \
+        --outputVolumeOrientationCode RAS
+    
     python ${DEFORMABLE_REGISTRATION_SCRIPT} \
         --inputVolume   1 ${MASKED_FILENAME} \
         --outlineVolume 0 ${MASK_FILENAME} \
         --registerSubset ${REGISTER_SUBSET_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
-        --iterations 5 \
-        --startFromIteration 0 \
+        --skipSlicePreprocess \
+        --stackFinalDeformation \
+        --iterations 6 \
+        --startFromIteration 1 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -180,8 +191,10 @@ then
         --outlineVolume 1 ${MASK_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
-        --startFromIteration 5 \
-        --iterations 15 \
+        --skipSlicePreprocess \
+        --stackFinalDeformation \
+        --startFromIteration 6 \
+        --iterations 14 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -199,10 +212,11 @@ then
         --outlineVolume 0 ${MASK_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
-        --startFromIteration 15 \
-        --iterations 21 \
-        --neighbourhood 1 \
+        --skipSlicePreprocess \
         --stackFinalDeformation \
+        --startFromIteration 14 \
+        --iterations 20 \
+        --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
         --antsImageMetricOpt 2 \
@@ -214,25 +228,26 @@ then
         --outputVolumeOrigin 0 -0.04 0 \
         --outputVolumeOrientationCode RAS
     
-#   python ${DEFORMABLE_REGISTRATION_SCRIPT} \
-#       --inputVolume   1 ${MASKED_FILENAME} \
-#       --outlineVolume 0 ${MASK_FILENAME} \
-#       --startSlice ${START_SLICE} \
-#       --endSlice ${END_SLICE} \
-#       --stackFinalDeformation \
-#       --startFromIteration 18 \
-#       --iterations 24 \
-#       --neighbourhood 1 \
-#       -d $WORK_DIR \
-#       --outputNaming ${OUTPUT_NAMING} \
-#       --antsImageMetricOpt 4 \
-#       --antsTransformation 0.01 \
-#       --antsRegularization 1.0 1.0 \
-#       --antsIterations 1000x1000x1000x1000x0000 \
-#       --outputVolumePermutationOrder 0 2 1 \
-#       --outputVolumeSpacing 0.01584 0.08 0.01584 \
-#       --outputVolumeOrigin 0 -0.04 0 \
-#       --outputVolumeOrientationCode RAS
+    python ${DEFORMABLE_REGISTRATION_SCRIPT} \
+        --inputVolume   1 ${MASKED_FILENAME} \
+        --outlineVolume 0 ${MASK_FILENAME} \
+        --startSlice ${START_SLICE} \
+        --endSlice ${END_SLICE} \
+        --registerSubset ${REGISTER_SUBSET_FILENAME_ANTERIOR} \
+        --stackFinalDeformation \
+        --startFromIteration 20 \
+        --iterations 22 \
+        --neighbourhood 2 \
+        -d $WORK_DIR \
+        --outputNaming ${OUTPUT_NAMING} \
+        --antsImageMetricOpt 4 \
+        --antsTransformation 0.01 \
+        --antsRegularization 1.0 1.0 \
+        --antsIterations 1000x1000x1000x1000x0000 \
+        --outputVolumePermutationOrder 0 2 1 \
+        --outputVolumeSpacing 0.01584 0.08 0.01584 \
+        --outputVolumeOrigin 0 -0.04 0 \
+        --outputVolumeOrientationCode RAS
 fi
 
 if [ ${DO_ARCHIVE} = 'true' ]
