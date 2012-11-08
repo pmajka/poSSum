@@ -194,7 +194,7 @@ then
         --skipSlicePreprocess \
         --stackFinalDeformation \
         --startFromIteration 6 \
-        --iterations 14 \
+        --iterations 16 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -215,7 +215,7 @@ then
         --skipSlicePreprocess \
         --stackFinalDeformation \
         --startFromIteration 14 \
-        --iterations 20 \
+        --iterations 22 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -235,8 +235,8 @@ then
         --endSlice ${END_SLICE} \
         --registerSubset ${REGISTER_SUBSET_FILENAME_ANTERIOR} \
         --stackFinalDeformation \
-        --startFromIteration 20 \
-        --iterations 22 \
+        --startFromIteration 22 \
+        --iterations 26 \
         --neighbourhood 2 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
