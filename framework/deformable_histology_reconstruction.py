@@ -26,7 +26,7 @@ class deformable_reconstruction_workflow(generic_workflow):
        * and a number of homemade software
     
     in order to generate smooth and acurate volumetric reconstructions from 2d
-    sliced.
+    slices.
     
     """
     _f = { \
