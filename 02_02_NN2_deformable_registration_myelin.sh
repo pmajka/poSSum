@@ -13,6 +13,7 @@ OUTLINE_FILENAME=/home/pmajka/possum/data/02_02_NN2/73_deformable_histology_reco
 MASKED_FILENAME=/home/pmajka/possum/data/02_02_NN2/73_deformable_histology_reconstruction/02_02_NN2_deformable_histology_reconstruction_myelin_masked.nii.gz
 OUTLIER_MASK_FILENAME=/home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_final_myelin_mask_outlier_removal.nii.gz
 CUSTOM_MASK_FILENAME=processing/02_02_NN2_myelin_masked_custom.csv
+CUSTOM_MASK_FILENAME2=processing/02_02_NN2_myelin_masked_custom_mask.csv
 REGISTER_SUBSET_FILENAME=processing/02_02_NN2_myelin_outliers.csv
 REGISTER_SUBSET_FILENAME_ANTERIOR=processing/02_02_NN2_myelin_outliers_anteriror.csv
 OUTPUT_NAMING=02_02_NN2_deformable_hist_reconstruction_myelin
@@ -21,8 +22,8 @@ ARCHIVE_DIR=/home/pmajka/possum/`date +"deformable_myelin_summary_%Y-%m-%d_%H-%M
 EVALUATE_REGISTRATION_SCRIPT=framework/pos_evaluate_registration.py
 DEFORMABLE_REGISTRATION_SCRIPT=framework/deformable_histology_reconstruction.py
 
-DO_PREPROCESS='true'
-DO_REGISTRATION='true'
+DO_PREPROCESS='false'
+DO_REGISTRATION='false'
 DO_ARCHIVE='true'
 
 mkdir -p $WORK_DIR
@@ -122,12 +123,14 @@ function reslice_multichannel {
 if [ ${DO_PREPROCESS} = 'true' ]
 then
     c3d ${VOLUME_MASK} \
+        -replace 4 1 \
         -replace 2 0 \
         -replace 3 0 \
         -type uchar \
         -o ${MASK_FILENAME}
     
     c3d ${VOLUME_MASK} \
+        -replace 4 1 \
         -replace 2 1 \
         -replace 3 0 \
         -type uchar \
@@ -145,13 +148,34 @@ fi
 if [ ${DO_REGISTRATION} = 'true' ]
 then
     python ${DEFORMABLE_REGISTRATION_SCRIPT} \
+        --inputVolume   1 ${MASK_FILENAME} \
+        --outlineVolume 0 ${MASK_FILENAME} \
+        --maskedVolume  1 ${OUTLIER_MASK_FILENAME} \
+        --maskedVolumeFile ${CUSTOM_MASK_FILENAME2} \
+        --startSlice ${START_SLICE} \
+        --endSlice ${END_SLICE} \
+        --iterations 1 \
+        --neighbourhood 1 \
+        -d $WORK_DIR \
+        --outputNaming ${OUTPUT_NAMING} \
+        --antsImageMetricOpt 16 \
+        --antsTransformation 0.1 \
+        --antsRegularization 3.0 1.0 \
+        --antsIterations 1000x1000x1000x0x0 \
+        --outputVolumePermutationOrder 0 2 1 \
+        --outputVolumeSpacing 0.01584 0.08 0.01584 \
+        --outputVolumeOrigin 0 -0.04 0 \
+        --outputVolumeOrientationCode RAS
+
+    python ${DEFORMABLE_REGISTRATION_SCRIPT} \
         --inputVolume   1 ${MASKED_FILENAME} \
         --outlineVolume 0 ${MASK_FILENAME} \
         --maskedVolume  1 ${OUTLIER_MASK_FILENAME} \
         --maskedVolumeFile ${CUSTOM_MASK_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
-        --iterations 1 \
+        --iterations 2 \
+        --startFromIteration 1 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -172,8 +196,8 @@ then
         --endSlice ${END_SLICE} \
         --skipSlicePreprocess \
         --stackFinalDeformation \
-        --iterations 6 \
-        --startFromIteration 1 \
+        --iterations 7 \
+        --startFromIteration 2 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -193,8 +217,8 @@ then
         --endSlice ${END_SLICE} \
         --skipSlicePreprocess \
         --stackFinalDeformation \
-        --startFromIteration 6 \
-        --iterations 16 \
+        --startFromIteration 7 \
+        --iterations 17 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -214,8 +238,8 @@ then
         --endSlice ${END_SLICE} \
         --skipSlicePreprocess \
         --stackFinalDeformation \
-        --startFromIteration 14 \
-        --iterations 22 \
+        --startFromIteration 15 \
+        --iterations 23 \
         --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
@@ -235,8 +259,8 @@ then
         --endSlice ${END_SLICE} \
         --registerSubset ${REGISTER_SUBSET_FILENAME_ANTERIOR} \
         --stackFinalDeformation \
-        --startFromIteration 22 \
-        --iterations 26 \
+        --startFromIteration 23 \
+        --iterations 27 \
         --neighbourhood 2 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \

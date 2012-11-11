@@ -13,13 +13,14 @@ MASKED_FILENAME=/home/pmajka/possum/data/02_02_NN2/73_deformable_histology_recon
 OUTLIER_MASK_FILENAME=/home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_final_nissl_mask_outlier_removal.nii.gz
 CUSTOM_MASK_FILENAME=processing/02_02_NN2_masked_custom.csv
 REGISTER_SUBSET_FILENAME=processing/02_02_NN2_outliers.csv
+REGISTER_SUBSET_FILENAME_ANTERIOR=processing/02_02_NN2_nissl_outliers_anteriror.csv
 OUTPUT_NAMING=02_02_NN2_deformable_hist_reconstruction_nissl
 ARCHIVE_DIR=/home/pmajka/possum/`date +"deformable_nissl_summary_%Y-%m-%d_%H-%M"`
 
 EVALUATE_REGISTRATION_SCRIPT=framework/pos_evaluate_registration.py
 DEFORMABLE_REGISTRATION_SCRIPT=framework/deformable_histology_reconstruction.py
 
-DO_PREPROCESS='false'
+DO_PREPROCESS='true'
 DO_REGISTRATION='true'
 DO_ARCHIVE='true'
 
@@ -39,6 +40,7 @@ function archive_results {
     cp -v ${CUSTOM_MASK_FILENAME} ${TARGET_DIR}
     cp -v ${OUTLIER_MASK_FILENAME} ${TARGET_DIR}/custom_outliers_mask.nii.gz
     cp -v ${REGISTER_SUBSET_FILENAME} ${TARGET_DIR}
+    cp -v ${REGISTER_SUBSET_FILENAME_ANTERIOR} ${TARGET_DIR}
     
     python ${EVALUATE_REGISTRATION_SCRIPT}     \
         --msqFilename ${TARGET_DIR}/msq.txt    \
@@ -229,6 +231,27 @@ then
         --outputNaming ${OUTPUT_NAMING} \
         --antsImageMetricOpt 4 \
         --antsTransformation 0.01 \
+        --antsRegularization 1.0 1.0 \
+        --antsIterations 1000x1000x1000x1000x0000 \
+        --outputVolumePermutationOrder 0 2 1 \
+        --outputVolumeSpacing 0.01584 0.08 0.01584 \
+        --outputVolumeOrigin 0 0.04 0 \
+        --outputVolumeOrientationCode RAS
+    
+    python ${DEFORMABLE_REGISTRATION_SCRIPT} \
+        --inputVolume   1 ${MASKED_FILENAME} \
+        --outlineVolume 0 ${MASK_FILENAME} \
+        --startSlice ${START_SLICE} \
+        --endSlice ${END_SLICE} \
+        --registerSubset ${REGISTER_SUBSET_FILENAME_ANTERIOR} \
+        --stackFinalDeformation \
+        --startFromIteration 24 \
+        --iterations 26 \
+        --neighbourhood 2 \
+        -d $WORK_DIR \
+        --outputNaming ${OUTPUT_NAMING} \
+        --antsImageMetricOpt 4 \
+        --antsTransformation 0.1 \
         --antsRegularization 1.0 1.0 \
         --antsIterations 1000x1000x1000x1000x0000 \
         --outputVolumePermutationOrder 0 2 1 \
