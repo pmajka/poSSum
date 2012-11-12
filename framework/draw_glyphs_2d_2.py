@@ -375,19 +375,36 @@ class deformation_field_visualizer(generic_workflow):
         ren.AddActor(self._get_glyphs_actor(ptMask, deformation_mag_lut))
         
         # Add scalar bars
-        ren.AddActor(self._get_jacobian_scalar_bar(deformation_mag_lut))
-        ren.AddActor(self._get_deformation_scalar_bar(jacobian_lut))
+        if not self.options.hideColorBars:
+            ren.AddActor(self._get_jacobian_scalar_bar(deformation_mag_lut))
+            ren.AddActor(self._get_deformation_scalar_bar(jacobian_lut))
         
         # ---- end adding data to renderer ----
-        # TODO: Make the view upside down
-        # TODO: Add saving the image
-        
         iren = vtk.vtkRenderWindowInteractor()
         iren.SetRenderWindow(renWin)
         interactorstyle = iren.GetInteractorStyle()
         interactorstyle.SetCurrentStyleToTrackballCamera()
         
+        cpos = self.options.cameraPosition
+        camera = ren.GetActiveCamera()
+        camera.SetPosition(*cpos);
+        camera.SetFocalPoint(cpos[0],cpos[1],0);
+        camera.SetViewUp(0,-1,0)
+        
         renWin.Render()
+        
+        #TODO: Put this code into a separated function
+        if self.options.screenshot:
+            wif = vtk.vtkRenderLargeImage()
+            wif.SetMagnification(4)
+            wif.SetInput(ren)
+            wif.Update()
+            
+            writer = vtk.vtkPNGWriter()
+            writer.SetInputConnection(wif.GetOutputPort())
+            writer.SetFileName(self.options.screenshot)
+            writer.Write()
+        
         iren.Initialize()
         iren.Start()
     
@@ -401,6 +418,9 @@ class deformation_field_visualizer(generic_workflow):
         parser.add_option('-i', '--sliceImage', default=None,
                 type='str', dest='sliceImage',
                 help='Input slice image (preferably png image, nifti will work as well.')
+        parser.add_option('--screenshot', default=None,
+                type='str', dest='screenshot',
+                help='Screenshot filename')
         parser.add_option('--deformationScaleRange', default=[0,4],
                 type='float', dest='deformationScaleRange',  nargs=2,
                 help='Scale for deformation colormap')
@@ -422,6 +442,12 @@ class deformation_field_visualizer(generic_workflow):
         parser.add_option('--spacing', default=[1,1],
                 type='float', dest='spacing', nargs=2,
                 help='Spacing of the image/deformation field/jacobian.')
+        parser.add_option('--cameraPosition', default=[8.13384,5.93208,20],
+                type='float', dest='cameraPosition', nargs=3,
+                help='Position of the camera... What did you expect?')
+        parser.add_option('--hideColorBars', default=False,
+                dest='hideColorBars', action='store_const', const=True,
+                help='Do not display the colorbars')
         
         return parser
 
