@@ -74,7 +74,6 @@ function reslice_multichannel {
     
     TEMPDIR=${TARGET_DIR}/10_resliced_multichannel/
     TEMPDIRM=${TARGET_DIR}/11_resliced_mask/
-    mkdir -p ${TEMPDIR}
     mkdir -p ${TEMPDIR} ${TEMPDIRM}
     
     sliceVol.py \
@@ -243,7 +242,6 @@ then
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
         --skipSlicePreprocess \
-        --stackFinalDeformation \
         --iterations 7 \
         --startFromIteration 2 \
         --neighbourhood 1 \
@@ -264,7 +262,6 @@ then
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
         --skipSlicePreprocess \
-        --stackFinalDeformation \
         --startFromIteration 7 \
         --iterations 17 \
         --neighbourhood 1 \
@@ -285,7 +282,6 @@ then
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
         --skipSlicePreprocess \
-        --stackFinalDeformation \
         --startFromIteration 15 \
         --iterations 20 \
         --neighbourhood 1 \
@@ -306,6 +302,7 @@ then
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
         --registerSubset ${REGISTER_SUBSET_FILENAME_ANTERIOR} \
+        --skipSlicePreprocess \
         --stackFinalDeformation \
         --startFromIteration 20 \
         --iterations 24 \

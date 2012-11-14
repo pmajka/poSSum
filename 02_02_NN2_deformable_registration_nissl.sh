@@ -1,6 +1,7 @@
 #!/bin/bash -xe
 
-WORK_DIR=/dev/shm/uniform/
+#WORK_DIR=/dev/shm/uniform/
+WORK_DIR=/home/pmajka/deformable_nissl/
 
 START_SLICE=0
 END_SLICE=263
@@ -15,14 +16,25 @@ CUSTOM_MASK_FILENAME=processing/02_02_NN2_masked_custom.csv
 REGISTER_SUBSET_FILENAME=processing/02_02_NN2_outliers.csv
 REGISTER_SUBSET_FILENAME_ANTERIOR=processing/02_02_NN2_nissl_outliers_anteriror.csv
 OUTPUT_NAMING=02_02_NN2_deformable_hist_reconstruction_nissl
-ARCHIVE_DIR=/home/pmajka/possum/`date +"deformable_nissl_summary_%Y-%m-%d_%H-%M"`
+#ARCHIVE_DIR=/home/pmajka/possum/`date +"deformable_nissl_summary_%Y-%m-%d_%H-%M"`
+ARCHIVE_DIR=/home/pmajka/possum/deformable_nissl_summary
 
 EVALUATE_REGISTRATION_SCRIPT=framework/pos_evaluate_registration.py
 DEFORMABLE_REGISTRATION_SCRIPT=framework/deformable_histology_reconstruction.py
 
+TEMP_VOLUME_FILENAME="/dev/shm/${OUTPUT_NAMING}__temp__vol__gray.vtk"
+
 DO_PREPROCESS='true'
 DO_REGISTRATION='true'
 DO_ARCHIVE='true'
+
+# ----------------------------------------------------------
+# Output volume configuration
+# ----------------------------------------------------------
+OUTPUT_VOLUME_SPACING="0.01584 0.08 0.01584"
+OUTPUT_VOLUME_ORGIN="0.0 0.04 0.0"
+OUTPUT_VOLUME_ORIENTATION_CODE="RAS"
+OUTPUT_VOLUME_PERMURATION_ORDER='0 2 1'
 
 mkdir -p $WORK_DIR
 
@@ -31,7 +43,8 @@ function archive_results {
     TARGET_DIR=${2}
     
     mkdir -p ${TARGET_DIR}
-    
+    mkdir -p ${TARGET_DIR}/12_jacobian/ 
+        
     cp -rfv ${SRC_DIR}/08_intermediate_results ${TARGET_DIR}
     cp -rfv ${SRC_DIR}/09_final_deformation    ${TARGET_DIR}
     
@@ -58,7 +71,14 @@ function reslice_multichannel {
     END_SLICE=${5}
     
     TEMPDIR=${TARGET_DIR}/10_resliced_multichannel/
-    mkdir -p ${TEMPDIR}
+    TEMPDIRM=${TARGET_DIR}/11_resliced_mask/
+    mkdir -p ${TEMPDIR} ${TEMPDIRM}
+    
+    sliceVol.py \
+        -i ${VOLUME_MASK} \
+        -o "${TARGET_DIR}/11_resliced_mask/%04d.png" \
+        -r ${START_SLICE} $((END_SLICE+1)) 1 \
+        -s 1 
     
     sliceVol.py \
         -i ${SOURCE_VOLUME} \
@@ -91,11 +111,22 @@ function reslice_multichannel {
             ${TEMPDIR}/resliced_${ii}y.nii.gz \
             ${TEMPDIR}/resliced_${ii}z.nii.gz \
             -type uchar -omc 3 ${TEMPDIR}/resliced_${ii}.nii.gz
+        
+        WarpImageMultiTransform 2 \
+            ${TEMPDIRM}/${ii}.png \
+            ${TEMPDIRM}/${ii}.nii.gz \
+            -R ${TEMPDIR}/resliced_${ii}.nii.gz\
+            --use-NN \
+            ${SRC_DIR}/09_final_deformation/${ii}.nii.gz
          
         rm -rfv \
             ${TEMPDIR}/resliced_${ii}x.nii.gz \
             ${TEMPDIR}/resliced_${ii}y.nii.gz \
             ${TEMPDIR}/resliced_${ii}z.nii.gz
+        
+        ANTSJacobian 2 \
+            ${SRC_DIR}/09_final_deformation/${ii}.nii.gz \
+            ${TARGET_DIR}/12_jacobian/${ii}
     done
     
     stack_rgb_slices.py \
@@ -115,8 +146,23 @@ function reslice_multichannel {
                 --multichannelImage  \
                 --cleanup | bash -xe;
     
+    StackSlices \
+        ${SRC_DIR}/08_intermediate_results/__temp__vol__gray.vtk \
+        -1 -1 0 \
+        ${TEMPDIRM}/*.nii.gz
+    
+    reorientImage.py \
+               -i ${SRC_DIR}/08_intermediate_results/__temp__vol__gray.vtk \
+                --permutationOrder 0 2 1\
+                --orientationCode RAS\
+                --outputVolumeScalarType uchar\
+                --setSpacing 0.01584 0.08 0.01584\
+                --setOrigin 0.0 0.04 0.0\
+                -o ${TARGET_DIR}/nissl_resliced_mask.nii.gz \
+                --cleanup | bash -xe;
+    
     rm ${SRC_DIR}/08_intermediate_results/__temp__vol__gray.vtk;
-    rm -rfv ${TEMPDIR}
+    rm -rfv ${TEMPDIR} ${TEMPDIRM}
 }
 
 if [ ${DO_PREPROCESS} = 'true' ]
@@ -142,7 +188,6 @@ then
         --outlineVolume 0 ${MASK_FILENAME} \
         --maskedVolume  1 ${OUTLIER_MASK_FILENAME} \
         --maskedVolumeFile ${CUSTOM_MASK_FILENAME} \
-        --stackFinalDeformation \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
         --iterations 4 \
@@ -153,10 +198,10 @@ then
         --antsTransformation 0.05 \
         --antsRegularization 3.0 1.0 \
         --antsIterations 1000x1000x1000x0x0 \
-        --outputVolumePermutationOrder 0 2 1 \
-        --outputVolumeSpacing 0.01584 0.08 0.01584 \
-        --outputVolumeOrigin 0 0.04 0 \
-        --outputVolumeOrientationCode RAS
+        --outputVolumePermutationOrder ${OUTPUT_VOLUME_PERMURATION_ORDER} \
+        --outputVolumeSpacing ${OUTPUT_VOLUME_SPACING} \
+        --outputVolumeOrigin ${OUTPUT_VOLUME_ORGIN} \
+        --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION_CODE}
     
     python ${DEFORMABLE_REGISTRATION_SCRIPT} \
         --inputVolume   1 ${MASKED_FILENAME} \
@@ -164,6 +209,7 @@ then
         --registerSubset ${REGISTER_SUBSET_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
+        --skipSlicePreprocess \
         --iterations 8 \
         --startFromIteration 4 \
         --neighbourhood 1 \
@@ -173,10 +219,10 @@ then
         --antsTransformation 0.05 \
         --antsRegularization 1.0 1.0 \
         --antsIterations 1000x1000x1000x0x0 \
-        --outputVolumePermutationOrder 0 2 1 \
-        --outputVolumeSpacing 0.01584 0.08 0.01584 \
-        --outputVolumeOrigin 0 0.04 0 \
-        --outputVolumeOrientationCode RAS
+        --outputVolumePermutationOrder ${OUTPUT_VOLUME_PERMURATION_ORDER} \
+        --outputVolumeSpacing ${OUTPUT_VOLUME_SPACING} \
+        --outputVolumeOrigin ${OUTPUT_VOLUME_ORGIN} \
+        --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION_CODE}
     
     python ${DEFORMABLE_REGISTRATION_SCRIPT} \
         --inputVolume   0 ${MASKED_FILENAME} \
@@ -193,37 +239,37 @@ then
         --antsTransformation 0.05 \
         --antsRegularization 1.0 1.0 \
         --antsIterations 1000x1000x1000x0000x0000 \
-        --outputVolumePermutationOrder 0 2 1 \
-        --outputVolumeSpacing 0.01584 0.08 0.01584 \
-        --outputVolumeOrigin 0 0.04 0 \
-        --outputVolumeOrientationCode RAS
+        --outputVolumePermutationOrder ${OUTPUT_VOLUME_PERMURATION_ORDER} \
+        --outputVolumeSpacing ${OUTPUT_VOLUME_SPACING} \
+        --outputVolumeOrigin ${OUTPUT_VOLUME_ORGIN} \
+        --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION_CODE}
     
     python ${DEFORMABLE_REGISTRATION_SCRIPT} \
         --inputVolume   1 ${MASKED_FILENAME} \
         --outlineVolume 0 ${MASK_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
+        --skipSlicePreprocess \
         --startFromIteration 13 \
         --iterations 18 \
         --neighbourhood 1 \
-        --stackFinalDeformation \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
         --antsImageMetricOpt 2 \
         --antsTransformation 0.01 \
         --antsRegularization 1.0 1.0 \
         --antsIterations 1000x1000x1000x0000x0000 \
-        --outputVolumePermutationOrder 0 2 1 \
-        --outputVolumeSpacing 0.01584 0.08 0.01584 \
-        --outputVolumeOrigin 0 0.04 0 \
-        --outputVolumeOrientationCode RAS
+        --outputVolumePermutationOrder ${OUTPUT_VOLUME_PERMURATION_ORDER} \
+        --outputVolumeSpacing ${OUTPUT_VOLUME_SPACING} \
+        --outputVolumeOrigin ${OUTPUT_VOLUME_ORGIN} \
+        --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION_CODE}
     
     python ${DEFORMABLE_REGISTRATION_SCRIPT} \
         --inputVolume   1 ${MASKED_FILENAME} \
         --outlineVolume 0 ${MASK_FILENAME} \
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
-        --stackFinalDeformation \
+        --skipSlicePreprocess \
         --startFromIteration 18 \
         --iterations 24 \
         --neighbourhood 1 \
@@ -233,10 +279,10 @@ then
         --antsTransformation 0.01 \
         --antsRegularization 1.0 1.0 \
         --antsIterations 1000x1000x1000x1000x0000 \
-        --outputVolumePermutationOrder 0 2 1 \
-        --outputVolumeSpacing 0.01584 0.08 0.01584 \
-        --outputVolumeOrigin 0 0.04 0 \
-        --outputVolumeOrientationCode RAS
+        --outputVolumePermutationOrder ${OUTPUT_VOLUME_PERMURATION_ORDER} \
+        --outputVolumeSpacing ${OUTPUT_VOLUME_SPACING} \
+        --outputVolumeOrigin ${OUTPUT_VOLUME_ORGIN} \
+        --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION_CODE}
     
     python ${DEFORMABLE_REGISTRATION_SCRIPT} \
         --inputVolume   1 ${MASKED_FILENAME} \
@@ -244,20 +290,21 @@ then
         --startSlice ${START_SLICE} \
         --endSlice ${END_SLICE} \
         --registerSubset ${REGISTER_SUBSET_FILENAME_ANTERIOR} \
+        --skipSlicePreprocess \
         --stackFinalDeformation \
         --startFromIteration 24 \
         --iterations 26 \
-        --neighbourhood 2 \
+        --neighbourhood 1 \
         -d $WORK_DIR \
         --outputNaming ${OUTPUT_NAMING} \
         --antsImageMetricOpt 4 \
-        --antsTransformation 0.1 \
+        --antsTransformation 0.05 \
         --antsRegularization 1.0 1.0 \
         --antsIterations 1000x1000x1000x1000x0000 \
-        --outputVolumePermutationOrder 0 2 1 \
-        --outputVolumeSpacing 0.01584 0.08 0.01584 \
-        --outputVolumeOrigin 0 0.04 0 \
-        --outputVolumeOrientationCode RAS
+        --outputVolumePermutationOrder ${OUTPUT_VOLUME_PERMURATION_ORDER} \
+        --outputVolumeSpacing ${OUTPUT_VOLUME_SPACING} \
+        --outputVolumeOrigin ${OUTPUT_VOLUME_ORGIN} \
+        --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION_CODE}
 fi
 
 if [ ${DO_ARCHIVE} = 'true' ]
