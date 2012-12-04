@@ -259,7 +259,7 @@ class deformation_field_visualizer(generic_workflow):
         source_glyph.SetTipRadius(0.1)
         source_glyph.SetTipLength(0.35)
         source_glyph.SetShaftRadius(0.03)
-
+        
         glyph = vtk.vtkGlyph3D()
         glyph.SetInput(points.GetOutput())
         glyph.SetSource(source_glyph.GetOutput())
@@ -376,8 +376,9 @@ class deformation_field_visualizer(generic_workflow):
         ren.AddActor(deformation_magnitude_image_actor)
 
         # Add glyphs
-        ren.AddActor(self._get_glyphs_actor(ptMask, deformation_mag_lut))
-
+        if not self.options.hideGlyphs:
+            ren.AddActor(self._get_glyphs_actor(ptMask, deformation_mag_lut))
+        
         # Add scalar bars
         if not self.options.hideColorBars:
             ren.AddActor(self._get_jacobian_scalar_bar(deformation_mag_lut))
@@ -438,7 +439,7 @@ class deformation_field_visualizer(generic_workflow):
                 type='float', dest='deformationOverlayOpacity',
                 help='Opacity of the deformation colormap')
         parser.add_option('--glyphConfiguration', default=[5000, 10, 6],
-                type='int', dest='glyphConfiguration', nargs=3,
+                type='float', dest='glyphConfiguration', nargs=3,
                 help='Glyph configuration (int:max_probe_points:5000, int:probe_ratio:10, int:scale_factor:6)')
         parser.add_option('--rendererWindowSize', default=[500, 350],
                 type='int', dest='rendererWindowSize', nargs=2,
@@ -446,12 +447,15 @@ class deformation_field_visualizer(generic_workflow):
         parser.add_option('--spacing', default=[1, 1],
                 type='float', dest='spacing', nargs=2,
                 help='Spacing of the image/deformation field/jacobian.')
-        parser.add_option('--cameraPosition', default=[8.13384, 5.93208, -20],
+        parser.add_option('--cameraPosition', default=[75, 75, -20],
                 type='float', dest='cameraPosition', nargs=3,
                 help='Position of the camera... What did you expect?')
         parser.add_option('--hideColorBars', default=False,
                 dest='hideColorBars', action='store_const', const=True,
                 help='Do not display the colorbars')
+        parser.add_option('--hideGlyphs', default=False,
+                dest='hideGlyphs', action='store_const', const=True,
+                help='Do not display deformation files vectors.')
 
         return parser
 
