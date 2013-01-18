@@ -22,28 +22,28 @@ class deformable_reconstruction_iteration(generic_workflow):
         'resliced_outline' : filename('resliced_outline', work_dir = '22_resliced_outline', str_template = '{idx:04d}.nii.gz'),
         'resliced_custom'  : filename('resliced_custom', work_dir = '24_resliced_custom', str_template = '{idx:04d}.nii.gz')
         }
-    
+
     _usage = ""
-    
+
     def __init__(self, options, args, pool = None):
         super(self.__class__, self).__init__(options, args, pool)
-        
+
         start, end, eps = self._get_edges()
         self.slice_range = range(start, end +1)
-        
+
         # Convert the number of iterations string to list of integers
         self.options.antsIterations = \
                 map(int, self.options.antsIterations.strip().split("x"))
-        
-        # Load data for outlier removal rutines 
+
+        # Load data for outlier removal rutines
         self._load_subset_file()
         self._read_custom_registration_assignment()
-    
+
     def _read_custom_registration_assignment(self):
         """
-        Helper method for correcting outlier slices. 
+        Helper method for correcting outlier slices.
         """
-        
+
         # If custom mask is provided and its weight is more than zero, it means
         # that 'outlier removal mechanism' should be used. This mechanism
         # corrects only a part of the slices indicated by masks to the slices
@@ -51,39 +51,39 @@ class deformable_reconstruction_iteration(generic_workflow):
         if self.options.maskedVolume and \
                 self.options.maskedVolumeWeight > 0 and \
                 self.options.maskedVolumeFile:
-            
+
             self.masked_registraion = \
             self._get_outliers_registration_assignment(self.options.maskedVolumeFile)
             self.subset = self.masked_registraion.keys()
         else:
             self.masked_registraion = {}
-    
+
     def _get_outliers_registration_assignment(self, fileName, delimiter = " "):
         """
         """
-        
+
         returnDictionary = {}
         columns = {'fixed': 1, 'moving' : 0, 'metric' : 2, 'met_opt': 3,\
                    'iters': 4, 'trval'  : 5, 'regtype': 6, 'regam': 7}
-        
+
         for sourceLine in open(fileName):
             if sourceLine.strip().startswith('#') or sourceLine.strip() == "":
                 continue
             line = sourceLine.split("#")[0].strip().split(delimiter)
             key = int(line[columns['moving']])
-            
+
             # There are two options possible, either
             # 1) There is only moving_image => fixed image assignment
             # 2) There are full registration settings provided for
             #    each of the entries
             # The two options can be mixed within single assignment file
-            
+
             # Check, if there is only one assignment per file
 
             if returnDictionary.has_key(key):
                 print >>sys,stderr, "Entry %s defined more than once. Skipping..." % key
                 continue
-            
+
             if len(line) > 2:
                 value = {}
                 value['moving']  = key
@@ -94,7 +94,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                 value['trval']   = float(line[columns['trval']])
                 value['regtype'] = line[columns['regtype']]
                 value['regam']   = map(float, line[columns['regam']].split(","))
-            
+
             elif len(line) == 2:
                 value = {}
                 value['moving']  = key
@@ -105,11 +105,11 @@ class deformable_reconstruction_iteration(generic_workflow):
                 value['trval']   = self.options.antsTransformation
                 value['regtype'] = self.options.antsRegularizationType
                 value['regam']   = self.options.antsRegularization
-             
+
             returnDictionary[key] = value
-         
+
         return returnDictionary
-    
+
     def _get_edges(self):
         """
         Convenience function for returning frequently used numbers
@@ -117,7 +117,7 @@ class deformable_reconstruction_iteration(generic_workflow):
         return (self.options.startSlice,
                 self.options.endSlice,
                 self.options.neighbourhood)
-    
+
     def _load_subset_file(self):
         """
         Loads a subset of slices from a given file.
@@ -129,44 +129,44 @@ class deformable_reconstruction_iteration(generic_workflow):
             self.subset = list(subset)
         else:
             self.subset = self.slice_range
-    
+
     def _assign_weights_from_func(self):
         """
         Assing weights for image averaging. Currently just constants weights are
-        assigned and that seems to be quite a good solution. 
+        assigned and that seems to be quite a good solution.
         """
         start, end, eps = self._get_edges()
-        
+
         self.weights = {}
         for i in self.slice_range:
             for j in range(i - eps, i + eps+1):
                 if j!=i and j<=end and j>=start:
                     self.weights[(i,j)] = 1
-    
+
     def _assign_weights(self):
         self._assign_weights_from_func()
-    
+
     def get_weight(self, i, j):
         return self.weights[(i,j)]
-    
+
     def _preprocess_images(self):
         return self._average_images()
-    
+
     def _average_images(self):
         start, end, eps = self._get_edges()
-        
+
         if self.options.inputVolume and self.options.inputVolumeWeight > 0:
             commands = []
-            
+
             for i in self.slice_range:
                 files_to_average = []
                 weights = []
-                
+
                 for j in range(i - eps, i + eps+1):
                     if j!=i and j<=end and j>=start:
                        files_to_average.append(self.f['src_slice'](idx=j))
                        weights.append(self.get_weight(i,j))
-                
+
                 command = images_weighted_average(\
                             dimension = 2,
                             input_images = files_to_average,
@@ -174,21 +174,21 @@ class deformable_reconstruction_iteration(generic_workflow):
                             output_type = 'float',
                             output_image = self.f['processed'](idx=i))
                 commands.append(copy.deepcopy(command))
-            
+
             self.execute(commands)
-        
+
         if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
             commands = []
-            
+
             for i in self.slice_range:
                 files_to_average = []
                 weights = []
-                
+
                 for j in range(i - eps, i + eps+1):
                     if j!=i and j<=end and j>=start:
                        files_to_average.append(self.f['outline'](idx=j))
                        weights.append(self.get_weight(i,j))
-                
+
                 command = images_weighted_average(\
                             dimension = 2,
                             input_images = files_to_average,
@@ -196,22 +196,22 @@ class deformable_reconstruction_iteration(generic_workflow):
                             output_type = 'float',
                             output_image = self.f['poutline'](idx=i))
                 commands.append(copy.deepcopy(command))
-            
+
             self.execute(commands)
-    
+
     def _get_default_reg_settings(self):
-        return (self.options.antsImageMetric, 
+        return (self.options.antsImageMetric,
                 self.options.antsImageMetricOpt,
                 self.options.antsIterations,
                 self.options.antsTransformation,
                 self.options.antsRegularizationType,
                 self.options.antsRegularization)
-    
+
     def _get_custom_reg_settings(self, mov_slice_idx):
         src = self.masked_registraion[mov_slice_idx]
         return (src['metric'], src['met_opt'], src['iters'],
                 src['trval'], src['regtype'], src['regam'])
-    
+
     def _calculate_transformations_masked(self):
         """
         Generate and invoke commands for generating deformation fields. Commands
@@ -219,15 +219,15 @@ class deformable_reconstruction_iteration(generic_workflow):
         what is registered to what and how its quite complicated and it is my
         sweet secret how it is actually calculated.
         """
-        
+
         start, end, eps = self._get_edges()
-        
+
         commands = []
-        
+
         for i in self.slice_range:
             metrics  = []
-            j_data = self.masked_registraion.get(i, None) 
-            
+            j_data = self.masked_registraion.get(i, None)
+
             if j_data == None:
                 fixed_image_type = 'processed'
                 fixed_outline_type='poutline'
@@ -235,7 +235,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                 j=i
                 r_metric, parameter, iterations, transf_grad, reg_type, reg_ammount =\
                         self._get_default_reg_settings()
-            
+
             else:
                 fixed_image_type = 'src_slice'
                 fixed_outline_type='outline'
@@ -243,7 +243,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                 mask_image =  self.f['cmask'](idx=j)
                 r_metric, parameter, iterations, transf_grad, reg_type, reg_ammount =\
                         self._get_custom_reg_settings(i)
-            
+
             if self.options.inputVolume and self.options.inputVolumeWeight > 0:
                 metric = ants_intensity_meric(
                             fixed_image  = self.f[fixed_image_type](idx=j),
@@ -252,7 +252,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                             weight = self.options.inputVolumeWeight,
                             parameter = parameter)
                 metrics.append(copy.deepcopy(metric))
-            
+
             if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
                 outline_metric = ants_intensity_meric(
                             fixed_image  = self.f[fixed_outline_type](idx=j),
@@ -261,7 +261,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                             weight = self.options.outlineVolumeWeight,
                             parameter = parameter)
                 metrics.append(copy.deepcopy(outline_metric))
-            
+
             if i in self.subset:
                 registration = ants_registration(
                             dimension = 2,
@@ -281,12 +281,12 @@ class deformable_reconstruction_iteration(generic_workflow):
                         output_image = self.f['transform'](idx=i)
                         )
             commands.append(copy.deepcopy(registration))
-        
+
         self.execute(commands)
-    
+
     def launch(self):
         """
-        Launching a deformable registration iteration means: 
+        Launching a deformable registration iteration means:
 
             * Assigning weights for the images by reading them from files or
               applying weighting functions.
@@ -296,11 +296,11 @@ class deformable_reconstruction_iteration(generic_workflow):
             * Launching actual registration process and calculating deformation
               fields.
         """
-        
+
         self._assign_weights()
         self._preprocess_images()
         self._calculate_transformations_masked()
-    
+
     def __call__(self, *args, **kwargs):
         return self.launch()
 

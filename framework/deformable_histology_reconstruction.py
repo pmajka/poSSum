@@ -24,10 +24,10 @@ class deformable_reconstruction_workflow(generic_workflow):
        * ITKSnap and Convert3d (http://www.itksnap.org/)
        * Visualization Toolkit (VTK, http://www.vtk.org/)
        * and a number of homemade software
-    
+
     in order to generate smooth and acurate volumetric reconstructions from 2d
     slices.
-    
+
     """
     _f = { \
          # Initial grayscale slices
@@ -62,19 +62,19 @@ class deformable_reconstruction_workflow(generic_workflow):
         'iteration_stack_outline' : filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/????.nii.gz'),
         'iteration_stack_cmask' : filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/????.nii.gz')
         }
-    
+
     _usage = ""
-    
+
     def __init__(self, options, args, pool = None):
         super(self.__class__, self).__init__(options, args, pool)
-        
+
         # Handling situation when no volume is provided
         if not any([self.options.inputVolume, \
                    self.options.outlineVolume, \
                    self.options.maskedVolume]):
             print >> sys.stderr, "No input volumes provided. Exiting."
             sys.exit(1)
-        
+
         # Process each type of the input volume. Currently there are three types
         # of input volumes supported: The input grayscale volume (the actual
         # imaege to be registared), the outline volume (volume pointing wihch
@@ -84,20 +84,20 @@ class deformable_reconstruction_workflow(generic_workflow):
         if self.options.inputVolume:
             self.options.inputVolumeWeight = float(self.options.inputVolume[0])
             self.options.inputVolume = self.options.inputVolume[1]
-        
+
         if self.options.outlineVolume:
             self.options.outlineVolumeWeight = float(self.options.outlineVolume[0])
             self.options.outlineVolume = self.options.outlineVolume[1]
-        
+
         if self.options.maskedVolume:
             self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])
             self.options.maskedVolume = self.options.maskedVolume[1]
-    
+
     def _get_prepare_volume_command_template(self):
         """
         :return: template for processing the input volumes.
-        
-        The templte has to be customized to process a particular type of volume. 
+
+        The templte has to be customized to process a particular type of volume.
         """
         preprocess_slices = preprocess_slice_volume(\
                 input_image = self.options.inputVolume,
@@ -107,95 +107,95 @@ class deformable_reconstruction_workflow(generic_workflow):
                 shift_indexes = self.options.shiftIndexes, \
                 slice_mask = self.f['init_slice_mask'](),
                 output_dir = self.f['init_slice'].base_dir)
-        
+
         return preprocess_slices
-    
+
     def prepare_slices(self):
         """
         Split provided input volumes into slices. The proceure requires the
         prvided volumes to be in grayscale mode (it's gonna work also with rgb
-        volumes but the further registration process will collapse). 
-        
+        volumes but the further registration process will collapse).
+
         Volumes are sectioned separately. If the swich for given volume is
         provided, the sections `startSlice` to `endSlice` are extracted. The
         process is repeated separately for each volume (grayscale, outline,
         custom mask volume, segmentation volume, etc...)
         """
-        
+
         # Handle inputVolume (grayscale volume, aka THE registereg image volume)
         if self.options.inputVolume:
             preprocess_grayscale_slices = \
                     self._get_prepare_volume_command_template()
-            
+
             preprocess_grayscale_slices.updateParameters({
                 'input_image' : self.options.inputVolume,
                 'output_naming' : self.f['init_slice_naming'](), \
                 'slice_mask' : self.f['init_slice_mask'](),
                 'output_dir' : self.f['init_slice'].base_dir})
             preprocess_grayscale_slices()
-        
+
         # Handle the outline volume. This volume is a binary volume (it can
         # contain only 0 and 1 values).
         if self.options.outlineVolume:
             prepare_outline_volume = \
                     self._get_prepare_volume_command_template()
-            
-            prepare_outline_volume.updateParameters({ 
-                'input_image' : self.options.outlineVolume, 
+
+            prepare_outline_volume.updateParameters({
+                'input_image' : self.options.outlineVolume,
                 'output_naming' : self.f['init_outline_naming'](),
                 'slice_mask' : self.f['init_outline_mask'],
                 'output_dir' : self.f['init_outline_naming'].base_dir})
             prepare_outline_volume()
-        
+
         # Handling custom mask volume. This volume is a mask volume which means
         # that it is a binary volume and contains only 0 and 1 values.
         if self.options.maskedVolume:
             prepare_masked_volume = \
                     self._get_prepare_volume_command_template()
-            
-            prepare_masked_volume.updateParameters({ 
-                'input_image' : self.options.maskedVolume, 
+
+            prepare_masked_volume.updateParameters({
+                'input_image' : self.options.maskedVolume,
                 'output_naming' : self.f['init_custom_naming'](),
                 'slice_mask' : self.f['init_custom_mask'],
                 'output_dir' : self.f['init_custom_naming'].base_dir,
                 'leave_overflows': True})
-                   
+
             prepare_masked_volume()
-    
+
     def launch(self):
         """
         Launch the deformable registration process.
         """
-        
+
         # Preprocessing the input sliced can be supressed by issuing a command
         # line parameter
         if not self.options.skipSlicePreprocess:
             self.prepare_slices()
-        
+
         # If 'startFromIteration' switch is enabled,
         # the reconstruction starts from a given iteration
         # instead of starting from the beginning - iteration 0
         for iteration in range(self.options.startFromIteration,\
                                self.options.iterations):
-            
+
             print >> sys.stderr, "-------------------------------------------------"
             print >> sys.stderr, "Staring iteration: %d of %d" \
                                         % (iteration +1, self.options.iterations)
             print >> sys.stderr, "-------------------------------------------------"
-            
+
             self.current_iteration = iteration
-            
+
             # Make hard copy of the setting dictionaries. Hard copy is made as
             # it is passed to the 'deformable_reconstruction_iteration' class
             # and is is customized within this class. Because of that reason a
             # hard copy has to be made.
             step_options = copy.deepcopy(self.options)
             step_args = copy.deepcopy(self.args)
-            
+
             step_options.workdir = os.path.join(self.f['iteration'](iter=iteration))
             single_step = deformable_reconstruction_iteration(step_options, step_args, pool = self.pool)
             single_step.parent_process = self
-            
+
             # Settings for the first iteration has to be tweaked up a little as
             # they use slightly different image sources. Iteration 'zero' uses
             # the source images (images that were not processed at all) while
@@ -209,23 +209,23 @@ class deformable_reconstruction_workflow(generic_workflow):
                 single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
                 single_step.f['outline'].override_dir = self.f['iteration_resliced_outline'](iter=iteration-1)
                 single_step.f['cmask'].override_dir = self.f['iteration_resliced_custom'](iter=iteration-1)
-            
+
             # Do registration if proper switches are provided
-            # (there is a possibility to run the reconstruction process without 
+            # (there is a possibility to run the reconstruction process without
             # actually calculationg the transfomations.
             if not self.options.skipTransformations:
                 single_step()
-            
+
             # Generate volume holding the intermediate results
             # and prepare images for the next iteration
-            self._reslice() 
+            self._reslice()
             self._stack_intermediate()
-        
+
         # At the end of the processing the calculated deformation fields can be
         # composed togeather to form the final deformation field.
         if self.options.stackFinalDeformation:
             self._generate_final_transforms()
-    
+
     def _get_edges(self):
         """
         Convenience function for returning frequently used numbers
@@ -234,7 +234,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                 self.options.endSlice,
                 self.options.neighbourhood,
                 self.current_iteration)
-    
+
     def _reslice(self):
         """
         Launch reslicing for each type of the input volume. If the volume of the
@@ -243,30 +243,30 @@ class deformable_reconstruction_workflow(generic_workflow):
         """
         if self.options.inputVolume:
             self._reslice_input_volume()
-        
+
         if self.options.outlineVolume:
             self._reslice_outline()
-        
+
         if self.options.maskedVolume:
             self._reslice_custom_masks()
-    
+
     def _get_reslice_command(self, slice_number, slice_type, output_slice_type, method = ants_reslice):
         """
         Helper for generating reslicing command for different slices, reslicing
         with different types, etc.
-        
+
         :return: Command for reslicing given slice according to provided
                  parameters
         """
-        
+
         start, end, eps, iteration = self._get_edges()
-        
+
         i = slice_number # Just an alias
-        
+
         # Define a list of deformation fields file
         deformable_list = map(lambda j: self.f['iteration_transform'](idx=i,iter=j), range(iteration+1))
         moving_image = self.f[slice_type](idx=i)
-        
+
         # Use 'ants_reslice' when a regular reslicing is done. A regular
         # reslicing occur after each iteration.
         if method == ants_reslice:
@@ -278,7 +278,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                     deformable_list = deformable_list,
                     affine_list = [])
             return command
-        
+
         # Use 'ants_compose_multi_transform' for composing individual
         # deformation fields into a single deformation fiels.
         if method == ants_compose_multi_transform:
@@ -289,69 +289,69 @@ class deformable_reconstruction_workflow(generic_workflow):
                     deformable_list = deformable_list,
                     affine_list = [])
             return command
-    
+
     def _reslice_input_volume(self):
         start, end, eps, iteration = self._get_edges()
-        
+
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice')
             command.updateParameters({'useBspline':True, 'useNN':None})
             commands.append(copy.deepcopy(command))
-        
+
         self.execute(commands)
-    
+
     def _reslice_outline(self):
         start, end, eps, iteration = self._get_edges()
-        
+
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_outline', 'iteration_resliced_outline_slice')
             command.updateParameters({'useNN':None, 'useBspline':None})
             commands.append(copy.deepcopy(command))
-         
+
         self.execute(commands)
-    
+
     def _reslice_custom_masks(self):
         start, end, eps, iteration = self._get_edges()
-        
+
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_custom', 'iteration_resliced_custom_slice')
             command.updateParameters({'useBspline':None, 'useNN':True})
             commands.append(copy.deepcopy(command))
-        
+
         self.execute(commands)
-    
+
     def _generate_final_transforms(self):
         """
         Compose the individual deformation fields calculated in each iteration
         into a single deformation field that can be analysed. In other words,
         this procedure just sums up all the individual deformation filelds.
         """
-         
+
         # As usually, get the slice range:
         start, end, eps, iteration = self._get_edges()
-        
+
         # For each slice, compose all the separated deformation fields:
         commands = []
         for i in range(start, end +1):
-            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice', 
+            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice',
                                                 method = ants_compose_multi_transform)
             command.updateParameters({\
                     'output_image': self.f['final_deformations'](idx=i)
                     })
             commands.append(copy.deepcopy(command))
-         
+
         self.execute(commands)
-    
+
     def _get_stack_intermediate_command(self):
         """
         Helper function for stakcing resliced slices from intermediate stages of
         processing.
         """
         iteration = self.current_iteration
-        
+
         stack_grayscale =  stack_slices_gray_wrapper(
                 temp_volume_fn = self.f['tmp_gray_vol'](),
                 stack_mask = self.f['iteration_stack_mask'](iter=iteration),
@@ -362,14 +362,14 @@ class deformable_reconstruction_workflow(generic_workflow):
                 origin = self.options.outputVolumeOrigin,
                 interpolation = self.options.setInterpolation,
                 resample = self.options.outputVolumeResample)
-        
+
         return stack_grayscale
-    
+
     def _stack_intermediate(self):
         iteration = self.current_iteration
-        
+
         commands = []
-        
+
         if self.options.inputVolume:
             stack_input_volume = self._get_stack_intermediate_command()
             stack_input_volume.updateParameters({
@@ -379,7 +379,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                                     output_naming=self.options.outputNaming)
                                     })
             stack_input_volume()
-        
+
         if self.options.outlineVolume:
             stack_outline_volume = self._get_stack_intermediate_command()
             stack_outline_volume.updateParameters({
@@ -389,7 +389,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                                     output_naming=self.options.outputNaming)
                                     })
             stack_outline_volume()
-        
+
         if self.options.maskedVolume:
             stack_masked_volume = self._get_stack_intermediate_command()
             stack_masked_volume.updateParameters({
@@ -399,11 +399,11 @@ class deformable_reconstruction_workflow(generic_workflow):
                                     output_naming=self.options.outputNaming)
                                     })
             stack_masked_volume()
-    
+
     @classmethod
     def _getCommandLineParser(cls):
         parser = generic_workflow._getCommandLineParser()
-        
+
         parser.add_option('--startSlice', default=0,
                 type='int', dest='startSlice',
                 help='Index of the first slice of the stack')
@@ -446,10 +446,10 @@ class deformable_reconstruction_workflow(generic_workflow):
         parser.add_option('--stackFinalDeformation', default=False, const=True,
                 dest='stackFinalDeformation', action='store_const',
                 help='Stack filnal deformation fileld.')
-        
+
         regSettings = \
                 OptionGroup(parser, 'Registration setttings.')
-        
+
         regSettings.add_option('--antsImageMetric', default='CC',
                 type='str', dest='antsImageMetric',
                 help='ANTS image to image metric. See ANTS documentation.')
@@ -467,13 +467,13 @@ class deformable_reconstruction_workflow(generic_workflow):
         regSettings.add_option('--antsIterations', default="1000x1000x1000x1000x1000",
                 type='str', dest='antsIterations',
                 help='Number of deformable registration iterations.')
-        
+
         outputVolumeSettings = \
                 OptionGroup(parser, 'OutputVolumeSettings.')
         outputVolumeSettings.add_option('--outputVolumeOrigin', dest='outputVolumeOrigin',
                 default=[0.,0.,0.], action='store', type='float', nargs =3, help='')
         outputVolumeSettings.add_option('--outputVolumeScalarType', default='uchar',
-                type='str', dest='outputVolumeScalarType', 
+                type='str', dest='outputVolumeScalarType',
                 help='Data type for output volume\'s voxels. Allowed values: char | uchar | short | ushort | int | uint | float | double')
         outputVolumeSettings.add_option('--outputVolumeSpacing', default=[1,1,1],
             type='float', nargs=3, dest='outputVolumeSpacing',
@@ -493,10 +493,10 @@ class deformable_reconstruction_workflow(generic_workflow):
         outputVolumeSettings.add_option('--setInterpolation',
                           dest='setInterpolation', type='str', default=None,
                           help='<NearestNeighbor|Linear|Cubic|Sinc|Gaussian>')
-        
+
         parser.add_option_group(regSettings)
         parser.add_option_group(outputVolumeSettings)
-        
+
         return parser
 
 if __name__ == '__main__':
