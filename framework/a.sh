@@ -1,0 +1,14 @@
+    python nonuniform_reslice.py \
+        --referenceCoordinates nonuniform_planes_probe \
+        --probingCoordinates nonuniform_planes_reference \
+        --negateReferenceCoordinates \
+        --skipOutputVolumeGeneration \
+        --useMultichannelWorkflow \
+        --referenceInputDirectory /home/pmajka/the_whole_brain_connectivity_atlas/data/merge/R601/ \
+        --interpolation nearest \
+        --outputVolumeScalarType uchar \
+        --outputVolumeSpacing 0.017062 0.04 0.017062 \
+        --outputVolumeOrigin -9.622 -7.92 1.444 \
+        --outputVolumePermutationOrder 0 2 1 \
+        --outputVolumeOrientationCode RAS \
+        --rgbVolumeFilename /home/pmajka/601.nii.gz 
