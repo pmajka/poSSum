@@ -6,10 +6,11 @@ import subprocess as sub
 # serialization function
 # value, default valuse
 
+
 class generic_parameter(object):
     _str_template = None
 
-    def __init__(self, name, value = None,  str_template = None):
+    def __init__(self, name, value=None, str_template=None):
         self._value = None
         if value:
             self.value = value
@@ -51,28 +52,33 @@ class generic_parameter(object):
     template = property(_get_str_template, _set_str_template)
     name = property(_get_name, _set_name)
 
+
 class switch_parameter(generic_parameter):
 
     def _serialize(self):
-        if self.value != None:
+        if self.value is not None:
             return self._str_template.format(**self.__dict__)
         else:
             return ""
+
 
 class string_parameter(generic_parameter):
     _str_template = "{_value}"
 
     def _serialize(self):
-        if self.value != None:
+        if self.value is not None:
             return self._str_template.format(**self.__dict__)
         else:
             return ""
 
+
 class filename_parameter(string_parameter):
     _str_template = "{_value}"
 
+
 class value_parameter(string_parameter):
     _str_template = "{_value}"
+
 
 class list_parameter(generic_parameter):
     _str_template = "{_list}"
@@ -84,6 +90,7 @@ class list_parameter(generic_parameter):
             return self._str_template.format(**self.__dict__)
         else:
             return ""
+
 
 class vector_parameter(list_parameter):
     _delimiter = 'x'
@@ -341,6 +348,7 @@ class stack_slices_rgb_wrapper(generic_wrapper):
             --outputVolumeScalarType {output_type} \
             --setSpacing {spacing} \
             --setOrigin {origin} \
+            --multichannelImage \
             {interpolation} \
             {resample} \
             -o {output_volume_fn} \

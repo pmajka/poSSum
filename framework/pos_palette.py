@@ -49,7 +49,7 @@ class pos_color(object):
     @classmethod
     def from_int(pos_color, (rInt, bInt, gInt)):
         """
-        Create pos_color objest from tuple of iintegert from (0 to 255) instead
+        Create pos_color objects from tuple of integers from (0 to 255) instead
         of floats.
 
         :param rInt: Red component of given color, Integer from 0 to 255.
