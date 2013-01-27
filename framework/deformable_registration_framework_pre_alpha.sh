@@ -108,6 +108,10 @@ function prepare_datasets {
         -o ${FIXED_SEG}
 }
 
+function list_computed_warps {
+echo "${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp"`"
+}
+
 function warp_moving_from_source {
     local OUTPUT_FILENAME=$1
     
@@ -115,7 +119,7 @@ function warp_moving_from_source {
         ${MOVING_SRC} \
         ${OUTPUT_FILENAME} \
         -R ${FIXED} \
-        ${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp"` ${INITIAL_AFFINE_TRANSFORM}
+        `list_computed_warps` ${INITIAL_AFFINE_TRANSFORM}
 }
 
 function warp_mask_from_source {
@@ -125,7 +129,7 @@ function warp_mask_from_source {
         ${MOVING_RAW_MASK} \
         ${OUTPUT_FILENAME} \
         -R ${FIXED} \
-        ${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp"` \
+        `list_computed_warps`
         --use-NN
         
     c${IMG_DIM}d -verbose ${WORKING_DIR}/${MOVING_MASK} \
@@ -139,7 +143,7 @@ function warp_segmentation_from_source {
         ${MOVING_RAW_MASK} \
         ${OUTPUT_FILENAME} \
         -R ${FIXED} \
-        ${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp"` \
+        `list_computed_warps`
         --use-NN
     
     c${IMG_DIM}d -verbose ${WORKING_DIR}/${MOVING_SEG} \
@@ -152,7 +156,7 @@ function cumulative_wrap {
     WarpImageMultiTransform ${IMG_DIM} \
         ${OUTPUT_FILENAME} \
         -R ${FIXED} \
-        ${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp"`
+        `list_computed_warps`
 }
 
 function self_archive {
@@ -160,7 +164,10 @@ function self_archive {
     mv ${JOB_IDENTIFIER_PREFIX}.tgz ~/backup/
 }
 
-function determine_smoothing_sigmas {
+function print_calculation_identifier {
+    echo "---------------------------------------------------------------------"
+    echo "`date` `pwd`"
+    echo "---------------------------------------------------------------------"
 }
 
 function prepare_iteration {
@@ -176,16 +183,14 @@ function prepare_iteration {
     local PARAM_TRANSFORMATION=`sed -n "$[$ITERATION+1] p" ${PARAM_FILE} | cut -f4 -d" "`
     local PARAM_REGULARIZATION=`sed -n "$[$ITERATION+1] p" ${PARAM_FILE} | cut -f5 -d" "`
     local PARAM_ITERATIONS=`sed -n "$[$ITERATION+1] p" ${PARAM_FILE} | cut -f6 -d" "`
-#   local PARAM_SMOOTHING_SIGMAS=`sed -n "$[$ITERATION+1] p" ${PARAM_FILE} | cut -f7 -d" " | awk '$1!="FALSE" { print "--smoothing-sigmas " $1 }'`
-#   local PARAM_FIXED_IMAGE_MASK=`sed -n "$[$ITERATION+1] p" ${PARAM_FILE} | cut -f8 -d" " | awk '$1!="FALSE" { print "--mask-image " $1 }'`
+    local PARAM_SMOOTHING_SIGMAS=`sed -n "$[$ITERATION+1] p" ${PARAM_FILE} | cut -f7 -d" " | awk '$1!="FALSE" { print "--gaussian-smoothing-sigmas " $1 }'`
+    local PARAM_FIXED_IMAGE_MASK=`sed -n "$[$ITERATION+1] p" ${PARAM_FILE} | cut -f8 -d" " | awk '$1!="FALSE" { print "--mask-image " $1 }'`
     
     warp_moving_from_source ${WORKING_DIR}/${MOVING}
     warp_mask_from_source   ${WORKING_DIR}/${MOVING_MASK} 
     warp_segmentation_from_source ${WORKING_DIR}/${MOVING_SEG}
     
-    echo "---------------------------------------------------------------------"
-    echo "`date` `pwd`"
-    echo "---------------------------------------------------------------------"
+   print_calculation_identifier 
     
     ANTS ${IMG_DIM} \
         -m CC[${FIXED},${WORKING_DIR}/${MOVING},           ${PARAM_CC_WEIGHT},0005] \
@@ -199,7 +204,7 @@ function prepare_iteration {
         --use-Histogram-Matching \
         --affine-metric-type CC \
         --rigid-affine false \
-        --use-all-metrics-for-convergence
+        --use-all-metrics-for-convergence ${PARAM_SMOOTHING_SIGMAS} ${PARAM_FIXED_IMAGE_MASK}
     
     local DEFORMED_FILENAME=${WORKING_DIR}/${OUTPUT_PREFIX}Deformed.nii.gz
     local DEFORMED_MASK_FILENAME=${WORKING_DIR}/${OUTPUT_PREFIX}_mask_Deformed.nii.gz
@@ -220,9 +225,7 @@ function prepare_iteration {
     /opt/c3d-0.8.2-Linux-x86_64/bin/c${IMG_DIM}d ${FIXED} ${DEFORMED_FILENAME} -nmi  >> ${WORKING_DIR}/${OUTPUT_PREFIX}_eval.txt
     LabelOverlapMeasures ${IMG_DIM} ${FIXED_SEG} ${DEFORMED_SEGMENTATION_FILENAME}   >> ${WORKING_DIR}/${OUTPUT_PREFIX}_seg.txt
     
-    echo "---------------------------------------------------------------------"
-    echo "`date` `pwd`"
-    echo "---------------------------------------------------------------------"
+    print_calculation_identifier
     
     # When the last iteration is being processed:
     if [ "$ITERATION" -eq "$ITERATIONLIMIT" ]
