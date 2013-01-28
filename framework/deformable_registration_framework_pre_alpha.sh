@@ -109,7 +109,7 @@ function prepare_datasets {
 }
 
 function list_computed_warps {
-echo "${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp"`"
+echo "${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp" | grep -v "cumulative_Warp"`"
 }
 
 function warp_moving_from_source {
@@ -128,8 +128,7 @@ function warp_mask_from_source {
     WarpImageMultiTransform ${IMG_DIM} \
         ${MOVING_RAW_MASK} \
         ${OUTPUT_FILENAME} \
-        -R ${FIXED} \
-        `list_computed_warps`
+        -R ${FIXED} `list_computed_warps` \
         --use-NN
         
     c${IMG_DIM}d -verbose ${WORKING_DIR}/${MOVING_MASK} \
@@ -142,8 +141,7 @@ function warp_segmentation_from_source {
     WarpImageMultiTransform ${IMG_DIM} \
         ${MOVING_RAW_MASK} \
         ${OUTPUT_FILENAME} \
-        -R ${FIXED} \
-        `list_computed_warps`
+        -R ${FIXED} `list_computed_warps` \
         --use-NN
     
     c${IMG_DIM}d -verbose ${WORKING_DIR}/${MOVING_SEG} \
@@ -152,11 +150,10 @@ function warp_segmentation_from_source {
 
 function cumulative_wrap {
     local OUTPUT_FILENAME=$1
-    
-    WarpImageMultiTransform ${IMG_DIM} \
+   
+    ComposeMultiTransform ${IMG_DIM} \
         ${OUTPUT_FILENAME} \
-        -R ${FIXED} \
-        `list_computed_warps`
+        -R ${FIXED} `list_computed_warps`
 }
 
 function self_archive {
@@ -234,6 +231,7 @@ function prepare_iteration {
         cp -v ${DEFORMED_MASK_FILENAME}          ${JOB_IDENTIFIER_PREFIX}_${MOVING_MASK}
         cp -v ${DEFORMED_SEGMENTATION_FILENAME}  ${JOB_IDENTIFIER_PREFIX}_${MOVING_SEG}
         cp -v ${DEFORMED_FILENAME}               ${DROPBOX_PRIV}/${JOB_IDENTIFIER_PREFIX}_${MOVING}
+	touch done_`date +%Y-%m-%d-%H-%M`
     fi
 }
 
