@@ -31,7 +31,7 @@ HISTOLOGY_MULTIPLIER_RAW=${DROPBOX}/02_02_NN2_mri_mask_histology_multiplier_stra
 
 ITERATION_PREFIX=iteration_
 INITIAL_AFFINE_TRANSFORM_RAW=~/possum/processing_supplement/02_02_NN2_histology_myelin_to_straight_mri_affine.txt
-INITIAL_DEFORMABLE_TRANSFORM_RAW=/home/pmajka/possum/testy/myelin_to_mri_step2_attempt_0/05_registration_raw/f__m__CC0005_SyN0.35_Gauss0,0_i1000x1000_mi32x1600_afi0_rigidfalse_amt_CC_psep1.0_psew1.000000_mw1.000000_ccw0.000000_syni02_syns0.010000_Warp.nii.gz
+INITIAL_DEFORMABLE_TRANSFORM_RAW=/home/pmajka/possum/testy/myelin_to_mri_step2_attempt_0/05_registration_raw_v2/f__m__CC0005_SyN0.35_Gauss0,0_i1000x1000_mi32x1600_afi0_rigidfalse_amt_CC_psep1.0_psew1.000000_mw1.000000_ccw0.000000_syni02_syns0.010000_Warp.nii.gz
 
 INITIAL_DEFORMABLE_TRANSFORM=initial_Warp.nii.gz
 INITIAL_AFFINE_TRANSFORM=initial_Affine.txt
@@ -131,8 +131,8 @@ function warp_mask_from_source {
         -R ${FIXED} `list_computed_warps` \
         --use-NN
         
-    c${IMG_DIM}d -verbose ${WORKING_DIR}/${MOVING_MASK} \
-        -replace 255 0 4 0 2 0 -binarize -o ${WORKING_DIR}/${MOVING_MASK}
+    c${IMG_DIM}d -verbose ${OUTPUT_FILENAME} \
+        -replace 255 0 4 0 2 0 -binarize -o ${OUTPUT_FILENAME}
 }
 
 function warp_segmentation_from_source {
@@ -144,8 +144,8 @@ function warp_segmentation_from_source {
         -R ${FIXED} `list_computed_warps` \
         --use-NN
     
-    c${IMG_DIM}d -verbose ${WORKING_DIR}/${MOVING_SEG} \
-        -replace 255 0 4 0 2 0 -o ${WORKING_DIR}/${MOVING_SEG}
+    c${IMG_DIM}d -verbose ${OUTPUT_FILENAME} \
+        -replace 255 0 4 0 2 0 -o ${OUTPUT_FILENAME}
 }
 
 function cumulative_wrap {

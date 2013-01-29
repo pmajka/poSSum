@@ -88,7 +88,7 @@ class nonuniform_relice(generic_workflow):
         }
     _usage = ""
 
-    CONST_NOSLICE_INDEX = 9999
+    CONST_NOSLICE_INDEX = 9998
 
     def __init__(self, options, args, pool=None):
         super(self.__class__, self).__init__(options, args, pool)
@@ -169,10 +169,12 @@ class nonuniform_relice(generic_workflow):
 
         for slice_idx, slice in enumerate(interpolation_data):
             # print slice
+            o=self.options.startingSliceIndexOffset
+            
             command = reslice_command_wrapper(\
                         dimension = 2,
-                        input_image_1 = self.f['ref_input'](idx=slice['slice_1']),
-                        input_image_2 = self.f['ref_input'](idx=slice['slice_2']),
+                        input_image_1 = self.f['ref_input'](idx=slice['slice_1']+o),
+                        input_image_2 = self.f['ref_input'](idx=slice['slice_2']+o),
                         weight_1 = slice['weight_1'],
                         weight_2 = slice['weight_2'],
                         output_image = self.f[weighting_output_dir](idx=slice_idx))
@@ -283,6 +285,9 @@ class nonuniform_relice(generic_workflow):
         regSettings.add_option('--skipOutputVolumeGeneration', default=False,
                 dest='skipSlicePreprocess', action='store_const', const=True,
                 help='Skip slice preprocessing.')
+        regSettings.add_option('--startingSliceIndexOffset', default=0, type="int",
+                dest='startingSliceIndexOffset', action='store',
+                help='Indicates index of the first image.')
 
         outputVolumeSettings = \
                 OptionGroup(parser, 'OutputVolumeSettings.')
