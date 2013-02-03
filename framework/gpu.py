@@ -1,64 +1,43 @@
 # An example from scipy cookbook demonstrating the use of numpy arrys in vtk
 
 import vtk
+import pos_palette
 
 imread = vtk.vtkStructuredPointsReader()
-#imread.SetFileName('/home/pmajka/a.vtk')
+imread.SetFileName('/home/pmajka/a.vtk')
 #imread.SetFileName('/home/pmajka/d.vtk')
-imread.SetFileName('/home/pmajka/z.vtk')
+#imread.SetFileName('/home/pmajka/z.vtk')
+#imread.SetFileName('/dev/shm/a.vtk')
 imread.Update()
 
-cast = vtk.vtkImageCast();
+cast = vtk.vtkImageCast()
 cast.SetInput(imread.GetOutput())
 cast.SetOutputScalarTypeToUnsignedChar()
 cast.Update()
 
 extract = vtk.vtkExtractVOI()
 extract.SetInputConnection(cast.GetOutputPort())
-extract.SetVOI(0,600,0,600,0,600)
+extract.SetVOI(00, 600, 00, 600, 0, 600)
 extract.SetSampleRate(1, 1, 1)
 
-#def ShowOrientationCube(interactor):
-#	print "ORIENTATION CUBE!"
-
-
+class vtk_volume_mapper_wrapper():
+    def __init__(self):
+        pass
 
 
 # The following class is used to store transparencyv-values for later retrival. In our case, we want the value 0 to be
 # completly opaque whereas the three different cubes are given different transperancy-values to show how it works.
-alphaChannelFunc = vtk.vtkPiecewiseFunction()
-#   alphaChannelFunc.AddPoint(0, 0.0)
-#   alphaChannelFunc.AddPoint(1, 0.0)
-#   alphaChannelFunc.AddPoint(2, 0.9)
-#   alphaChannelFunc.AddPoint(7, 1.0)
-alphaChannelFunc.AddPoint(1, 1.0)
-alphaChannelFunc.AddPoint(128, 1.0)
-alphaChannelFunc.AddPoint(254, 1.0)
-alphaChannelFunc.AddPoint(255, 1.0)
-
-# This class stores color data and can create color tables from a few color points. For this demo, we want the three cubes
-# to be of the colors red green and blue.
-colorFunc = vtk.vtkColorTransferFunction()
-#   colorFunc.AddRGBPoint(00, 0.0, 0.0, 0.0)
-#   colorFunc.AddRGBPoint(1, 1.0, 0.0, 0.0)
-#   colorFunc.AddRGBPoint(7, 0.0, 1.0, 0.0)
-colorFunc.AddRGBPoint(01, 0.0, 0.0, 0.0)
-colorFunc.AddRGBPoint(128, 0.5, 0.5, 0.5)
-colorFunc.AddRGBPoint(255, 0.0, 0.0, 0.0)
-
-gtfun = vtk.vtkPiecewiseFunction()
-gtfun.AddPoint(0, 0.0)
-gtfun.AddPoint(20, 0)
-gtfun.AddPoint(255, 0.3)
+alphaChannelFunc = pos_palette.pos_palette.lib('grad_1').piecewise_function()
+colorFunc = pos_palette.pos_palette.lib('grayscale', min=0, max=255).color_transfer_function()
+gtfun = pos_palette.pos_palette.lib('grad_2').piecewise_function()
 
 # The preavius two classes stored properties. Because we want to apply these properties to the volume we want to render,
 # we have to store them in a class that stores volume prpoperties.
 volumeProperty = vtk.vtkVolumeProperty()
-#volumeProperty.SetColor(colorFunc)
+volumeProperty.SetColor(colorFunc)
 volumeProperty.SetScalarOpacity(alphaChannelFunc)
 volumeProperty.SetGradientOpacity(gtfun)
 volumeProperty.SetInterpolationTypeToLinear()
-#volumeProperty.ShadeOn()
 
 # This class describes how the volume is rendered (through ray tracing).
 compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
@@ -66,15 +45,12 @@ compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
 #compositeFunction.SetIsoValue(80)
 
 # We can finally create our volume. We also have to specify the data for it, as well as how the data will be rendered.
-#volumeMapper = vtk.vtkVolumeRayCastMapper()
-#volumeMapper.SetVolumeRayCastFunction(compositeFunction)
-vp=vtk.vtkVolumeProperty()
-volumeMapper= vtk.vtkFixedPointVolumeRayCastMapper()
+vp = vtk.vtkVolumeProperty()
+volumeMapper = vtk.vtkFixedPointVolumeRayCastMapper()
 volumeMapper.SetSampleDistance(0.05)
-print extract.GetOutput().GetNumberOfScalarComponents()
 volumeMapper.SetInputConnection(extract.GetOutputPort())
-volumeMapper.SetBlendModeToComposite()
-volumeProperty.IndependentComponentsOff()
+#volumeMapper.SetBlendModeToComposite()
+#volumeProperty.IndependentComponentsOff()
 
 # The class vtkVolume is used to pair the preaviusly declared volume as well as the properties to be used when rendering that volume.
 volume = vtk.vtkVolume()
