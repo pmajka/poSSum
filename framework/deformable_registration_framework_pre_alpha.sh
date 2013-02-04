@@ -1,7 +1,6 @@
 PROGPATH=/opt/ANTs-1.9.y-Linux/bin/
 JOB_EXECUTION_DIR=${HOME}/possum/testy/
 
-OUTPUT_SPACING=0.08x0.08x0.08mm
 OUTPUT_SPACING=0.1x0.1x0.1mm
 #OUTPUT_SPACING=0.05x0.05x0.05mm
 SLICE_RESAMPLED_PLANE='y'
@@ -16,14 +15,13 @@ PARAM_FILE=$1
 JOB_IDENTIFIER_PREFIX=deformable_registration_`date +%Y-%m-%d-%H-%M`_${BASHPID}_
 ITERATIONLIMIT=$[`wc -l ${PARAM_FILE} | cut -f1 -d" "`-1]
 
-
 DROPBOX=/home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/
 DROPBOX_PRIV=/home/pmajka/Dropbox/
+DIRECTORY_POSSUM_MASKS_BACKUP=/home/pmajka/possum/data/02_02_NN2/74_deformable_multimodal_registration/
 
 FIXED_RAW=${DROPBOX}/02_02_NN2_mri.nii.gz
 FIXED_RAW_MASK=${DROPBOX}/mri_registration_mask.nii.gz
 
-#MOVING_RAW=${DROPBOX}/myelin.nii.gz
 MOVING_RAW=${DROPBOX}/02_02_NN2_deformable_hist_reconstruction_myelin_resliced.nii.gz
 MOVING_RAW_MASK=${DROPBOX}/myelin_registration_mask.nii.gz
 
@@ -38,7 +36,7 @@ INITIAL_AFFINE_TRANSFORM=initial_Affine.txt
 
 #==============================================================================
 # Naming conventions. Not really for configuration.
-#
+#==============================================================================
 
 FIXED_SRC=fixed_src.nii.gz
 FIXED_MASK_SRC=fixed_mask_src.nii.gz
@@ -60,6 +58,13 @@ MOVING_MASK=moving_mask.nii.gz
 HISTOLOGY_MULTIPLIER_SRC=hm.nii.gz
 
 #==============================================================================
+
+function backup_masks_from_dropbox {
+    cp -v ${FIXED_RAW_MASK}           ${DIRECTORY_POSSUM_MASKS_BACKUP}/mri_registration_mask.nii.gz
+    cp -v ${MOVING_RAW_MASK}          ${DIRECTORY_POSSUM_MASKS_BACKUP}/myelin_registration_mask.nii.gz
+    cp -v ${HISTOLOGY_MULTIPLIER_RAW} ${DIRECTORY_POSSUM_MASKS_BACKUP}/02_02_NN2_mri_mask_histology_multiplier_straight.nii.gz
+    sleep 5
+}
 
 function travel_to_work_directory {
     WORK_DIR=${JOB_EXECUTION_DIR}/${JOB_IDENTIFIER_PREFIX}
@@ -103,13 +108,17 @@ function prepare_datasets {
         ${FIXED_MASK_SRC} \
         -interpolation NearestNeighbor \
         -resample-mm ${OUTPUT_SPACING} \
-        -replace 4 0 2 0\
+        -replace 4 0 2 0 12 1\
         ${REGION_DEFINITION} \
         -o ${FIXED_SEG}
 }
 
+function list_computed_warps_this_step {
+    echo "`ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp" | grep -v "cumulative_Warp" | grep -v "cumulative_this_step_Warp"`"
+}
+
 function list_computed_warps {
-echo "${INITIAL_DEFORMABLE_TRANSFORM} `ls ${ITERATION_PREFIX}*/*Warp.nii.gz | grep -v "InverseWarp" | grep -v "cumulative_Warp"`"
+    echo "${INITIAL_DEFORMABLE_TRANSFORM} `list_computed_warps_this_step`"
 }
 
 function warp_moving_from_source {
@@ -145,7 +154,7 @@ function warp_segmentation_from_source {
         --use-NN
     
     c${IMG_DIM}d -verbose ${OUTPUT_FILENAME} \
-        -replace 255 0 4 0 2 0 -o ${OUTPUT_FILENAME}
+        -replace 255 0 4 0 2 0 12 1 -o ${OUTPUT_FILENAME}
 }
 
 function cumulative_wrap {
@@ -154,6 +163,14 @@ function cumulative_wrap {
     ComposeMultiTransform ${IMG_DIM} \
         ${OUTPUT_FILENAME} \
         -R ${FIXED} `list_computed_warps`
+}
+
+function cumulative_wrap_step {
+    local OUTPUT_FILENAME=$1
+   
+    ComposeMultiTransform ${IMG_DIM} \
+        ${OUTPUT_FILENAME} \
+        -R ${FIXED} `list_computed_warps_this_step`
 }
 
 function self_archive {
@@ -187,12 +204,12 @@ function prepare_iteration {
     warp_mask_from_source   ${WORKING_DIR}/${MOVING_MASK} 
     warp_segmentation_from_source ${WORKING_DIR}/${MOVING_SEG}
     
-   print_calculation_identifier 
+    print_calculation_identifier 
     
     ANTS ${IMG_DIM} \
-        -m CC[${FIXED},${WORKING_DIR}/${MOVING},           ${PARAM_CC_WEIGHT},0005] \
-        -m MSQ[${FIXED_MASK},${WORKING_DIR}/${MOVING_MASK},${PARAM_MSQ_WEIGHT},0004] \
         -m PSE[${FIXED},${WORKING_DIR}/${MOVING},${FIXED_SEG},${WORKING_DIR}/${MOVING_SEG},${PARAM_PSE_WEIGHT},1.0,1,0,10]\
+        -m MSQ[${FIXED_MASK},${WORKING_DIR}/${MOVING_MASK},${PARAM_MSQ_WEIGHT},0004] \
+        -m CC[${FIXED},${WORKING_DIR}/${MOVING},           ${PARAM_CC_WEIGHT},0005] \
         -t ${PARAM_TRANSFORMATION} -r ${PARAM_REGULARIZATION} \
         -o ${WORKING_DIR}/${OUTPUT_PREFIX} \
         -i ${PARAM_ITERATIONS} \
@@ -207,12 +224,17 @@ function prepare_iteration {
     local DEFORMED_MASK_FILENAME=${WORKING_DIR}/${OUTPUT_PREFIX}_mask_Deformed.nii.gz
     local DEFORMED_SEGMENTATION_FILENAME=${WORKING_DIR}/${OUTPUT_PREFIX}_seg_Deformed.nii.gz
     local CUMULATIVE_WARP=${WORKING_DIR}/${OUTPUT_PREFIX}_cumulative_Warp.nii.gz
+    local CUMULATIVE_WARP_STEP=${WORKING_DIR}/${OUTPUT_PREFIX}_cumulative_this_step_Warp.nii.gz
     
     warp_moving_from_source ${DEFORMED_FILENAME}
     warp_mask_from_source   ${DEFORMED_MASK_FILENAME}
     warp_segmentation_from_source ${DEFORMED_SEGMENTATION_FILENAME}
+
     cumulative_wrap ${CUMULATIVE_WARP}
+    cumulative_wrap_step ${CUMULATIVE_WARP_STEP}
+    
     ANTSJacobian ${IMG_DIM} ${CUMULATIVE_WARP} ${WORKING_DIR}/${OUTPUT_PREFIX}_
+    ANTSJacobian ${IMG_DIM} ${CUMULATIVE_WARP_STEP} ${WORKING_DIR}/${OUTPUT_PREFIX}_step_
     
     /opt/c3d-0.8.2-Linux-x86_64/bin/c${IMG_DIM}d ${FIXED_MASK} ${DEFORMED_MASK_FILENAME} -overlap 1 >> ${WORKING_DIR}/${OUTPUT_PREFIX}_eval.txt
     /opt/c3d-0.8.2-Linux-x86_64/bin/c${IMG_DIM}d ${FIXED_MASK} ${DEFORMED_MASK_FILENAME} -msq  >> ${WORKING_DIR}/${OUTPUT_PREFIX}_eval.txt
@@ -231,10 +253,11 @@ function prepare_iteration {
         cp -v ${DEFORMED_MASK_FILENAME}          ${JOB_IDENTIFIER_PREFIX}_${MOVING_MASK}
         cp -v ${DEFORMED_SEGMENTATION_FILENAME}  ${JOB_IDENTIFIER_PREFIX}_${MOVING_SEG}
         cp -v ${DEFORMED_FILENAME}               ${DROPBOX_PRIV}/${JOB_IDENTIFIER_PREFIX}_${MOVING}
-	touch done_`date +%Y-%m-%d-%H-%M`
+        touch done_`date +%Y-%m-%d-%H-%M`
     fi
 }
 
+#backup_masks_from_dropbox
 travel_to_work_directory
 prepare_datasets
 for i in `seq 1 1 ${ITERATIONLIMIT}`

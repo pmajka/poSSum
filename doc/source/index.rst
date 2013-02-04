@@ -13,6 +13,11 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   pos_palette
+
+.. automodule:: pos_parameters
+    :members:
+
 
 
 Indices and tables

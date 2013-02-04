@@ -181,7 +181,7 @@ class deformation_field_visualizer(generic_workflow):
         """
 
         # The loaded image contains two dimensional vector deformation field.
-        # It means that it has two scalar variabled decribing each vector
+        # It means that it has two scalar variables decribing each vector
         # component of the image. Simple. We need to calculate the magnitude of
         # the vector for each pixel of the image. To perform this calcualtion we
         # will use a vtkArrayCalculator.
@@ -189,6 +189,7 @@ class deformation_field_visualizer(generic_workflow):
         # Because we want our deformation field to be scaled in milimeters, we
         # need to multiply it by pixel size.
         pixel_size = float(self.options.spacing[0])
+        #TODO: pixel_size should be readout from the source image.
 
         calculator = vtk.vtkArrayCalculator()
         calculator.SetInputConnection(source_image.GetOutputPort())
@@ -259,7 +260,7 @@ class deformation_field_visualizer(generic_workflow):
         source_glyph.SetTipRadius(0.1)
         source_glyph.SetTipLength(0.35)
         source_glyph.SetShaftRadius(0.03)
-        
+
         glyph = vtk.vtkGlyph3D()
         glyph.SetInput(points.GetOutput())
         glyph.SetSource(source_glyph.GetOutput())
@@ -378,7 +379,7 @@ class deformation_field_visualizer(generic_workflow):
         # Add glyphs
         if not self.options.hideGlyphs:
             ren.AddActor(self._get_glyphs_actor(ptMask, deformation_mag_lut))
-        
+
         # Add scalar bars
         if not self.options.hideColorBars:
             ren.AddActor(self._get_jacobian_scalar_bar(deformation_mag_lut))
