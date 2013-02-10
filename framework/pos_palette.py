@@ -418,9 +418,7 @@ class pos_palette(object):
 
         # Calculate scaling and offset mapping range (0,1) to (min,max)
         # and store them within the class
-        scale, offset = (max - min), min
-        self.scale = float(scale)
-        self.offset = float(offset)
+        self.scale, self.offset = float(max - min), float(min)
 
         # Define mappings and then define interpolation function between the
         # mapping entries.
@@ -662,6 +660,27 @@ class pos_palette(object):
         :type max: int
 
         :return: :class:`pos_palette`
+
+        Tests:
+
+        >>> pos_palette.from_gnuplot_file('palettes/bb.gpf') #doctest: +ELLIPSIS
+        <__main__.pos_palette object at 0x...>
+
+        >>> p = pos_palette.from_gnuplot_file('palettes/bb.gpf', min=0, max=100)
+        >>> p(0).html == '#000000'
+        True
+        >>> p(1).html == '#050000'
+        True
+        >>> p(100).html == '#FFFFFF'
+        True
+        >>> p.scale == 100.0
+        True
+
+        >>> p.color_transfer_function().GetRange() == (0.0, 100.0)
+        True
+
+        >>> p.piecewise_function().GetRange() == (0.0, 100.0)
+        True
         """
 
         # Initialize empty dictionary fo the mapping. Open provided file and
@@ -691,11 +710,31 @@ class pos_palette(object):
         :param max: Use custom upper boundary. Default is 1.
 
         :return: pos_palette
+
+        >>> p = pos_palette.lib('bb', min=0, max=100)
+        >>> p(0).html == '#000000'
+        True
+        >>> p(1).html == '#050000'
+        True
+        >>> p(100).html == '#FFFFFF'
+        True
+        >>> p.scale == 100.0
+        True
+
+        >>> p.color_transfer_function().GetRange() == (0.0, 100.0)
+        True
+
+        >>> p.piecewise_function().GetRange() == (0.0, 100.0)
+        True
+
         """
+
         execution_path = os.path.dirname(__file__)
         return cls.from_gnuplot_file(os.path.join(
             execution_path, DIRECTORY_PALLETES, name + '.gpf'),
             min=min, max=max)
+
+
 
 if __name__ == '__main__':
     import doctest

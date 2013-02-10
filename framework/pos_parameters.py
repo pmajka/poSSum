@@ -12,16 +12,16 @@ class generic_parameter(object):
     _str_template = None
 
     def __init__(self, name, value=None, str_template=None):
-        
+
         # Obligatory
         self.name = name
-        
+
         # Initialize default value to None. If any no-None value is provided
         # override the default one.
         self._value = None
         if value:
             self.value = value
-        
+
         # Override default serialization template if non-None template is
         # provided.
         if str_template:
@@ -140,11 +140,13 @@ class filename_parameter(string_parameter):
     _str_template = "{_value}"
 
 
+
 class value_parameter(string_parameter):
     """
     This class sould be used to handle any string parameter. This class should be used instead
     """
     _str_template = "{_value}"
+
 
 
 class list_parameter(generic_parameter):
@@ -159,7 +161,7 @@ class list_parameter(generic_parameter):
     >>> p=list_parameter()
     Traceback (most recent call last):
     TypeError: __init__() takes at least 2 arguments (1 given)
-    
+
     >>> p=list_parameter(value=[1,2,3])
     Traceback (most recent call last):
     TypeError: __init__() takes at least 2 non-keyword arguments (1 given)
@@ -192,7 +194,7 @@ class list_parameter(generic_parameter):
     >>> print p
     Traceback (most recent call last):
     AttributeError: 'int' object has no attribute 'join'
-    
+
     """
     _str_template = "{_list}"
     _delimiter = " "
@@ -210,7 +212,7 @@ class vector_parameter(list_parameter):
     A specialized class for holding lists which are intended to be a vector.
     A default delimiter for this class is an "x" character. Otherwise it is a regular
     :class:`list_parameter`
-    
+
     >>> p=vector_parameter('number-of-iterations', [10000,10000,10000], "--{_name} {_list}")
     >>> p #doctest: +ELLIPSIS
     <__main__.vector_parameter object at 0x...>
@@ -239,6 +241,7 @@ class vector_parameter(list_parameter):
 
     """
     _delimiter = 'x'
+
 
 
 class ants_specific_parameter(generic_parameter):
@@ -289,27 +292,28 @@ class ants_transformation_parameter(ants_specific_parameter):
     _switch = '-t'
 
 
+
 class ants_regularization_parameter(ants_specific_parameter):
     """
     >>> ants_regularization_parameter
     <class '__main__.ants_regularization_parameter'>
-    
+
     >>> p=ants_regularization_parameter()
     Traceback (most recent call last):
     TypeError: __init__() takes at least 2 arguments (1 given)
-    
+
     >>> print ants_regularization_parameter('a_parameter')
     Traceback (most recent call last):
     TypeError: 'NoneType' object is unsubscriptable
-    
+
     >>> print ants_regularization_parameter(value=['s'])
     Traceback (most recent call last):
     TypeError: __init__() takes at least 2 non-keyword arguments (1 given)
-    
+
     >>> print ants_regularization_parameter('a_parameter', value=[9,0])
     Traceback (most recent call last):
     TypeError: cannot concatenate 'str' and 'int' objects
-    
+
     >>> print ants_regularization_parameter('a_parameter', value=['s'])
     Traceback (most recent call last):
     IndexError: list index out of range
@@ -317,7 +321,7 @@ class ants_regularization_parameter(ants_specific_parameter):
     >>> p=ants_regularization_parameter('a_parameter', value=['s',(2,2)])
     >>> p #doctest: +ELLIPSIS
     <__main__.ants_regularization_parameter object at 0x...>
-    
+
     >>> p=ants_regularization_parameter('a_parameter', value=['Gauss',(2,2)])
     >>> print p #doctest: +NORMALIZE_WHITESPACE
     -r Gauss[2,2]
@@ -340,6 +344,7 @@ class ants_regularization_parameter(ants_specific_parameter):
     '-r'
     """
     _switch = '-r'
+
 
 
 class generic_wrapper(object):
@@ -382,17 +387,17 @@ class generic_wrapper(object):
     def __str__(self):
         replacement = dict(map(lambda (k,v): (k, str(v)), self.p.iteritems()))
         return self._template.format(**replacement)
-    
+
     def __call__(self, *args, **kwargs):
         command = str(self)
         os.system(command)
-        
+
         execution = {'port': {}}
         if hasattr(self, '_io_pass'):
             for k, v in self._io_pass.iteritems():
                 execution['port'][v] = self.p[k]
         return execution
-    
+
     def updateParameters(self, parameters):
         for (name, value) in parameters.items():
             self.p[name].value = value
@@ -403,13 +408,13 @@ class ants_intensity_meric(generic_wrapper):
     """
     A wrapper for ANTS intensity metric syntax. Note that this wrapper does not
     support point set estimation image-to-image metrics.
-    
+
     Kwargs:
         there are a number of possible keyword arguments. See description below.
-    
+
     :param metric: The name to use.
     :type metric: str
-    
+
     :param fixed_image: Reference image of the metric. Cross correlation ('CC')
                         is the default value
     :type fixed_image: str
@@ -422,25 +427,25 @@ class ants_intensity_meric(generic_wrapper):
 
     :param parameter: Metric-specific parameter. Default is 4.
     :type parameter: int
-    
+
     >>> ants_intensity_meric
     <class '__main__.ants_intensity_meric'>
-    
+
     >>> ants_intensity_meric() #doctest: +ELLIPSIS
     <__main__.ants_intensity_meric object at 0x...>
-    
+
     >>> print ants_intensity_meric()
     -m CC[,,1,4]
-    
+
     >>> p=ants_intensity_meric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz')
     >>> print p
     -m CC[fixed.nii.gz,moving.nii.gz,1,4]
-    
+
     >>> print ants_intensity_meric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz',metric="XXX")
     -m XXX[fixed.nii.gz,moving.nii.gz,1,4]
 
     >>> p=ants_intensity_meric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz')
-    >>> p #doctest: +ELLIPSIS 
+    >>> p #doctest: +ELLIPSIS
     <__main__.ants_intensity_meric object at 0x...>
     >>> print p
     -m CC[fixed.nii.gz,moving.nii.gz,1,4]
@@ -572,6 +577,7 @@ class ants_reslice(generic_wrapper):
             }
 
 
+
 class ants_compose_multi_transform(generic_wrapper):
     """
     """
@@ -594,6 +600,7 @@ class ants_compose_multi_transform(generic_wrapper):
             }
 
 
+
 class average_images(generic_wrapper):
     """
     """
@@ -610,6 +617,7 @@ class average_images(generic_wrapper):
             'dimension'    : 'dimension',
             'output_image' : 'input_image'
             }
+
 
 
 class images_weighted_average(generic_wrapper):
@@ -631,6 +639,7 @@ class images_weighted_average(generic_wrapper):
             }
 
 
+
 class chain_affine_transforms(generic_wrapper):
     """
     """
@@ -646,6 +655,7 @@ class chain_affine_transforms(generic_wrapper):
             'dimension'    : 'dimension',
             'output_filename' : 'filename_filename'
             }
+
 
 
 class stack_slices_gray_wrapper(generic_wrapper):
@@ -674,6 +684,7 @@ class stack_slices_gray_wrapper(generic_wrapper):
             'interpolation' : string_parameter('interpolation', None, str_template = '--{_name} {_value}'),
             'resample' : list_parameter('resample', [], str_template = '--{_name} {_list}')
             }
+
 
 
 class stack_slices_rgb_wrapper(generic_wrapper):
@@ -711,6 +722,7 @@ class stack_slices_rgb_wrapper(generic_wrapper):
             }
 
 
+
 class mkdir_wrapper(generic_wrapper):
     _template = """mkdir -p {dir_list}"""
 
@@ -719,12 +731,15 @@ class mkdir_wrapper(generic_wrapper):
             }
 
 
+
 class rmdir_wrapper(generic_wrapper):
     _template = """rm -rfv {dir_list}"""
 
     _parameters = { \
             'dir_list' : list_parameter('dir_list', [], str_template = '{_list}')
             }
+
+
 
 if __name__ == '__main__':
     import doctest
