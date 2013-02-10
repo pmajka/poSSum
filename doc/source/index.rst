@@ -14,10 +14,7 @@ Contents:
    :maxdepth: 2
 
    pos_palette
-
-.. automodule:: pos_parameters
-    :members:
-
+   pos_parameters
 
 
 Indices and tables
