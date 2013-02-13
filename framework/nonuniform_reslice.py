@@ -6,13 +6,11 @@ import numpy as np
 from scipy.interpolate import interp1d
 from optparse import OptionParser, OptionGroup
 
-from pos_parameters import generic_wrapper, filename_parameter, string_parameter, \
-                           list_parameter, value_parameter,\
-                           stack_slices_gray_wrapper, stack_slices_rgb_wrapper
+from pos_parameters import filename_parameter, string_parameter, list_parameter, value_parameter, filename
 from pos_wrapper_skel import generic_workflow
-from pos_filenames import filename
+import pos_wrappers
 
-class average_grayscale_images_list(generic_wrapper):
+class average_grayscale_images_list(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -verbose \
                     {input_image_1} {input_image_2} \
                     -weighted-sum {weight_1} {weight_2} \
@@ -28,7 +26,7 @@ class average_grayscale_images_list(generic_wrapper):
          }
 
 
-class average_multichannel_images_list(generic_wrapper):
+class average_multichannel_images_list(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -verbose \
         -mcs {input_image_1}  -popas iblue -popas igreen -popas ired -clear \
         -mcs {input_image_2}  -popas oblue -popas ogreen -popas ored -clear \
@@ -218,7 +216,7 @@ class nonuniform_relice(generic_workflow):
         return results
 
     def prepare_output_grayscale_volume(self):
-        stack_grayscale =  stack_slices_gray_wrapper(
+        stack_grayscale =  pos_wrappers.stack_slices_gray_wrapper(
                 temp_volume_fn = self.f['tmp_gray_vol'](),
                 stack_mask = self.f['weighted_grayscale_mask'](),
                 permutation_order = self.options.outputVolumePermutationOrder,
@@ -233,7 +231,7 @@ class nonuniform_relice(generic_workflow):
         self.execute_callable(stack_grayscale)
 
     def prepare_output_multichannel_volume(self):
-        stack_multichannel =  stack_slices_rgb_wrapper(
+        stack_multichannel =  pos_wrappers.stack_slices_rgb_wrapper(
                 stack_mask = self.f['weighted_multichannel_mask'](),
                 slice_start= 0,
                 slice_end  = len(self.coords_to)-1,

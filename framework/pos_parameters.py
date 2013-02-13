@@ -338,26 +338,26 @@ class ants_regularization_parameter(ants_specific_parameter):
 
 class filename(generic_parameter):
     """
-   >>> filename('name', job_dir="", work_dir="", str_template="{value}") #doctest: +SKIP
+    >>> filename('name', job_dir="", work_dir="", str_template="{value}") #doctest: +SKIP
 
     Class representing a filename template for files being a part of some
     workflow. The template can be customized, the class is callable and returns
     filename according to prvided arguments.
 
     The only legal way of invocating this class is the one shown with above.
-    Following parameters are required to make this class behave properly: name,
-    job_dir, work_dir, str_template.
+    Following parameters are required to make this class behave properly: :py:attr:`name`,
+    :py:attr:`job_dir`, :py:attr:`work_dir`, :py:attr:`str_template`.
 
     :param name: Required but very rarely used in real applications. One can use
-        it by putting `{_name}` string into the `str_template`. Actually it's legacy
+        it by putting `{_name}` string into the :py:attr:`str_template`. Actually it's legacy
         parameter from the parrent class.
     :type name: str
 
-    :param value: Required, defaults to `None`, Can be used in file name
-        by putting `{_value}` into `str_template`. Can be an empty string but not `None`
+    :param value: Required, defaults to ``None``, Can be used in file name
+        by putting `{_value}` into :py:attr:`str_template`. Can be an empty string but not ``None``
     :type value: any serializable object
 
-    :param job_dir: Required. home directory of given workflow. Can be an empty string but not `None`
+    :param job_dir: Required. home directory of given workflow. Can be an empty string but not ``None``
     :type job_dir: str
 
     :param work_dir: directory of the file,
@@ -365,7 +365,7 @@ class filename(generic_parameter):
 
     :param str_template: filename template without any paths, just the
         filename's basename (with extension). Parameters are processed according
-        to python `.format` function. Cannot be empty or `None`.
+        to python `.format` function. Cannot be empty or ``None``.
     :type str_template: str
 
     """
@@ -506,10 +506,12 @@ class filename(generic_parameter):
         self.work_dir = work_dir
 
         # Possibility of complex behaviour, see docstrings
+
         self.override_dir = None
         """
         Directory that overrides both, `job_dir` and `work_dir`. This can be
-        reverted by assigning none to this propoerty."""
+        reverted by assigning none to this propoerty.
+        """
 
         self.override_fname = None
         """
@@ -522,6 +524,7 @@ class filename(generic_parameter):
         then insensible to any argumnets. The output is the same regardless the
         arguments provided. This can be reverted by nulling this property.
         """
+
     def _get_job_dir(self):
         return self._job_dir
 

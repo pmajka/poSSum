@@ -76,7 +76,7 @@ def float_colour_to_int(color, maxValue=255.):
     from 0 to 1.
 
     :param color: tuple of (r,g,b) components ranging from 0 to 1.
-    :tyepe color: (float, float, float)
+    :type color: (float, float, float)
 
     :return: tuple of (r,g,b) integer components.
 
