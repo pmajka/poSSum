@@ -5,9 +5,11 @@ import os
 import colorsys
 from scipy.interpolate import interp1d
 
-# Directory with all the available palettes, Palettes are stored as gnuplot
-# palette files which are basicly csv files in form of:
-# value red_component(0-1) green_component(0-1)  blue_component(0-1)
+"""
+Directory with all the available palettes, Palettes are stored as gnuplot
+palette files which are basicly csv files in form of:
+value red_component(0-1) green_component(0-1)  blue_component(0-1)
+"""
 DIRECTORY_PALLETES = 'palettes/'
 
 
@@ -74,7 +76,7 @@ def float_colour_to_int(color, maxValue=255.):
     from 0 to 1.
 
     :param color: tuple of (r,g,b) components ranging from 0 to 1.
-    :tyepe color: (float, float, float)
+    :type color: (float, float, float)
 
     :return: tuple of (r,g,b) integer components.
 
@@ -728,12 +730,10 @@ class pos_palette(object):
         True
 
         """
-
         execution_path = os.path.dirname(__file__)
         return cls.from_gnuplot_file(os.path.join(
             execution_path, DIRECTORY_PALLETES, name + '.gpf'),
             min=min, max=max)
-
 
 
 if __name__ == '__main__':

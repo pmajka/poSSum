@@ -15,6 +15,7 @@ Contents:
 
    pos_palette
    pos_parameters
+   pos_wrappers
 
 
 Indices and tables

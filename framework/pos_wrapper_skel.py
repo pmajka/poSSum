@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import sys, os
 import multiprocessing
 import subprocess as sub
@@ -7,10 +6,7 @@ import subprocess as sub
 import time, datetime
 from optparse import OptionParser, OptionGroup
 import copy
-
-from pos_parameters import mkdir_wrapper, rmdir_wrapper, average_images, \
-        ants_intensity_meric, ants_registration, ants_reslice, stack_slices_gray_wrapper
-from pos_filenames import filename
+import pos_wrappers
 
 def getBasesame(path, withExtension = False):
     if withExtension == True:
@@ -98,10 +94,10 @@ class generic_workflow(object):
         map(self._ensureDir, dirs_to_create)
 
     def _ensureDir(self, path):
-        return mkdir_wrapper(dir_list = [path])()
+        return pos_wrappers.mkdir_wrapper(dir_list = [path])()
 
     def _rmdir(self, path):
-        return rmdir_wrapper(dir_list = [path])()
+        return pos_wrappers.rmdir_wrapper(dir_list = [path])()
 
     @staticmethod
     def _basesame(path, withExtension = False):

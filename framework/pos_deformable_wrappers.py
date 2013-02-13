@@ -1,7 +1,7 @@
-from pos_parameters import generic_wrapper, filename_parameter,\
-        value_parameter, string_parameter
+from pos_parameters import filename_parameter, value_parameter, string_parameter
+import pos_wrappers
 
-class preprocess_slice_volume(generic_wrapper):
+class preprocess_slice_volume(pos_wrappers.generic_wrapper):
     _template = """sliceVol.py \
             -i {input_image} \
             -o "{output_naming}" \
@@ -25,7 +25,7 @@ class preprocess_slice_volume(generic_wrapper):
             'output_dir'   : string_parameter('output_dir', None),
             }
 
-class blank_slice_deformation_wrapper(generic_wrapper):
+class blank_slice_deformation_wrapper(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d  {input_image} -scale 0 -dup -omc {dimension} {output_image}"""
     
     _parameters = {\
@@ -34,7 +34,7 @@ class blank_slice_deformation_wrapper(generic_wrapper):
         'output_image'  : filename_parameter('output_image', None),
          }
 
-class gnuplot_wrapper(generic_wrapper):
+class gnuplot_wrapper(pos_wrappers.generic_wrapper):
     _template = "gnuplot {plot_file}; inkscape {svg_file} --export-png={output_file} -d 300 -y 1;"
     
     _parameters = {

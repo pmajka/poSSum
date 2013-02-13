@@ -1,5 +1,4 @@
 import os
-import copy
 
 """
 pos parameters
@@ -58,7 +57,6 @@ class generic_parameter(object):
     template = property(_get_str_template, _set_str_template)
     name = property(_get_name, _set_name)
 
-
 class switch_parameter(generic_parameter):
     """
     >>> p=switch_parameter('a_switch', False, "--{_name}")
@@ -90,7 +88,6 @@ class switch_parameter(generic_parameter):
             return self._str_template.format(**self.__dict__)
         else:
             return ""
-
 
 class string_parameter(generic_parameter):
     """
@@ -131,7 +128,6 @@ class string_parameter(generic_parameter):
         else:
             return ""
 
-
 class filename_parameter(string_parameter):
     """
     This class is designed to be used as a filename.
@@ -140,13 +136,11 @@ class filename_parameter(string_parameter):
     _str_template = "{_value}"
 
 
-
 class value_parameter(string_parameter):
     """
     This class sould be used to handle any string parameter. This class should be used instead
     """
     _str_template = "{_value}"
-
 
 
 class list_parameter(generic_parameter):
@@ -206,12 +200,11 @@ class list_parameter(generic_parameter):
         else:
             return ""
 
-
 class vector_parameter(list_parameter):
     """
-    A specialized class for holding lists which are intended to be a vector.
-    A default delimiter for this class is an "x" character. Otherwise it is a regular
-    :class:`list_parameter`
+    A specialized class for holding lists which are intended to be a vector.  A
+    default delimiter for this class is an "x" character. Otherwise it is a
+    regular :class:`list_parameter`
 
     >>> p=vector_parameter('number-of-iterations', [10000,10000,10000], "--{_name} {_list}")
     >>> p #doctest: +ELLIPSIS
@@ -243,7 +236,6 @@ class vector_parameter(list_parameter):
     _delimiter = 'x'
 
 
-
 class ants_specific_parameter(generic_parameter):
     """
     This class cannot be instantized. Use one of the subclasses instead.
@@ -252,14 +244,13 @@ class ants_specific_parameter(generic_parameter):
 
     def _serialize(self):
         meaning = self.value[0]
-        values  = self.value[1]
+        values = self.value[1]
 
-        retStr = " "+ self._switch +" " + meaning + "["
-        retStr+= ",".join(map(str, values))
-        retStr+="] "
+        retStr = " " + self._switch + " " + meaning + "["
+        retStr += ",".join(map(str, values))
+        retStr += "] "
 
         return retStr
-
 
 class ants_transformation_parameter(ants_specific_parameter):
     """
@@ -290,7 +281,6 @@ class ants_transformation_parameter(ants_specific_parameter):
 
     """
     _switch = '-t'
-
 
 
 class ants_regularization_parameter(ants_specific_parameter):
@@ -346,399 +336,244 @@ class ants_regularization_parameter(ants_specific_parameter):
     _switch = '-r'
 
 
-
-class generic_wrapper(object):
+class filename(generic_parameter):
     """
-    A generic command line wrapper class. Actually, it is of no use and should
-    be subclassed. This class provides only general mechanisms for executing
-    command line processes.
+    >>> filename('name', job_dir="", work_dir="", str_template="{value}") #doctest: +SKIP
 
-    >>> print generic_wrapper()
-    Traceback (most recent call last):
-    AttributeError: 'NoneType' object has no attribute 'format'
+    Class representing a filename template for files being a part of some
+    workflow. The template can be customized, the class is callable and returns
+    filename according to prvided arguments.
 
-    >>> w=generic_wrapper()
-    >>> w #doctest: +ELLIPSIS
-    <__main__.generic_wrapper object at 0x...>
+    The only legal way of invocating this class is the one shown with above.
+    Following parameters are required to make this class behave properly: :py:attr:`name`,
+    :py:attr:`job_dir`, :py:attr:`work_dir`, :py:attr:`str_template`.
 
-    >>> w._template
-    >>> w._template='Serialization template {name}'
-    >>> print w
-    Traceback (most recent call last):
-    KeyError: 'name'
+    :param name: Required but very rarely used in real applications. One can use
+        it by putting `{_name}` string into the :py:attr:`str_template`. Actually it's legacy
+        parameter from the parrent class.
+    :type name: str
 
-    >>> w._parameters
-    {}
+    :param value: Required, defaults to ``None``, Can be used in file name
+        by putting `{_value}` into :py:attr:`str_template`. Can be an empty string but not ``None``
+    :type value: any serializable object
+
+    :param job_dir: Required. home directory of given workflow. Can be an empty string but not ``None``
+    :type job_dir: str
+
+    :param work_dir: directory of the file,
+    :type work_dir: str
+
+    :param str_template: filename template without any paths, just the
+        filename's basename (with extension). Parameters are processed according
+        to python `.format` function. Cannot be empty or ``None``.
+    :type str_template: str
 
     """
-    _template = None
 
-    _parameters = {}
+    def __init__(self, name, value=None, str_template=None,
+                 job_dir=None, work_dir=None):
+        """
+        >>> filename('name', job_dir="", work_dir="", str_template="{value}") #doctest: +SKIP
 
-    def __init__(self, **kwargs):
+        >>> filename()
+        Traceback (most recent call last):
+        TypeError: __init__() takes at least 2 arguments (1 given)
 
-        # Hardcopy the parameters to split instance parameters
-        # from default class parameters
-        #self.p = dict(self._parameters)
-        self.p = copy.deepcopy(self._parameters)
+        >>> filename("test")()
+        Traceback (most recent call last):
+        AttributeError: 'NoneType' object has no attribute 'format'
 
-        self.updateParameters(kwargs)
+        >>> filename("test", job_dir="/",work_dir=".")()
+        Traceback (most recent call last):
+        AttributeError: 'NoneType' object has no attribute 'format'
 
-    def __str__(self):
-        replacement = dict(map(lambda (k,v): (k, str(v)), self.p.iteritems()))
-        return self._template.format(**replacement)
+        >>> filename("test_name", "test_value", job_dir="", work_dir="", str_template="{_value}")()
+        'test_value'
 
-    def __call__(self, *args, **kwargs):
-        command = str(self)
-        os.system(command)
+        >>> filename("test_name", "test_value", job_dir="", work_dir="",  str_template="{_name}")()
+        'test_name'
 
-        execution = {'port': {}}
-        if hasattr(self, '_io_pass'):
-            for k, v in self._io_pass.iteritems():
-                execution['port'][v] = self.p[k]
-        return execution
+        >>> filename("test_name", "test_value", job_dir="/a_dir/", work_dir="", str_template="{_name}")()
+        '/a_dir/test_name'
+
+        >>> filename("test_name", "test_value", job_dir="/a_dir/", work_dir="a_workdir", str_template="{_name}")()
+        '/a_dir/a_workdir/test_name'
+
+        >>> f=filename("test_name", "test_value", job_dir="/a_dir/",
+        ... work_dir="a_workdir", str_template="{_name}_{_value}.txt")
+        >>> f # doctest: +ELLIPSIS
+        <__main__.filename object at 0x...>
+
+        >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+
+        >>> str(f) == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+
+        >>> f.base_dir == '/a_dir/a_workdir'
+        True
+
+        >>> f.job_dir == '/a_dir/'
+        True
+
+        >>> f.name == 'test_name'
+        True
+
+        >>> f.override_path == None
+        True
+
+        >>> f.override_fname == None
+        True
+
+        >>> f.override_dir == None
+        True
+
+        >>> f.updateParameters()
+        Traceback (most recent call last):
+        TypeError: updateParameters() takes exactly 2 arguments (1 given)
+
+        >>> f.value == 'test_value'
+        True
+
+        override_dir property
+
+        >>> f.override_dir == None
+        True
+        >>> f.job_dir == '/a_dir/'
+        True
+        >>> f.override_dir="overriding/default/workdir"
+        >>> f() == 'overriding/default/workdir/test_name_test_value.txt'
+        True
+
+        >>> f.override_dir=None
+        >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+
+        override_fname property
+
+        >>> f.override_path == None
+        True
+        >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+        >>> f.override_path = "this_overrides_whole_output"
+        >>> f() == 'this_overrides_whole_output'
+        True
+        >>> f.override_path = None
+        >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+
+        override filename
+
+        >>> f.override_fname == None
+        True
+        >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+        >>> f.override_fname = "overrided_filename.txt"
+        >>> f() == '/a_dir/a_workdir/overrided_filename.txt'
+        True
+        >>> f.override_fname = None
+        >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+
+        str_template and passing arguments:
+
+        >>> f.template = '{_name}_{_value}.txt'
+        >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
+        True
+        >>> f.template = '{_name}.txt'
+        >>> f() == '/a_dir/a_workdir/test_name.txt'
+        True
+        >>> f.template = '{index:04d}.txt'
+        >>> f()
+        Traceback (most recent call last):
+        KeyError: 'index'
+        >>> f(index=3) == '/a_dir/a_workdir/0003.txt'
+        True
+
+        >>> f.template = '{iteration:02d}/{index:04d}.txt'
+        >>> f(index=3)
+        Traceback (most recent call last):
+        KeyError: 'iteration'
+        >>> f(index=3,iteration=1) == '/a_dir/a_workdir/01/0003.txt'
+        True
+
+        """
+
+        generic_parameter.__init__(self, name, value=value,
+                 str_template=str_template)
+
+        self.job_dir = job_dir
+        self.work_dir = work_dir
+
+        # Possibility of complex behaviour, see docstrings
+
+        self.override_dir = None
+        """
+        Directory that overrides both, `job_dir` and `work_dir`. This can be
+        reverted by assigning none to this propoerty.
+        """
+
+        self.override_fname = None
+        """
+        Override filename leaving all directory prefixes unaffected. Revertible.
+        """
+
+        self.override_path = None
+        """
+        String that overrides the output by provided value. The function becomes
+        then insensible to any argumnets. The output is the same regardless the
+        arguments provided. This can be reverted by nulling this property.
+        """
+
+    def _get_job_dir(self):
+        return self._job_dir
+
+    def _set_job_dir(self, value):
+        self._job_dir = value
+
+    def _get_work_dir(self):
+        return self._work_dir
+
+    def _set_work_dir(self, value):
+        self._work_dir = value
+
+    def _get_base_dir(self):
+        return os.path.join(self.job_dir, self.work_dir)
+
+    def _set_base_dir(self, value):
+        pass
 
     def updateParameters(self, parameters):
         for (name, value) in parameters.items():
-            self.p[name].value = value
+            setattr(self, name, value)
         return self
 
+    def _serialize(self):
+        if self.override_fname:
+            return self.override_fname
+        else:
+            return self._str_template.format(**self.__dict__)
 
-class ants_intensity_meric(generic_wrapper):
-    """
-    A wrapper for ANTS intensity metric syntax. Note that this wrapper does not
-    support point set estimation image-to-image metrics.
+    def __str__(self):
+        if self.override_dir:
+            return os.path.join(self.override_dir, self._serialize())
+        if self.override_path:
+            return self.override_path
 
-    Kwargs:
-        there are a number of possible keyword arguments. See description below.
+        return os.path.join(self.job_dir, self.work_dir, self._serialize())
 
-    :param metric: The name to use.
-    :type metric: str
-
-    :param fixed_image: Reference image of the metric. Cross correlation ('CC')
-                        is the default value
-    :type fixed_image: str
-
-    :param moving_image: Moving image of the metric.
-    :type moving_image: str
-
-    :param weight: Weight of the metric. Default is 1.
-    :type weight: float
-
-    :param parameter: Metric-specific parameter. Default is 4.
-    :type parameter: int
-
-    >>> ants_intensity_meric
-    <class '__main__.ants_intensity_meric'>
-
-    >>> ants_intensity_meric() #doctest: +ELLIPSIS
-    <__main__.ants_intensity_meric object at 0x...>
-
-    >>> print ants_intensity_meric()
-    -m CC[,,1,4]
-
-    >>> p=ants_intensity_meric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz')
-    >>> print p
-    -m CC[fixed.nii.gz,moving.nii.gz,1,4]
-
-    >>> print ants_intensity_meric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz',metric="XXX")
-    -m XXX[fixed.nii.gz,moving.nii.gz,1,4]
-
-    >>> p=ants_intensity_meric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz')
-    >>> p #doctest: +ELLIPSIS
-    <__main__.ants_intensity_meric object at 0x...>
-    >>> print p
-    -m CC[fixed.nii.gz,moving.nii.gz,1,4]
-
-    >>> print ants_intensity_meric._parameters['parameter']
-    4
-    >>> print ants_intensity_meric._parameters['weight']
-    1
-    >>> print ants_intensity_meric._parameters['moving_image']
-    <BLANKLINE>
-
-    >>> p.value
-    '-m CC[fixed.nii.gz,moving.nii.gz,1,4]'
-
-    >>> p.updateParameters({"weight":0.5}) #doctest: +ELLIPSIS
-    <__main__.ants_intensity_meric object at 0x...>
-
-    >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
-    Traceback (most recent call last):
-    KeyError: 'parameter_that_does_not_exist'
-
-    >>> print p.updateParameters({"weight":0.5,"parameter":1})
-    -m CC[fixed.nii.gz,moving.nii.gz,0.5,1]
-
-    >>> print p.updateParameters({"weight":0.5, "parameter":1, "fixed_image":"f.nii.gz"})
-    -m CC[f.nii.gz,moving.nii.gz,0.5,1]
-
-    >>> print p
-    -m CC[f.nii.gz,moving.nii.gz,0.5,1]
-
-    >>> print p.updateParameters({"fixed_image":"f.nii.gz","moving_image":"m.nii.gz"})
-    -m CC[f.nii.gz,m.nii.gz,0.5,1]
-
-    >>> print p.updateParameters({"metric":"MI"})
-    -m MI[f.nii.gz,m.nii.gz,0.5,1]
-
-    """
-    _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
-
-    _parameters = {\
-            'metric' : string_parameter('metric', 'CC'),
-            'fixed_image' : filename_parameter('fixed_image', None),
-            'moving_image': filename_parameter('moving_image', None),
-            'weight'      : value_parameter('weight', 1),
-            'parameter'   : value_parameter('parameter', 4)
-            }
-
-    def _get_value(self):
+    def __call__(self, **parameters):
+        self.updateParameters(parameters)
         return str(self)
 
-    def _set_value(self, value):
-        pass
+    job_dir = property(_get_job_dir, _set_job_dir)
+    """ Returns / sets job_dir """
 
-    value = property(_get_value, _set_value)
+    work_dir = property(_get_work_dir, _set_work_dir)
+    """ Returns / sets work """
 
-
-class ants_registration(generic_wrapper):
-    """
-    """
-    _template = """ANTS {dimension} \
-       {verbose} \
-       {transformation} {regularization} {outputNaming} \
-       {imageMetrics} \
-       {iterations} {affineIterations}\
-       {rigidAffine} {continueAffine}\
-       {useNN} {histogramMatching} {allMetricsConverge} \
-       {initialAffine} {fixedImageInitialAffine} {affineGradientDescent} \
-       {maskImage} """
-
-    _parameters = { \
-            'dimension'      : value_parameter('dimension', 2),
-            'verbose'        : switch_parameter('verbose', True, str_template = '--{_name} {_value}'),
-            'transformation' : ants_transformation_parameter('transformation', ('SyN', [0.25])),
-            'regularization' : ants_regularization_parameter('regularization', ('Gausas', (3.0, 1.0))),
-            'outputNaming'   : filename_parameter('output-naming', None, str_template = '--{_name} {_value}'),
-            'iterations'     : vector_parameter('number-of-iterations', (5000,)*4, '--{_name} {_list}'),
-            'affineIterations'      : vector_parameter('number-of-affine-iterations', (10000,)*5, '--{_name} {_list}'),
-            'rigidAffine'    : switch_parameter('rigid-affine', True, str_template = '--{_name} {_value}'),
-            'continueAffine' : switch_parameter('continue-affine', True, str_template = '--{_name} {_value}'),
-            'useNN'          : switch_parameter('use-NN', False, str_template = '--{_name}'),
-            'histogramMatching' : switch_parameter('use-Histogram-Matching', True, str_template = '--{_name} {_value}'),
-            'allMetricsConverge': switch_parameter('use-all-metrics-for-convergence', True, str_template = '--{_name} {_value}'),
-            'initialAffine'     : filename_parameter('initial-affine', None, str_template = '--{_name} {_value}'),
-            'fixedImageInitialAffine': filename_parameter('fixed-image-initial-affine', None, str_template = '--{_name} {_value}'),
-            'affineGradientDescent' : vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
-            'imageMetrics'          : list_parameter('image_to_image_metrics', [], '{_list}'),
-            'maskImage'      : filename_parameter('mask-image', None, str_template = '--{_name} {_value}')
-            }
-
-    _io_pass = { \
-            'dimension' : 'dimension'
-            }
-
-    def __call__(self, *args, **kwargs):
-        execution = super(self.__class__, self).__call__(*args, **kwargs)
-        execution['port']['deformable_list'] = [str(self.p['outputNaming']) + 'Warp.nii.gz']
-
-        if self.p['affineIterations']:
-            execution['port']['affine_list'] = [str(self.p['outputNaming']) + 'Affine.txt']
-
-        execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
-
-        return execution
-
-
-class ants_reslice(generic_wrapper):
-    """
-    """
-    _template = """WarpImageMultiTransform {dimension} \
-                  {moving_image} {output_image} \
-                  {reference_image} \
-                  {useNN} {useBspline} \
-                  {deformable_list} {affine_list}"""
-
-    _parameters = { \
-        'dimension'      : value_parameter('dimension', 2),
-        'moving_image'  : filename_parameter('moving_image', None),
-        'output_image'  : filename_parameter('output_image', None),
-        'reference_image'  : filename_parameter('reference_image', None, str_template = '-R {_value}'),
-        'useNN'            : switch_parameter('use-NN', None, str_template = '--{_name}'),
-        'useBspline'       : switch_parameter('use-BSpline', None, str_template = '--{_name}'),
-        'deformable_list'  : list_parameter('deformable_list', [], str_template = '{_list}'),
-        'affine_list'  : list_parameter('affine_list', [], str_template = '{_list}')
-                }
-
-    _io_pass = { \
-            'dimension'    : 'dimension',
-            'output_image' : 'input_image'
-            }
-
-
-
-class ants_compose_multi_transform(generic_wrapper):
-    """
-    """
-    _template = """ComposeMultiTransform {dimension} \
-                  {output_image} \
-                  {reference_image} \
-                  {deformable_list} {affine_list}"""
-
-    _parameters = { \
-        'dimension'      : value_parameter('dimension', 2),
-        'output_image'  : filename_parameter('output_image', None),
-        'reference_image'  : filename_parameter('reference_image', None, str_template = '-R {_value}'),
-        'deformable_list'  : list_parameter('deformable_list', [], str_template = '{_list}'),
-        'affine_list'  : list_parameter('affine_list', [], str_template = '{_list}')
-                }
-
-    _io_pass = { \
-            'dimension'    : 'dimension',
-            'output_image' : 'input_image'
-            }
-
-
-
-class average_images(generic_wrapper):
-    """
-    """
-    _template = """c{dimension}d  {input_images} -mean {output_type} -o {output_image}"""
-
-    _parameters = { \
-            'dimension'    : value_parameter('dimension', 2),
-            'input_images' : list_parameter('input_images', [], str_template = '{_list}'),
-            'output_image' : filename_parameter('output_image'),
-            'output_type'  : string_parameter('output_type', 'uchar', str_template = '-type {_value}')
-            }
-
-    _io_pass = { \
-            'dimension'    : 'dimension',
-            'output_image' : 'input_image'
-            }
-
-
-
-class images_weighted_average(generic_wrapper):
-    """
-    """
-    _template = """c{dimension}d  {input_images} -weighted-sum {weights} {output_type} -o {output_image}"""
-
-    _parameters = { \
-            'dimension'    : value_parameter('dimension', 2),
-            'input_images' : list_parameter('input_images', [], str_template = '{_list}'),
-            'weights'      : list_parameter('weights', [], str_template = '{_list}'),
-            'output_image' : filename_parameter('output_image'),
-            'output_type'  : string_parameter('output_type', 'uchar', str_template = '-type {_value}')
-            }
-
-    _io_pass = { \
-            'dimension'    : 'dimension',
-            'output_image' : 'input_image'
-            }
-
-
-
-class chain_affine_transforms(generic_wrapper):
-    """
-    """
-    _template = """ComposeMultiTransform {dimension} {output_filename} {input_images}"""
-
-    _parameters = { \
-            'dimension'    : value_parameter('dimension', 2),
-            'input_images' : list_parameter('input_images', [], str_template = '{_list}'),
-            'output_filename' : filename_parameter('output_filename')
-            }
-
-    _io_pass = { \
-            'dimension'    : 'dimension',
-            'output_filename' : 'filename_filename'
-            }
-
-
-
-class stack_slices_gray_wrapper(generic_wrapper):
-    _template = """StackSlices {temp_volume_fn} -1 -1 0 {stack_mask};\
-            reorientImage.py -i {temp_volume_fn} \
-            --permutationOrder {permutation_order} \
-            --orientationCode {orientation_code} \
-            --outputVolumeScalarType {output_type} \
-            --setSpacing {spacing} \
-            --setOrigin {origin} \
-            {interpolation} \
-            {resample} \
-            -o {output_volume_fn} \
-            --cleanup | bash -xe;
-            rm {temp_volume_fn};"""
-
-    _parameters = { \
-            'temp_volume_fn' : filename_parameter('temp_volume_fn', None),
-            'output_volume_fn' : filename_parameter('output_volume_fn', None),
-            'stack_mask' : filename_parameter('stack_mask', None),
-            'permutation_order' : list_parameter('permutation_order', [0,2,1], str_template = '{_list}'),
-            'orientation_code' : string_parameter('orientation_code', 'RAS'),
-            'output_type'  : string_parameter('output_type', 'uchar'),
-            'spacing' : list_parameter('spacing', [1.,1.,1.], str_template = '{_list}'),
-            'origin' : list_parameter('origin', [0,0,0], str_template = '{_list}'),
-            'interpolation' : string_parameter('interpolation', None, str_template = '--{_name} {_value}'),
-            'resample' : list_parameter('resample', [], str_template = '--{_name} {_list}')
-            }
-
-
-
-class stack_slices_rgb_wrapper(generic_wrapper):
-    _template = """stack_rgb_slices.py \
-            -f {stack_mask} \
-            -b {slice_start} \
-            -e {slice_end} \
-            -o {temp_volume_fn};\
-         reorientImage.py -i {temp_volume_fn} \
-            --permutationOrder {permutation_order} \
-            --orientationCode {orientation_code} \
-            --outputVolumeScalarType {output_type} \
-            --setSpacing {spacing} \
-            --setOrigin {origin} \
-            --multichannelImage \
-            {interpolation} \
-            {resample} \
-            -o {output_volume_fn} \
-            --cleanup | bash -xe;
-            rm {temp_volume_fn};"""
-
-    _parameters = { \
-            'stack_mask' : filename_parameter('stack_mask', None),
-            'slice_start'  : value_parameter('slice_start', None),
-            'slice_end'    : value_parameter('slice_end', None),
-            'temp_volume_fn' : filename_parameter('temp_volume_fn', None),
-            'permutation_order' : list_parameter('permutation_order', [0,2,1], str_template = '{_list}'),
-            'orientation_code' : string_parameter('orientation_code', 'RAS'),
-            'output_type'  : string_parameter('output_type', 'uchar'),
-            'spacing' : list_parameter('spacing', [1.,1.,1.], str_template = '{_list}'),
-            'origin' : list_parameter('origin', [0,0,0], str_template = '{_list}'),
-            'interpolation' : string_parameter('interpolation', None, str_template = '--{_name} {_value}'),
-            'resample' : list_parameter('resample', [], str_template = '--{_name} {_list}'),
-            'output_volume_fn' : filename_parameter('output_volume_fn', None)
-            }
-
-
-
-class mkdir_wrapper(generic_wrapper):
-    _template = """mkdir -p {dir_list}"""
-
-    _parameters = { \
-            'dir_list' : list_parameter('dir_list', [], str_template = '{_list}')
-            }
-
-
-
-class rmdir_wrapper(generic_wrapper):
-    _template = """rm -rfv {dir_list}"""
-
-    _parameters = { \
-            'dir_list' : list_parameter('dir_list', [], str_template = '{_list}')
-            }
-
+    base_dir = property(_get_base_dir, _set_base_dir)
+    """ Returns / sets base_dir """
 
 
 if __name__ == '__main__':

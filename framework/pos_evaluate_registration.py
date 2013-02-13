@@ -7,9 +7,9 @@ import nifti
 import numpy as np
 from scipy import stats
 
-from pos_parameters import generic_wrapper, filename_parameter, string_parameter, list_parameter,\
-                           value_parameter
+from pos_parameters import filename_parameter, string_parameter, list_parameter, value_parameter
 from pos_deformable_wrappers import gnuplot_wrapper 
+import pos_wrappers
 
 #signal.correlate2?
 # http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.correlate2d.html
@@ -57,7 +57,7 @@ def avg_msq(a1, a2, a3):
     
     return msq(p1, p2)
 
-class evaluation_plot(generic_wrapper):
+class evaluation_plot(pos_wrappers.generic_wrapper):
     _template = """
     set terminal svg size 700,450 dynamic enhanced fname "Verdana" fsize 12 
     set out '{output_filename}'
@@ -98,7 +98,7 @@ class evaluation_plot(generic_wrapper):
             'input_filename' : 'output_filename'
             }
 
-class candlestick_plot(generic_wrapper):
+class candlestick_plot(pos_wrappers.generic_wrapper):
     _template = """
     set terminal svg size 700,450 dynamic enhanced fname "Verdana" fsize 12 
     set out '{output_filename}'
