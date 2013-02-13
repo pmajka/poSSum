@@ -1,8 +1,8 @@
 import vtk
 from pos_palette import pos_palette
 from pos_wrapper_skel import generic_workflow
-from pos_filenames import filename
-from pos_parameters import generic_wrapper, value_parameter, filename_parameter, vector_parameter
+from pos_parameters import value_parameter, filename_parameter, vector_parameter, filename
+import pos_wrappers
 
 SCALAR_BAR_TEXT_COLOR = (1, 1, 1)
 JACOBIAN_BAR_NAME = "Jacobian of the deformation filed"
@@ -17,7 +17,7 @@ JACOBIAN_COLOR_PALETTE_NAME = 'cool-warm'
 DEFORMATION_FILED_PALETTE_NAME = 'bb'
 
 
-class vtk_slice_image(generic_wrapper):
+class vtk_slice_image(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d {input_image} {spacing} -o {output_image}"""
 
     _parameters = {
@@ -28,7 +28,7 @@ class vtk_slice_image(generic_wrapper):
             }
 
 
-class vtk_warp(generic_wrapper):
+class vtk_warp(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -mcs {input_image} \
             -foreach {spacing} -endfor\
             -omc 2 {output_image}"""
@@ -41,7 +41,7 @@ class vtk_warp(generic_wrapper):
             }
 
 
-class vtk_jacobian(generic_wrapper):
+class vtk_jacobian(pos_wrappers.generic_wrapper):
     _template = """ANTSJacobian {dimension} {input_image} {output_naming};
     c{dimension}d {input_jacobian_image} {spacing} -o {output_image}"""
 

@@ -1,26 +1,24 @@
 #!/usr/bin/python
-
 import copy
 import numpy as np
-
-from pos_parameters import ants_intensity_meric, ants_registration, images_weighted_average
 from pos_deformable_wrappers import blank_slice_deformation_wrapper
 from pos_wrapper_skel import generic_workflow
-from pos_filenames import filename
+import pos_wrappers
+import pos_parameters
 
 class deformable_reconstruction_iteration(generic_workflow):
     _f = { \
-        'src_slice'  : filename('src_slice',  work_dir = '00_src_slices',      str_template =  '{idx:04d}.nii.gz'),
-        'processed'  : filename('processed',  work_dir = '01_process_slices',  str_template =  '{idx:04d}.nii.gz'),
-        'outline'    : filename('outline',    work_dir = '02_outline',         str_template =  '{idx:04d}.nii.gz'),
-        'poutline'   : filename('poutline',   work_dir = '03_poutline',        str_template =  '{idx:04d}.nii.gz'),
-        'cmask'      : filename('cmask',      work_dir = '04_cmask',           str_template =  '{idx:04d}.nii.gz'),
-        'pcmask'     : filename('pcmask',     work_dir = '05_pcmask',          str_template =  '{idx:04d}.nii.gz'),
-        'transform'  : filename('transform',  work_dir = '11_transformations', str_template =  '{idx:04d}Warp.nii.gz'),
-        'out_naming' : filename('out_naming', work_dir = '11_transformations', str_template = '{idx:04d}'),
-        'resliced'   : filename('resliced',   work_dir = '21_resliced',        str_template = '{idx:04d}.nii.gz'),
-        'resliced_outline' : filename('resliced_outline', work_dir = '22_resliced_outline', str_template = '{idx:04d}.nii.gz'),
-        'resliced_custom'  : filename('resliced_custom', work_dir = '24_resliced_custom', str_template = '{idx:04d}.nii.gz')
+        'src_slice'  : pos_parameters.filename('src_slice',  work_dir = '00_src_slices',      str_template =  '{idx:04d}.nii.gz'),
+        'processed'  : pos_parameters.filename('processed',  work_dir = '01_process_slices',  str_template =  '{idx:04d}.nii.gz'),
+        'outline'    : pos_parameters.filename('outline',    work_dir = '02_outline',         str_template =  '{idx:04d}.nii.gz'),
+        'poutline'   : pos_parameters.filename('poutline',   work_dir = '03_poutline',        str_template =  '{idx:04d}.nii.gz'),
+        'cmask'      : pos_parameters.filename('cmask',      work_dir = '04_cmask',           str_template =  '{idx:04d}.nii.gz'),
+        'pcmask'     : pos_parameters.filename('pcmask',     work_dir = '05_pcmask',          str_template =  '{idx:04d}.nii.gz'),
+        'transform'  : pos_parameters.filename('transform',  work_dir = '11_transformations', str_template =  '{idx:04d}Warp.nii.gz'),
+        'out_naming' : pos_parameters.filename('out_naming', work_dir = '11_transformations', str_template = '{idx:04d}'),
+        'resliced'   : pos_parameters.filename('resliced',   work_dir = '21_resliced',        str_template = '{idx:04d}.nii.gz'),
+        'resliced_outline' : pos_parameters.filename('resliced_outline', work_dir = '22_resliced_outline', str_template = '{idx:04d}.nii.gz'),
+        'resliced_custom'  : pos_parameters.filename('resliced_custom', work_dir = '24_resliced_custom', str_template = '{idx:04d}.nii.gz')
         }
 
     _usage = ""
@@ -167,7 +165,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                        files_to_average.append(self.f['src_slice'](idx=j))
                        weights.append(self.get_weight(i,j))
 
-                command = images_weighted_average(\
+                command = pos_wrappers.images_weighted_average(\
                             dimension = 2,
                             input_images = files_to_average,
                             weights = weights,
@@ -189,7 +187,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                        files_to_average.append(self.f['outline'](idx=j))
                        weights.append(self.get_weight(i,j))
 
-                command = images_weighted_average(\
+                command = pos_wrappers.images_weighted_average(\
                             dimension = 2,
                             input_images = files_to_average,
                             weights = weights,
@@ -245,7 +243,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                         self._get_custom_reg_settings(i)
 
             if self.options.inputVolume and self.options.inputVolumeWeight > 0:
-                metric = ants_intensity_meric(
+                metric = pos_wrappers.ants_intensity_meric(
                             fixed_image  = self.f[fixed_image_type](idx=j),
                             moving_image = self.f['src_slice'](idx=i),
                             metric = r_metric,
@@ -254,7 +252,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                 metrics.append(copy.deepcopy(metric))
 
             if self.options.outlineVolume and self.options.outlineVolumeWeight > 0:
-                outline_metric = ants_intensity_meric(
+                outline_metric = pos_wrappers.ants_intensity_meric(
                             fixed_image  = self.f[fixed_outline_type](idx=j),
                             moving_image = self.f['outline'](idx=i),
                             metric = r_metric,
@@ -263,7 +261,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                 metrics.append(copy.deepcopy(outline_metric))
 
             if i in self.subset:
-                registration = ants_registration(
+                registration = pos_wrappers.ants_registration(
                             dimension = 2,
                             outputNaming = self.f['out_naming'](idx=i),
                             iterations = iterations,

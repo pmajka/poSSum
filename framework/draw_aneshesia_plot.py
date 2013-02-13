@@ -3,8 +3,8 @@ from itertools import izip
 import datetime, time
 from optparse import OptionParser, OptionGroup
 
-from pos_parameters import generic_wrapper, filename_parameter, string_parameter, list_parameter,\
-        boolean_parameter
+from pos_parameters import filename_parameter, string_parameter, list_parameter, boolean_parameter
+import pos_wrappers
 
 # Define numpy datatype in order to read reconrdings from the file
 # Supported input file format: TSV format with a number of header lines starting
@@ -18,7 +18,7 @@ record_data = np.dtype([
 class range_parameter(list_parameter):
     _delimiter = ":"
 
-class anesthesia_plot(generic_wrapper):
+class anesthesia_plot(pos_wrappers.generic_wrapper):
     _template = """
     set terminal svg size 700,450 dynamic fname "Verdana" fsize 12
     set out '{output_filename}'
@@ -63,7 +63,7 @@ class anesthesia_plot(generic_wrapper):
             'input_filename' : 'output_filename'
             }
 
-class gnuplot_wrapper(generic_wrapper):
+class gnuplot_wrapper(pos_wrappers.generic_wrapper):
     _template = "gnuplot {plot_file}; convert {svg_file} -density 300 {output_file}; rm -rfv {plot_file}"
 
     _parameters = {
