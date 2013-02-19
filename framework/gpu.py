@@ -2,9 +2,10 @@ import vtk
 import os
 import sys
 import pos_palette
+from config import Config
 
 imread = vtk.vtkStructuredPointsReader()
-imread.SetFileName('/home/pmajka/a.vtk')
+imread.SetFileName('/home/pmajka/mri.vtk')
 #imread.SetFileName('/home/pmajka/nietoperz_finished_uchar_small.vtk')
 imread.Update()
 
@@ -15,11 +16,11 @@ cast0.Update()
 
 extract = vtk.vtkExtractVOI()
 extract.SetInputConnection(cast0.GetOutputPort())
-extract.SetVOI(00, 175, 0, 255, 0, 236)
+extract.SetVOI(0, 175*2, 0, 255*2, 00, 136*2)
 extract.SetSampleRate(1, 1, 1)
 
 imread1 = vtk.vtkStructuredPointsReader()
-imread1.SetFileName('/home/pmajka/bbb.vtk')
+imread1.SetFileName('/home/pmajka/mri.vtk')
 imread1.Update()
 
 cast1 = vtk.vtkImageCast()
@@ -29,21 +30,24 @@ cast1.Update()
 
 extract1 = vtk.vtkExtractVOI()
 extract1.SetInputConnection(cast1.GetOutputPort())
-extract1.SetVOI(0, 175, 0, 255, 00, 136)
+extract1.SetVOI(0, 175*2, 0, 255*2, 00, 136*2)
 extract1.SetSampleRate(1, 1, 1)
 
 class vtk_volume_mapper_wrapper():
     """
     vtk_volume_mapper_wrapper(image_data,  use_multichannel_workflow=False)
+
     """
 
     def __init__(self, image_data, use_multichannel_workflow=False):
         """
         vtk_volume_mapper_wrapper(image_data,  use_multichannel_workflow=False)
         """
-        self.acf = None
-        self.ctf = None
-        self.gof = None
+        self.acf = 'grad_ramp_one_to_zero'
+        self.ctf = 'grayscale'
+        self.gof = 'grad_constant_one'
+
+        self.configuration = None
 
         self.use_multichannel_workflow = use_multichannel_workflow
         self.alpha_channel_function = None
@@ -64,14 +68,21 @@ class vtk_volume_mapper_wrapper():
         self.volume_property.SetScalarOpacity(self.alpha_channel_function.piecewise_function())
         self.volume_property.SetGradientOpacity(self.gradient_opacity_function.piecewise_function())
         self.volume_property.SetInterpolationTypeToLinear()
-       #self.volume_property.ShadeOn()
+        #self.volume_property.ShadeOn()
+        print self.volume_property.GetShade()
 
         if self.use_multichannel_workflow == True:
             self.volume_property.IndependentComponentsOff()
 
+        if self.volume_property.ShadeOn():
+            self.volume_property.SetDiffuse(0.5)
+            self.volume_property.SetSpecular(0.5)
+            self.volume_property.SetAmbient(0.5)
+            self.volume_property.SetSpecularPower(0.5)
+
     def _prepare_volume_mapper(self):
-        self.volume_mapper.SetSampleDistance(0.05)
         self.volume_mapper.SetInputConnection(self.image_data.GetOutputPort())
+        self.volume_mapper.SetSampleDistance(0.01)
         self.volume_mapper.SetBlendModeToComposite()
 
     def _prepare_volume(self):
@@ -79,32 +90,9 @@ class vtk_volume_mapper_wrapper():
         self.volume.SetProperty(self.volume_property)
 
     def _load_transfer_functions(self):
-        if os.path.isfile(self.acf):
-            self.alpha_channel_function = \
-                pos_palette.pos_palette.from_gnuplot_file(
-                    self.acf, min=self._min, max=self._max)
-        else:
-            self.alpha_channel_function = \
-                pos_palette.pos_palette.lib(
-                    self.acf, min=self._min, max=self._max)
-
-        if os.path.isfile(self.ctf):
-            self.color_transfer_function = \
-                pos_palette.pos_palette.from_gnuplot_file(
-                    self.ctf, min=self._min, max=self._max)
-        else:
-            self.color_transfer_function = \
-                pos_palette.pos_palette.lib(
-                    self.ctf, min=self._min, max=self._max)
-
-        if os.path.isfile(self.gof):
-            self.gradient_opacity_function = \
-                pos_palette.pos_palette.from_gnuplot_file(
-                    self.gof, min=self._min, max=self._max)
-        else:
-            self.gradient_opacity_function = \
-                pos_palette.pos_palette.lib(
-                    self.gof, min=self._min, max=self._max)
+        self.alpha_channel_function = pos_palette.pos_palette.get(self.acf, min=self._min, max=self._max)
+        self.color_transfer_function = pos_palette.pos_palette.get(self.ctf, min=self._min, max=self._max)
+        self.gradient_opacity_function = pos_palette.pos_palette.get(self.gof, min=self._min, max=self._max)
 
     def reload_configuration(self):
         self._load_transfer_functions()
@@ -134,20 +122,20 @@ culler.SetSortingStyleToBackToFront()
 
 volume = vtk_volume_mapper_wrapper(extract)
 ###############################################################################
-volume.acf = '/home/pmajka/02_02_NN2_mri_alpha_surface.gpf'
-volume.ctf = '/home/pmajka/02_02_NN2_mri_color_surface.gpf'
-volume.gof = '/home/pmajka/02_02_NN2_mri_gradient_surface.gpf'
+volume.acf = 'grad_ramp_one_to_zero'
+volume.ctf = 'bb'
+volume.gof = 'grad_constant_one'
 #volume.acf = '/home/pmajka/bat_alpha.gpf'
 #volume.ctf = '/home/pmajka/bat_color.gpf'
 #volume.gof = '/home/pmajka/bat_gradient.gpf'
 ###############################################################################
-volume1 = vtk_volume_mapper_wrapper(extract1, True)
-volume1.acf = '/home/pmajka/02_02_NN2_myelin_alpha_surface.gpf'
-volume1.ctf = '/home/pmajka/02_02_NN2_mri_color_surface.gpf'
-volume1.gof = '/home/pmajka/02_02_NN2_myelin_gradient_surface.gpf'
+#volume1 = vtk_volume_mapper_wrapper(extract1, True)
+#volume1.acf = '/home/pmajka/02_02_NN2_myelin_alpha_surface.gpf'
+#volume1.ctf = '/home/pmajka/02_02_NN2_mri_color_surface.gpf'
+#volume1.gof = '/home/pmajka/02_02_NN2_myelin_gradient_surface.gpf'
 
 vol = volume.reload_configuration()
-vol1 = volume1.reload_configuration()
+#vol1 = volume1.reload_configuration()
 
 lightKit=vtk.vtkLightKit()
 lightKit.AddLightsToRenderer(renderer)
@@ -188,7 +176,7 @@ axes.SetTipTypeToCone()
 axes.SetXAxisLabelText("X")
 axes.SetYAxisLabelText("Y")
 axes.SetZAxisLabelText("Z")
-#axes.SetNormalizedLabelPosition(.5, .5, .5)
+axes.SetNormalizedLabelPosition(.5, .5, .5)
 
 orientation_widget = vtk.vtkOrientationMarkerWidget()
 orientation_widget.SetOrientationMarker(cube)
@@ -203,7 +191,7 @@ orientation_widget.InteractiveOff()
 renderer1.SetActiveCamera(renderer.GetActiveCamera())
 
 # We add the volume to the renderer ...
-renderer1.AddVolume(vol1)
+#renderer1.AddVolume(vol1)
 renderer.AddVolume(vol)
 renderer.SetBackground(1.0, 1.0, 1.0)
 renderWin.SetSize(400, 400)
@@ -213,14 +201,14 @@ def Keypress(obj, event):
     key = obj.GetKeySym()
     if key.startswith('k'):
         volume.reload_configuration()
-        volume1.reload_configuration()
+        #volume1.reload_configuration()
         renderWin.Render()
 
 # Tell the application to use the function as an exit check.
 renderInteractor.AddObserver("KeyPressEvent", Keypress)
 
-renderInteractor.Initialize()
 renderWin.Render()
+renderInteractor.Initialize()
 renderInteractor.Start()
 
 for i in range(0):
