@@ -188,21 +188,8 @@ volume = vtk_volume_mapper_wrapper(extract, 'a.cfg')
 vol = volume.reload_configuration()
 #vol1 = volume1.reload_configuration()
 
-lightKit=vtk.vtkLightKit()
-lightKit.AddLightsToRenderer(renderer)
-lightKit.MaintainLuminanceOn()
-lightKit.SetKeyLightIntensity(1.0)
-
-lightKit.SetKeyLightWarmth(0.50)
-lightKit.SetFillLightWarmth(0.50)
-try :
-    lightKit.SetHeadLightWarmth(0.50)
-except :
-    lightKit.SetHeadlightWarmth(0.50)
-
-lightKit.SetKeyToFillRatio(2.)
-lightKit.SetKeyToHeadRatio(7.)
-lightKit.SetKeyToBackRatio(1000.)
+light_kit = vtk_light_kit('a.cfg')
+light_kit.light_kit.AddLightsToRenderer(renderer)
 
 cube = vtk.vtkAnnotatedCubeActor()
 cube.GetXMinusFaceProperty().SetColor(1,0,0)
@@ -247,6 +234,7 @@ def Keypress(obj, event):
     key = obj.GetKeySym()
     if key.startswith('k'):
         volume.reload_configuration()
+        light_kit.reload_configuration()
         #volume1.reload_configuration()
         renderWin.Render()
 
