@@ -209,55 +209,89 @@ class vtk_volume_mapper_wrapper():
         return self.volume
 
 class vtk_single_renderer_scene():
-    pass
+    def __init__(self, configuration_file):
+        self._configuration_filename = configuration_file
 
-# With almost everything else ready, its time to initialize the renderer and window, as well as creating a method for exiting the application
-renderer = vtk.vtkRenderer()
-renderWin = vtk.vtkRenderWindow()
-renderWin.AddRenderer(renderer)
-renderInteractor = vtk.vtkRenderWindowInteractor()
-renderInteractor.SetRenderWindow(renderWin)
+        self._renderer = vtk.vtkRenderer()
+        self._render_win = vtk.vtkRenderWindow()
+        self._render_interactor = vtk.vtkRenderWindowInteractor()
 
-renderer.GetCullers().InitTraversal()
-culler = renderer.GetCullers().GetNextItem()
-culler.SetSortingStyleToBackToFront()
+    def _load_config_file(self):
+        self.cfg = Config(file(self._configuration_filename))
 
-r = vtk_volume_image_reader('/home/pmajka/mri.vtk', 'a.cfg')
+    def _prepare_rendering_env(self):
+        self._render_win.AddRenderer(self._renderer)
+        self._render_interactor.SetRenderWindow(self._render_win)
 
-volume = vtk_volume_mapper_wrapper(r.reload_configuration().GetOutput(), 'a.cfg')
-vol = volume.reload_configuration()
+        self._renderer.GetCullers().InitTraversal()
+        culler = self._renderer.GetCullers().GetNextItem()
+        culler.SetSortingStyleToBackToFront()
 
-light_kit = vtk_light_kit('a.cfg')
-light_kit.light_kit.AddLightsToRenderer(renderer)
+        if self.cfg['scene']['general_settings']['use_light_kit']:
+            self.light_kit = vtk_light_kit(self._configuration_filename)
+            self.light_kit.light_kit.AddLightsToRenderer(self._renderer)
 
-orientation_widget = vtk_orientation_marker('a.cfg')
-orientation_widget.orientation_widget.SetInteractor(renderInteractor)
-orientation_widget.after_setting_interactor()
+        if self.cfg['scene']['general_settings']['use_orientation_marker']:
+            self.orientation_widget = vtk_orientation_marker(self._configuration_filename)
+            self.orientation_widget.orientation_widget.SetInteractor(self._render_interactor)
+            self.orientation_widget.after_setting_interactor()
 
+    def _prepare_renderer(self):
+        self._renderer.SetBackground(1.0, 1.0, 1.0)
 
-# We add the volume to the renderer ...
-renderer.AddVolume(vol)
-renderer.SetBackground(1.0, 1.0, 1.0)
-renderWin.SetSize(400, 400)
+    def _prepare_render_window(self):
+        self._render_win.SetSize(400, 400)
 
-def Keypress(obj, event):
-    key = obj.GetKeySym()
-    if key.startswith('k'):
-        volume.image_data = r.reload_configuration().GetOutput()
-        volume.reload_configuration()
-        light_kit.reload_configuration()
-        orientation_widget.reload_configuration()
-        renderWin.Render()
+    def _prepare_render_interactor(self):
+        vtk.vtkInteractorStyleTrackballCamera()
+        self._render_interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
-# Tell the application to use the function as an exit check.
-renderInteractor.AddObserver("KeyPressEvent", Keypress)
+    def add_actors(self):
+        self.reader = vtk_volume_image_reader( \
+                   '/home/pmajka/mri.vtk', self._configuration_filename)
 
-renderWin.Render()
-renderInteractor.Initialize()
-renderInteractor.Start()
+        self.volume = vtk_volume_mapper_wrapper( \
+                self.reader.reload_configuration().GetOutput(), self._configuration_filename)
+        self._renderer.AddVolume(self.volume.reload_configuration())
 
-for i in range(20):
-    #renderer.GetActiveCamera().Azimuth(1)
-    r._extract.SetVOI(0, 175, 0, 10*i, 00, 136)
-    #renderer.ResetCameraClippingRange()
-    renderWin.Render()
+    def _assign_events(self):
+        self._render_interactor.AddObserver("KeyPressEvent", self.reload_configuration)
+
+    def _reload_configuration(self):
+        self.volume.image_data = self.reader.reload_configuration().GetOutput()
+        self.volume.reload_configuration()
+
+    def start(self):
+        self._load_config_file()
+        self._prepare_rendering_env()
+        self._prepare_renderer()
+        self._prepare_render_window()
+        self._prepare_render_interactor()
+        self.add_actors()
+        self._assign_events()
+
+        self._render_win.Render()
+        self._render_interactor.Initialize()
+        self._render_interactor.Start()
+
+    def reload_configuration(self, obj, event):
+        key = obj.GetKeySym()
+        if key.startswith('k'):
+
+            self._reload_configuration()
+
+            try:
+                self.light_kit.reload_configuration()
+            except:
+                pass
+
+            try:
+                self.orientation_widget.reload_configuration()
+            except:
+                pass
+
+            self._render_win.Render()
+
+if __name__ == '__main__':
+    app = vtk_single_renderer_scene('a.cfg')
+    app.start()
