@@ -156,6 +156,7 @@ class vtk_volume_mapper_wrapper():
         self.volume_mapper = vtk.vtkFixedPointVolumeRayCastMapper()
        #self.volume_mapper = vtk.vtkVolumeRayCastMapper()
        #compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
+       #compositeFunction.SetCompositeMethodToInterpolateFirst()
        #self.volume_mapper.SetVolumeRayCastFunction(compositeFunction)
         self.volume = vtk.vtkVolume()
 
@@ -188,7 +189,7 @@ class vtk_volume_mapper_wrapper():
 
     def _prepare_volume_mapper(self):
         self.volume_mapper.SetInput(self.image_data)
-        self.volume_mapper.SetBlendModeToComposite()
+       #self.volume_mapper.SetBlendModeToComposite()
 
         attrmap = self.cfg['mri_volume']['volume_mapper']
         for attr, val in attrmap.iteritems():
@@ -332,8 +333,8 @@ class vtk_single_renderer_scene():
         self._screenshot_index=0
 
         # Setup initial camera location
-        self._camera.Azimuth(90)
-        self._camera.Zoom(2)
+       #self._camera.Azimuth(90)
+       #self._camera.Zoom(2)
         pass
 
     def animate(self):
