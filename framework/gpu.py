@@ -1,6 +1,7 @@
 import vtk
 import os
 import sys
+import math
 import pos_palette
 from config import Config
 
@@ -153,6 +154,9 @@ class vtk_volume_mapper_wrapper():
 
         self.volume_property = vtk.vtkVolumeProperty()
         self.volume_mapper = vtk.vtkFixedPointVolumeRayCastMapper()
+       #self.volume_mapper = vtk.vtkVolumeRayCastMapper()
+       #compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
+       #self.volume_mapper.SetVolumeRayCastFunction(compositeFunction)
         self.volume = vtk.vtkVolume()
 
     def _load_config_file(self):
@@ -240,22 +244,63 @@ class vtk_single_renderer_scene():
         self._renderer.SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(400, 400)
+        self._render_win.SetSize(800, 400)
+
+    def _prepare_camera(self):
+        self._camera = self._renderer.GetActiveCamera()
+
+        if self.cfg['scene']['general_settings']['use_manual_camera']:
+            attrmap = self.cfg['scene']['camera_settings']['manual']
+            for attr, val in attrmap.iteritems():
+                try:
+                    getattr(self._camera, attr)(*tuple(val))
+                except TypeError:
+                    getattr(self._camera, attr)(val)
+            self._camera.ParallelProjectionOn()
+            self._renderer.ResetCameraClippingRange()
+
+    def _take_screenshot(self):
+
+        template_dictionary = {
+            'pid' : os.getpid(),
+            'timestep' : self._global_time,
+            'screenshot_idx' : self._screenshot_index
+        }
+
+        filename_template = \
+                self.cfg['scene']['screenshots_settings']['screenshot_template']
+        magnification = \
+                self.cfg['scene']['screenshots_settings']['SetMagnification']
+
+        w2i = vtk.vtkWindowToImageFilter()
+        w2i.SetMagnification(magnification)
+        w2i.SetInput(self._render_win)
+        w2i.Update()
+
+        writer = vtk.vtkPNGWriter()
+        writer.SetInputConnection(w2i.GetOutputPort())
+        writer.SetFileName(filename_template.format(**template_dictionary))
+        writer.Write()
+
+        self._screenshot_index += 1
 
     def _prepare_render_interactor(self):
         vtk.vtkInteractorStyleTrackballCamera()
         self._render_interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
     def add_actors(self):
+        volume_filename = '/home/pmajka/mri.vtk'
+       #volume_filename = '/dev/shm/nietoperz_finished_uchar.vtk'
+
         self.reader = vtk_volume_image_reader( \
-                   '/home/pmajka/mri.vtk', self._configuration_filename)
+                   volume_filename, self._configuration_filename)
 
         self.volume = vtk_volume_mapper_wrapper( \
                 self.reader.reload_configuration().GetOutput(), self._configuration_filename)
         self._renderer.AddVolume(self.volume.reload_configuration())
 
     def _assign_events(self):
-        self._render_interactor.AddObserver("KeyPressEvent", self.reload_configuration)
+        self._render_interactor.AddObserver("KeyPressEvent", self.key_press_dispather)
 
     def _reload_configuration(self):
         self.volume.image_data = self.reader.reload_configuration().GetOutput()
@@ -266,15 +311,43 @@ class vtk_single_renderer_scene():
         self._prepare_rendering_env()
         self._prepare_renderer()
         self._prepare_render_window()
+        self._prepare_camera()
         self._prepare_render_interactor()
         self.add_actors()
         self._assign_events()
 
         self._render_win.Render()
+        self._renderer.ResetCamera()
+        self._pre_animate()
+        self._render_win.Render()
+
         self._render_interactor.Initialize()
         self._render_interactor.Start()
 
-    def reload_configuration(self, obj, event):
+       #self.animate()
+
+    def _pre_animate(self):
+        # Initialize global timer and screenshot iterator
+        self._global_time = 0
+        self._screenshot_index=0
+
+        # Setup initial camera location
+        self._camera.Azimuth(90)
+        self._camera.Zoom(2)
+        pass
+
+    def animate(self):
+
+        for i in range(180):
+           #self._camera.Zoom(1.1)
+           #self._renderer.ResetCamera()
+            self._camera.Azimuth(2)
+           #self._camera.Elevation(0.5)
+            self._render_win.Render()
+            self._global_time += 1
+           #self._take_screenshot()
+
+    def key_press_dispather(self, obj, event):
         key = obj.GetKeySym()
         if key.startswith('k'):
 
@@ -289,8 +362,10 @@ class vtk_single_renderer_scene():
                 self.orientation_widget.reload_configuration()
             except:
                 pass
+        if key.startswith('s'):
+            self._take_screenshot()
 
-            self._render_win.Render()
+        self._render_win.Render()
 
 if __name__ == '__main__':
     app = vtk_single_renderer_scene('a.cfg')
