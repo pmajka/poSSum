@@ -44,7 +44,7 @@ class vtk_volume_image_reader():
         f = self.cfg['mri_reader']['flip_image']['flip_xyz']
         o = self.cfg['mri_reader']['flip_image']['origin_xyz']
 
-        flip = [0,0,0] # A stup
+        flip = [0,0,0] # A stub
 
         self._flip_output = self._permute
 
@@ -154,10 +154,6 @@ class vtk_volume_mapper_wrapper():
 
         self.volume_property = vtk.vtkVolumeProperty()
         self.volume_mapper = vtk.vtkFixedPointVolumeRayCastMapper()
-       #self.volume_mapper = vtk.vtkVolumeRayCastMapper()
-       #compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
-       #compositeFunction.SetCompositeMethodToInterpolateFirst()
-       #self.volume_mapper.SetVolumeRayCastFunction(compositeFunction)
         self.volume = vtk.vtkVolume()
 
     def _load_config_file(self):
@@ -189,7 +185,7 @@ class vtk_volume_mapper_wrapper():
 
     def _prepare_volume_mapper(self):
         self.volume_mapper.SetInput(self.image_data)
-       #self.volume_mapper.SetBlendModeToComposite()
+        self.volume_mapper.SetBlendModeToComposite()
 
         attrmap = self.cfg['mri_volume']['volume_mapper']
         for attr, val in attrmap.iteritems():
@@ -212,6 +208,56 @@ class vtk_volume_mapper_wrapper():
         self._prepare_volume()
 
         return self.volume
+
+class vtk_oblique_slice_mapper():
+    def __init__(self, image, interactor):
+        pass
+        self.plane = vtk.vtkPlane()
+        self.plane_widget = vtk.vtkImplicitPlaneWidget()
+        self.plane_widget.SetInteractor(interactor)
+        self.plane_widget.SetPlaceFactor(1)
+        self.plane_widget.SetInput(image)
+        self.plane_widget.PlaceWidget()
+#       self.plane_widget.AddObserver("InteractionEvent", self.myCallback)
+        self.plane_widget.DrawPlaneOff()
+        self.plane_widget.SetOrigin(3.469, 12.37, 6.425)
+        self.plane_widget.SetNormalToXAxis(1)
+        self.plane_widget.OutlineTranslationOff()
+
+        self.transform = vtk.vtkTransform()
+        self.transform.PostMultiply()
+        self.plane.SetOrigin(3.469, 12.37, 6.425)
+        self.plane.SetTransform(self.transform)
+
+        self._resample = vtk.vtkImageResample()
+        self._resample.SetAxisMagnificationFactor(0,0.33)
+        self._resample.SetAxisMagnificationFactor(1,0.33)
+        self._resample.SetAxisMagnificationFactor(2,0.33)
+        self._resample.SetInterpolationModeToCubic()
+        self._resample.SetInput(image)
+
+        planeCut = vtk.vtkCutter()
+        planeCut.SetInput(self._resample.GetOutput())
+        planeCut.SetCutFunction(self.plane)
+        cutMapper = vtk.vtkPolyDataMapper()
+        cutMapper.SetInputConnection(planeCut.GetOutputPort())
+
+        self.cutActor = vtk.vtkActor()
+        self.cutActor.SetMapper(cutMapper)
+        self.cutActor.VisibilityOn()
+        self.plane_widget.GetPlane(self.plane)
+
+#       self.transform.Translate(*tuple(map(lambda x: -1*x, self.plane.GetOrigin())))
+#       self.transform.RotateY(-45)
+#       self.transform.Translate(*self.plane.GetOrigin())
+        planeCut.Update()
+
+    def reload_configuration(self):
+        return self.cutActor
+
+    def myCallback(self, obj, event):
+        obj.GetPlane(self.plane)
+        self.cutActor.VisibilityOn()
 
 class vtk_single_renderer_scene():
     def __init__(self, configuration_file):
@@ -261,7 +307,6 @@ class vtk_single_renderer_scene():
             self._renderer.ResetCameraClippingRange()
 
     def _take_screenshot(self):
-
         template_dictionary = {
             'pid' : os.getpid(),
             'timestep' : self._global_time,
@@ -291,6 +336,8 @@ class vtk_single_renderer_scene():
 
     def add_actors(self):
         volume_filename = '/home/pmajka/mri.vtk'
+        volume_filename = '/home/pmajka/myelin.vtk'
+        volume_filename = '/home/pmajka/a.vtk'
        #volume_filename = '/dev/shm/nietoperz_finished_uchar.vtk'
 
         self.reader = vtk_volume_image_reader( \
@@ -300,8 +347,17 @@ class vtk_single_renderer_scene():
                 self.reader.reload_configuration().GetOutput(), self._configuration_filename)
         self._renderer.AddVolume(self.volume.reload_configuration())
 
+        self._cut = vtk_oblique_slice_mapper( \
+                self.reader.reload_configuration().GetOutput(),\
+                self._render_interactor)
+
+        self._cutActor = self._cut.reload_configuration()
+        self._renderer.AddActor(self._cutActor)
+
     def _assign_events(self):
+        pass
         self._render_interactor.AddObserver("KeyPressEvent", self.key_press_dispather)
+        self._cut.plane_widget.AddObserver("InteractionEvent", self._cut.myCallback)
 
     def _reload_configuration(self):
         self.volume.image_data = self.reader.reload_configuration().GetOutput()
@@ -333,7 +389,7 @@ class vtk_single_renderer_scene():
         self._screenshot_index=0
 
         # Setup initial camera location
-       #self._camera.Azimuth(90)
+        self._camera.Azimuth(90)
        #self._camera.Zoom(2)
         pass
 
@@ -342,11 +398,14 @@ class vtk_single_renderer_scene():
         for i in range(180):
            #self._camera.Zoom(1.1)
            #self._renderer.ResetCamera()
-            self._camera.Azimuth(2)
+           #self._camera.Azimuth(2)
            #self._camera.Elevation(0.5)
+            self._cut.transform.Translate(*tuple(map(lambda x: -1*x, self._cut.plane.GetOrigin())))
+            self._cut.transform.RotateY(1)
+            self._cut.transform.Translate(*self._cut.plane.GetOrigin())
             self._render_win.Render()
             self._global_time += 1
-           #self._take_screenshot()
+            self._take_screenshot()
 
     def key_press_dispather(self, obj, event):
         key = obj.GetKeySym()
