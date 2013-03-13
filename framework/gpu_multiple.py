@@ -323,7 +323,7 @@ class vtk_single_renderer_scene():
         self._renderer4.SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(800, 800)
+        self._render_win.SetSize(1200, 800)
 
     def _prepare_camera(self):
         self._camera = self._renderer.GetActiveCamera()
@@ -388,7 +388,7 @@ class vtk_single_renderer_scene():
                    volume_filename3, self._configuration_filename, 'mri_reader')
 
         self.reader4 = vtk_volume_image_reader( \
-                   volume_filename4, self._configuration_filename, 'mri_reader')
+                   volume_filename4, self._configuration_filename, 'blockface_reader')
 
         self.volume = vtk_volume_mapper_wrapper( \
                 self.reader.reload_configuration().GetOutput(), self._configuration_filename,\
@@ -407,7 +407,7 @@ class vtk_single_renderer_scene():
 
         self.volume4 = vtk_volume_mapper_wrapper( \
                 self.reader4.reload_configuration().GetOutput(), self._configuration_filename,\
-                'mri_volume')
+                'blockface_volume')
         self._renderer4.AddVolume(self.volume4.reload_configuration())
 
        #self._cut = vtk_oblique_slice_mapper( \
@@ -465,6 +465,9 @@ class vtk_single_renderer_scene():
                 pass
             else:
                 self.reader._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+                self.reader2._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+                self.reader3._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+                self.reader4._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
 
             self._render_win.Render()
             self._global_time += 1
