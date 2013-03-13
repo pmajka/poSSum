@@ -6,8 +6,9 @@ import pos_palette
 from config import Config
 
 class vtk_volume_image_reader():
-    def __init__(self, filename, configuration_file):
+    def __init__(self, filename, configuration_file, reader_name):
         self._configuration_filename = configuration_file
+        self._reader_name = reader_name
         self._image_filename = filename
 
     def _load_config_file(self):
@@ -62,7 +63,7 @@ class vtk_volume_image_reader():
         self._permute = vtk.vtkImagePermute()
         self._permute.SetInputConnection(self._extract.GetOutputPort())
 
-        attrmap = self.cfg['mri_reader']['permute_image']
+        attrmap = self.cfg[self._reader_name]['permute_image']
         for attr, val in attrmap.iteritems():
             getattr(self._permute, attr)(*tuple(val))
 
@@ -139,12 +140,13 @@ class vtk_volume_mapper_wrapper():
     vtk_volume_mapper_wrapper(image_data,  use_multichannel_workflow=False)
     """
 
-    def __init__(self, image_data, configuration_file):
+    def __init__(self, image_data, configuration_file, reader_name):
         """
         vtk_volume_mapper_wrapper(image_data,configuration_file)
         """
 
         self._configuration_filename = configuration_file
+        self._reader_name = reader_name
         self._load_config_file()
         self.image_data = image_data
 
@@ -159,7 +161,7 @@ class vtk_volume_mapper_wrapper():
     def _load_config_file(self):
         self.cfg = Config(file(self._configuration_filename))
         for attr in ['acf', 'ctf', 'gof', 'use_multichannel_workflow','_min','_max']:
-            setattr(self, attr, self.cfg['mri_volume'][attr])
+            setattr(self, attr, self.cfg[self._reader_name][attr])
 
     def _prepare_volume_property(self):
         self.volume_property.SetColor(self.color_transfer_function.color_transfer_function())
@@ -167,7 +169,7 @@ class vtk_volume_mapper_wrapper():
         self.volume_property.SetGradientOpacity(self.gradient_opacity_function.piecewise_function())
 
         # Just an alias:
-        attrmap = self.cfg['mri_volume']['volume_property']
+        attrmap = self.cfg[self._reader_name]['volume_property']
         for attr, val in attrmap.iteritems():
             getattr(self.volume_property, attr)(val)
             print  attr, val
@@ -175,7 +177,7 @@ class vtk_volume_mapper_wrapper():
         print self.volume_property.GetShade()
         if self.volume_property.GetShade():
             # Just an alias:
-            attrmap = self.cfg['mri_volume']['volume_property_shading']
+            attrmap = self.cfg[self._reader_name]['volume_property_shading']
             for attr, val in attrmap.iteritems():
                 getattr(self.volume_property, attr)(val)
                 print attr, val
@@ -187,7 +189,7 @@ class vtk_volume_mapper_wrapper():
         self.volume_mapper.SetInput(self.image_data)
         self.volume_mapper.SetBlendModeToComposite()
 
-        attrmap = self.cfg['mri_volume']['volume_mapper']
+        attrmap = self.cfg[self._reader_name]['volume_mapper']
         for attr, val in attrmap.iteritems():
             getattr(self.volume_mapper, attr)(val)
 
@@ -264,6 +266,15 @@ class vtk_single_renderer_scene():
         self._configuration_filename = configuration_file
 
         self._renderer = vtk.vtkRenderer()
+        self._renderer2 = vtk.vtkRenderer()
+        self._renderer3 = vtk.vtkRenderer()
+        self._renderer4 = vtk.vtkRenderer()
+
+        self._renderer.SetViewport(   0, 0,   0.5, 0.5)
+        self._renderer2.SetViewport(  0.5, 0,  1.0, 0.5)
+        self._renderer3.SetViewport(0.5, 0.5, 1  ,   1)
+        self._renderer4.SetViewport(0, 0.5,   0.5,   1.0)
+
         self._render_win = vtk.vtkRenderWindow()
         self._render_interactor = vtk.vtkRenderWindowInteractor()
 
@@ -272,15 +283,33 @@ class vtk_single_renderer_scene():
 
     def _prepare_rendering_env(self):
         self._render_win.AddRenderer(self._renderer)
+        self._render_win.AddRenderer(self._renderer2)
+        self._render_win.AddRenderer(self._renderer3)
+        self._render_win.AddRenderer(self._renderer4)
         self._render_interactor.SetRenderWindow(self._render_win)
 
         self._renderer.GetCullers().InitTraversal()
         culler = self._renderer.GetCullers().GetNextItem()
         culler.SetSortingStyleToBackToFront()
 
+        self._renderer2.GetCullers().InitTraversal()
+        culler = self._renderer2.GetCullers().GetNextItem()
+        culler.SetSortingStyleToBackToFront()
+
+        self._renderer3.GetCullers().InitTraversal()
+        culler = self._renderer3.GetCullers().GetNextItem()
+        culler.SetSortingStyleToBackToFront()
+
+        self._renderer4.GetCullers().InitTraversal()
+        culler = self._renderer4.GetCullers().GetNextItem()
+        culler.SetSortingStyleToBackToFront()
+
         if self.cfg['scene']['general_settings']['use_light_kit']:
             self.light_kit = vtk_light_kit(self._configuration_filename)
             self.light_kit.light_kit.AddLightsToRenderer(self._renderer)
+            self.light_kit.light_kit.AddLightsToRenderer(self._renderer2)
+            self.light_kit.light_kit.AddLightsToRenderer(self._renderer3)
+            self.light_kit.light_kit.AddLightsToRenderer(self._renderer4)
 
         if self.cfg['scene']['general_settings']['use_orientation_marker']:
             self.orientation_widget = vtk_orientation_marker(self._configuration_filename)
@@ -289,12 +318,18 @@ class vtk_single_renderer_scene():
 
     def _prepare_renderer(self):
         self._renderer.SetBackground(1.0, 1.0, 1.0)
+        self._renderer2.SetBackground(1.0, 1.0, 1.0)
+        self._renderer3.SetBackground(1.0, 1.0, 1.0)
+        self._renderer4.SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(800, 400)
+        self._render_win.SetSize(800, 800)
 
     def _prepare_camera(self):
         self._camera = self._renderer.GetActiveCamera()
+        self._renderer2.SetActiveCamera(self._camera)
+        self._renderer3.SetActiveCamera(self._camera)
+        self._renderer4.SetActiveCamera(self._camera)
 
         if self.cfg['scene']['general_settings']['use_manual_camera']:
             attrmap = self.cfg['scene']['camera_settings']['manual']
@@ -305,6 +340,9 @@ class vtk_single_renderer_scene():
                     getattr(self._camera, attr)(val)
             self._camera.ParallelProjectionOn()
             self._renderer.ResetCameraClippingRange()
+            self._renderer2.ResetCameraClippingRange()
+            self._renderer3.ResetCameraClippingRange()
+            self._renderer4.ResetCameraClippingRange()
 
     def _take_screenshot(self):
         template_dictionary = {
@@ -335,18 +373,42 @@ class vtk_single_renderer_scene():
         self._render_interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
     def add_actors(self):
-        volume_filename = '/home/pmajka/mri.vtk'
-       #volume_filename = '/home/pmajka/myelin.vtk'
-       #volume_filename = '/home/pmajka/a.vtk'
-       #volume_filename = '/dev/shm/nietoperz_finished_uchar.vtk'
-       #volume_filename = '/dev/shm/opos.vtk'
+        volume_filename = '/home/pmajka/myelin_rgb.vtk'
+        volume_filename2 = '/home/pmajka/nissl_rgb.vtk'
+        volume_filename3 = '/home/pmajka/mri.vtk'
+        volume_filename4 = '/home/pmajka/blockface_rgb.vtk'
 
         self.reader = vtk_volume_image_reader( \
-                   volume_filename, self._configuration_filename)
+                   volume_filename, self._configuration_filename, 'myelin_reader')
+
+        self.reader2 = vtk_volume_image_reader( \
+                   volume_filename2, self._configuration_filename, 'nissl_reader')
+
+        self.reader3 = vtk_volume_image_reader( \
+                   volume_filename3, self._configuration_filename, 'mri_reader')
+
+        self.reader4 = vtk_volume_image_reader( \
+                   volume_filename4, self._configuration_filename, 'mri_reader')
 
         self.volume = vtk_volume_mapper_wrapper( \
-                self.reader.reload_configuration().GetOutput(), self._configuration_filename)
+                self.reader.reload_configuration().GetOutput(), self._configuration_filename,\
+                'myelin_volume')
         self._renderer.AddVolume(self.volume.reload_configuration())
+
+        self.volume2 = vtk_volume_mapper_wrapper( \
+                self.reader2.reload_configuration().GetOutput(), self._configuration_filename,\
+                'nissl_volume')
+        self._renderer2.AddVolume(self.volume2.reload_configuration())
+
+        self.volume3 = vtk_volume_mapper_wrapper( \
+                self.reader3.reload_configuration().GetOutput(), self._configuration_filename,\
+                'mri_volume')
+        self._renderer3.AddVolume(self.volume3.reload_configuration())
+
+        self.volume4 = vtk_volume_mapper_wrapper( \
+                self.reader4.reload_configuration().GetOutput(), self._configuration_filename,\
+                'mri_volume')
+        self._renderer4.AddVolume(self.volume4.reload_configuration())
 
        #self._cut = vtk_oblique_slice_mapper( \
        #        self.reader.reload_configuration().GetOutput(),\
@@ -396,17 +458,6 @@ class vtk_single_renderer_scene():
 
     def animate(self):
 
-#       for i in range(180):
-#          #self._camera.Zoom(1.1)
-#          #self._renderer.ResetCamera()
-#          #self._camera.Azimuth(2)
-#          #self._camera.Elevation(0.5)
-#           self._cut.transform.Translate(*tuple(map(lambda x: -1*x, self._cut.plane.GetOrigin())))
-#           self._cut.transform.RotateY(1)
-#           self._cut.transform.Translate(*self._cut.plane.GetOrigin())
-#           self._render_win.Render()
-#           self._global_time += 1
-#           self._take_screenshot()
         for i in range(576):
             if i < 360:
                 self._camera.Azimuth(1)
@@ -440,5 +491,5 @@ class vtk_single_renderer_scene():
         self._render_win.Render()
 
 if __name__ == '__main__':
-    app = vtk_single_renderer_scene('a.cfg')
+    app = vtk_single_renderer_scene('multiple_rgb.cfg')
     app.start()

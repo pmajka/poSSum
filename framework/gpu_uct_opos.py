@@ -336,10 +336,10 @@ class vtk_single_renderer_scene():
 
     def add_actors(self):
         volume_filename = '/home/pmajka/mri.vtk'
-       #volume_filename = '/home/pmajka/myelin.vtk'
-       #volume_filename = '/home/pmajka/a.vtk'
+        volume_filename = '/home/pmajka/myelin.vtk'
+        volume_filename = '/home/pmajka/a.vtk'
        #volume_filename = '/dev/shm/nietoperz_finished_uchar.vtk'
-       #volume_filename = '/dev/shm/opos.vtk'
+        volume_filename = '/dev/shm/opos.vtk'
 
         self.reader = vtk_volume_image_reader( \
                    volume_filename, self._configuration_filename)
@@ -396,24 +396,13 @@ class vtk_single_renderer_scene():
 
     def animate(self):
 
-#       for i in range(180):
-#          #self._camera.Zoom(1.1)
-#          #self._renderer.ResetCamera()
-#          #self._camera.Azimuth(2)
-#          #self._camera.Elevation(0.5)
-#           self._cut.transform.Translate(*tuple(map(lambda x: -1*x, self._cut.plane.GetOrigin())))
-#           self._cut.transform.RotateY(1)
-#           self._cut.transform.Translate(*self._cut.plane.GetOrigin())
-#           self._render_win.Render()
-#           self._global_time += 1
-#           self._take_screenshot()
-        for i in range(576):
+        for i in range(690):
             if i < 360:
                 self._camera.Azimuth(1)
             elif 360 <= i < 400:
                 pass
             else:
-                self.reader._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+                self.reader._extract.SetVOI(i-400, 580, 0, 1250, 0, 1136)
 
             self._render_win.Render()
             self._global_time += 1
@@ -440,5 +429,5 @@ class vtk_single_renderer_scene():
         self._render_win.Render()
 
 if __name__ == '__main__':
-    app = vtk_single_renderer_scene('a.cfg')
+    app = vtk_single_renderer_scene('uct_opos.cfg')
     app.start()

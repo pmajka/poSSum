@@ -213,27 +213,35 @@ class vtk_oblique_slice_mapper():
     def __init__(self, image, interactor):
         pass
         self.plane = vtk.vtkPlane()
-        self.plane_widget = vtk.vtkImplicitPlaneWidget()
-        self.plane_widget.SetInteractor(interactor)
-        self.plane_widget.SetPlaceFactor(1)
-        self.plane_widget.SetInput(image)
-        self.plane_widget.PlaceWidget()
-#       self.plane_widget.AddObserver("InteractionEvent", self.myCallback)
-        self.plane_widget.DrawPlaneOff()
-        self.plane_widget.SetOrigin(3.469, 12.37, 6.425)
-        self.plane_widget.SetNormalToXAxis(1)
-        self.plane_widget.OutlineTranslationOff()
+ #      self.plane_widget = vtk.vtkImplicitPlaneWidget()
+ #      self.plane_widget.SetInteractor(interactor)
+ #      self.plane_widget.SetPlaceFactor(1)
+ #      self.plane_widget.SetInput(image)
+ #      self.plane_widget.PlaceWidget()
+##      self.plane_widget.AddObserver("InteractionEvent", self.myCallback)
+ #      self.plane_widget.DrawPlaneOff()
+ #      self.plane_widget.SetOrigin(3.469, 12.37, 6.425)
+ #      self.plane_widget.SetNormalToXAxis(1)
+ #      self.plane_widget.OutlineTranslationOff()
 
-        self.transform = vtk.vtkTransform()
-        self.transform.PostMultiply()
-        self.plane.SetOrigin(3.469, 12.37, 6.425)
-        self.plane.SetTransform(self.transform)
+        self.boxWidget = vtk.vtkBoxWidget()
+        self.boxWidget.SetInteractor(interactor)
+
+        self.boxWidget.PlaceWidget(0, 3.469, 0, 12.37, 0, 6.425)
+
+        self.plane = vtk.vtkPlanes()
+
+#       self.transform = vtk.vtkTransform()
+#       self.transform.PostMultiply()
+#       self.plane.SetOrigin(3.469, 12.37, 6.425)
+#       self.plane.SetTransform(self.transform)
 
         self._resample = vtk.vtkImageResample()
-        self._resample.SetAxisMagnificationFactor(0,0.2)
-        self._resample.SetAxisMagnificationFactor(1,0.2)
-        self._resample.SetAxisMagnificationFactor(2,0.2)
-        self._resample.SetInterpolationModeToCubic()
+        self._resample.SetAxisMagnificationFactor(0,.2)
+        self._resample.SetAxisMagnificationFactor(1,.2)
+        self._resample.SetAxisMagnificationFactor(2,.2)
+        #self._resample.SetInterpolationModeToCubic()
+        self._resample.SetInterpolationModeToLinear()
         self._resample.SetInput(image)
 
         planeCut = vtk.vtkCutter()
@@ -245,7 +253,8 @@ class vtk_oblique_slice_mapper():
         self.cutActor = vtk.vtkActor()
         self.cutActor.SetMapper(cutMapper)
         self.cutActor.VisibilityOn()
-        self.plane_widget.GetPlane(self.plane)
+       #self.plane_widget.GetPlane(self.plane)
+        self.boxWidget.GetPlanes(self.plane)
 
 #       self.transform.Translate(*tuple(map(lambda x: -1*x, self.plane.GetOrigin())))
 #       self.transform.RotateY(-45)
@@ -256,7 +265,8 @@ class vtk_oblique_slice_mapper():
         return self.cutActor
 
     def myCallback(self, obj, event):
-        obj.GetPlane(self.plane)
+       #obj.GetPlane(self.plane)
+        obj.GetPlanes(self.plane)
         self.cutActor.VisibilityOn()
 
 class vtk_single_renderer_scene():
@@ -336,10 +346,9 @@ class vtk_single_renderer_scene():
 
     def add_actors(self):
         volume_filename = '/home/pmajka/mri.vtk'
-       #volume_filename = '/home/pmajka/myelin.vtk'
-       #volume_filename = '/home/pmajka/a.vtk'
+        volume_filename = '/home/pmajka/myelin.vtk'
+        volume_filename = '/home/pmajka/a.vtk'
        #volume_filename = '/dev/shm/nietoperz_finished_uchar.vtk'
-       #volume_filename = '/dev/shm/opos.vtk'
 
         self.reader = vtk_volume_image_reader( \
                    volume_filename, self._configuration_filename)
@@ -348,17 +357,17 @@ class vtk_single_renderer_scene():
                 self.reader.reload_configuration().GetOutput(), self._configuration_filename)
         self._renderer.AddVolume(self.volume.reload_configuration())
 
-       #self._cut = vtk_oblique_slice_mapper( \
-       #        self.reader.reload_configuration().GetOutput(),\
-       #        self._render_interactor)
+        self._cut = vtk_oblique_slice_mapper( \
+                self.reader.reload_configuration().GetOutput(),\
+                self._render_interactor)
 
-       #self._cutActor = self._cut.reload_configuration()
-       #self._renderer.AddActor(self._cutActor)
+        self._cutActor = self._cut.reload_configuration()
+        self._renderer.AddActor(self._cutActor)
 
     def _assign_events(self):
         pass
         self._render_interactor.AddObserver("KeyPressEvent", self.key_press_dispather)
-#       self._cut.plane_widget.AddObserver("InteractionEvent", self._cut.myCallback)
+        self._cut.boxWidget.AddObserver("InteractionEvent", self._cut.myCallback)
 
     def _reload_configuration(self):
         self.volume.image_data = self.reader.reload_configuration().GetOutput()
@@ -382,7 +391,7 @@ class vtk_single_renderer_scene():
         self._render_interactor.Initialize()
         self._render_interactor.Start()
 
-        self.animate()
+       #self.animate()
 
     def _pre_animate(self):
         # Initialize global timer and screenshot iterator
@@ -391,30 +400,19 @@ class vtk_single_renderer_scene():
 
         # Setup initial camera location
         self._camera.Azimuth(90)
-        self._camera.Zoom(2.0)
+       #self._camera.Zoom(2)
         pass
 
     def animate(self):
 
-#       for i in range(180):
-#          #self._camera.Zoom(1.1)
-#          #self._renderer.ResetCamera()
-#          #self._camera.Azimuth(2)
-#          #self._camera.Elevation(0.5)
-#           self._cut.transform.Translate(*tuple(map(lambda x: -1*x, self._cut.plane.GetOrigin())))
-#           self._cut.transform.RotateY(1)
-#           self._cut.transform.Translate(*self._cut.plane.GetOrigin())
-#           self._render_win.Render()
-#           self._global_time += 1
-#           self._take_screenshot()
-        for i in range(576):
-            if i < 360:
-                self._camera.Azimuth(1)
-            elif 360 <= i < 400:
-                pass
-            else:
-                self.reader._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-
+        for i in range(180):
+           #self._camera.Zoom(1.1)
+           #self._renderer.ResetCamera()
+           #self._camera.Azimuth(2)
+           #self._camera.Elevation(0.5)
+            self._cut.transform.Translate(*tuple(map(lambda x: -1*x, self._cut.plane.GetOrigin())))
+            self._cut.transform.RotateY(1)
+            self._cut.transform.Translate(*self._cut.plane.GetOrigin())
             self._render_win.Render()
             self._global_time += 1
             self._take_screenshot()
