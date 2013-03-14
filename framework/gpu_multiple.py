@@ -6,18 +6,20 @@ import pos_palette
 from config import Config
 
 class vtk_volume_image_reader():
-    def __init__(self, filename, configuration_file, reader_name):
+    def __init__(self, reader_name, configuration_file, filename = None):
         self._configuration_filename = configuration_file
         self._reader_name = reader_name
         self._image_filename = filename
 
     def _load_config_file(self):
         self.cfg = Config(file(self._configuration_filename))
-        print self.cfg
 
     def _prepare_reader(self):
         self._reader = vtk.vtkStructuredPointsReader()
-        self._reader.SetFileName(self._image_filename)
+        if self._image_filename:
+            self._reader.SetFileName(self._image_filename)
+        else:
+            self._reader.SetFileName(self.cfg[self._reader_name]['image_name'])
         self._reader.Update()
 
     def _prepare_image_cast(self):
@@ -25,7 +27,7 @@ class vtk_volume_image_reader():
         self._cast.SetInput(self._reader.GetOutput())
         self._cast.SetOutputScalarTypeToUnsignedChar()
 
-        attrmap = self.cfg['mri_reader']['cast_image']
+        attrmap = self.cfg[self._reader_name]['cast_image']
         for attr, val in attrmap.iteritems():
             getattr(self._cast, attr)(val)
 
@@ -35,15 +37,15 @@ class vtk_volume_image_reader():
         self._extract = vtk.vtkExtractVOI()
         self._extract.SetInputConnection(self._cast.GetOutputPort())
 
-        attrmap = self.cfg['mri_reader']['extract_voi']
+        attrmap = self.cfg[self._reader_name]['extract_voi']
         for attr, val in attrmap.iteritems():
             getattr(self._extract, attr)(*tuple(val))
 
         self._extract.Update()
 
     def _prepare_flip(self):
-        f = self.cfg['mri_reader']['flip_image']['flip_xyz']
-        o = self.cfg['mri_reader']['flip_image']['origin_xyz']
+        f = self.cfg[self._reader_name]['flip_image']['flip_xyz']
+        o = self.cfg[self._reader_name]['flip_image']['origin_xyz']
 
         flip = [0,0,0] # A stub
 
@@ -193,6 +195,9 @@ class vtk_volume_mapper_wrapper():
         for attr, val in attrmap.iteritems():
             getattr(self.volume_mapper, attr)(val)
 
+        self.clippingPlanes = vtk.vtkPlaneCollection()
+        self.volume_mapper.SetClippingPlanes(self.clippingPlanes)
+
     def _prepare_volume(self):
         self.volume.SetMapper(self.volume_mapper)
         self.volume.SetProperty(self.volume_property)
@@ -213,23 +218,21 @@ class vtk_volume_mapper_wrapper():
 
 class vtk_oblique_slice_mapper():
     def __init__(self, image, interactor):
-        pass
         self.plane = vtk.vtkPlane()
         self.plane_widget = vtk.vtkImplicitPlaneWidget()
         self.plane_widget.SetInteractor(interactor)
         self.plane_widget.SetPlaceFactor(1)
         self.plane_widget.SetInput(image)
         self.plane_widget.PlaceWidget()
-#       self.plane_widget.AddObserver("InteractionEvent", self.myCallback)
         self.plane_widget.DrawPlaneOff()
         self.plane_widget.SetOrigin(3.469, 12.37, 6.425)
         self.plane_widget.SetNormalToXAxis(1)
         self.plane_widget.OutlineTranslationOff()
 
-        self.transform = vtk.vtkTransform()
-        self.transform.PostMultiply()
+#       self.transform = vtk.vtkTransform()
+#       self.transform.PostMultiply()
         self.plane.SetOrigin(3.469, 12.37, 6.425)
-        self.plane.SetTransform(self.transform)
+#       self.plane.SetTransform(self.transform)
 
         self._resample = vtk.vtkImageResample()
         self._resample.SetAxisMagnificationFactor(0,0.2)
@@ -249,9 +252,9 @@ class vtk_oblique_slice_mapper():
         self.cutActor.VisibilityOn()
         self.plane_widget.GetPlane(self.plane)
 
-#       self.transform.Translate(*tuple(map(lambda x: -1*x, self.plane.GetOrigin())))
-#       self.transform.RotateY(-45)
-#       self.transform.Translate(*self.plane.GetOrigin())
+        #self.transform.Translate(*tuple(map(lambda x: -1*x, self.plane.GetOrigin())))
+        #self.transform.RotateY(-45)
+        #self.transform.Translate(*self.plane.GetOrigin())
         planeCut.Update()
 
     def reload_configuration(self):
@@ -265,15 +268,19 @@ class vtk_single_renderer_scene():
     def __init__(self, configuration_file):
         self._configuration_filename = configuration_file
 
-        self._renderer = vtk.vtkRenderer()
-        self._renderer2 = vtk.vtkRenderer()
-        self._renderer3 = vtk.vtkRenderer()
-        self._renderer4 = vtk.vtkRenderer()
+        self._renderers = []
+        for i in range(4):
+            self._renderers.append(vtk.vtkRenderer())
 
-        self._renderer.SetViewport(   0, 0,   0.5, 0.5)
-        self._renderer2.SetViewport(  0.5, 0,  1.0, 0.5)
-        self._renderer3.SetViewport(0.5, 0.5, 1  ,   1)
-        self._renderer4.SetViewport(0, 0.5,   0.5,   1.0)
+        layout2 = [(0, 0, 0.67,  1), (0.67, 0, 1.0, 0.33),
+                  (0.67, 0.33, 1, 0.67), (0.67, 0.67, 1.0, 1.0)]
+        layout3 = [(0.0, 0.33, 1, 1), (0, 0, 0.33, 0.33),
+                  (0.33, 0, 0.67, 0.33), (0.67, 0, 1.0, 0.33)]
+        layout = [(0, 0, 0.5, 0.5), (0.5, 0, 1.0, 0.5),
+                  (0.5, 0.5, 1, 1), (0, 0.5, 0.5, 1.0)]
+
+        for i in range(4):
+            self._renderers[i].SetViewport(*layout3[i])
 
         self._render_win = vtk.vtkRenderWindow()
         self._render_interactor = vtk.vtkRenderWindowInteractor()
@@ -282,34 +289,17 @@ class vtk_single_renderer_scene():
         self.cfg = Config(file(self._configuration_filename))
 
     def _prepare_rendering_env(self):
-        self._render_win.AddRenderer(self._renderer)
-        self._render_win.AddRenderer(self._renderer2)
-        self._render_win.AddRenderer(self._renderer3)
-        self._render_win.AddRenderer(self._renderer4)
+        for i in range(4):
+            self._render_win.AddRenderer(self._renderers[i])
+            self._renderers[i].GetCullers().InitTraversal()
+            culler = self._renderers[i].GetCullers().GetNextItem()
+            culler.SetSortingStyleToBackToFront()
         self._render_interactor.SetRenderWindow(self._render_win)
-
-        self._renderer.GetCullers().InitTraversal()
-        culler = self._renderer.GetCullers().GetNextItem()
-        culler.SetSortingStyleToBackToFront()
-
-        self._renderer2.GetCullers().InitTraversal()
-        culler = self._renderer2.GetCullers().GetNextItem()
-        culler.SetSortingStyleToBackToFront()
-
-        self._renderer3.GetCullers().InitTraversal()
-        culler = self._renderer3.GetCullers().GetNextItem()
-        culler.SetSortingStyleToBackToFront()
-
-        self._renderer4.GetCullers().InitTraversal()
-        culler = self._renderer4.GetCullers().GetNextItem()
-        culler.SetSortingStyleToBackToFront()
 
         if self.cfg['scene']['general_settings']['use_light_kit']:
             self.light_kit = vtk_light_kit(self._configuration_filename)
-            self.light_kit.light_kit.AddLightsToRenderer(self._renderer)
-            self.light_kit.light_kit.AddLightsToRenderer(self._renderer2)
-            self.light_kit.light_kit.AddLightsToRenderer(self._renderer3)
-            self.light_kit.light_kit.AddLightsToRenderer(self._renderer4)
+            for i in range(4):
+                self.light_kit.light_kit.AddLightsToRenderer(self._renderers[i])
 
         if self.cfg['scene']['general_settings']['use_orientation_marker']:
             self.orientation_widget = vtk_orientation_marker(self._configuration_filename)
@@ -317,19 +307,16 @@ class vtk_single_renderer_scene():
             self.orientation_widget.after_setting_interactor()
 
     def _prepare_renderer(self):
-        self._renderer.SetBackground(1.0, 1.0, 1.0)
-        self._renderer2.SetBackground(1.0, 1.0, 1.0)
-        self._renderer3.SetBackground(1.0, 1.0, 1.0)
-        self._renderer4.SetBackground(1.0, 1.0, 1.0)
+        for i in range(4):
+            self._renderers[i].SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
         self._render_win.SetSize(1200, 800)
 
     def _prepare_camera(self):
-        self._camera = self._renderer.GetActiveCamera()
-        self._renderer2.SetActiveCamera(self._camera)
-        self._renderer3.SetActiveCamera(self._camera)
-        self._renderer4.SetActiveCamera(self._camera)
+        self._camera = self._renderers[0].GetActiveCamera()
+        for i in range(1,4):
+            self._renderers[i].SetActiveCamera(self._camera)
 
         if self.cfg['scene']['general_settings']['use_manual_camera']:
             attrmap = self.cfg['scene']['camera_settings']['manual']
@@ -339,10 +326,9 @@ class vtk_single_renderer_scene():
                 except TypeError:
                     getattr(self._camera, attr)(val)
             self._camera.ParallelProjectionOn()
-            self._renderer.ResetCameraClippingRange()
-            self._renderer2.ResetCameraClippingRange()
-            self._renderer3.ResetCameraClippingRange()
-            self._renderer4.ResetCameraClippingRange()
+
+            for i in range(4):
+                self._renderers[i].ResetCameraClippingRange()
 
     def _take_screenshot(self):
         template_dictionary = {
@@ -373,54 +359,36 @@ class vtk_single_renderer_scene():
         self._render_interactor.SetInteractorStyle(vtk.vtkInteractorStyleTrackballCamera())
 
     def add_actors(self):
-        volume_filename = '/home/pmajka/myelin_rgb.vtk'
-        volume_filename2 = '/home/pmajka/nissl_rgb.vtk'
-        volume_filename3 = '/home/pmajka/mri.vtk'
-        volume_filename4 = '/home/pmajka/blockface_rgb.vtk'
 
-        self.reader = vtk_volume_image_reader( \
-                   volume_filename, self._configuration_filename, 'myelin_reader')
+        modalities_readers = ['myelin_reader', 'nissl_reader', 'mri_reader', 'blockface_reader']
+        modalities_volumes = ['myelin_volume', 'nissl_volume', 'mri_volume', 'blockface_volume']
 
-        self.reader2 = vtk_volume_image_reader( \
-                   volume_filename2, self._configuration_filename, 'nissl_reader')
+        self.readers = []
+        self.volumes = []
+        for idx, modality in enumerate(modalities_readers):
+            self.readers.append(vtk_volume_image_reader(modality,
+                                                        self._configuration_filename))
 
-        self.reader3 = vtk_volume_image_reader( \
-                   volume_filename3, self._configuration_filename, 'mri_reader')
+        for idx, modality in enumerate(modalities_volumes):
+            self.volumes.append(\
+                vtk_volume_mapper_wrapper(self.readers[idx].reload_configuration().GetOutput(),
+                                          self._configuration_filename, modality))
+            self._renderers[idx].AddVolume(self.volumes[idx].reload_configuration())
 
-        self.reader4 = vtk_volume_image_reader( \
-                   volume_filename4, self._configuration_filename, 'blockface_reader')
+        self._cut = vtk_oblique_slice_mapper( \
+                self.readers[0].reload_configuration().GetOutput(),\
+                self._render_interactor)
 
-        self.volume = vtk_volume_mapper_wrapper( \
-                self.reader.reload_configuration().GetOutput(), self._configuration_filename,\
-                'myelin_volume')
-        self._renderer.AddVolume(self.volume.reload_configuration())
-
-        self.volume2 = vtk_volume_mapper_wrapper( \
-                self.reader2.reload_configuration().GetOutput(), self._configuration_filename,\
-                'nissl_volume')
-        self._renderer2.AddVolume(self.volume2.reload_configuration())
-
-        self.volume3 = vtk_volume_mapper_wrapper( \
-                self.reader3.reload_configuration().GetOutput(), self._configuration_filename,\
-                'mri_volume')
-        self._renderer3.AddVolume(self.volume3.reload_configuration())
-
-        self.volume4 = vtk_volume_mapper_wrapper( \
-                self.reader4.reload_configuration().GetOutput(), self._configuration_filename,\
-                'blockface_volume')
-        self._renderer4.AddVolume(self.volume4.reload_configuration())
-
-       #self._cut = vtk_oblique_slice_mapper( \
-       #        self.reader.reload_configuration().GetOutput(),\
-       #        self._render_interactor)
-
-       #self._cutActor = self._cut.reload_configuration()
-       #self._renderer.AddActor(self._cutActor)
+#       self._cutActor = self._cut.reload_configuration()
+        self._renderers[0].AddActor(self._cutActor)
+        self.volumes[0].clippingPlanes.AddItem(self._cut.plane)
+        self.volumes[1].clippingPlanes.AddItem(self._cut.plane)
+        self.volumes[2].clippingPlanes.AddItem(self._cut.plane)
+        self.volumes[3].clippingPlanes.AddItem(self._cut.plane)
 
     def _assign_events(self):
-        pass
         self._render_interactor.AddObserver("KeyPressEvent", self.key_press_dispather)
-#       self._cut.plane_widget.AddObserver("InteractionEvent", self._cut.myCallback)
+        self._cut.plane_widget.AddObserver("InteractionEvent", self._cut.myCallback)
 
     def _reload_configuration(self):
         self.volume.image_data = self.reader.reload_configuration().GetOutput()
@@ -437,7 +405,7 @@ class vtk_single_renderer_scene():
         self._assign_events()
 
         self._render_win.Render()
-        self._renderer.ResetCamera()
+        self._renderers[0].ResetCamera()
         self._pre_animate()
         self._render_win.Render()
 
@@ -458,20 +426,42 @@ class vtk_single_renderer_scene():
 
     def animate(self):
 
-        for i in range(576):
-            if i < 360:
-                self._camera.Azimuth(1)
-            elif 360 <= i < 400:
-                pass
-            else:
-                self.reader._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-                self.reader2._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-                self.reader3._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-                self.reader4._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+        self.transform = vtk.vtkTransform()
+        self.transform.PostMultiply()
+        plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
+        first_origin = plane.GetOrigin()
+        first_normal = plane.GetNormal()
+
+        for i in range(180):
+#           self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
+#           self.transform.RotateZ(0)
+#           self.transform.Translate(*first_origin)
+
+#           new_origin = self.transform.TransformPoint(*first_origin)
+#           new_normal = self.transform.TransformPoint(*first_normal)
+#           plane.SetOrigin(*new_origin)
+#           plane.SetNormal(*new_normal)
+            plane.Push(0.1)
+#           print new_origin, new_normal
 
             self._render_win.Render()
             self._global_time += 1
-            self._take_screenshot()
+            print i
+
+#       for i in range(576):
+#           if i < 360:
+#               self._camera.Azimuth(1)
+#           elif 360 <= i < 400:
+#               pass
+#           else:
+#               self.reader._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+#               self.reader2._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+#               self.reader3._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+#               self.reader4._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
+
+#           self._render_win.Render()
+#           self._global_time += 1
+#           self._take_screenshot()
 
     def key_press_dispather(self, obj, event):
         key = obj.GetKeySym()
@@ -492,6 +482,7 @@ class vtk_single_renderer_scene():
             self._take_screenshot()
 
         self._render_win.Render()
+
 
 if __name__ == '__main__':
     app = vtk_single_renderer_scene('multiple_rgb.cfg')
