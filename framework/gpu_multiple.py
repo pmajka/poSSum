@@ -218,6 +218,7 @@ class vtk_volume_mapper_wrapper():
 
 class vtk_oblique_slice_mapper():
     def __init__(self, image, interactor):
+#   def __init__(self, configuration_file, image, interactor):
         self.plane = vtk.vtkPlane()
         self.plane_widget = vtk.vtkImplicitPlaneWidget()
         self.plane_widget.SetInteractor(interactor)
@@ -225,19 +226,20 @@ class vtk_oblique_slice_mapper():
         self.plane_widget.SetInput(image)
         self.plane_widget.PlaceWidget()
         self.plane_widget.DrawPlaneOff()
-        self.plane_widget.SetOrigin(3.469, 12.37, 6.425)
-        self.plane_widget.SetNormalToXAxis(1)
+        self.plane_widget.SetOrigin(0, 12.37, 6.425)
+        self.plane_widget.SetNormal(1,0,0)
+#       self.plane_widget.SetNormalToXAxis(1)
         self.plane_widget.OutlineTranslationOff()
 
 #       self.transform = vtk.vtkTransform()
 #       self.transform.PostMultiply()
-        self.plane.SetOrigin(3.469, 12.37, 6.425)
+        self.plane.SetOrigin(0, 12.37, 6.425)
 #       self.plane.SetTransform(self.transform)
 
         self._resample = vtk.vtkImageResample()
-        self._resample.SetAxisMagnificationFactor(0,0.2)
-        self._resample.SetAxisMagnificationFactor(1,0.2)
-        self._resample.SetAxisMagnificationFactor(2,0.2)
+        self._resample.SetAxisMagnificationFactor(0,1)
+        self._resample.SetAxisMagnificationFactor(1,1)
+        self._resample.SetAxisMagnificationFactor(2,1)
         self._resample.SetInterpolationModeToCubic()
         self._resample.SetInput(image)
 
@@ -257,6 +259,15 @@ class vtk_oblique_slice_mapper():
         #self.transform.Translate(*self.plane.GetOrigin())
         planeCut.Update()
 
+    def _prepare_plane(self):
+        pass
+
+    def _prepare_widget(self):
+        pass
+
+    def _prepare_actor(self):
+        pass
+
     def reload_configuration(self):
         return self.cutActor
 
@@ -264,23 +275,23 @@ class vtk_oblique_slice_mapper():
         obj.GetPlane(self.plane)
         self.cutActor.VisibilityOn()
 
-class vtk_single_renderer_scene():
+class vtk_four_renderers_scene():
+
+    layouts = {
+        'equal' :    [(0, 0, 0.5, 0.5), (0.5, 0, 1.0, 0.5),
+                     (0.5, 0.5, 1, 1), (0, 0.5, 0.5, 1.0)],
+        'vertical':  [(0, 0, 0.67,  1), (0.67, 0, 1.0, 0.33),
+                     (0.67, 0.33, 1, 0.67), (0.67, 0.67, 1.0, 1.0)],
+        'horizontal':[(0.0, 0.33, 1, 1), (0, 0, 0.33, 0.33),
+                     (0.33, 0, 0.67, 0.33), (0.67, 0, 1.0, 0.33)]}
+
     def __init__(self, configuration_file):
         self._configuration_filename = configuration_file
 
         self._renderers = []
         for i in range(4):
             self._renderers.append(vtk.vtkRenderer())
-
-        layout2 = [(0, 0, 0.67,  1), (0.67, 0, 1.0, 0.33),
-                  (0.67, 0.33, 1, 0.67), (0.67, 0.67, 1.0, 1.0)]
-        layout3 = [(0.0, 0.33, 1, 1), (0, 0, 0.33, 0.33),
-                  (0.33, 0, 0.67, 0.33), (0.67, 0, 1.0, 0.33)]
-        layout = [(0, 0, 0.5, 0.5), (0.5, 0, 1.0, 0.5),
-                  (0.5, 0.5, 1, 1), (0, 0.5, 0.5, 1.0)]
-
-        for i in range(4):
-            self._renderers[i].SetViewport(*layout3[i])
+            self._renderers[i].SetViewport(*self.layouts['vertical'][i])
 
         self._render_win = vtk.vtkRenderWindow()
         self._render_interactor = vtk.vtkRenderWindowInteractor()
@@ -311,7 +322,7 @@ class vtk_single_renderer_scene():
             self._renderers[i].SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(1200, 800)
+        self._render_win.SetSize(600, 400)
 
     def _prepare_camera(self):
         self._camera = self._renderers[0].GetActiveCamera()
@@ -371,7 +382,7 @@ class vtk_single_renderer_scene():
 
         for idx, modality in enumerate(modalities_volumes):
             self.volumes.append(\
-                vtk_volume_mapper_wrapper(self.readers[idx].reload_configuration().GetOutput(),
+               vtk_volume_mapper_wrapper(self.readers[idx].reload_configuration().GetOutput(),
                                           self._configuration_filename, modality))
             self._renderers[idx].AddVolume(self.volumes[idx].reload_configuration())
 
@@ -379,7 +390,7 @@ class vtk_single_renderer_scene():
                 self.readers[0].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
-#       self._cutActor = self._cut.reload_configuration()
+        self._cutActor = self._cut.reload_configuration()
         self._renderers[0].AddActor(self._cutActor)
         self.volumes[0].clippingPlanes.AddItem(self._cut.plane)
         self.volumes[1].clippingPlanes.AddItem(self._cut.plane)
@@ -441,11 +452,12 @@ class vtk_single_renderer_scene():
 #           new_normal = self.transform.TransformPoint(*first_normal)
 #           plane.SetOrigin(*new_origin)
 #           plane.SetNormal(*new_normal)
-            plane.Push(0.1)
+            plane.Push(0.05)
 #           print new_origin, new_normal
 
             self._render_win.Render()
             self._global_time += 1
+            self._take_screenshot()
             print i
 
 #       for i in range(576):
@@ -485,5 +497,5 @@ class vtk_single_renderer_scene():
 
 
 if __name__ == '__main__':
-    app = vtk_single_renderer_scene('multiple_rgb.cfg')
+    app = vtk_four_renderers_scene('multiple_rgb.cfg')
     app.start()
