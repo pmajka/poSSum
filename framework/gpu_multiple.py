@@ -237,9 +237,9 @@ class vtk_oblique_slice_mapper():
 #       self.plane.SetTransform(self.transform)
 
         self._resample = vtk.vtkImageResample()
-        self._resample.SetAxisMagnificationFactor(0,1)
-        self._resample.SetAxisMagnificationFactor(1,1)
-        self._resample.SetAxisMagnificationFactor(2,1)
+        self._resample.SetAxisMagnificationFactor(0,.3)
+        self._resample.SetAxisMagnificationFactor(1,.3)
+        self._resample.SetAxisMagnificationFactor(2,.3)
         self._resample.SetInterpolationModeToCubic()
         self._resample.SetInput(image)
 
@@ -497,5 +497,7 @@ class vtk_four_renderers_scene():
 
 
 if __name__ == '__main__':
+   #configuration_file = sys.argv[1]
+   #app = vtk_four_renderers_scene(configuration_file)
     app = vtk_four_renderers_scene('multiple_rgb.cfg')
     app.start()
