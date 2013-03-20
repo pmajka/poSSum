@@ -50,8 +50,8 @@ class average_multichannel_images_list(pos_wrappers.generic_wrapper):
 
 class nonuniform_relice(generic_workflow):
     """
-    Workflow to mappin nonuniformly spaced slices to a grid of regular spacing.
-    
+    Workflow for mapping nonuniformly spaced slices to a regularly spaced gird.
+
     python nonuniform_reslice.py \
         --referenceCoordinates /home/pmajka/the_whole_brain_connectivity_atlas/data/merge/R601_reference_planes \
         --probingCoordinates planes_reference \
@@ -65,9 +65,9 @@ class nonuniform_relice(generic_workflow):
         --outputVolumeOrigin -9.622 -7.92 1.444 \
         --outputVolumePermutationOrder 0 2 1 \
         --outputVolumeOrientationCode RAS \
-        --rgbVolumeFilename /home/pmajka/601.nii.gz 
-        
-        #    --dryRun 
+        --rgbVolumeFilename /home/pmajka/601.nii.gz
+
+        #    --dryRun
         #    --cleanup
         #    --useGrayscaleWorkflow \
         #    --useGrayscaleWorkflow \
@@ -113,37 +113,37 @@ class nonuniform_relice(generic_workflow):
         if self.options.outputWeightedSlicesDir:
             self.f['weighted_grayscale'].override_dir = self.options.outputWeightedSlicesDir
             self.f['weighted_multichannel'].override_dir = self.options.outputWeightedSlicesDir
-        
+
         for out_type in (self.options.grayscaleVolumeFilename,\
                          self.options.rgbVolumeFilename):
             if out_type:
                 self.f['output_volumes'].override_path = out_type
-    
+
     def launch(self):
-        # TODO: the script should be able to process the volumes instead of 
+        # TODO: the script should be able to process the volumes instead of
         # the extracted slices. Think about it :)
-        
+
         # At first load the coordinates of reference volume
         # (the coordinates you map to)
         self.coords_from = self.load_coordinates_from_file(
                              self.options.referenceCoordinates,
                              negate=self.options.negateReferenceCoordinates)
-        
+
         # Then load the probing coordinates
         # (the coordinates you map from)
         self.coords_to = self.load_coordinates_from_file(
                            self.options.probingCoordinates,
                            negate=self.options.negateProbingCoordinates)
-        
+
         # Select the workflow type (one can choose between RGB - multichannel workflow
         # and classic, grayscale workflow).
-        # Process the source data according to the selected workflow, 
+        # Process the source data according to the selected workflow,
         if self.options.useMultichannelWorkflow:
             self.reslice_generic(average_multichannel_images_list,
                                  weighting_output_dir='weighted_multichannel')
 
             self.prepare_output_multichannel_volume()
-        
+
         if self.options.useGrayscaleWorkflow:
             self.reslice_generic(average_grayscale_images_list,
                                  weighting_output_dir='weighted_grayscale')
@@ -168,7 +168,7 @@ class nonuniform_relice(generic_workflow):
         for slice_idx, slice in enumerate(interpolation_data):
             # print slice
             o=self.options.startingSliceIndexOffset
-            
+
             command = reslice_command_wrapper(\
                         dimension = 2,
                         input_image_1 = self.f['ref_input'](idx=slice['slice_1']+o),
@@ -201,7 +201,7 @@ class nonuniform_relice(generic_workflow):
                 # Avoid getting out of the range:
                 if r_slice > len(coords_from)-1:
                     r_slice = l_slice
-                
+
                 # print i, l_slice, l_weight, r_slice, r_weight, len(coords_from)
                 slice_results = {'status': True, 'coord': i,
                                'slice_1': l_slice, 'weight_1': l_weight,
