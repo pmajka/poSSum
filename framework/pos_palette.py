@@ -730,7 +730,7 @@ class pos_palette(object):
         True
 
         """
-        execution_path = os.path.dirname(__file__)
+        execution_path = os.path.dirname(os.path.relpath(__file__))
         return cls.from_gnuplot_file(os.path.join(
             execution_path, DIRECTORY_PALLETES, name + '.gpf'),
             min=min, max=max)
