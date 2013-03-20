@@ -217,56 +217,58 @@ class vtk_volume_mapper_wrapper():
         return self.volume
 
 class vtk_oblique_slice_mapper():
-    def __init__(self, image, interactor):
-#   def __init__(self, configuration_file, image, interactor):
-        self.plane = vtk.vtkPlane()
-        self.plane_widget = vtk.vtkImplicitPlaneWidget()
-        self.plane_widget.SetInteractor(interactor)
-        self.plane_widget.SetPlaceFactor(1)
-        self.plane_widget.SetInput(image)
-        self.plane_widget.PlaceWidget()
-        self.plane_widget.DrawPlaneOff()
-        self.plane_widget.SetOrigin(0, 12.37, 6.425)
-        self.plane_widget.SetNormal(1,0,0)
-#       self.plane_widget.SetNormalToXAxis(1)
-        self.plane_widget.OutlineTranslationOff()
+    def __init__(self, configuration_file, image, interactor):
 
-#       self.transform = vtk.vtkTransform()
-#       self.transform.PostMultiply()
-        self.plane.SetOrigin(0, 12.37, 6.425)
-#       self.plane.SetTransform(self.transform)
+        self._configuration_filename = configuration_file
+        self._interactor = interactor
+        self._image = image
 
-        self._resample = vtk.vtkImageResample()
-        self._resample.SetAxisMagnificationFactor(0,.3)
-        self._resample.SetAxisMagnificationFactor(1,.3)
-        self._resample.SetAxisMagnificationFactor(2,.3)
-        self._resample.SetInterpolationModeToCubic()
-        self._resample.SetInput(image)
+        self._load_config_file()
+        self._prepare_plane()
+        self._prepare_resample()
+        self._prepare_cutter()
+        self._prepare_actor()
 
-        planeCut = vtk.vtkCutter()
-        planeCut.SetInput(self._resample.GetOutput())
-        planeCut.SetCutFunction(self.plane)
-        cutMapper = vtk.vtkPolyDataMapper()
-        cutMapper.SetInputConnection(planeCut.GetOutputPort())
-
-        self.cutActor = vtk.vtkActor()
-        self.cutActor.SetMapper(cutMapper)
-        self.cutActor.VisibilityOn()
         self.plane_widget.GetPlane(self.plane)
 
-        #self.transform.Translate(*tuple(map(lambda x: -1*x, self.plane.GetOrigin())))
-        #self.transform.RotateY(-45)
-        #self.transform.Translate(*self.plane.GetOrigin())
-        planeCut.Update()
+    def _load_config_file(self):
+        self.cfg = Config(file(self._configuration_filename))
 
     def _prepare_plane(self):
-        pass
+        self.plane = vtk.vtkPlane()
+        self.plane_widget = vtk.vtkImplicitPlaneWidget()
+        self.plane_widget.SetInteractor(self._interactor)
+        self.plane_widget.SetPlaceFactor(1)
+        self.plane_widget.SetInput(self._image)
+        self.plane_widget.PlaceWidget()
+        self.plane_widget.DrawPlaneOff()
+        self.plane_widget.OutlineTranslationOff()
 
-    def _prepare_widget(self):
-        pass
+        attrmap = self.cfg['oblique_slice']['plane']
+        for attr, val in attrmap.iteritems():
+            getattr(self.plane_widget, attr)(*tuple(val))
+
+    def _prepare_resample(self):
+        self._resample = vtk.vtkImageResample()
+        self._resample.SetInterpolationModeToCubic()
+        self._resample.SetInput(self._image)
+
+        attrmap = self.cfg['oblique_slice']['resample']['SetAxisMagnificationFactor']
+        for idx, val in enumerate(attrmap):
+            getattr(self._resample, 'SetAxisMagnificationFactor')(idx, val)
+
+    def _prepare_cutter(self):
+        self._planeCut = vtk.vtkCutter()
+        self._planeCut.SetInput(self._resample.GetOutput())
+        self._planeCut.SetCutFunction(self.plane)
+        self._cutMapper = vtk.vtkPolyDataMapper()
+        self._cutMapper.SetInputConnection(self._planeCut.GetOutputPort())
+        self._planeCut.Update()
 
     def _prepare_actor(self):
-        pass
+        self.cutActor = vtk.vtkActor()
+        self.cutActor.SetMapper(self._cutMapper)
+        self.cutActor.VisibilityOn()
 
     def reload_configuration(self):
         return self.cutActor
@@ -387,15 +389,15 @@ class vtk_four_renderers_scene():
             self._renderers[idx].AddVolume(self.volumes[idx].reload_configuration())
 
         self._cut = vtk_oblique_slice_mapper( \
+                self._configuration_filename, \
                 self.readers[0].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
         self._cutActor = self._cut.reload_configuration()
         self._renderers[0].AddActor(self._cutActor)
-        self.volumes[0].clippingPlanes.AddItem(self._cut.plane)
-        self.volumes[1].clippingPlanes.AddItem(self._cut.plane)
-        self.volumes[2].clippingPlanes.AddItem(self._cut.plane)
-        self.volumes[3].clippingPlanes.AddItem(self._cut.plane)
+
+        for idx, modality in enumerate(modalities_volumes):
+            self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
 
     def _assign_events(self):
         self._render_interactor.AddObserver("KeyPressEvent", self.key_press_dispather)
@@ -423,7 +425,7 @@ class vtk_four_renderers_scene():
         self._render_interactor.Initialize()
         self._render_interactor.Start()
 
-        self.animate()
+       #self.animate()
 
     def _pre_animate(self):
         # Initialize global timer and screenshot iterator
@@ -433,7 +435,26 @@ class vtk_four_renderers_scene():
         # Setup initial camera location
         self._camera.Azimuth(90)
         self._camera.Zoom(2.0)
-        pass
+
+##      first_origin = plane.GetOrigin()
+##      first_normal = plane.GetNormal()
+
+##      self.transform = vtk.vtkTransform()
+##      self.transform.PostMultiply()
+##      plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
+
+##      self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
+##      self.transform.RotateX(0)
+##      self.transform.RotateZ(10)
+##      self.transform.Translate(*first_origin)
+
+##      new_origin = self.transform.TransformPoint(*first_origin)
+##      new_normal = self.transform.TransformPoint(*first_normal)
+##      plane.SetOrigin(*new_origin)
+##      plane.SetNormal(*new_normal)
+
+        self._take_screenshot()
+#       print new_origin, new_normal
 
     def animate(self):
 
@@ -443,22 +464,35 @@ class vtk_four_renderers_scene():
         first_origin = plane.GetOrigin()
         first_normal = plane.GetNormal()
 
-        for i in range(180):
-#           self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
-#           self.transform.RotateZ(0)
-#           self.transform.Translate(*first_origin)
+        self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
+        self.transform.RotateX(30)
+        self.transform.RotateY(45)
+        self.transform.RotateZ(10)
+        self.transform.Translate(*first_origin)
 
-#           new_origin = self.transform.TransformPoint(*first_origin)
-#           new_normal = self.transform.TransformPoint(*first_normal)
-#           plane.SetOrigin(*new_origin)
-#           plane.SetNormal(*new_normal)
-            plane.Push(0.05)
-#           print new_origin, new_normal
+        new_origin = self.transform.TransformPoint(*first_origin)
+        new_normal = self.transform.TransformPoint(*first_normal)
+        plane.SetOrigin(*new_origin)
+        plane.SetNormal(*new_normal)
+        self._take_screenshot()
+        print new_origin, new_normal
 
-            self._render_win.Render()
-            self._global_time += 1
-            self._take_screenshot()
-            print i
+##      for i in range(180):
+##          self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
+##          self.transform.RotateZ(10)
+##          self.transform.Translate(*first_origin)
+
+##          new_origin = self.transform.TransformPoint(*first_origin)
+##          new_normal = self.transform.TransformPoint(*first_normal)
+##          plane.SetOrigin(*new_origin)
+##          plane.SetNormal(*new_normal)
+##          plane.Push(0.05)
+##          print new_origin, new_normal
+
+##          self._render_win.Render()
+##          self._global_time += 1
+##          self._take_screenshot()
+##          print i
 
 #       for i in range(576):
 #           if i < 360:
@@ -497,7 +531,9 @@ class vtk_four_renderers_scene():
 
 
 if __name__ == '__main__':
-   #configuration_file = sys.argv[1]
-   #app = vtk_four_renderers_scene(configuration_file)
-    app = vtk_four_renderers_scene('multiple_rgb.cfg')
+    try:
+        configuration_file = sys.argv[1]
+    except:
+        configuration_file = 'multiple_rgb.cfg'
+    app = vtk_four_renderers_scene(configuration_file)
     app.start()
