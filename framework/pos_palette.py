@@ -730,10 +730,32 @@ class pos_palette(object):
         True
 
         """
-        execution_path = os.path.dirname(__file__)
+        execution_path = os.path.dirname(os.path.relpath(__file__))
         return cls.from_gnuplot_file(os.path.join(
             execution_path, DIRECTORY_PALLETES, name + '.gpf'),
             min=min, max=max)
+
+    @classmethod
+    def get(cls, name, min=0.0, max=1.0):
+        """
+        A conveniet function wrapper that loads the palette either from file or
+        from the internal library.  The methos checks if a given name of the
+        palette is a filename or library palette name. In the former case the
+        palette is loaded from the file, in the latter -- from internal
+        library. Simple.
+
+        :param name: palette file or name to load
+        :type name: str
+
+        :return: py:class:`pos_palette`
+        """
+
+        if os.path.isfile(name):
+            palette = cls.from_gnuplot_file(name, min=min, max=max)
+        else:
+            palette = cls.lib(name, min=min, max=max)
+
+        return palette
 
 
 if __name__ == '__main__':
