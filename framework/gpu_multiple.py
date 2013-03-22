@@ -2,6 +2,7 @@ import vtk
 import os
 import sys
 import math
+import numpy as np
 import pos_palette
 from config import Config
 
@@ -243,6 +244,7 @@ class vtk_oblique_slice_mapper():
         self.plane_widget.PlaceWidget()
         self.plane_widget.DrawPlaneOff()
         self.plane_widget.OutlineTranslationOff()
+        #TODO: Disable scaling
 
         attrmap = self.cfg['oblique_slice']['plane']
         for attr, val in attrmap.iteritems():
@@ -275,6 +277,11 @@ class vtk_oblique_slice_mapper():
 
     def myCallback(self, obj, event):
         obj.GetPlane(self.plane)
+        print self.plane.GetOrigin()
+        print self.plane.GetNormal()
+        print np.degrees(np.arccos(np.array(self.plane.GetNormal())))
+        print
+
         self.cutActor.VisibilityOn()
 
 class vtk_four_renderers_scene():
@@ -376,6 +383,9 @@ class vtk_four_renderers_scene():
         modalities_readers = ['myelin_reader', 'nissl_reader', 'mri_reader', 'blockface_reader']
         modalities_volumes = ['myelin_volume', 'nissl_volume', 'mri_volume', 'blockface_volume']
 
+#       modalities_readers = ['myelin_reader']
+#       modalities_volumes = ['myelin_volume']
+
         self.readers = []
         self.volumes = []
         for idx, modality in enumerate(modalities_readers):
@@ -394,7 +404,7 @@ class vtk_four_renderers_scene():
                 self._render_interactor)
 
         self._cutActor = self._cut.reload_configuration()
-        self._renderers[0].AddActor(self._cutActor)
+#       self._renderers[0].AddActor(self._cutActor)
 
         for idx, modality in enumerate(modalities_volumes):
             self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
@@ -425,7 +435,7 @@ class vtk_four_renderers_scene():
         self._render_interactor.Initialize()
         self._render_interactor.Start()
 
-       #self.animate()
+        self.animate()
 
     def _pre_animate(self):
         # Initialize global timer and screenshot iterator
@@ -436,78 +446,39 @@ class vtk_four_renderers_scene():
         self._camera.Azimuth(90)
         self._camera.Zoom(2.0)
 
-##      first_origin = plane.GetOrigin()
-##      first_normal = plane.GetNormal()
-
-##      self.transform = vtk.vtkTransform()
-##      self.transform.PostMultiply()
-##      plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
-
-##      self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
-##      self.transform.RotateX(0)
-##      self.transform.RotateZ(10)
-##      self.transform.Translate(*first_origin)
-
-##      new_origin = self.transform.TransformPoint(*first_origin)
-##      new_normal = self.transform.TransformPoint(*first_normal)
-##      plane.SetOrigin(*new_origin)
-##      plane.SetNormal(*new_normal)
-
-        self._take_screenshot()
-#       print new_origin, new_normal
-
-    def animate(self):
-
-        self.transform = vtk.vtkTransform()
-        self.transform.PostMultiply()
         plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
         first_origin = plane.GetOrigin()
         first_normal = plane.GetNormal()
 
+        self.transform = vtk.vtkTransform()
+        self.transform.PostMultiply()
+
         self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
-        self.transform.RotateX(30)
-        self.transform.RotateY(45)
-        self.transform.RotateZ(10)
+        self.transform.RotateX(130)
+        self.transform.RotateY(90)
+        self.transform.RotateZ(130)
         self.transform.Translate(*first_origin)
 
-        new_origin = self.transform.TransformPoint(*first_origin)
-        new_normal = self.transform.TransformPoint(*first_normal)
+        new_normal = self.transform.TransformDoubleNormal(*first_normal)
+        new_origin = self.transform.TransformDoublePoint(*first_origin)
+
         plane.SetOrigin(*new_origin)
         plane.SetNormal(*new_normal)
-        self._take_screenshot()
-        print new_origin, new_normal
+        self._cut.plane_widget.SetOrigin(*new_origin)
+        self._cut.plane_widget.SetNormal(*new_normal)
 
-##      for i in range(180):
-##          self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
-##          self.transform.RotateZ(10)
-##          self.transform.Translate(*first_origin)
+#       self._camera.SetFocalPoint(*new_origin)
+#       d=-10
+#       new_loc = d * np.array(new_normal) + np.array(new_origin)
+#       self._camera.SetPosition(*tuple(new_loc))
+#       print new_loc, new_origin, new_normal
+#       self._renderers[0].ResetCameraClippingRange()
+#       self._camera.OrthogonalizeViewUp()
 
-##          new_origin = self.transform.TransformPoint(*first_origin)
-##          new_normal = self.transform.TransformPoint(*first_normal)
-##          plane.SetOrigin(*new_origin)
-##          plane.SetNormal(*new_normal)
-##          plane.Push(0.05)
-##          print new_origin, new_normal
+#       self._take_screenshot()
 
-##          self._render_win.Render()
-##          self._global_time += 1
-##          self._take_screenshot()
-##          print i
-
-#       for i in range(576):
-#           if i < 360:
-#               self._camera.Azimuth(1)
-#           elif 360 <= i < 400:
-#               pass
-#           else:
-#               self.reader._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-#               self.reader2._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-#               self.reader3._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-#               self.reader4._extract.SetVOI(i-400,350, 0, 1250, 0, 1136)
-
-#           self._render_win.Render()
-#           self._global_time += 1
-#           self._take_screenshot()
+    def animate(self):
+        pass
 
     def key_press_dispather(self, obj, event):
         key = obj.GetKeySym()
