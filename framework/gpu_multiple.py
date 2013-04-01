@@ -300,7 +300,7 @@ class vtk_four_renderers_scene():
         self._renderers = []
         for i in range(4):
             self._renderers.append(vtk.vtkRenderer())
-            self._renderers[i].SetViewport(*self.layouts['vertical'][i])
+            self._renderers[i].SetViewport(*self.layouts['equal'][i])
 
         self._render_win = vtk.vtkRenderWindow()
         self._render_interactor = vtk.vtkRenderWindowInteractor()

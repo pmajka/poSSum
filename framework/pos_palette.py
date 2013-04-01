@@ -457,7 +457,6 @@ class pos_palette(object):
         # interpolates single color channel thus we need three eof them. Perhaps
         # this step could be implemented in a better way (e.g. using numpy
         # arrays) but this implementation also works fine.
-        # TODO: Implement using numpy arrays.
         ic = \
             tuple(map(lambda x: interp1d(m, x, kind=kind), [r, g, b]))
 
