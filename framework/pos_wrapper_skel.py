@@ -9,6 +9,43 @@ import copy
 import pos_wrappers
 
 def getBasesame(path, withExtension = False):
+    """
+    Extract the very filename from the path provided. The filename can be
+    extracted with or without extension. Behaviour of the function is not
+    validated against multiple extensions (e.g. nii.gz) and most probaby will
+    not work properly.
+
+    :param path: Path to extract filename from
+    :type path: str
+
+    :param withExtension: Decides wheter the filename will be extracted with or
+    without extension.
+    :type withExtension: bool
+
+    >>> getBasesame("/home/user/file.txt")
+    'file'
+
+    >>> getBasesame("/home/user/file.txt", withExtension = False)
+    'file'
+
+    >>> getBasesame("/home/user/file.txt", withExtension = True)
+    'file.txt'
+
+    >>> getBasesame("/home/user/file.txt", True)
+    'file.txt'
+
+    >>> getBasesame("file.txt", True)
+    'file.txt'
+
+    >>> getBasesame("/home/user/image.nii.gz", True)
+    'image.nii.gz'
+
+    >>> getBasesame("/home/user/image.nii.gz")
+    'image.nii'
+
+    >>> getBasesame(getBasesame("/home/user/image.nii.gz"))
+    'image'
+    """
     if withExtension == True:
         return os.path.basename(path)
     else:
@@ -33,10 +70,19 @@ class generic_workflow(object):
 
         self.f = dict(self._f)
 
-        # Get number of cpus for parallel processing
-        # even if parallel processing is disabled
+        # Get number of cpus for parallel processing.
+        # Multiprocessing modlue is used to determine the number of cpus. This
+        # behavior can be overriden with --cpuNO switch.
         if not self.options.cpuNo:
             self.options.cpuNo = multiprocessing.cpu_count()
+
+        """
+        XXX: IMPORTANT! The multiprocessing module js no longer used in the code.
+        It has been replaced with command line 'parallel' tool which is less
+        elastic in usage but at least it works. Probably the module should be
+        utilized again but that requires quite a lot of wrapping code.
+        The multiprocessing module is used now only for determining the number
+        of cpu's.
 
         # If no cpu pool is provided, create and
         # assign a new pool
@@ -44,7 +90,7 @@ class generic_workflow(object):
             self.pool = pool
         else:
             self.pool = multiprocessing.Pool(processes=self.options.cpuNo)
-
+        """
         self._initializeOptions()
         self._initializeDirectories()
         self._overrideDefaults()
@@ -170,4 +216,5 @@ class generic_workflow(object):
 
 
 if __name__ == '__main__':
-    pass
+    import doctest
+    doctest.testmod()
