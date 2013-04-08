@@ -150,7 +150,8 @@ class extract_slices_from_volume(object):
                       self.options['logFilename'], self.options['loglevel'])
 
     def launchFilter(self):
-
+        """
+        """
         # At the very beginnig, determine input image type to configure the
         # reader.
         input_filename = self.options['inputFilename']
@@ -165,31 +166,16 @@ class extract_slices_from_volume(object):
         self.image_reader.SetFileName(input_filename)
         self.image_reader.Update()
 
-        initial_full_region = self.image_reader.GetOutput().GetLargestPossibleRegion()
-        logging.info("Largest possible region: %s.", initial_full_region)
+        self._source_largest_region = self.image_reader.GetOutput().GetLargestPossibleRegion()
+        logging.info("Largest possible region: %s.", self._source_largest_region)
 
-        logging.debug("Setting slice region.")
-        new_region = itk.ImageRegion[3]()
-        slice_size = itk.Size[3]()
-
-        # Clone the size of the old region to the new region. Why I can't just
-        # assign the whole array? It's very simple - I would copy by reference
-        # so both sizes would be binded. Inevitable catastrophy!
-        for i in range(3):
-            slice_size[i] = initial_full_region.GetSize().GetElement(i)
-
-        # And now I reset the dimension in the slicing axis. So simple in
-        # comparision with numpy:
-        slice_size[self.options['sliceAxisIndex']] = 0
-
-        # Finally I can put the size into region object.
-        new_region.SetSize(slice_size)
-        logging.info("Computed slice region: %s.", new_region)
+        # Define slicing region (in its initial form)
+        self._define_slicing_region()
 
         # Define filter for extracting slices
         logging.debug("Setting slice region.")
         self.extract_slice = itk.ExtractImageFilter[self._input_image_type, self._output_image_type].New()
-        self.extract_slice.SetExtractionRegion(new_region)
+        self.extract_slice.SetExtractionRegion(self._new_region)
         self.extract_slice.SetInput(self.image_reader.GetOutput())
         self.extract_slice.SetDirectionCollapseToIdentity()
         self.extract_slice.Update()
@@ -199,52 +185,94 @@ class extract_slices_from_volume(object):
         self.image_writer.SetInput(self.extract_slice.GetOutput())
 
         logging.debug("Getting indexed of slices to extract.")
-        self.get_slicing_range()
+        self._define_slicing_range()
 
-        logging.debug("Extracting slices...")
+        logging.debug("Extracting slices.")
         for i in self._slicingRange:
-            logging.debug("Extracing slice: %d", i)
+            self._extract_single_slice(i)
 
-            slice_index = [0,0,0]
-            slice_index[self.options['sliceAxisIndex']] = i
-            new_region.SetIndex(slice_index)
-            logging.debug("Region to extract: %s", new_region)
+        logging.debug("Done. Have a nice day.")
 
-            # Now, get the output filename. Filename depends on the slice
-            # index :)
-            slice_filename = self.get_output_filename(i)
-            logging.info("Saving slice %d to: %s", i, slice_filename)
-            self.extract_slice.SetExtractionRegion(new_region)
-            self.image_writer.SetFileName(slice_filename)
-            self.image_writer.Update()
 
-    def get_slicing_range(self):
+    def _define_slicing_region(self):
         """
+        Create slicing region - a region that will be used for slicing.
+        This method only creates the region (initializes).
+
+        The properties of the slicing region are updated in the loop
+        that is actually extracting the slices.
         """
-        logging.debug("Determinig set of slices to extract.")
+
+        # Well, we assume that volume that we slice is three dimensional
+        # otherwise the script is gonna crush.
+        logging.debug("Setting slice region.")
+        self._new_region = itk.ImageRegion[3]()
+        slice_size = itk.Size[3]()
+
+        # Clone the size of the old region to the new region. Why I can't just
+        # assign the whole array? It's very simple - I would copy by reference
+        # so both sizes would be binded. Inevitable catastrophy!
+        for i in range(3):
+            slice_size[i] = self._source_largest_region.GetSize()[i]
+
+        # And now I reset the dimension in the slicing axis. So simple in
+        # comparision with numpy:
+        slice_size[self.options['sliceAxisIndex']] = 0
+
+        # Finally I can put the size into region object.
+        self._new_region.SetSize(slice_size)
+        logging.info("Computed slice region: %s.", self._new_region)
+
+    def _define_slicing_range(self):
+        """
+        Defines indexes of slices that are to be extracted from the volume.
+        The default set of slices to extract are all the sliced in the slicing plane.
+        """
+        logging.debug("Defining set of slices to extract.")
 
         # The default slide range is a full slide range (all slices in given
-        # plane. When non-empty slide range is provided set of slices to
+        # plane). When non-empty slide range is provided, the slices to extract
+        # are defined according to provided settings.
 
         if self.options['sliceRange'] is None:
             logging.debug("No custom slice range provided. Extracting all slices in given plane.")
-            initial_full_region = self.image_reader.GetOutput().GetLargestPossibleRegion()
+            logging.debug("Selecting slices from LargestPossibleRegion: %s",
+                          self._source_largest_region)
 
-            logging.debug("Selecting slices from LargestPossibleRegion: %s", initial_full_region)
-            slice_number = initial_full_region.GetSize().GetElement(self.options['sliceAxisIndex'])
+            # Grab indexes of all slices in slicing plane
+            slice_number = self._source_largest_region.GetSize()[self.options['sliceAxisIndex']]
             self._slicingRange = range(0, slice_number)
 
         else:
+            # Get only those sliced that user wants to.
             self._slicingRange = range(*self.options['sliceRange'])
 
         logging.info("Selected slices: %s", " ".join(map(str, self._slicingRange)))
 
-    def get_output_filename(self, slice_index):
+    def _extract_single_slice(self, slice_index):
         """
+        Extract single slice from the volume.
+
+        :type slice_index: int
+        :param slice_index: index of the slice to be extracted.
         """
-        outputFilename = \
+        logging.debug("Extracing slice: %d", slice_index)
+
+        region_index = [0,0,0]
+        region_index[self.options['sliceAxisIndex']] = slice_index
+        self._new_region.SetIndex(region_index)
+
+        logging.debug("Region to extract: %s", self._new_region)
+
+        # Now, get the output filename. Filename depends on the slice
+        # region_index :)
+        filename = \
                 self.options['outputImagesFormat'] % (slice_index + self.options['shiftIndexes'], )
-        return outputFilename
+
+        logging.info("Saving slice %d to: %s", slice_index, filename)
+        self.extract_slice.SetExtractionRegion(self._new_region)
+        self.image_writer.SetFileName(filename)
+        self.image_writer.Update()
 
     @staticmethod
     def parseArgs():
@@ -254,26 +282,26 @@ class extract_slices_from_volume(object):
         parser.add_option('--outputImagesFormat', '-o',
                         dest='outputImagesFormat', type='str',
                         default='%04d.png',
-                        help='Format of the output images.')
+                        help='Filename format for the the output images.')
         parser.add_option('--sliceRange', '-r',
                         dest='sliceRange', type='int',  nargs=3,
                         default=None,
-                        help='Range of the slice extraction.')
+                        help='Indexes of the slices to extract defined as parameters of the python range function.')
         parser.add_option('--sliceAxisIndex', '-s',
                         dest='sliceAxisIndex', type='int',
                         default=0,
-                        help='Index of the slice axis.')
+                        help='Index of the slicing axis.')
         parser.add_option('--inputFilename', '-i', dest='inputFilename', type='str',
-                default=None, help='Input file.')
+                default=None, help='File that is going to be sliced.')
         parser.add_option('--shiftIndexes', dest='shiftIndexes', type='int',
-                default=0, help='Shift output file numbers.')
+                default=0, help='Shift output file numbers by given value (has to be integer).')
 
-        logging_settings = OptionGroup(parser, 'General workflow settings')
+        logging_settings = OptionGroup(parser, 'Logging options')
         logging_settings.add_option('--loglevel', dest='loglevel', type='str',
-                default='WARNING', help='Loglevel: CRITICAL | ERROR | WARNING | INFO | DEBUG')
+                default='WARNING', help='Severity of the messages to report: CRITICAL | ERROR | WARNING | INFO | DEBUG')
         logging_settings.add_option('--logFilename', dest='logFilename',
                 default=None, action='store', type='str',
-                help='Sets printing log to stderr instead to a file')
+                help='If defined puts the log into given file instead of printing it to stderr.')
         parser.add_option_group(logging_settings)
 
         (options, args) = parser.parse_args()
