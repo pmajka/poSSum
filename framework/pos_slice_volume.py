@@ -140,7 +140,8 @@ class extract_slices_from_volume(object):
         self._validate_options()
 
     def _validate_options(self):
-        pass
+        assert self.options['sliceAxisIndex'] in [0,1,2] , \
+            "The slicing plane has to be either 0, 1 or 2."
 
     def _initializeLogging(self):
         setup_logging(self.options['logFilename'],
@@ -276,7 +277,7 @@ class extract_slices_from_volume(object):
 
     @staticmethod
     def parseArgs():
-        usage = "python sliceVol.py  -r <range> -s <axis> -o <input filename> [options]"
+        usage = "python pos_slice_volume.py  -r <range> -s <axis> -o <input filename> [options]"
         parser = OptionParser(usage = usage)
 
         parser.add_option('--outputImagesFormat', '-o',
@@ -301,7 +302,7 @@ class extract_slices_from_volume(object):
                 default='WARNING', help='Severity of the messages to report: CRITICAL | ERROR | WARNING | INFO | DEBUG')
         logging_settings.add_option('--logFilename', dest='logFilename',
                 default=None, action='store', type='str',
-                help='If defined puts the log into given file instead of printing it to stderr.')
+                help='If defined, puts the log into given file instead of printing it to stderr.')
         parser.add_option_group(logging_settings)
 
         (options, args) = parser.parse_args()
