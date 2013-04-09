@@ -50,10 +50,13 @@ io_component_string_name_to_image_type = {
         ('scalar', 'unsigned_short', 3) : itk.Image.US3,
         ('scalar', 'unsigned_char', 3) : itk.Image.UC3,
         ('vector', 'unsigned_char', 3) : itk.Image.RGBUC3,
+        ('scalar', 'float', 3) : itk.Image.F3,
         ('scalar', 'short', 2) : itk.Image.SS2,
         ('scalar', 'unsigned_short', 2) : itk.Image.US2,
         ('vector', 'unsigned_char', 2) : itk.Image.RGBUC2,
-        ('scalar', 'unsigned_char', 2) : itk.Image.UC2
+        ('scalar', 'unsigned_char', 2) : itk.Image.UC2,
+        ('scalar', 'float', 2) : itk.Image.F2,
+        ('rgb', 'unsigned_char', 2) : itk.Image.RGBUC2
         }
 
 # Another quite clever dictionary. This one converts given image type to the
@@ -62,7 +65,8 @@ types_reduced_dimensions = {
         itk.Image.SS3 : itk.Image.SS2,
         itk.Image.US3 : itk.Image.US2,
         itk.Image.UC3 : itk.Image.UC2,
-        itk.Image.RGBUC3 : itk.Image.RGBUC2
+        itk.Image.RGBUC3 : itk.Image.RGBUC2,
+        itk.Image.F3 : itk.Image.F2
     }
 
 def autodetect_file_type(image_path):
@@ -127,7 +131,6 @@ class extract_slices_from_volume(object):
     def __init__(self, optionsDict, args):
         """
         """
-
         # Store filter configuration withing the class instance
         if type(optionsDict) != type({}):
             self.options = eval(str(optionsDict))
@@ -138,6 +141,8 @@ class extract_slices_from_volume(object):
 
         self._initializeLogging()
         self._validate_options()
+
+        # TODO: In thik that filters should be private attrubutes...
 
     def _validate_options(self):
         assert self.options['sliceAxisIndex'] in [0,1,2] , \
