@@ -57,7 +57,42 @@ class generic_parameter(object):
     template = property(_get_str_template, _set_str_template)
     name = property(_get_name, _set_name)
 
-class switch_parameter(generic_parameter):
+
+class boolean_parameter(generic_parameter):
+    """
+    >>> p=boolean_parameter('parameter')
+    >>> p #doctest: +ELLIPSIS
+    <__main__.boolean_parameter object at 0x...>
+
+    >>> print p
+    <BLANKLINE>
+
+    >>> p.value = True
+    >>> print p
+    True
+
+    >>> p.name = 'something'
+    >>> print p
+    True
+
+    >>> p.value = False
+    >>> print p
+    False
+
+    >>> p.template
+    '{_value}'
+
+    """
+    _str_template = "{_value}"
+
+    def _serialize(self):
+        if self.value is not None:
+             return self._str_template.format(**self.__dict__)
+        else:
+            return ""
+
+
+class switch_parameter(boolean_parameter):
     """
     >>> p=switch_parameter('a_switch', False, "--{_name}")
     >>> p #doctest: +ELLIPSIS
@@ -83,11 +118,6 @@ class switch_parameter(generic_parameter):
     --True --sth
     """
 
-    def _serialize(self):
-        if self.value is not None:
-            return self._str_template.format(**self.__dict__)
-        else:
-            return ""
 
 class string_parameter(generic_parameter):
     """

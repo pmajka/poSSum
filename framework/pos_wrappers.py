@@ -1,6 +1,6 @@
 import os
 import copy
-from pos_parameters import string_parameter, value_parameter, filename_parameter, ants_transformation_parameter, vector_parameter, list_parameter, switch_parameter, ants_regularization_parameter
+from pos_parameters import string_parameter, value_parameter, filename_parameter, ants_transformation_parameter, vector_parameter, list_parameter, switch_parameter, ants_regularization_parameter, boolean_parameter
 
 
 class generic_wrapper(object):
@@ -225,6 +225,116 @@ class ants_intensity_meric(generic_wrapper):
         'weight': value_parameter('weight', 1),
         'parameter': value_parameter('parameter', 4)
     }
+
+    def _get_value(self):
+        return str(self)
+
+    def _set_value(self, value):
+        pass
+
+    value = property(_get_value, _set_value)
+
+
+class ants_point_set_estimation_metric(generic_wrapper):
+    """
+    Wrapper for ANTS Point Set Estimation metric template.  The role of this
+    metric is to help in registering the images using labelled volumes instead
+    of the intensity images instead. PartialMatchingIterations, kNeighborhood
+    parameters are skipped and default values are used for this parameter.
+
+    PSE/point-set-expectation/PointSetExpectation[
+                fixedImage,movingImage,fixedPoints,movingPoints,
+                weight,pointSetPercentage,pointSetSigma,boundaryPointsOnly,
+                kNeighborhood,PartialMatchingIterations=100000]
+
+    Kwargs:
+        there are a number of possible keyword arguments. See description below.
+
+    :param fixed_image: Reference image of the metric. Cross correlation ('CC')
+                        is the default value
+    :type fixed_image: str
+
+    :param moving_image: Moving image of the metric.
+    :type moving_image: str
+
+    :param fixed_points: labelled or landmark volume for fixed images
+    :type fixed_point: str
+
+    :param moving_points: labelled or landmark volume for moving points
+    :type moving_points: labelled or landmark volume for fixed points
+
+    :param weight: Weight of the metric. Default is 1.
+    :type weight: float
+
+    :param point_set_percentage: percentage of points to sample from the volume
+    :type point_set_percentage: float
+
+    :param point_set_sigma: gaussian smoothing sigma to be applied to the points (in mm)
+    :type point_set_sigma: float
+
+    :param boundary_points_only: If true, only points from the boundary will be used in the metric. If False, all the points (superficial and those inside) are used for the registration.
+    :type boundary_points_only: bool
+
+    >>> ants_point_set_estimation_metric
+    <class '__main__.ants_point_set_estimation_metric'>
+
+    >>> p=ants_point_set_estimation_metric()
+    >>> p #doctest: +ELLIPSIS
+    <__main__.ants_point_set_estimation_metric object at 0x...>
+
+    >>> str(ants_point_set_estimation_metric._parameters['boundary_points_only']) == ''
+    True
+    >>> str(ants_point_set_estimation_metric._parameters['fixed_image']) == ''
+    True
+    >>> ants_point_set_estimation_metric._parameters['weight'].value == 1
+    True
+    >>> ants_point_set_estimation_metric._parameters['boundary_points_only'].value == None
+    True
+    >>> ants_point_set_estimation_metric._parameters['point_set_sigma'].value == None
+    True
+    >>> ants_point_set_estimation_metric._parameters['moving_points'].value == None
+    True
+
+    >>> print p
+    -m PSE[,,,,1,1.0]
+
+    >>> p=ants_point_set_estimation_metric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz',fixed_points='fixed_points.nii.gz',moving_points='moving_points.nii.gz')
+    >>> print p
+    -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,1,1.0]
+
+    >>> p.updateParameters({"weight":0.5}) #doctest: +ELLIPSIS
+    <__main__.ants_point_set_estimation_metric object at 0x...>
+    >>> print p
+    -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,1.0]
+
+    >>> p.updateParameters({"point_set_sigma":0.25}) #doctest: +ELLIPSIS
+    <__main__.ants_point_set_estimation_metric object at 0x...>
+    >>> print p
+    -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,1.0,0.25]
+
+    >>> p.updateParameters({"point_set_sigma":None, "boundary_points_only":True}) #doctest: +ELLIPSIS
+    <__main__.ants_point_set_estimation_metric object at 0x...>
+    >>> print p
+    -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,1.0,True]
+
+    >>> p.updateParameters({"point_set_percentage":0.1,"point_set_sigma":None, "boundary_points_only":True}) #doctest: +ELLIPSIS
+    <__main__.ants_point_set_estimation_metric object at 0x...>
+    >>> print p
+    -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,0.1,True]
+    """
+
+    _template = "-m PSE[{fixed_image},{moving_image},{fixed_points},{moving_points},{weight},{point_set_percentage}{point_set_sigma}{boundary_points_only}]"
+
+    _parameters = {
+        'fixed_image': filename_parameter('fixed_image', None),
+        'moving_image': filename_parameter('moving_image', None),
+        'fixed_points': filename_parameter('fixed_points', None),
+        'moving_points': filename_parameter('moving_points', None),
+        'weight': value_parameter('weight', 1),
+        'point_set_percentage' : value_parameter('point_set_percentage', 1.0),
+        'point_set_sigma' : value_parameter('point_set_sigma', None,  str_template=',{_value}'),
+        'boundary_points_only' : boolean_parameter('boundary_points_only', False, str_template=',{_value}'),
+        }
 
     def _get_value(self):
         return str(self)
