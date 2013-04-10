@@ -362,7 +362,8 @@ class vtk_four_renderers_scene():
         magnification = \
                 self.cfg['scene']['screenshots_settings']['SetMagnification']
 
-        w2i = vtk.vtkWindowToImageFilter()
+      # w2i = vtk.vtkWindowToImageFilter()
+        w2i = vtk.vtkRenderLargeImage()
         w2i.SetMagnification(magnification)
         w2i.SetInput(self._render_win)
         w2i.Update()
@@ -380,8 +381,8 @@ class vtk_four_renderers_scene():
 
     def add_actors(self):
 
-        modalities_readers = ['myelin_reader', 'nissl_reader', 'mri_reader', 'blockface_reader']
-        modalities_volumes = ['myelin_volume', 'nissl_volume', 'mri_volume', 'blockface_volume']
+        modalities_readers = ['blockface_reader','myelin_reader', 'nissl_reader', 'mri_reader']
+        modalities_volumes = ['blockface_volume','myelin_volume', 'nissl_volume', 'mri_volume']
 
 #       modalities_readers = ['myelin_reader']
 #       modalities_volumes = ['myelin_volume']
