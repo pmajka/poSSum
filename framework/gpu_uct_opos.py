@@ -362,9 +362,10 @@ class vtk_four_renderers_scene():
         magnification = \
                 self.cfg['scene']['screenshots_settings']['SetMagnification']
 
-        w2i = vtk.vtkWindowToImageFilter()
+       #w2i = vtk.vtkWindowToImageFilter()
+        w2i = vtk.vtkRenderLargeImage()
         w2i.SetMagnification(magnification)
-        w2i.SetInput(self._render_win)
+        w2i.SetInput(self._renderers[0])
         w2i.Update()
 
         writer = vtk.vtkPNGWriter()
