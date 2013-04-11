@@ -18,10 +18,9 @@ class deformable_reconstruction_workflow(generic_workflow):
     """
     _f = { \
         'init_images' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '/home/pmajka/Downloads/a/ANTS/trunk/Examples/Data/B{idx:01d}.tiff'),
-        '_init_images' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
-        'affine_coregistration' : pos_parameters.filename('affine_coregistration',  work_dir = '03_affine_coregistration', str_template = 'f{fidx:04d}_m{midx:04d}_Affine.txt'),
-        'affine_coregistration_naming' : pos_parameters.filename('affine_coregistration',  work_dir = '03_affine_coregistration', str_template = 'f{fidx:04d}_m{midx:04d}_'),
-        'average_affine_transformations' : pos_parameters.filename('average_affine_transformations',  work_dir = '03_average_affine_transformations', str_template = '{idx:04d}.txt'),
+        'init_avarage' : pos_parameters.filename('init_avarage', work_dir = '01_init_slices', str_template = '/home/pmajka/Downloads/a/ANTS/trunk/Examples/Data/average.nii.gz'),
+        'average_affine_transformations' : pos_parameters.filename('average_affine_transformations',  work_dir = '03_average_affine_transformations', str_template = '{idx:04d}Affine.txt'),
+        'average_affine_transformations_naming' : pos_parameters.filename('average_affine_transformations_naming',  work_dir = '03_average_affine_transformations', str_template = '{idx:04d}'),
         'init_resliced_affine' : pos_parameters.filename('init_resliced_affine',  work_dir = '04_init_resliced_affine', str_template = '{idx:04d}.nii.gz')
         }
 
@@ -34,19 +33,12 @@ class deformable_reconstruction_workflow(generic_workflow):
     def launch(self):
         commands = []
 
-        for fixd in range(self.samples):
-            for midx in range(self.samples):
-                if fixd != midx:
-                    registration = self._get_ants_affine_transformation_command(fixd, midx)
-                    commands.append(registration)
-
-        #print "\n".join(map(str, commands))
+        commands.append(self._prepare_average_for_affine())
         self.execute(commands)
 
-        commands = []
         for fixd in range(self.samples):
-            commands.append(self._average_affine_transforms(fixd))
-        #print "\n".join(map(str, commands))
+            registration = self._get_ants_affine_transformation_command(fixd)
+            commands.append(registration)
         self.execute(commands)
 
         commands = []
@@ -55,13 +47,24 @@ class deformable_reconstruction_workflow(generic_workflow):
         #print "\n".join(map(str, commands))
         self.execute(commands)
 
+    def _prepare_average_for_affine(self):
+        samples = range(self.samples)
+        input_list = map(lambda x: self.f['init_images'](idx=x), samples)
 
-    def _get_ants_affine_transformation_command(self, i, j):
+        average_command = pos_wrappers.average_images(
+                dimension = 2,
+                input_images = input_list,
+                output_image = self.f['init_avarage']())
+
+        return copy.deepcopy(average_command)
+
+
+    def _get_ants_affine_transformation_command(self, i):
         metrics  = []
 
         affine_metric = pos_wrappers.ants_intensity_meric(
-                    fixed_image  = self.f['init_images'](idx=i),
-                    moving_image = self.f['init_images'](idx=j),
+                    fixed_image  = self.f['init_avarage'](),
+                    moving_image = self.f['init_images'](idx=i),
                     metric = "CC",
                     weight = 1,
                     parameter = 32)
@@ -70,7 +73,7 @@ class deformable_reconstruction_workflow(generic_workflow):
 
         registration = pos_wrappers.ants_registration(
                     dimension = 2,
-                    outputNaming = self.f['affine_coregistration_naming'](fidx=i, midx=j),
+                    outputNaming = self.f['average_affine_transformations_naming'](idx=i),
                     iterations = [0],
                     transformation = ('SyN', [0.5]),
                     regularization = ('Gauss', (3.0,1.0)),
@@ -83,19 +86,6 @@ class deformable_reconstruction_workflow(generic_workflow):
                     allMetricsConverge = None)
 
         return copy.deepcopy(registration)
-
-    def _average_affine_transforms(self, i):
-
-        samples = range(self.samples)
-        samples.remove(i)
-        input_list = map(lambda x: self.f['affine_coregistration'](fidx=i, midx=x), samples)
-
-        average_affine = pos_wrappers.ants_average_affine_transform(
-            dimension = 2,
-            output_affine_transform = self.f['average_affine_transformations'](idx=i),
-            affine_list = input_list)
-
-        return copy.deepcopy(average_affine)
 
     def _reslice_to_average(self, i):
         reslice = pos_wrappers.ants_reslice(
