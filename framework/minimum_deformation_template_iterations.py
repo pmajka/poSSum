@@ -43,22 +43,23 @@ class deformable_reconstruction_iteration(generic_workflow):
                 self.options.endSlice)
 
     def _preprocess_images(self):
-        return self._average_images()
+        if self.parent_process.current_iteration == 0:
+            return self._average_images()
 
     def _average_images(self):
         commands = []
         files_to_average = []
-        weights = []
 
         for j in self.slice_range:
-            files_to_average.append(self.f['src_slice'](idx=j))
-            weights.append(1.0)
+            if self.parent_process.current_iteration == 0:
+                files_to_average.append(self.parent_process.f['raw_slices'](idx=j))
+            else:
+                files_to_average.append(self.f['src_slice'](idx=j))
 
-        command = pos_wrappers.images_weighted_average(\
+        command = pos_wrappers.ants_average_images(\
                     dimension = self.options.antsDimension,
+                    normalize = int(True),
                     input_images = files_to_average,
-                    weights = weights,
-                    output_type = 'float',
                     output_image = self.f['processed']())
         commands.append(copy.deepcopy(command))
         self.execute(commands)
@@ -87,24 +88,16 @@ class deformable_reconstruction_iteration(generic_workflow):
 
             fixed_image_type = 'processed'
             fixed_outline_type='poutline'
-            mask_image = None
 
             r_metric, parameter, iterations, affine_iterations, \
             transf_grad, reg_type, reg_ammount =\
                     self._get_default_reg_settings()
 
-            if self.parent_process.current_iteration == 0:
-                iterations = [0]
-                allMetricsConverge = None
-            else:
-                affine_iterations = [0]
-                allMetricsConverge = int(True)
-
             metric = pos_wrappers.ants_intensity_meric(
                         fixed_image  = self.f[fixed_image_type](),
                         moving_image = self.f['src_slice'](idx=i),
                         metric = r_metric,
-                        weight = 1.0,
+                        weight = 1,
                         parameter = parameter)
             metrics.append(copy.deepcopy(metric))
 
@@ -116,11 +109,10 @@ class deformable_reconstruction_iteration(generic_workflow):
                         regularization = (reg_type, reg_ammount),
                         affineIterations = affine_iterations,
                         continueAffine = None,
-                        rigidAffine = int(False),
+                        rigidAffine = None,
                         imageMetrics = metrics,
-                        histogramMatching = int(True),
-                        maskImage = mask_image,
-                        allMetricsConverge = allMetricsConverge)
+                        histogramMatching = " ",
+                        allMetricsConverge = None)
             commands.append(copy.deepcopy(registration))
 
         self.execute(commands)

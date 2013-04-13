@@ -480,7 +480,7 @@ class filename(generic_parameter):
         >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
         True
 
-        override_fname property
+        override_path property
 
         >>> f.override_path == None
         True

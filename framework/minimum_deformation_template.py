@@ -28,6 +28,7 @@ class test_msq_2(pos_wrappers.generic_wrapper):
         'output_image': 'input_image'
     }
 
+
 class test_msq_3(pos_wrappers.generic_wrapper):
     """
     """
@@ -51,6 +52,41 @@ class calculate_sddm(pos_wrappers.average_images):
     _template = """c{dimension}d  {input_images} -mean -sqrt -o {output_image}"""
 
 
+
+class ants_multiply_images(pos_wrappers.generic_wrapper):
+    """
+    """
+    _template = """MultiplyImages {dimension} {input_image} {multiplier} {output_image}"""
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'multiplier': pos_parameters.value_parameter('multiplier', 1.0),
+        'input_image': pos_parameters.filename_parameter('input_image', None),
+        'output_image': pos_parameters.filename_parameter('output_image', None)
+    }
+
+    _io_pass = {
+        'dimension': 'dimension',
+        'output_image': 'input_image'
+    }
+
+
+
+class bias_corrections(pos_wrappers.generic_wrapper):
+    _template= """N4BiasFieldCorrection -d {dimension} -i {input_image} -o {output_image} -b [200] -s 3 -c [50x50x30x20,1e-6]"""
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'input_image': pos_parameters.filename_parameter('input_image', None),
+        'output_image': pos_parameters.filename_parameter('output_image', None)
+    }
+
+    _io_pass = {
+        'dimension': 'dimension',
+        'output_image': 'input_image'
+    }
+
+
 class minimum_deformation_template_wrokflow(generic_workflow):
     """
     A framework for performing deformable reconstruction of histological volumes
@@ -67,6 +103,7 @@ class minimum_deformation_template_wrokflow(generic_workflow):
 
     """
     _f = { \
+        'raw_slices' : pos_parameters.filename('raw_slices', work_dir = '00_raw_slices', str_template = '{idx:04d}.nii.gz'),
          # Initial grayscale slices
         'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
         'init_slice_mask' : pos_parameters.filename('init_slice_mask', work_dir = '01_init_slices', str_template = '????.png'),
@@ -79,10 +116,14 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         'iteration'  : pos_parameters.filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
         'iteration_out_naming' : pos_parameters.filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
         'iteration_affine_transform'  : pos_parameters.filename('iteration_affine_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}Affine.txt'),
+        'iteration_affine_transform_avg'  : pos_parameters.filename('iteration_affine_transform_avg', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/averageAffine.txt'),
         'iteration_transform'  : pos_parameters.filename('iteration_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}Warp.nii.gz'),
+        'iteration_transform_avg'  : pos_parameters.filename('iteration_transform_avg', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/averageWarp.nii.gz'),
         'iteration_transform_inverse'  : pos_parameters.filename('iteration_transform_inverse', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}InverseWarp.nii.gz'),
+        'iteration_transform_inverse_avg'  : pos_parameters.filename('iteration_transform_inverse_avg', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/averageInverseWarp.nii.gz'),
         'iteration_resliced'   : pos_parameters.filename('iteration_resliced' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/'),
         'iteration_resliced_slice' : pos_parameters.filename('iteration_resliced_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/{idx:04d}.nii.gz'),
+        'iteration_resliced_avg'   : pos_parameters.filename('iteration_resliced_slice_avg' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/average.nii.gz'),
         'iteration_resliced_outline'   : pos_parameters.filename('iteration_resliced_outline' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/'),
         'iteration_resliced_outline_slice' : pos_parameters.filename('iteration_resliced_outline_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/{idx:04d}.nii.gz'),
         # After completing iterations
@@ -109,7 +150,8 @@ class minimum_deformation_template_wrokflow(generic_workflow):
             sys.exit(1)
 
         if self.options.inputVolume:
-            self.f['init_slice'].override_dir = self.options.inputVolume
+            self.f['raw_slices'].override_dir = self.options.inputVolume
+#           self.f['init_slice'].override_dir = self.options.inputVolume
 
         if self.options.outlineVolume:
             self.f['init_outline'].override_dir = self.options.outlineVolume
@@ -118,6 +160,17 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         """
         Launch the process.
         """
+
+        start = self.options.startSlice
+        end = self.options.endSlice
+        commands = []
+        for i in range(start, end +1):
+            command = bias_corrections( \
+                            dimension = self.options.antsDimension,
+                            input_image  = self.f['raw_slices'](idx=i),
+                            output_image = self.f['init_slice'](idx=i))
+            commands.append(copy.deepcopy(command))
+        self.execute(commands)
 
         # If 'startFromIteration' switch is enabled,
         # the reconstruction starts from a given iteration
@@ -148,12 +201,19 @@ class minimum_deformation_template_wrokflow(generic_workflow):
             # the source images (images that were not processed at all) while
             # images for all the other iterations are processed by the previous
             # iterations.
+           #if iteration == 0:
+           #    single_step.f['src_slice'].override_dir = self.f['init_slice'].override_dir
+           #    single_step.f['outline'].override_dir = self.f['init_outline'].override_dir
+           #else:
+           #    single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
+           #    single_step.f['outline'].override_dir = self.f['iteration_resliced_outline'](iter=iteration-1)
+            single_step.f['src_slice'].override_dir = self.f['init_slice'].base_dir
+#           single_step.f['src_slice'].override_dir = self.f['init_slice'].override_dir
+           #single_step.f['outline'].override_dir = self.f['init_outline'].override_dir
             if iteration == 0:
-                single_step.f['src_slice'].override_dir = self.f['init_slice'].override_dir
-                single_step.f['outline'].override_dir = self.f['init_outline'].override_dir
+                pass
             else:
-                single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
-                single_step.f['outline'].override_dir = self.f['iteration_resliced_outline'](iter=iteration-1)
+                single_step.f['processed'].override_path = self.f['iteration_resliced_avg'](iter=iteration-1)
 
             # Do registration if proper switches are provided
             # (there is a possibility to run the reconstruction process without
@@ -168,8 +228,7 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         # At the end of the processing the calculated deformation fields can be
         # composed togeather to form the final deformation field.
         #if self.options.stackFinalDeformation:
-        self._generate_final_transforms()
-        self._build_template()
+       #self._build_template()
 
     def _get_edges(self):
         """
@@ -188,8 +247,6 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         if self.options.inputVolume:
             self._reslice_input_volume()
 
-        if self.options.outlineVolume:
-            self._reslice_outline()
 
     def _get_reslice_command(self, slice_number, slice_type, output_slice_type,
                              method = pos_wrappers.ants_reslice,
@@ -207,8 +264,8 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         i = slice_number # Just an alias
 
         # Define a list of deformation fields file
-        deformable_list = map(lambda j: self.f[transform_direction](idx=i,iter=j), range(1, iteration+1))
-        deformable_list += [self.f['iteration_affine_transform'](idx=i,iter=0)]
+        deformable_list  = [self.f[transform_direction](idx=i,iter=iteration)]
+        deformable_list += [self.f['iteration_affine_transform'](idx=i,iter=iteration)]
         moving_image = self.f[slice_type](idx=i)
 
         # Use 'ants_reslice' when a regular reslicing is done. A regular
@@ -237,90 +294,136 @@ class minimum_deformation_template_wrokflow(generic_workflow):
     def _reslice_input_volume(self):
         start, end, iteration = self._get_edges()
 
+        #  /opt/ANTs-1.9.x-Linux/bin/WarpImageMultiTransform 2
+        #  /home/pmajka/test0004.nii.gz /home/pmajka/test0004deformed.nii.gz
+        #  /home/pmajka/test0004Warp.nii.gz /home/pmajka/test0004Affine.txt -R
+        #  testtemplate.nii.gz
         commands = []
         for i in range(start, end +1):
             command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice')
-            command.updateParameters({'useBspline':True, 'useNN':None})
+#           command.updateParameters({'useBspline':True, 'useNN':None})
             commands.append(copy.deepcopy(command))
 
         self.execute(commands)
 
-    def _reslice_outline(self):
-        start, end, iteration = self._get_edges()
-
-        commands = []
-        for i in range(start, end +1):
-            command = self._get_reslice_command(i, 'init_outline', 'iteration_resliced_outline_slice')
-            command.updateParameters({'useNN':None, 'useBspline':None})
-            commands.append(copy.deepcopy(command))
-
-        self.execute(commands)
-
-    def _generate_final_transforms(self):
-        """
-        Compose the individual deformation fields calculated in each iteration
-        into a single deformation field that can be analysed. In other words,
-        this procedure just sums up all the individual deformation filelds.
-        """
-
-        # As usually, get the slice range:
-        start, end, iteration = self._get_edges()
-
-        # For each slice, compose all the separated deformation fields:
-        commands = []
-        for i in range(start, end +1):
-            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice',
-                                                method = pos_wrappers.ants_compose_multi_transform)
-            command.updateParameters({\
-                    'output_image': self.f['final_deformations'](idx=i)
-                    })
-            commands.append(copy.deepcopy(command))
-
-            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice',
-                                                method = pos_wrappers.ants_compose_multi_transform,
-                                                transform_direction = 'iteration_transform_inverse')
-            command.updateParameters({\
-                    'output_image': self.f['final_deformations_inversed'](idx=i)
-                    })
-            commands.append(copy.deepcopy(command))
-
-        self.execute(commands)
-
-    def _build_template(self):
-        # As usually, get the slice range:
-        start, end, iteration = self._get_edges()
-
+        # /opt/ANTs-1.9.x-Linux/bin/AverageImages 2 testtemplate.nii.gz 1
+        # test0000deformed.nii.gz test0001deformed.nii.gz
+        # test0002deformed.nii.gz test0003deformed.nii.gz
+        # test0004deformed.nii.gz
         commands = []
         files_to_average = \
-                map(lambda j: self.f['final_deformations_inversed'](idx=j), range(start, end +1))
+                map(lambda j: self.f['iteration_resliced_slice'](iter=iteration,idx=j), range(start, end +1))
         command = pos_wrappers.ants_average_images( \
                         dimension = self.options.antsDimension,
-                        output_image = self.f['final_deformations_inv_avg'](),
+                        normalize = int(True),
+                        output_image = self.f['iteration_resliced_avg'](iter=iteration),
                         input_images = files_to_average)
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        # /opt/ANTs-1.9.x-Linux/bin/AverageImages 2 testtemplatewarp.nii.gz 0
+        # test0000Warp.nii.gz test0001Warp.nii.gz test0002Warp.nii.gz
+        # test0003Warp.nii.gz test0004Warp.nii.gz
+        #
+        commands = []
+        files_to_average = \
+                map(lambda j: self.f['iteration_transform'](iter=iteration,idx=j), range(start, end +1))
+        command = pos_wrappers.ants_average_images( \
+                        dimension = self.options.antsDimension,
+                        normalize = int(False),
+                        output_image = self.f['iteration_transform_avg'](iter=iteration),
+                        input_images = files_to_average)
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        # /opt/ANTs-1.9.x-Linux/bin/MultiplyImages 2 testtemplatewarp.nii.gz\
+        #                                      -0.25 testtemplatewarp.nii.gz
+        commands = []
+        command = ants_multiply_images( \
+                        dimension = self.options.antsDimension,
+                        multiplier = -0.25,
+                        output_image = self.f['iteration_transform_avg'](iter=iteration),
+                        input_image  = self.f['iteration_transform_avg'](iter=iteration))
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        #  /opt/ANTs-1.9.x-Linux/bin/AverageAffineTransform 2
+        #  testtemplateAffine.txt test0000Affine.txt test0001Affine.txt
+        #  test0002Affine.txt test0003Affine.txt test0004Affine.txt
+        commands = []
+        files_to_average = \
+                map(lambda j: self.f['iteration_affine_transform'](iter=iteration,idx=j), range(start, end +1))
+        command = pos_wrappers.ants_average_affine_transform( \
+                        dimension = self.options.antsDimension,
+                        affine_list = files_to_average,
+                        output_affine_transform = self.f['iteration_affine_transform_avg'](iter=iteration))
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        #  /opt/ANTs-1.9.x-Linux/bin/WarpImageMultiTransform 2
+        #  testtemplatewarp.nii.gz
+        #  testtemplatewarp.nii.gz
+        #  -i
+        #  testtemplateAffine.txt
+        #  -R
+        #  testtemplate.nii.gz
+        commands = []
+        inv_aff = ["-i " + self.f['iteration_affine_transform_avg'](iter=iteration)]
+        mul_avg_aff = self.f['iteration_transform_avg'](iter=iteration)
+
+        command = pos_wrappers.ants_reslice(
+            dimension = self.options.antsDimension,
+            moving_image = mul_avg_aff,
+            output_image = mul_avg_aff,
+            reference_image = mul_avg_aff,
+            deformable_list = inv_aff + 4*[mul_avg_aff],
+            affine_list = [])
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        #-----------------------------------------------------------------
+        # INVERSE!!!!!!!!!!!!!
+        # /opt/ANTs-1.9.x-Linux/bin/AverageImages 2 testtemplatewarp.nii.gz 0
+        # test0000Warp.nii.gz test0001Warp.nii.gz test0002Warp.nii.gz
+        # test0003Warp.nii.gz test0004Warp.nii.gz
+        #
+        commands = []
+        files_to_average = \
+                map(lambda j: self.f['iteration_transform_inverse'](iter=iteration,idx=j), range(start, end +1))
+        command = pos_wrappers.ants_average_images( \
+                        dimension = self.options.antsDimension,
+                        normalize = int(False),
+                        output_image = self.f['iteration_transform_inverse_avg'](iter=iteration),
+                        input_images = files_to_average)
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        #  /opt/ANTs-1.9.x-Linux/bin/WarpImageMultiTransform 2
+        #  testtemplatewarp.nii.gz
+        #  testtemplatewarp.nii.gz
+        #  -i
+        #  testtemplateAffine.txt
+        #  -R
+        #  testtemplate.nii.gz
+        commands = []
+        mul_avg_aff = self.f['iteration_transform_inverse_avg'](iter=iteration)
+        inv_aff = self.f['iteration_affine_transform_avg'](iter=iteration)
+
+        command = pos_wrappers.ants_reslice(
+            dimension = self.options.antsDimension,
+            moving_image = mul_avg_aff,
+            output_image = mul_avg_aff,
+            reference_image = mul_avg_aff,
+            deformable_list = [mul_avg_aff, inv_aff] ,
+            affine_list = [])
         commands.append(copy.deepcopy(command))
         self.execute(commands)
 
         commands = []
         for i in range(start, end +1):
             deformable_list = [
-                self.f['final_deformations'](idx=i),
-                self.f['final_deformations_inv_avg']()]
-
-            command = pos_wrappers.ants_reslice(
-                    dimension = self.options.antsDimension,
-                    moving_image = self.f['init_slice'](idx=i),
-                    output_image = self.f['template_indiv'](idx=i),
-                    reference_image = self.f['init_slice'](idx=i),
-                    deformable_list = deformable_list,
-                    affine_list = [self.f['iteration_affine_transform'](idx=i,iter=0)])
-            commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-        commands = []
-        for i in range(start, end +1):
-            deformable_list = [
-                self.f['final_deformations'](idx=i),
-                self.f['final_deformations_inv_avg']()]
+                self.f['iteration_transform_inverse_avg'](iter=iteration),
+                self.f['iteration_transform'](iter=iteration,idx=i)]
 
             command = pos_wrappers.ants_compose_multi_transform(
                     dimension = self.options.antsDimension,
@@ -330,6 +433,32 @@ class minimum_deformation_template_wrokflow(generic_workflow):
                     affine_list = [])
             commands.append(copy.deepcopy(command))
         self.execute(commands)
+
+        commands = []
+        meth ={2:test_msq_2, 3: test_msq_3}
+        for i in range(start, end +1):
+            command = meth[self.options.antsDimension](
+                    dimension = self.options.antsDimension,
+                    input_image = self.f['template_transf_f'](idx=i),
+                    output_image = self.f['template_transf_f_msq'](idx=i))
+            commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        commands = []
+        files_to_average = \
+                map(lambda j: self.f['template_transf_f_msq'](idx=j), range(start, end +1))
+        command = calculate_sddm( \
+                        dimension = self.options.antsDimension,
+                        output_image = self.f['sddm'](),
+                        input_images = files_to_average)
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+
+    def _build_template(self):
+        # As usually, get the slice range:
+        start, end, iteration = self._get_edges()
+
 
         commands = []
         files_to_average = \

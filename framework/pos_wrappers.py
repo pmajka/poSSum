@@ -75,7 +75,7 @@ class ants_registration(generic_wrapper):
        {rigidAffine} {continueAffine}\
        {useNN} {histogramMatching} {allMetricsConverge} \
        {initialAffine} {fixedImageInitialAffine} {affineGradientDescent} \
-       {affineMetricType} {maskImage}"""
+       {affineMetricType} {maskImage}  --MI-option 32x16000 """
 
     _parameters = {
         'dimension': value_parameter('dimension', 2),
