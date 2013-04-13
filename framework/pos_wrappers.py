@@ -1,6 +1,8 @@
 import os
 import copy
-from pos_parameters import string_parameter, value_parameter, filename_parameter, ants_transformation_parameter, vector_parameter, list_parameter, switch_parameter, ants_regularization_parameter, boolean_parameter
+from pos_parameters import string_parameter, value_parameter, filename_parameter, \
+                ants_transformation_parameter, vector_parameter, list_parameter, \
+                switch_parameter, ants_regularization_parameter, boolean_parameter
 
 
 class generic_wrapper(object):
@@ -64,7 +66,8 @@ class generic_wrapper(object):
 class ants_registration(generic_wrapper):
     """
     """
-    _template = """ANTS {dimension} \
+    #_template = """ANTS {dimension} \
+    _template = """/opt/ANTs-1.9.x-Linux/bin/ANTS {dimension} \
        {verbose} \
        {transformation} {regularization} {outputNaming} \
        {imageMetrics} \
@@ -72,7 +75,7 @@ class ants_registration(generic_wrapper):
        {rigidAffine} {continueAffine}\
        {useNN} {histogramMatching} {allMetricsConverge} \
        {initialAffine} {fixedImageInitialAffine} {affineGradientDescent} \
-       {maskImage} """
+       {affineMetricType} {maskImage}"""
 
     _parameters = {
         'dimension': value_parameter('dimension', 2),
@@ -91,7 +94,8 @@ class ants_registration(generic_wrapper):
         'fixedImageInitialAffine': filename_parameter('fixed-image-initial-affine', None, str_template='--{_name} {_value}'),
         'affineGradientDescent': vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
         'imageMetrics': list_parameter('image_to_image_metrics', [], '{_list}'),
-        'maskImage': filename_parameter('mask-image', None, str_template='--{_name} {_value}')
+        'maskImage': filename_parameter('mask-image', None, str_template='--{_name} {_value}'),
+        'affineMetricType' : value_parameter('affine-metric-type', None, str_template='--{_name} {_value}')
     }
 
     _io_pass = {
@@ -345,6 +349,74 @@ class ants_point_set_estimation_metric(generic_wrapper):
     value = property(_get_value, _set_value)
 
 
+class ants_average_affine_transform(generic_wrapper):
+    """
+    AverageAffineTransform ImageDimension output_affine_transform
+                   [-R reference_affine_transform]
+                   {[-i] affine_transform_txt [weight(=1)] ]}
+    TODO: Add weights and inversion of the affine transforms
+
+    >>> ants_average_affine_transform
+    <class '__main__.ants_average_affine_transform'>
+
+    >>> ants_average_affine_transform() #doctest: +ELLIPSIS
+    <__main__.ants_average_affine_transform object at 0x...>
+
+    >>> str(ants_average_affine_transform._parameters['dimension']) == '2'
+    True
+    >>> str(ants_average_affine_transform._parameters['output_affine_transform']) == ''
+    True
+    >>> ants_average_affine_transform._parameters['reference_affine_transform'].value == None
+    True
+    >>> ants_average_affine_transform._parameters['reference_affine_transform'].value == None
+    True
+    >>> ants_average_affine_transform._parameters['affine_list'].value == None
+    True
+
+    >>> str(ants_average_affine_transform()).strip() == 'AverageAffineTransform 2'
+    True
+
+    >>> str(ants_average_affine_transform(dimension=3)).strip() == 'AverageAffineTransform 3'
+    True
+
+    >>> p = ants_average_affine_transform(dimension=3, output_affine_transform="out.txt")
+    >>> print str(p).strip()
+    AverageAffineTransform 3             out.txt
+
+    >>> p.updateParameters({"reference_affine_transform":"reference_affine.txt"}) #doctest: +ELLIPSIS
+    <__main__.ants_average_affine_transform object at 0x...>
+    >>> print str(p).strip()
+    AverageAffineTransform 3             out.txt             -R reference_affine.txt
+
+    >>> p.updateParameters({"affine_list":["affine_1.txt", "affine_2.txt", "affine_3.txt"]}) #doctest: +ELLIPSIS
+    <__main__.ants_average_affine_transform object at 0x...>
+    >>> print str(p).strip()
+    AverageAffineTransform 3             out.txt             -R reference_affine.txt             affine_1.txt affine_2.txt affine_3.txt
+
+    >>> p.updateParameters({"reference_affine_transform":None}) #doctest: +ELLIPSIS
+    <__main__.ants_average_affine_transform object at 0x...>
+    >>> print str(p).strip()
+    AverageAffineTransform 3             out.txt                          affine_1.txt affine_2.txt affine_3.txt
+
+    """
+    _template = "AverageAffineTransform {dimension} \
+            {output_affine_transform} \
+            {reference_affine_transform} \
+            {affine_list}"
+
+    _parameters = {
+        'dimension': value_parameter('dimension', 2),
+        'output_affine_transform': filename_parameter('output_affine_transform', None),
+        'reference_affine_transform': filename_parameter('reference_affine_transform', None, str_template='-R {_value}'),
+        'affine_list': list_parameter('affine_list', [], str_template='{_list}')
+    }
+
+    _io_pass = {
+        'dimension': 'dimension',
+        'output_affine_transform': 'input_affine_transform'
+    }
+
+
 class ants_compose_multi_transform(generic_wrapper):
     """
     """
@@ -367,26 +439,22 @@ class ants_compose_multi_transform(generic_wrapper):
     }
 
 
-
-class average_images(generic_wrapper):
+class ants_average_images(generic_wrapper):
     """
     """
-    _template = """c{dimension}d  {input_images} -mean {output_type} -o {output_image}"""
+    _template = """AverageImages {dimension} {output_image} {normalize} {input_images}"""
 
     _parameters = {
         'dimension': value_parameter('dimension', 2),
+        'normalize': value_parameter('normalize', 0),
         'input_images': list_parameter('input_images', [], str_template='{_list}'),
         'output_image': filename_parameter('output_image'),
-        'output_type': string_parameter('output_type', 'uchar', str_template='-type {_value}')
     }
 
     _io_pass = {
         'dimension': 'dimension',
         'output_image': 'input_image'
     }
-   # TODO: merge average image with weighted average image
-   # TODO: and then validate the output.
-
 
 
 class images_weighted_average(generic_wrapper):
@@ -407,6 +475,23 @@ class images_weighted_average(generic_wrapper):
         'output_image': 'input_image'
     }
 
+
+class average_images(images_weighted_average):
+    """
+    """
+    _template = """c{dimension}d  {input_images} -mean -o {output_image}"""
+
+    _parameters = {
+        'dimension': value_parameter('dimension', 2),
+        'input_images': list_parameter('input_images', [], str_template='{_list}'),
+        'output_image': filename_parameter('output_image'),
+        'output_type': string_parameter('output_type', 'uchar', str_template='-type {_value}')
+    }
+
+    _io_pass = {
+        'dimension': 'dimension',
+        'output_image': 'input_image'
+    }
 
 
 class chain_affine_transforms(generic_wrapper):

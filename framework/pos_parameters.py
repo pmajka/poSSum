@@ -230,6 +230,7 @@ class list_parameter(generic_parameter):
         else:
             return ""
 
+
 class vector_parameter(list_parameter):
     """
     A specialized class for holding lists which are intended to be a vector.  A
