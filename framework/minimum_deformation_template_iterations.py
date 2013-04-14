@@ -112,6 +112,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                         rigidAffine = None,
                         imageMetrics = metrics,
                         histogramMatching = " ",
+                        miOption = [32, 16000],
                         allMetricsConverge = None)
             commands.append(copy.deepcopy(registration))
 

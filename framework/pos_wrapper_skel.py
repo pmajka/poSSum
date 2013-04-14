@@ -182,7 +182,11 @@ class generic_workflow(object):
 
         :param parallel: Enables execution in parallel mode
         :type parallel: bool
+
         """
+
+        #TODO: Implement pbs job dependencies
+        # (https://docs.loni.org/wiki/PBS_Job_Chains_and_Dependencies)
 
         # If single command is provided, it is supposed to be a string. Convert
         # to list with a single element.

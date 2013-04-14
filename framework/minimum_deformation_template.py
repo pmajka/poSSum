@@ -35,7 +35,7 @@ class test_msq_3(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -mcs {input_image} -popas x -popas y -popas z -push x -dup -times -popas xx -push y  -dup -times -popas yy -push z  -dup -times  -popas zz -push xx -push yy -push zz -add -o {output_image}"""
 
     _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'dimension': pos_parameters.value_parameter('dimension', 3),
         'input_image': pos_parameters.filename_parameter('input_image', None),
         'output_image': pos_parameters.filename_parameter('output_image', None)
     }
