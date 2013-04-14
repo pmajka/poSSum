@@ -75,7 +75,7 @@ class ants_registration(generic_wrapper):
        {rigidAffine} {continueAffine}\
        {useNN} {histogramMatching} {allMetricsConverge} \
        {initialAffine} {fixedImageInitialAffine} {affineGradientDescent} \
-       {affineMetricType} {maskImage}  --MI-option 32x16000 """
+       {affineMetricType} {maskImage} {miOption} """
 
     _parameters = {
         'dimension': value_parameter('dimension', 2),
@@ -95,6 +95,7 @@ class ants_registration(generic_wrapper):
         'affineGradientDescent': vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
         'imageMetrics': list_parameter('image_to_image_metrics', [], '{_list}'),
         'maskImage': filename_parameter('mask-image', None, str_template='--{_name} {_value}'),
+        'miOption': vector_parameter('MI-option', None, str_template='--{_name} {_list}'),
         'affineMetricType' : value_parameter('affine-metric-type', None, str_template='--{_name} {_value}')
     }
 
