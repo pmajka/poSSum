@@ -43,8 +43,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                 self.options.endSlice)
 
     def _preprocess_images(self):
-        if self.parent_process.current_iteration == 0:
-            return self._average_images()
+        return self._average_images()
 
     def _average_images(self):
         commands = []
@@ -131,7 +130,8 @@ class deformable_reconstruction_iteration(generic_workflow):
               fields.
         """
 
-        self._preprocess_images()
+        if self.parent_process.current_iteration == 0:
+            self._preprocess_images()
         self._calculate_transformations_masked()
 
     def __call__(self, *args, **kwargs):
