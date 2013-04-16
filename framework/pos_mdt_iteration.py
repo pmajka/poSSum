@@ -2,76 +2,10 @@
 import copy
 import numpy as np
 
-import pos_wrappers
 import pos_parameters
+import pos_wrappers
+import pos_mdt_wrappers
 from pos_wrapper_skel import generic_workflow
-
-class test_msq_2(pos_wrappers.generic_wrapper):
-    """
-    """
-    _template = """c{dimension}d -mcs {input_image} -popas x -popas y -push x -dup -times -popas xx -push y  -dup -times -popas yy -push xx -push yy -add -o {output_image}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'input_image': pos_parameters.filename_parameter('input_image', None),
-        'output_image': pos_parameters.filename_parameter('output_image', None)
-    }
-
-    _io_pass = {
-        'dimension': 'dimension',
-        'output_image': 'input_image'
-    }
-
-
-class test_msq_3(pos_wrappers.generic_wrapper):
-    """
-    """
-    _template = """c{dimension}d -mcs {input_image} -popas x -popas y -popas z -push x -dup -times -popas xx -push y  -dup -times -popas yy -push z  -dup -times  -popas zz -push xx -push yy -push zz -add -o {output_image}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 3),
-        'input_image': pos_parameters.filename_parameter('input_image', None),
-        'output_image': pos_parameters.filename_parameter('output_image', None)
-    }
-
-    _io_pass = {
-        'dimension': 'dimension',
-        'output_image': 'input_image'
-    }
-
-
-class calculate_sddm(pos_wrappers.average_images):
-    """
-    """
-    _template = """c{dimension}d  {input_images} -scale {variance_n} -sqrt -o {output_image}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'input_images': pos_parameters.list_parameter('input_images', [], str_template='{_list}'),
-        'variance_n' : pos_parameters.value_parameter('variance_n', 1),
-        'output_image': pos_parameters.filename_parameter('output_image'),
-        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}')
-    }
-
-
-
-class ants_multiply_images(pos_wrappers.generic_wrapper):
-    """
-    """
-    _template = """MultiplyImages {dimension} {input_image} {multiplier} {output_image}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'multiplier': pos_parameters.value_parameter('multiplier', 1.0),
-        'input_image': pos_parameters.filename_parameter('input_image', None),
-        'output_image': pos_parameters.filename_parameter('output_image', None)
-    }
-
-    _io_pass = {
-        'dimension': 'dimension',
-        'output_image': 'input_image'
-    }
-
 
 class deformable_reconstruction_iteration(generic_workflow):
     _f = { \
@@ -287,7 +221,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                 templatewarp.nii.gz templatewarp.nii.gz
                 templatewarp.nii.gz templatewarp.nii.gz
         """
-        command = ants_multiply_images( \
+        command = pos_mdt_wrappers.ants_multiply_images( \
                         dimension = self.options.antsDimension,
                         multiplier = -0.25,
                         output_image = self.f['forward_average'](),
@@ -385,7 +319,8 @@ class deformable_reconstruction_iteration(generic_workflow):
 
         # Calculate magnitides of the warp vectors for each individual image
         commands = []
-        meth ={2:test_msq_2, 3:test_msq_3}
+        meth ={2 : pos_mdt_wrappers.test_msq_2,
+               3 : pos_mdt_wrappers.test_msq_3}
 
         for i in self.slice_range:
             command = meth[self.options.antsDimension](
@@ -408,7 +343,7 @@ class deformable_reconstruction_iteration(generic_workflow):
         sddm_filename = \
                 self.parent.f['sddm'](iter=self.parent.current_iteration)
 
-        command = calculate_sddm( \
+        command = pos_mdt_wrappers.calculate_sddm( \
                     dimension = self.options.antsDimension,
                     output_image = sddm_filename,
                     variance_n = 1.0/(len(self.slice_range) - 1.0),

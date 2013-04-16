@@ -6,34 +6,9 @@ import copy
 from optparse import OptionParser, OptionGroup
 
 from pos_wrapper_skel import generic_workflow
-from minimum_deformation_template_iterations import deformable_reconstruction_iteration
-import pos_wrappers
+from pos_mdt_iteration import deformable_reconstruction_iteration
 import pos_parameters
-
-
-class bias_correction(pos_wrappers.generic_wrapper):
-    _template= """N4BiasFieldCorrection -d {dimension} -i {input_image} -o {output_image} -b [200] -s 3 -c [50x50x30x20,1e-6]"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'input_image': pos_parameters.filename_parameter('input_image', None),
-        'output_image': pos_parameters.filename_parameter('output_image', None)
-    }
-
-    _io_pass = {
-        'dimension': 'dimension',
-        'output_image': 'input_image'
-    }
-
-class sddm_convergence(pos_wrappers.generic_wrapper):
-    _template= """c{dimension}d {first_image} {second_image} -msq | cut -f 3 -d" " >> {output_image}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'first_image': pos_parameters.filename_parameter('first_image', None),
-        'second_image': pos_parameters.filename_parameter('second_image', None),
-        'output_image': pos_parameters.filename_parameter('output_image', None)
-    }
+import pos_mdt_wrappers
 
 class minimum_deformation_template_wrokflow(generic_workflow):
     """
@@ -84,7 +59,7 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         commands = []
 
         for i in self.slice_range:
-            command = bias_correction( \
+            command = pos_mdt_wrappers.bias_correction( \
                             dimension = self.options.antsDimension,
                             input_image  = self.f['raw_slices'](idx=i),
                             output_image = self.f['init_slice'](idx=i))
@@ -147,7 +122,7 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         pairs = zip(self.iterations[:-1], self.iterations[1:])
 
         for (i, j) in pairs:
-            command = sddm_convergence( \
+            command = pos_mdt_wrappers.sddm_convergence( \
                 dimension = self.options.antsDimension,
                 first_image = self.f['sddm'](iter=i),
                 second_image = self.f['sddm'](iter=j),
