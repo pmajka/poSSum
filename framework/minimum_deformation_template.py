@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 import os,sys
 import numpy as np
 
@@ -69,7 +70,6 @@ class ants_multiply_images(pos_wrappers.generic_wrapper):
         'dimension': 'dimension',
         'output_image': 'input_image'
     }
-
 
 
 class bias_correction(pos_wrappers.generic_wrapper):
@@ -244,8 +244,229 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         self._update_average_inverse_wrap()
         self._update_warp_variance()
 
-    def _update_warp_variance(self):
+    def _reslice_images_forward(self):
+        """
+        Reslice the source (initial) images towards the current template using
+        transformation calculated in corrent iteration.  This method executes
+        the following code::
+
+           bash
+                /opt/ANTs-1.9.x-Linux/bin/WarpImageMultiTransform 2
+                test0004.nii.gz
+                test0004deformed.nii.gz
+                test0004Warp.nii.gz
+                test0004Affine.txt -R
+                testtemplate.nii.gz
+        """
+
+        # Start as usual.
         start, end, iteration = self._get_edges()
+
+        # Gather all the commands to be executed in a single array
+        commands = []
+
+        for i in self.slice_range:
+            moving_image = self.f['init_slice'](idx=i)
+            deformable_list  = [self.f['iteration_transform'](idx=i,iter=iteration)]
+            deformable_list += [self.f['iteration_affine_transform'](idx=i,iter=iteration)]
+
+            command = pos_wrappers.ants_reslice(
+                    dimension = self.options.antsDimension,
+                    moving_image = moving_image,
+                    output_image = self.f['iteration_resliced_slice'](idx=i,iter=iteration),
+                    reference_image = moving_image,
+                    deformable_list = deformable_list,
+                    affine_list = [])
+
+            commands.append(copy.deepcopy(command))
+
+        # And then execute all the scheduled commands.
+        self.execute(commands)
+
+    def _update_template_shape(self):
+        """
+        Update average template by averaging individual warped images::
+
+          bash
+              AverageImages 2 testtemplate.nii.gz 1
+              0000deformed.nii.gz 0001deformed.nii.gz
+              0002deformed.nii.gz 0003deformed.nii.gz
+              0004deformed.nii.gz
+
+        .. note:: The command uses normalization feature of the `AverageImages`
+            tool which does some sharpening (see the source of the `AverageImages`)
+            which sometimes leads to stragne effects. The uses should be able to
+            trun it off on demand.
+        """
+        #XXX: Add normalization switch
+        #TODO: Normalization switch
+
+        # Start as usual.
+        start, end, iteration = self._get_edges()
+
+        # Gather all the commands to be executed in a single array
+        commands = []
+
+        images_to_average = map(lambda j: \
+                self.f['iteration_resliced_slice'](iter=iteration,idx=j),
+                self.slice_range)
+
+        command = pos_wrappers.ants_average_images(\
+                            dimension = self.options.antsDimension,
+                            normalize = int(True),
+                            output_image = self.f['iteration_resliced_avg'](iter=iteration),
+                            input_images = images_to_average)
+
+        commands.append(copy.deepcopy(command))
+
+        # And then execute all the scheduled commands.
+        self.execute(commands)
+
+    def _average_forward_warps(self):
+        """
+        Averages all forward warps, equivalent of::
+
+            bash AverageImages 2 testtemplatewarp.nii.gz 0
+                0000Warp.nii.gz 0001Warp.nii.gz 0002Warp.nii.gz
+                0003Warp.nii.gz 0004Warp.nii.gz
+
+        .. note:: This time the normalization is forced to be `0`. We don't want
+                to sharpen the deformation fields.
+        """
+
+        # Start as usual.
+        start, end, iteration = self._get_edges()
+
+        # Gather all the commands to be executed in a single array
+        commands = []
+
+        images_to_average = \
+            map(lambda j: self.f['iteration_transform'](iter=iteration,idx=j), self.slice_range)
+
+        command = pos_wrappers.ants_average_images( \
+                        dimension = self.options.antsDimension,
+                        normalize = int(False),
+                        output_image = self.f['iteration_transform_avg'](iter=iteration),
+                        input_images = images_to_average)
+        commands.append(copy.deepcopy(command))
+
+        self.execute(commands)
+
+    def _update_average_fwd_wrap(self):
+        """
+        Updates the mean deformation fileld. Equivalent of following series of commands
+        Averages all forward warps, equivalent of::
+
+            MultiplyImages 2 templatewarp.nii.gz -0.25 templatewarp.nii.gz
+            AverageAffineTransform 2
+                templateAffine.txt
+                0000Affine.txt 0001Affine.txt 0002Affine.txt 0003Affine.txt 0004Affine.txt
+            WarpImageMultiTransform 2
+                templatewarp.nii.gz
+                templatewarp.nii.gz
+                -i templateAffine.txt
+                -R template.nii.gz
+                templatewarp.nii.gz templatewarp.nii.gz
+                templatewarp.nii.gz templatewarp.nii.gz
+        """
+
+        # Start as usual.
+        start, end, iteration = self._get_edges()
+
+        # Gather all the commands to be executed in a single array
+        commands = []
+
+        command = ants_multiply_images( \
+                        dimension = self.options.antsDimension,
+                        multiplier = -0.25,
+                        output_image = self.f['iteration_transform_avg'](iter=iteration),
+                        input_image  = self.f['iteration_transform_avg'](iter=iteration))
+
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        # Averaging affine transforms
+        commands = []
+        files_to_average = \
+                map(lambda j: self.f['iteration_affine_transform'](iter=iteration,idx=j), self.slice_range)
+        command = pos_wrappers.ants_average_affine_transform( \
+                        dimension = self.options.antsDimension,
+                        affine_list = files_to_average,
+                        output_affine_transform = self.f['iteration_affine_transform_avg'](iter=iteration))
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        # Transforming the average warp using only affine transforms.
+        # The warp filed is stacked four times as it was multiplied by 0.25
+        # in the previous step, so, overall it would be 1.0 again.
+        inverse_affine = ["-i " + self.f['iteration_affine_transform_avg'](iter=iteration)]
+        average_warp = self.f['iteration_transform_avg'](iter=iteration)
+
+        commands = []
+        command = pos_wrappers.ants_reslice(
+            dimension = self.options.antsDimension,
+            moving_image = average_warp,
+            output_image = average_warp,
+            reference_image = average_warp,
+            deformable_list = inverse_affine + 4*[average_warp],
+            affine_list = [])
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+    def _update_average_inverse_wrap(self):
+        """
+        Update the '''INVERSE''' warps::
+
+            AverageImages 2 templateInverseWarp.nii.gz 0
+                0000InverseWarp.nii.gz 0001InverseWarp.nii.gz 0002InverseWarp.nii.gz
+                0003InverseWarp.nii.gz 0004InverseWarp.nii.gz
+            WarpImageMultiTransform 2
+                templateInverseWarp.nii.gz
+                -R templateInverseWarp.nii.gz
+                templateAffine.txt
+        """
+
+        # Start as usual.
+        start, end, iteration = self._get_edges()
+
+        # Averaging inverse deformation fields:
+        commands = []
+        files_to_average = \
+                map(lambda j: self.f['iteration_transform_inverse'](iter=iteration,idx=j), self.slice_range)
+        command = pos_wrappers.ants_average_images( \
+                        dimension = self.options.antsDimension,
+                        normalize = int(False),
+                        output_image = self.f['iteration_transform_inverse_avg'](iter=iteration),
+                        input_images = files_to_average)
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        # Shifting the average inverse warp field with the affine transform
+        commands = []
+        #XXX: There is a bug somewhere here...
+        # I guess there should not be average_inverse_warp in deformable_list
+        # for warping
+        average_inverse_warp = self.f['iteration_transform_inverse_avg'](iter=iteration)
+        affine_transform = self.f['iteration_affine_transform_avg'](iter=iteration)
+
+        command = pos_wrappers.ants_reslice(
+            dimension = self.options.antsDimension,
+            moving_image = average_inverse_warp,
+            output_image = average_inverse_warp,
+            reference_image = average_inverse_warp,
+            deformable_list = [average_inverse_warp, affine_transform],
+            affine_list = [])
+        commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+    def _update_warp_variance(self):
+        """
+        Update the variance map.
+        """
+
+        # Start as usual.
+        start, end, iteration = self._get_edges()
+
         commands = []
         for i in self.slice_range:
             deformable_list = [
@@ -279,155 +500,6 @@ class minimum_deformation_template_wrokflow(generic_workflow):
                         output_image = self.f['sddm'](),
                         input_images = files_to_average)
         commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-    def _update_average_inverse_wrap(self):
-        start, end, iteration = self._get_edges()
-        #-----------------------------------------------------------------
-        # INVERSE!!!!!!!!!!!!!
-        # /opt/ANTs-1.9.x-Linux/bin/AverageImages 2 testtemplatewarp.nii.gz 0
-        # test0000Warp.nii.gz test0001Warp.nii.gz test0002Warp.nii.gz
-        # test0003Warp.nii.gz test0004Warp.nii.gz
-        #
-        commands = []
-        files_to_average = \
-                map(lambda j: self.f['iteration_transform_inverse'](iter=iteration,idx=j), self.slice_range)
-        command = pos_wrappers.ants_average_images( \
-                        dimension = self.options.antsDimension,
-                        normalize = int(False),
-                        output_image = self.f['iteration_transform_inverse_avg'](iter=iteration),
-                        input_images = files_to_average)
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-        #  /opt/ANTs-1.9.x-Linux/bin/WarpImageMultiTransform 2
-        #  testtemplatewarp.nii.gz
-        #  testtemplatewarp.nii.gz
-        #  -i
-        #  testtemplateAffine.txt
-        #  -R
-        #  testtemplate.nii.gz
-        commands = []
-        mul_avg_aff = self.f['iteration_transform_inverse_avg'](iter=iteration)
-        inv_aff = self.f['iteration_affine_transform_avg'](iter=iteration)
-
-        command = pos_wrappers.ants_reslice(
-            dimension = self.options.antsDimension,
-            moving_image = mul_avg_aff,
-            output_image = mul_avg_aff,
-            reference_image = mul_avg_aff,
-            deformable_list = [mul_avg_aff, inv_aff] ,
-            affine_list = [])
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-    def _update_average_fwd_wrap(self):
-        start, end, iteration = self._get_edges()
-        # /opt/ANTs-1.9.x-Linux/bin/MultiplyImages 2 testtemplatewarp.nii.gz\
-        #                                      -0.25 testtemplatewarp.nii.gz
-        commands = []
-        command = ants_multiply_images( \
-                        dimension = self.options.antsDimension,
-                        multiplier = -0.25,
-                        output_image = self.f['iteration_transform_avg'](iter=iteration),
-                        input_image  = self.f['iteration_transform_avg'](iter=iteration))
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-        #  /opt/ANTs-1.9.x-Linux/bin/AverageAffineTransform 2
-        #  testtemplateAffine.txt test0000Affine.txt test0001Affine.txt
-        #  test0002Affine.txt test0003Affine.txt test0004Affine.txt
-        commands = []
-        files_to_average = \
-                map(lambda j: self.f['iteration_affine_transform'](iter=iteration,idx=j), self.slice_range)
-        command = pos_wrappers.ants_average_affine_transform( \
-                        dimension = self.options.antsDimension,
-                        affine_list = files_to_average,
-                        output_affine_transform = self.f['iteration_affine_transform_avg'](iter=iteration))
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-        #  /opt/ANTs-1.9.x-Linux/bin/WarpImageMultiTransform 2
-        #  testtemplatewarp.nii.gz
-        #  testtemplatewarp.nii.gz
-        #  -i
-        #  testtemplateAffine.txt
-        #  -R
-        #  testtemplate.nii.gz
-        #  testtemplatewarp.nii.gz
-        #  testtemplatewarp.nii.gz
-        #  testtemplatewarp.nii.gz
-        #  testtemplatewarp.nii.gz
-        commands = []
-        inv_aff = ["-i " + self.f['iteration_affine_transform_avg'](iter=iteration)]
-        mul_avg_aff = self.f['iteration_transform_avg'](iter=iteration)
-
-        command = pos_wrappers.ants_reslice(
-            dimension = self.options.antsDimension,
-            moving_image = mul_avg_aff,
-            output_image = mul_avg_aff,
-            reference_image = mul_avg_aff,
-            deformable_list = inv_aff + 4*[mul_avg_aff],
-            affine_list = [])
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-    def _average_forward_warps(self):
-        start, end, iteration = self._get_edges()
-        # /opt/ANTs-1.9.x-Linux/bin/AverageImages 2 testtemplatewarp.nii.gz 0
-        # test0000Warp.nii.gz test0001Warp.nii.gz test0002Warp.nii.gz
-        # test0003Warp.nii.gz test0004Warp.nii.gz
-        #
-        start, end, iteration = self._get_edges()
-        commands = []
-        files_to_average = \
-                map(lambda j: self.f['iteration_transform'](iter=iteration,idx=j), self.slice_range)
-        command = pos_wrappers.ants_average_images( \
-                        dimension = self.options.antsDimension,
-                        normalize = int(False),
-                        output_image = self.f['iteration_transform_avg'](iter=iteration),
-                        input_images = files_to_average)
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-    def _update_template_shape(self):
-        start, end, iteration = self._get_edges()
-        # /opt/ANTs-1.9.x-Linux/bin/AverageImages 2 testtemplate.nii.gz 1
-        # test0000deformed.nii.gz test0001deformed.nii.gz
-        # test0002deformed.nii.gz test0003deformed.nii.gz
-        # test0004deformed.nii.gz
-        commands = []
-        files_to_average = \
-                map(lambda j: self.f['iteration_resliced_slice'](iter=iteration,idx=j), self.slice_range)
-        command = pos_wrappers.ants_average_images( \
-                        dimension = self.options.antsDimension,
-                        normalize = int(True),
-                        output_image = self.f['iteration_resliced_avg'](iter=iteration),
-                        input_images = files_to_average)
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-    def _reslice_images_forward(self):
-        start, end, iteration = self._get_edges()
-
-        #  /opt/ANTs-1.9.x-Linux/bin/WarpImageMultiTransform 2
-        #  /home/pmajka/test0004.nii.gz /home/pmajka/test0004deformed.nii.gz
-        #  /home/pmajka/test0004Warp.nii.gz /home/pmajka/test0004Affine.txt -R
-        #  testtemplate.nii.gz
-        commands = []
-        for i in self.slice_range:
-            deformable_list  = [self.f['iteration_transform'](idx=i,iter=iteration)]
-            deformable_list += [self.f['iteration_affine_transform'](idx=i,iter=iteration)]
-            moving_image = self.f['init_slice'](idx=i)
-            command = pos_wrappers.ants_reslice(
-                    dimension = self.options.antsDimension,
-                    moving_image = moving_image,
-                    output_image = self.f['iteration_resliced_slice'](idx=i,iter=iteration),
-                    reference_image = moving_image,
-                    deformable_list = deformable_list,
-                    affine_list = [])
-            commands.append(copy.deepcopy(command))
-
         self.execute(commands)
 
     @classmethod
