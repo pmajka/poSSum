@@ -1,10 +1,10 @@
 #!/usr/bin/python
 import copy
 import numpy as np
-from pos_deformable_wrappers import blank_slice_deformation_wrapper
-from pos_wrapper_skel import generic_workflow
+
 import pos_wrappers
 import pos_parameters
+from pos_wrapper_skel import generic_workflow
 
 class test_msq_2(pos_wrappers.generic_wrapper):
     """
@@ -43,7 +43,15 @@ class test_msq_3(pos_wrappers.generic_wrapper):
 class calculate_sddm(pos_wrappers.average_images):
     """
     """
-    _template = """c{dimension}d  {input_images} -mean -sqrt -o {output_image}"""
+    _template = """c{dimension}d  {input_images} -scale {variance_n} -sqrt -o {output_image}"""
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'input_images': pos_parameters.list_parameter('input_images', [], str_template='{_list}'),
+        'variance_n' : pos_parameters.value_parameter('variance_n', 1),
+        'output_image': pos_parameters.filename_parameter('output_image'),
+        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}')
+    }
 
 
 
@@ -85,7 +93,8 @@ class deformable_reconstruction_iteration(generic_workflow):
     def __init__(self, options, args):
         super(self.__class__, self).__init__(options, args)
 
-        start, end = self._get_edges()
+        start = self.options.firstImageIndex
+        end = self.options.lastImageIndex
         self.slice_range = range(start, end +1)
 
         # Convert the number of iterations string to list of integers
@@ -94,13 +103,6 @@ class deformable_reconstruction_iteration(generic_workflow):
 
         self.options.antsAffineIterations = \
                 map(int, self.options.antsAffineIterations.strip().split("x"))
-
-    def _get_edges(self):
-        """
-        Convenience function for returning frequently used numbers
-        """
-        return (self.options.startSlice,
-                self.options.endSlice)
 
     def _preprocess_images(self):
         return self._average_images()
@@ -124,6 +126,10 @@ class deformable_reconstruction_iteration(generic_workflow):
         self.execute(commands)
 
     def _get_default_reg_settings(self):
+        """
+        Fetch the default registration settings (those which were provided from
+        command line).
+        """
         return (self.options.antsImageMetric,
                 self.options.antsImageMetricOpt,
                 self.options.antsIterations,
@@ -153,7 +159,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                         fixed_image  = self.f['processed'](),
                         moving_image = self.f['src_slice'](idx=i),
                         metric = r_metric,
-                        weight = 1,
+                        weight = 1.0,
                         parameter = parameter)
             metrics.append(copy.deepcopy(metric))
 
@@ -205,9 +211,6 @@ class deformable_reconstruction_iteration(generic_workflow):
         commands = []
 
         for i in self.slice_range:
-           #deformable_list  = [self.f['forward'](idx=i)]
-           #deformable_list += [self.f['affine'](idx=i)]
-
             command = pos_wrappers.ants_reslice(
                     dimension = self.options.antsDimension,
                     moving_image = self.f['src_slice'](idx=i),
@@ -233,10 +236,8 @@ class deformable_reconstruction_iteration(generic_workflow):
         .. note:: The command uses normalization feature of the `AverageImages`
             tool which does some sharpening (see the source of the `AverageImages`)
             which sometimes leads to stragne effects. The uses should be able to
-            trun it off on demand.
+            trun it off on demand (perhaps one day...)
         """
-        #XXX: Add normalization switch
-        #TODO: Normalization switch
 
         resliced_images = [self.f['resliced'](idx=i)
                            for i in self.slice_range]
@@ -293,7 +294,7 @@ class deformable_reconstruction_iteration(generic_workflow):
                         input_image  = self.f['forward_average']())
         self.execute(copy.deepcopy(command))
 
-        # Averaging affine transforms
+        # Averaging affine transforms:
         forward_affines = [self.f['affine'](idx=i)
                            for i in self.slice_range]
 
@@ -359,7 +360,10 @@ class deformable_reconstruction_iteration(generic_workflow):
 
     def _update_warp_variance(self):
         """
-        Update the variance map.
+        Update the variance map (the only one, global variance map).
+
+        msq_i = average_inverse * forward_i
+        sddm = sqrt ((1/n-1)* sum_i(msq_i) )
         """
 
         # Compose average inverse wrap with the individual forward wrap for
@@ -379,9 +383,10 @@ class deformable_reconstruction_iteration(generic_workflow):
             commands.append(copy.deepcopy(command))
         self.execute(commands)
 
-        # Calculate variance maps based on deformation fields.
+        # Calculate magnitides of the warp vectors for each individual image
         commands = []
         meth ={2:test_msq_2, 3:test_msq_3}
+
         for i in self.slice_range:
             command = meth[self.options.antsDimension](
                     dimension = self.options.antsDimension,
@@ -390,14 +395,24 @@ class deformable_reconstruction_iteration(generic_workflow):
             commands.append(copy.deepcopy(command))
         self.execute(commands)
 
-        # Now, calculate the variance of the msq maps
-        msq_maps = [self.parent.f['template_transf_f_msq'](idx=i)
-                    for i in self.slice_range]
+        # Now, calculate the variance of the deformation magnitude maps
+        # The way, how it is done is a bit clumsy, but pobably the fastest one.
+        # c3d command line is generated: i1 i2 -add i3 -add ... in -add
+        # -scale 1/(n-1) -sqrt
+        deformation_magnitude_maps = \
+            [self.parent.f['template_transf_f_msq'](idx=self.slice_range[0])]
+        deformation_magnitude_maps += \
+            [self.parent.f['template_transf_f_msq'](idx=i) + " -add "
+             for i in self.slice_range[1:]]
+
+        sddm_filename = \
+                self.parent.f['sddm'](iter=self.parent.current_iteration)
 
         command = calculate_sddm( \
                     dimension = self.options.antsDimension,
-                    output_image = self.parent.f['sddm'](),
-                    input_images = msq_maps)
+                    output_image = sddm_filename,
+                    variance_n = 1.0/(len(self.slice_range) - 1.0),
+                    input_images = deformation_magnitude_maps)
         self.execute(copy.deepcopy(command))
 
     def launch(self):

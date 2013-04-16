@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 import os,sys
 import numpy as np
-
-from optparse import OptionParser, OptionGroup
 import copy
+from optparse import OptionParser, OptionGroup
 
-from pos_deformable_wrappers import preprocess_slice_volume
 from pos_wrapper_skel import generic_workflow
 from minimum_deformation_template_iterations import deformable_reconstruction_iteration
 import pos_wrappers
@@ -27,6 +25,15 @@ class bias_correction(pos_wrappers.generic_wrapper):
         'output_image': 'input_image'
     }
 
+class sddm_convergence(pos_wrappers.generic_wrapper):
+    _template= """c{dimension}d {first_image} {second_image} -msq | cut -f 3 -d" " >> {output_image}"""
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'first_image': pos_parameters.filename_parameter('first_image', None),
+        'second_image': pos_parameters.filename_parameter('second_image', None),
+        'output_image': pos_parameters.filename_parameter('output_image', None)
+    }
 
 class minimum_deformation_template_wrokflow(generic_workflow):
     """
@@ -48,24 +55,12 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
         # Iteration
         'iteration'  : pos_parameters.filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
-        'iteration_out_naming' : pos_parameters.filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
-        'iteration_affine_transform'  : pos_parameters.filename('iteration_affine_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}Affine.txt'),
-        'iteration_affine_transform_avg'  : pos_parameters.filename('iteration_affine_transform_avg', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/averageAffine.txt'),
-        'iteration_transform'  : pos_parameters.filename('iteration_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}Warp.nii.gz'),
-        'iteration_transform_avg'  : pos_parameters.filename('iteration_transform_avg', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/averageWarp.nii.gz'),
-        'iteration_transform_inverse'  : pos_parameters.filename('iteration_transform_inverse', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}InverseWarp.nii.gz'),
-        'iteration_transform_inverse_avg'  : pos_parameters.filename('iteration_transform_inverse_avg', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/averageInverseWarp.nii.gz'),
-        'iteration_resliced'   : pos_parameters.filename('iteration_resliced' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/'),
-        'iteration_resliced_slice' : pos_parameters.filename('iteration_resliced_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/{idx:04d}.nii.gz'),
         'iteration_resliced_avg'   : pos_parameters.filename('iteration_resliced_slice_avg' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/average.nii.gz'),
-        # After completing iterations
-        'final_deformations'   : pos_parameters.filename('final_deformations',   work_dir = '09_final_deformation', str_template = '{idx:04d}.nii.gz'),
-        'final_deformations_inversed'   : pos_parameters.filename('final_deformations_inversed',   work_dir = '10_final_deformation_inversed', str_template = '{idx:04d}.nii.gz'),
-        'final_deformations_inv_avg'   : pos_parameters.filename('final_deformations_inv_avg',   work_dir = '10_final_deformation_inversed', str_template = 'average.nii.gz'),
         # Building the template
         'template_transf_f'   : pos_parameters.filename('template_transf_f',   work_dir = '12_transf_f', str_template = '{idx:04d}.nii.gz'),
         'template_transf_f_msq'   : pos_parameters.filename('template_transf_f_msq',   work_dir = '12_transf_f', str_template = 'msq{idx:04d}.nii.gz'),
-        'sddm'   : pos_parameters.filename('sddm',   work_dir = '12_transf_f', str_template = 'sddm.nii.gz'),
+        'sddm'   : pos_parameters.filename('sddm',   work_dir = '12_transf_f', str_template = 'sddm{iter:04d}.nii.gz'),
+        'sddm_convergence'   : pos_parameters.filename('sddm_convergence',   work_dir = '12_transf_f', str_template = 'sddm_convergence.txt'),
         }
 
     _usage = ""
@@ -74,19 +69,14 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         super(self.__class__, self).__init__(options, args)
 
         # Handling situation when no volume is provided
-        if not any([self.options.inputVolume, \
-                   self.options.outlineVolume]):
+        if not self.options.inputVolume:
             print >> sys.stderr, "No input volumes provided. Exiting."
             sys.exit(1)
 
-        if self.options.inputVolume:
-            self.f['raw_slices'].override_dir = self.options.inputVolume
+        #TODO: Input volume required!
+        #TODO: image span required!
 
-        if self.options.outlineVolume:
-            self.f['init_outline'].override_dir = self.options.outlineVolume
-
-        # Just to be sure :)
-        self.current_iteration = 0
+        self.f['raw_slices'].override_dir = self.options.inputVolume
 
     def _prepare_input_images(self):
         """
@@ -106,16 +96,17 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         Launch the process.
         """
 
-        start, end, iteration = self._get_edges()
-        self.slice_range = range(start, end +1)
+        self.slice_range = range(self.options.firstImageIndex,
+                                 self.options.lastImageIndex +1)
+        self.iterations = range(self.options.startFromIteration,\
+                                self.options.iterations)
 
         self._prepare_input_images()
 
         # If 'startFromIteration' switch is enabled,
         # the reconstruction starts from a given iteration
         # instead of starting from the beginning - iteration 0
-        for iteration in range(self.options.startFromIteration,\
-                               self.options.iterations):
+        for iteration in self.iterations:
 
             print >> sys.stderr, "-------------------------------------------------"
             print >> sys.stderr, "Staring iteration: %d of %d" \
@@ -149,28 +140,29 @@ class minimum_deformation_template_wrokflow(generic_workflow):
             if not self.options.skipTransformations:
                 single_step()
 
-            # Generate volume holding the intermediate results
-            # and prepare images for the next iteration
-            #self._reslice()
+        self.calculate_convergence()
 
-    def _get_edges(self):
-        """
-        Convenience function for returning frequently used numbers
-        """
-        return (self.options.startSlice,
-                self.options.endSlice,
-                self.current_iteration)
+    def calculate_convergence(self):
 
+        pairs = zip(self.iterations[:-1], self.iterations[1:])
+
+        for (i, j) in pairs:
+            command = sddm_convergence( \
+                dimension = self.options.antsDimension,
+                first_image = self.f['sddm'](iter=i),
+                second_image = self.f['sddm'](iter=j),
+                output_image = self.f['sddm_convergence']())
+            self.execute(copy.deepcopy(command))
 
     @classmethod
     def _getCommandLineParser(cls):
         parser = generic_workflow._getCommandLineParser()
 
-        parser.add_option('--startSlice', default=0,
-                type='int', dest='startSlice',
+        parser.add_option('--firstImageIndex', default=0,
+                type='int', dest='firstImageIndex',
                 help='Index of the first slice of the stack')
-        parser.add_option('--endSlice', default=None,
-                type='int', dest='endSlice',
+        parser.add_option('--lastImageIndex', default=None,
+                type='int', dest='lastImageIndex',
                 help='Index of the last slice of the stack')
         parser.add_option('--iterations', default=10,
                 type='int', dest='iterations',
@@ -181,15 +173,9 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         parser.add_option('--inputVolume','-i', default=None,
                 type='str', dest='inputVolume',
                 help='Input files dir.')
-        parser.add_option('--outlineVolume','-o', default=None,
-                type='str', dest='outlineVolume',
-                help='Outline files dir.')
         parser.add_option('--skipTransformations', default=False,
                 dest='skipTransformations', action='store_const', const=True,
                 help='Skip transformations.')
-        parser.add_option('--stackFinalDeformation', default=False, const=True,
-                dest='stackFinalDeformation', action='store_const',
-                help='Stack filnal deformation fileld.')
 
         regSettings = \
                 OptionGroup(parser, 'Registration setttings.')
