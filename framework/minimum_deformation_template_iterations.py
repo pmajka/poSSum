@@ -204,21 +204,17 @@ class deformable_reconstruction_iteration(generic_workflow):
         # Gather all the commands to be executed in a single array
         commands = []
 
-        # TODO: Reference image should be the average template
-        # not the moving image !
         for i in self.slice_range:
-            moving_image = self.f['src_slice'](idx=i)
-            deformable_list  = [self.f['forward'](idx=i)]
-            deformable_list += [self.f['affine'](idx=i)]
+           #deformable_list  = [self.f['forward'](idx=i)]
+           #deformable_list += [self.f['affine'](idx=i)]
 
             command = pos_wrappers.ants_reslice(
                     dimension = self.options.antsDimension,
-                    moving_image = moving_image,
+                    moving_image = self.f['src_slice'](idx=i),
                     output_image = self.f['resliced'](idx=i),
-                    reference_image = moving_image,
-                    deformable_list = deformable_list,
-                    affine_list = [])
-
+                    reference_image = self.f['processed'](),
+                    deformable_list = [self.f['forward'](idx=i)],
+                    affine_list = [self.f['affine'](idx=i)])
             commands.append(copy.deepcopy(command))
 
         # And then execute all the scheduled commands.
@@ -242,22 +238,15 @@ class deformable_reconstruction_iteration(generic_workflow):
         #XXX: Add normalization switch
         #TODO: Normalization switch
 
-        # Gather all the commands to be executed in a single array
-        commands = []
-
         resliced_images = [self.f['resliced'](idx=i)
                            for i in self.slice_range]
 
-        command = pos_wrappers.ants_average_images(\
+        command = pos_wrappers.ants_average_images( \
                             dimension = self.options.antsDimension,
                             normalize = int(True),
-                            output_image = self.f['resliced_average'](),
-                            input_images = resliced_images)
-
-        commands.append(copy.deepcopy(command))
-
-        # And then execute all the scheduled commands.
-        self.execute(commands)
+                            input_images = resliced_images,
+                            output_image = self.f['resliced_average']())
+        self.execute(copy.deepcopy(command))
 
     def _average_forward_warps(self):
         """
@@ -270,18 +259,15 @@ class deformable_reconstruction_iteration(generic_workflow):
         .. note:: This time the normalization is forced to be `0`. We don't want
                 to sharpen the deformation fields.
         """
+        forward_warps = [self.f['forward'](idx=i)
+                         for i in self.slice_range]
 
-        images_to_average = \
-            map(lambda j: self.f['forward'](idx=j), self.slice_range)
-
-        commands = []
         command = pos_wrappers.ants_average_images( \
                         dimension = self.options.antsDimension,
                         normalize = int(False),
-                        output_image = self.f['forward_average'](),
-                        input_images = images_to_average)
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
+                        input_images = forward_warps,
+                        output_image = self.f['forward_average']())
+        self.execute(copy.deepcopy(command))
 
     def _update_average_fwd_wrap(self):
         """
@@ -300,25 +286,22 @@ class deformable_reconstruction_iteration(generic_workflow):
                 templatewarp.nii.gz templatewarp.nii.gz
                 templatewarp.nii.gz templatewarp.nii.gz
         """
-        commands = []
         command = ants_multiply_images( \
                         dimension = self.options.antsDimension,
                         multiplier = -0.25,
                         output_image = self.f['forward_average'](),
                         input_image  = self.f['forward_average']())
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
+        self.execute(copy.deepcopy(command))
 
         # Averaging affine transforms
-        commands = []
-        files_to_average = \
-                map(lambda j: self.f['affine'](idx=j), self.slice_range)
+        forward_affines = [self.f['affine'](idx=i)
+                           for i in self.slice_range]
+
         command = pos_wrappers.ants_average_affine_transform( \
                         dimension = self.options.antsDimension,
-                        affine_list = files_to_average,
+                        affine_list = forward_affines,
                         output_affine_transform = self.f['affine_average']())
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
+        self.execute(copy.deepcopy(command))
 
         # Transforming the average warp using only affine transforms.
         # The warp filed is stacked four times as it was multiplied by 0.25
@@ -326,16 +309,14 @@ class deformable_reconstruction_iteration(generic_workflow):
         inverse_affine = ["-i " + self.f['affine_average']()]
         average_warp = self.f['forward_average']()
 
-        commands = []
         command = pos_wrappers.ants_reslice(
             dimension = self.options.antsDimension,
             moving_image = average_warp,
-            output_image = average_warp,
             reference_image = average_warp,
             deformable_list = inverse_affine + 4*[average_warp],
-            affine_list = [])
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
+            affine_list = [],
+            output_image = average_warp)
+        self.execute(copy.deepcopy(command))
 
     def _update_average_inverse_wrap(self):
         """
@@ -350,19 +331,17 @@ class deformable_reconstruction_iteration(generic_workflow):
                 templateAffine.txt
         """
         # Averaging inverse deformation fields:
-        commands = []
-        files_to_average = \
-                map(lambda j: self.f['inverse'](idx=j), self.slice_range)
+        inverse_warps = [self.f['inverse'](idx=i)
+                         for i in self.slice_range]
+
         command = pos_wrappers.ants_average_images( \
                         dimension = self.options.antsDimension,
                         normalize = int(False),
-                        output_image = self.f['inverse_average'](),
-                        input_images = files_to_average)
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
+                        input_images = inverse_warps,
+                        output_image = self.f['inverse_average']())
+        self.execute(copy.deepcopy(command))
 
         # Shifting the average inverse warp field with the affine transform
-        commands = []
         #XXX: There is a bug somewhere here...
         # I guess there should not be average_inverse_warp in deformable_list
         # for warping
@@ -376,14 +355,15 @@ class deformable_reconstruction_iteration(generic_workflow):
             reference_image = average_inverse_warp,
             deformable_list = [affine_transform],
             affine_list = [])
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
+        self.execute(copy.deepcopy(command))
 
     def _update_warp_variance(self):
         """
         Update the variance map.
         """
 
+        # Compose average inverse wrap with the individual forward wrap for
+        # each image.
         commands = []
         for i in self.slice_range:
             deformable_list = [
@@ -399,8 +379,9 @@ class deformable_reconstruction_iteration(generic_workflow):
             commands.append(copy.deepcopy(command))
         self.execute(commands)
 
+        # Calculate variance maps based on deformation fields.
         commands = []
-        meth ={2:test_msq_2, 3: test_msq_3}
+        meth ={2:test_msq_2, 3:test_msq_3}
         for i in self.slice_range:
             command = meth[self.options.antsDimension](
                     dimension = self.options.antsDimension,
@@ -409,15 +390,15 @@ class deformable_reconstruction_iteration(generic_workflow):
             commands.append(copy.deepcopy(command))
         self.execute(commands)
 
-        commands = []
-        files_to_average = \
-                map(lambda j: self.parent.f['template_transf_f_msq'](idx=j), self.slice_range)
+        # Now, calculate the variance of the msq maps
+        msq_maps = [self.parent.f['template_transf_f_msq'](idx=i)
+                    for i in self.slice_range]
+
         command = calculate_sddm( \
-                        dimension = self.options.antsDimension,
-                        output_image = self.parent.f['sddm'](),
-                        input_images = files_to_average)
-        commands.append(copy.deepcopy(command))
-        self.execute(commands)
+                    dimension = self.options.antsDimension,
+                    output_image = self.parent.f['sddm'](),
+                    input_images = msq_maps)
+        self.execute(copy.deepcopy(command))
 
     def launch(self):
         """
