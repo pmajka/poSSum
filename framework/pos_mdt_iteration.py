@@ -1,13 +1,14 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import copy
-import numpy as np
 
 import pos_parameters
 import pos_wrappers
 import pos_mdt_wrappers
 from pos_wrapper_skel import generic_workflow
 
-class deformable_reconstruction_iteration(generic_workflow):
+class minimum_deformation_template_iteration(generic_workflow):
     _f = { \
         'src_slice'  : pos_parameters.filename('src_slice',  work_dir = '00_src_slices',      str_template =  '{idx:04d}.nii.gz'),
         'processed'  : pos_parameters.filename('processed',  work_dir = '01_process_slices',  str_template =  'average.nii.gz'),
@@ -23,6 +24,11 @@ class deformable_reconstruction_iteration(generic_workflow):
         }
 
     _usage = ""
+
+    __parameters_return_order = ["antsImageMetric",
+        "antsImageMetricOpt", "antsIterations",
+        "antsAffineIterations", "antsTransformation",
+        "antsRegularizationType", "antsRegularization"]
 
     def __init__(self, options, args):
         super(self.__class__, self).__init__(options, args)
@@ -47,7 +53,7 @@ class deformable_reconstruction_iteration(generic_workflow):
 
         for j in self.slice_range:
             if self.parent.current_iteration == 0:
-                files_to_average.append(self.parent.f['raw_slices'](idx=j))
+                files_to_average.append(self.parent.f['raw_images'](idx=j))
             else:
                 files_to_average.append(self.f['src_slice'](idx=j))
 
@@ -64,13 +70,29 @@ class deformable_reconstruction_iteration(generic_workflow):
         Fetch the default registration settings (those which were provided from
         command line).
         """
-        return (self.options.antsImageMetric,
-                self.options.antsImageMetricOpt,
-                self.options.antsIterations,
-                self.options.antsAffineIterations,
-                self.options.antsTransformation,
-                self.options.antsRegularizationType,
-                self.options.antsRegularization)
+        registration_settings = \
+            tuple(map(lambda x: getattr(self.options, x),
+                  self.__parameters_return_order))
+        self._logger.info("Using registraton settings provided via the command line.")
+        return registration_settings
+
+    def _get_registration_settings_from_file(self):
+        """
+        Load registration settings from provided file instead of using the
+        settings provided via the command line.
+        """
+
+        iteration_str = str(self.parent.current_iteration)
+
+        self._logger.info("Loading registration settings for iteration %s from json file %s:", \
+                iteration_str, self.options.settingsFile)
+        settings = self.options.custom_registration_settings[iteration_str]
+
+        for k,v in settings.items():
+            self._logger.info("%s : %s", k, str(v))
+
+        return tuple(map(lambda x: settings[x],
+                     self.__parameters_return_order))
 
     def _calculate_transformations_masked(self):
         """
@@ -82,12 +104,22 @@ class deformable_reconstruction_iteration(generic_workflow):
 
         commands = []
 
+        # If custom registration settings file is provided, use it
+        # to drive the registration. Otherwise use the setting provided
+        # via the command line:
+        if self.options.settingsFile:
+            registration_settings = \
+                self._get_registration_settings_from_file()
+        else:
+            registration_settings = \
+                    self._get_default_reg_settings()
+
         for i in self.slice_range:
             metrics  = []
 
             r_metric, parameter, iterations, affine_iterations, \
             transf_grad, reg_type, reg_ammount =\
-                    self._get_default_reg_settings()
+                    registration_settings
 
             metric = pos_wrappers.ants_intensity_meric(
                         fixed_image  = self.f['processed'](),
@@ -353,7 +385,6 @@ class deformable_reconstruction_iteration(generic_workflow):
     def launch(self):
         """
         """
-
         if self.parent.current_iteration == 0:
             self._preprocess_images()
         self._calculate_transformations_masked()
@@ -361,4 +392,3 @@ class deformable_reconstruction_iteration(generic_workflow):
 
     def __call__(self, *args, **kwargs):
         return self.launch()
-

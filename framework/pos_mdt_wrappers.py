@@ -13,7 +13,8 @@ class sddm_convergence(pos_wrappers.generic_wrapper):
 
 
 class bias_correction(pos_wrappers.generic_wrapper):
-    _template= """N4BiasFieldCorrection -d {dimension} -i {input_image} -o {output_image} -b [200] -s 3 -c [50x50x30x20,1e-6]"""
+   #_template= """N4BiasFieldCorrection -d {dimension} -i {input_image} -o {output_image} -b [200] -s 3 -c [50x50x30x20,1e-6]"""
+    _template= """cp {input_image} {output_image} """
 
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 2),
@@ -62,7 +63,13 @@ class calculate_sddm(pos_wrappers.average_images):
 class test_msq_3(pos_wrappers.generic_wrapper):
     """
     """
-    _template = """c{dimension}d -mcs {input_image} -popas x -popas y -popas z -push x -dup -times -popas xx -push y  -dup -times -popas yy -push z  -dup -times  -popas zz -push xx -push yy -push zz -add -o {output_image}"""
+    _template = """c{dimension}d -mcs {input_image} \
+            -popas x -popas y -popas z \
+            -push x -dup -times -popas xx \
+            -push y -dup -times -popas yy \
+            -push z -dup -times -popas zz \
+            -push xx -push yy -push zz \
+            -add -o {output_image}"""
 
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 3),
@@ -79,7 +86,12 @@ class test_msq_3(pos_wrappers.generic_wrapper):
 class test_msq_2(pos_wrappers.generic_wrapper):
     """
     """
-    _template = """c{dimension}d -mcs {input_image} -popas x -popas y -push x -dup -times -popas xx -push y  -dup -times -popas yy -push xx -push yy -add -o {output_image}"""
+    _template = """c{dimension}d -mcs {input_image} \
+            -popas x -popas y \
+            -push x -dup -times -popas xx \
+            -push y -dup -times -popas yy \
+            -push xx -push yy \
+            -add -o {output_image}"""
 
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 2),

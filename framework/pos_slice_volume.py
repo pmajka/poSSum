@@ -21,10 +21,10 @@
 #    http://www.gnu.org/licenses/.                                            #
 #                                                                             #
 ###############################################################################
-
 import sys, os
 import datetime, logging
 from optparse import OptionParser, OptionGroup
+import pos_common
 
 import itk
 
@@ -113,37 +113,11 @@ def autodetect_file_type(image_path):
     return image_type
 
 
-def setup_logging(log_filename = None, log_level = 'WARNING'):
-    """
-    Initialize the logging subsystem. The logging is handled (suprisingly!)
-    by the logging module. Depending on the command line options the log may
-    be streamed to a specified file or printed directly to the stderr.
-
-    :param log_filename: file to which the log will be redirected. If None
-                         provided, the logging is redirected to stderr. None by default.
-    :type log_filename: str
-
-
-    :param log_level: Severity level of the logging module. Supports all the
-                      default severity levels implemented in python logging
-                      module. WARNING by default. (see http://docs.python.org/2.6/library/logging.html for more details.)
-    :type log_level: str
-    """
-
-    # Intialize the logging module.
-    logging.basicConfig(\
-            level = getattr(logging, log_level),
-            filename = log_filename,
-            format = '%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
-            datefmt = '%m/%d/%Y %H:%M:%S')
-
-
 class extract_slices_from_volume(object):
     """
     Class which purpose is to extract a slice(s) from 3d volume. So much buzzz
     about so simple thing...
     """
-    _LOGGING_IDENTIFIER = "extract_slices_from_volume"
 
     def __init__(self, optionsDict, args):
         """
@@ -174,7 +148,7 @@ class extract_slices_from_volume(object):
         # of the volume. This will be determined during execution.
 
     def _initializeLogging(self):
-        setup_logging(self.options['logFilename'],
+        pos_common.setup_logging(self.options['logFilename'],
                       self.options['loglevel'])
 
         logging.debug("Logging module initialized. Saving to: %s, Loglevel: %s",
@@ -182,7 +156,7 @@ class extract_slices_from_volume(object):
 
         # Assign the the string that will identify all messages from this
         # script
-        self._logger = logging.getLogger(self._LOGGING_IDENTIFIER)
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def launchFilter(self):
         """

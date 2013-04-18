@@ -1,32 +1,24 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
 import os,sys
-import numpy as np
 import copy
+import logging
+import json
 from optparse import OptionParser, OptionGroup
 
+import pos_common
 from pos_wrapper_skel import generic_workflow
-from pos_mdt_iteration import deformable_reconstruction_iteration
+from pos_mdt_iteration import minimum_deformation_template_iteration
 import pos_parameters
 import pos_mdt_wrappers
 
+
 class minimum_deformation_template_wrokflow(generic_workflow):
     """
-    A framework for performing deformable reconstruction of histological volumes
-    based on histological slices. The framework combines:
-       * Advanced Normalization Tools (ANTS, http://www.picsl.upenn.edu/ANTS/)
-       * ImageMagick (http://www.imagemagick.org/script/index.php)
-       * Insight Segmentation and Registration Toolkit (ITK, http://www.itk.org/)
-       * ITKSnap and Convert3d (http://www.itksnap.org/)
-       * Visualization Toolkit (VTK, http://www.vtk.org/)
-       * and a number of homemade software
-
-    in order to generate smooth and acurate volumetric reconstructions from 2d
-    slices.
-
     """
     _f = { \
-        'raw_slices' : pos_parameters.filename('raw_slices', work_dir = '00_raw_slices', str_template = '{idx:04d}.nii.gz'),
+        'raw_images' : pos_parameters.filename('raw_images', work_dir = '00_raw_images', str_template = '{idx:04d}.nii.gz'),
         'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
         # Iteration
         'iteration'  : pos_parameters.filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
@@ -40,28 +32,48 @@ class minimum_deformation_template_wrokflow(generic_workflow):
 
     _usage = ""
 
-    def __init__(self, options, args):
-        super(self.__class__, self).__init__(options, args)
-
+    def _validateOptions(self):
         # Handling situation when no volume is provided
-        if not self.options.inputVolume:
-            print >> sys.stderr, "No input volumes provided. Exiting."
-            sys.exit(1)
+        assert self.options.inputVolume, \
+            self._logger.error("No input directory provided. Please provide input directory (-i) and try again.")
 
-        #TODO: Input volume required!
-        #TODO: image span required!
+        # Handling the situation when no image span is provided.
+        assert self.options.firstImageIndex != None and \
+               self.options.lastImageIndex != None, \
+            self._logger.error("No image span provided. Please provide --firstImageIndex and --lastImageIndex.")
 
-        self.f['raw_slices'].override_dir = self.options.inputVolume
+    def _overrideDefaults(self):
+        # Override default raw_images directory (which, in fact, is just a
+        # stub) with the directory with actual images.
+        self.f['raw_images'].override_dir = self.options.inputVolume
+
+        # If custom registration settings file is provided, the number of
+        # iterations passed via command line should be overriden by the
+        # number of iterations defined by the custom registration settings
+        # file.
+        if self.options.settingsFile:
+            self._logger.debug("Custom registration settings file provided. Overriding number of iterations.")
+
+            self.options.custom_registration_settings = \
+                    json.load(open(self.options.settingsFile))
+
+            self.options.iterations = \
+                    len(self.options.custom_registration_settings.keys())
+
+            self._logger.debug("%d iteration will be performed.", self.options.iterations)
 
     def _prepare_input_images(self):
         """
+        The images constituting the template are not the raw images but the
+        processed :) images. Currently, the processing is only N4 bias
+        correction but in the future, other steps may be involved.
         """
         commands = []
 
         for i in self.slice_range:
             command = pos_mdt_wrappers.bias_correction( \
                             dimension = self.options.antsDimension,
-                            input_image  = self.f['raw_slices'](idx=i),
+                            input_image  = self.f['raw_images'](idx=i),
                             output_image = self.f['init_slice'](idx=i))
             commands.append(copy.deepcopy(command))
         self.execute(commands)
@@ -83,41 +95,63 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         # instead of starting from the beginning - iteration 0
         for iteration in self.iterations:
 
-            print >> sys.stderr, "-------------------------------------------------"
-            print >> sys.stderr, "Staring iteration: %d of %d" \
-                                        % (iteration, self.options.iterations)
-            print >> sys.stderr, "-------------------------------------------------"
+            self._logger.info("-------------------------------------------------")
+            self._logger.info("Staring iteration: %d of %d", \
+                              iteration, self.options.iterations)
+            self._logger.info("-------------------------------------------------")
 
             self.current_iteration = iteration
 
             # Make hard copy of the setting dictionaries. Hard copy is made as
-            # it is passed to the 'deformable_reconstruction_iteration' class
+            # it is passed to the 'minimum_deformation_template_iteration' class
             # and is is customized within this class. Because of that reason a
             # hard copy has to be made.
+            self._logger.debug("Cloning the command line options and passing to the child workflow.")
             step_options = copy.deepcopy(self.options)
             step_args = copy.deepcopy(self.args)
 
-            # TODO: Provide some comment here
+            # Assign working directory to the individual iteration workflow.
+            # The working directory is a subdir of the parent workflow.
+            self._logger.debug("Initializing the individual interation step workflow.")
             step_options.workdir = os.path.join(self.f['iteration'](iter=iteration))
-            single_step = deformable_reconstruction_iteration(step_options, step_args)
+            single_step = minimum_deformation_template_iteration(step_options, step_args)
             single_step.parent = self
 
-            #TODO: Provide some comment here
+            # In the first iteration the moving images are the initial images
+            # of the workflow. In all the next iterations, the images resliced
+            # during the previous iteration are used.
+            self._logger.debug("Setting the source of the moving images for iteration %d.", iteration)
             single_step.f['src_slice'].override_dir = self.f['init_slice'].base_dir
-            if iteration == 0:
-                pass
-            else:
+            if iteration != 0:
                 single_step.f['processed'].override_path = self.f['iteration_resliced_avg'](iter=iteration-1)
 
             # Do registration if proper switches are provided
             # (there is a possibility to run the reconstruction process without
             # actually calculationg the transfomations.
-            if not self.options.skipTransformations:
+            if self.options.skipTransformations:
+                self._logger.debug("skipTransformations option enabled - skipping iteration %d", iteration)
+            else:
                 single_step()
 
+        self._logger.info("Calculating template convergence.")
         self.calculate_convergence()
+        self._print_results_path()
+
+    def _print_results_path(self):
+        """
+        """
+        self._logger.info("Workflow done!.")
+        self._logger.info("SDDM map: %s",
+                self.f['sddm'](iter=self.iterations[-1]))
+        self._logger.info("Template: %s",
+                self.f['iteration_resliced_avg'](iter=self.iterations[-1]))
 
     def calculate_convergence(self):
+        """
+        Calculate the template convergence. The convergence is calculated by
+        substracting mean square difference of image j and i. This helps to
+        determine if the template converges over consecutive iterations or not.
+        """
 
         pairs = zip(self.iterations[:-1], self.iterations[1:])
 
@@ -151,6 +185,9 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         parser.add_option('--skipTransformations', default=False,
                 dest='skipTransformations', action='store_const', const=True,
                 help='Skip transformations.')
+        parser.add_option('--settingsFile', default=None,
+                dest='settingsFile', action='store', type='str',
+                help='Use a file to provide registration settings.')
 
         regSettings = \
                 OptionGroup(parser, 'Registration setttings.')
