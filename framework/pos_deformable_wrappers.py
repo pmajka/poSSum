@@ -1,5 +1,5 @@
 from pos_parameters import filename_parameter, value_parameter, \
-                            string_parameter
+                            string_parameter, list_parameter
 import pos_wrappers
 
 
@@ -46,3 +46,29 @@ class gnuplot_wrapper(pos_wrappers.generic_wrapper):
             'svg_file' : filename_parameter('svg_file', None),
             'output_file' : filename_parameter('output_file', None),
             }
+
+
+class visualize_wrap_field(pos_wrappers.generic_wrapper):
+    _template = """python ../../draw_glyphs_2d.py \
+        --warpImage {warp_image} \
+        --sliceImage {slice_image} \
+        --screenshot {screenshot_filename} \
+        --deformationOverlayOpacity {deformation_opacity} \
+        --jacobianOverlayOpacity {jacobian_opacity} \
+        --deformationScaleRange {deformation_range} \
+        --glyphConfiguration {glyphs_configuration} \
+        --spacing {spacing} \
+        --cameraPosition 12 8 -20 \
+        --jacobianScaleMapping 0.9 1 1.1 \
+        --cleanup"""
+
+    _parameters = {
+        'warp_image'  : filename_parameter('warp_image', None),
+        'slice_image' : filename_parameter('slice_image', None),
+        'screenshot_filename'  : filename_parameter('screenshot_filename', None),
+        'deformation_opacity' : value_parameter('deformation_opacity', 0.5),
+        'jacobian_opacity' : value_parameter('jacobian_opacity', 0.5),
+        'deformation_range' : list_parameter('deformation_range', [0.0, 1.0]),
+        'spacing' : list_parameter('spacing', None),
+        'glyphs_configuration' : list_parameter('glyphs_configuration', [5000, 10, 6])
+        }

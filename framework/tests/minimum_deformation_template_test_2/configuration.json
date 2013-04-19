@@ -3,7 +3,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "1":
@@ -11,7 +11,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "2":
@@ -19,7 +19,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "3":
@@ -27,7 +27,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "4":
@@ -35,7 +35,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "5":
@@ -43,7 +43,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "6":
@@ -51,7 +51,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "7":
@@ -59,7 +59,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "8":
@@ -67,7 +67,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25},
 "9":
@@ -75,7 +75,7 @@
 	"antsRegularizationType": "Gauss",
 	"antsImageMetric": "CC",
 	"antsAffineIterations": [10000, 10000, 10000, 10000, 10000],
-	"antsRegularization": [3.0, 1.0],
+	"antsRegularization": [3.0, 0.0],
 	"antsImageMetricOpt": 5,
 	"antsTransformation": 0.25}
 }
