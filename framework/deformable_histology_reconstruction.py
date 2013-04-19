@@ -5,7 +5,7 @@ import numpy as np
 from optparse import OptionParser, OptionGroup
 import copy
 
-from pos_deformable_wrappers import preprocess_slice_volume
+from pos_deformable_wrappers import preprocess_slice_volume, visualize_wrap_field
 from pos_wrapper_skel import generic_workflow
 from deformable_histology_iterations import deformable_reconstruction_iteration
 import pos_wrappers
@@ -57,13 +57,15 @@ class deformable_reconstruction_workflow(generic_workflow):
         'final_deformations'   : pos_parameters.filename('final_deformations',   work_dir = '09_final_deformation', str_template = '{idx:04d}.nii.gz'),
         'iteration_stack_mask' : pos_parameters.filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/????.nii.gz'),
         'iteration_stack_outline' : pos_parameters.filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/????.nii.gz'),
-        'iteration_stack_cmask' : pos_parameters.filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/????.nii.gz')
+        'iteration_stack_cmask' : pos_parameters.filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/????.nii.gz'),
+        # Analysis
+        'warp_field_visualization' : pos_parameters.filename('warp_field_visualization', work_dir = '15_deformation_analysis', str_template = '{idx:04d}.png')
         }
 
     _usage = ""
 
-    def __init__(self, options, args, pool = None):
-        super(self.__class__, self).__init__(options, args, pool)
+    def __init__(self, options, args):
+        super(self.__class__, self).__init__(options, args)
 
         # Handling situation when no volume is provided
         if not any([self.options.inputVolume, \
@@ -190,7 +192,7 @@ class deformable_reconstruction_workflow(generic_workflow):
             step_args = copy.deepcopy(self.args)
 
             step_options.workdir = os.path.join(self.f['iteration'](iter=iteration))
-            single_step = deformable_reconstruction_iteration(step_options, step_args, pool = self.pool)
+            single_step = deformable_reconstruction_iteration(step_options, step_args)
             single_step.parent_process = self
 
             # Settings for the first iteration has to be tweaked up a little as
@@ -220,8 +222,28 @@ class deformable_reconstruction_workflow(generic_workflow):
 
         # At the end of the processing the calculated deformation fields can be
         # composed togeather to form the final deformation field.
+
         if self.options.stackFinalDeformation:
             self._generate_final_transforms()
+            self._visualize_warps()
+
+    def _visualize_warps(self):
+        """
+        """
+        start, end, eps, iteration = self._get_edges()
+        commands = []
+
+        for i in range(start, end +1):
+            command = visualize_wrap_field(
+                warp_image = self.f['final_deformations'](idx=i),
+                slice_image = self.f['init_slice'](idx=i),
+                screenshot_filename = self.f['warp_field_visualization'](idx=i),
+                deformation_opacity = 0.0,
+                jacobian_opacity = 0.5,
+                deformation_range = [0,1],
+                spacing = [0.03, 0.03])
+            commands.append(copy.deepcopy(command))
+        self.execute(commands, parallel=False)
 
     def _get_edges(self):
         """
@@ -500,5 +522,3 @@ if __name__ == '__main__':
     options, args = deformable_reconstruction_workflow.parseArgs()
     d = deformable_reconstruction_workflow(options, args)
     d.launch()
-    d.pool.close()
-    d.pool.join()

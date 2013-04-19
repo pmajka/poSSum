@@ -21,10 +21,11 @@
 #    http://www.gnu.org/licenses/.                                            #
 #                                                                             #
 ###############################################################################
-
 import sys, os
 import datetime, logging
 from optparse import OptionParser, OptionGroup
+import pos_common
+
 import itk
 
 # Dictionary below copied from (Sun Apr  7 14:04:28 CEST 2013)
@@ -76,8 +77,8 @@ def autodetect_file_type(image_path):
     :param image_path: filename to be investigated
     :type image_path: str
     """
-
-    logging.info("Autodetecting file type: %s",  image_path)
+    logger = logging.getLogger('autodetect_file_type')
+    logger.info("Autodetecting file type: %s",  image_path)
 
     # Initialize itk imageIO factory which allows to do some strange thing
     # (this function a pythonized code of an itk example from
@@ -93,41 +94,31 @@ def autodetect_file_type(image_path):
     pixel_type = image_io.GetPixelTypeAsString(image_io.GetPixelType())
     number_of_dimensions = image_io.GetNumberOfDimensions()
 
-    logging.debug("Finished extracting header information.")
+    logger.debug("Finished extracting header information.")
 
-    logging.info("   Number of dimensions: %d", number_of_dimensions)
-    logging.info("   Image size: %s", str(image_size))
-    logging.info("   Component type: %s", component_type)
-    logging.info("   Pixel type: %s", pixel_type)
-    logging.debug(image_io)
-    logging.info("Matching image type...")
+    logger.info("   Number of dimensions: %d", number_of_dimensions)
+    logger.info("   Image size: %s", str(image_size))
+    logger.info("   Component type: %s", component_type)
+    logger.info("   Pixel type: %s", pixel_type)
+    logger.debug(image_io)
+    logger.info("Matching image type...")
 
     # Matching corresponding image type
     image_type = io_component_string_name_to_image_type[
         (pixel_type, component_type, number_of_dimensions)]
 
-    logging.info("Matched ITK image type: %s", image_type)
+    logger.info("Matched ITK image type: %s", image_type)
 
     # Hurrayy!!
     return image_type
 
 
-def setup_logging(log_filename = None, log_level = 'WARNING'):
-    """
-    Initialize the logging subsystem. The logging is handled (suprisingly!)
-    by the logging module. Depending on the command line options the log may
-    be streamed to a specified file or printed directly to the stderr.
-    """
-
-    # Intialize the logging module.
-    logging.basicConfig(\
-            level = getattr(logging, log_level),
-            filename = log_filename,
-            format = '%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
-            datefmt = '%m/%d/%Y %H:%M:%S')
-
-
 class extract_slices_from_volume(object):
+    """
+    Class which purpose is to extract a slice(s) from 3d volume. So much buzzz
+    about so simple thing...
+    """
+
     def __init__(self, optionsDict, args):
         """
         """
@@ -139,21 +130,33 @@ class extract_slices_from_volume(object):
 
         self._args = args
 
+        # Yes, we need logging even in so simple script.
         self._initializeLogging()
-        self._validate_options()
 
-        # TODO: In thik that filters should be private attrubutes...
+        # Check, if all the provided parameters are valid and mutually
+        # consistent.
+        self._validate_options()
 
     def _validate_options(self):
         assert self.options['sliceAxisIndex'] in [0,1,2] , \
-            "The slicing plane has to be either 0, 1 or 2."
+            self._logger.error("The slicing plane has to be either 0, 1 or 2.")
+
+        assert self.options['inputFilename'] is not None, \
+            self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
+
+        # XXX: Note that we do not check if the slicing range is within limit
+        # of the volume. This will be determined during execution.
 
     def _initializeLogging(self):
-        setup_logging(self.options['logFilename'],
+        pos_common.setup_logging(self.options['logFilename'],
                       self.options['loglevel'])
 
         logging.debug("Logging module initialized. Saving to: %s, Loglevel: %s",
                       self.options['logFilename'], self.options['loglevel'])
+
+        # Assign the the string that will identify all messages from this
+        # script
+        self._logger = logging.getLogger(self.__class__.__name__)
 
     def launchFilter(self):
         """
@@ -164,41 +167,40 @@ class extract_slices_from_volume(object):
         self._input_image_type = autodetect_file_type(input_filename)
         self._output_image_type = types_reduced_dimensions[self._input_image_type]
 
-        logging.info("Determined input image type: %s", self._input_image_type)
-        logging.info("Determined slices' image type: %s", self._output_image_type)
+        self._logger.info("Determined input image type: %s", self._input_image_type)
+        self._logger.info("Determined slices' image type: %s", self._output_image_type)
 
-        logging.debug("Reading volume file %s", input_filename)
-        self.image_reader = itk.ImageFileReader[self._input_image_type].New()
-        self.image_reader.SetFileName(input_filename)
-        self.image_reader.Update()
+        self._logger.debug("Reading volume file %s", input_filename)
+        self._image_reader = itk.ImageFileReader[self._input_image_type].New()
+        self._image_reader.SetFileName(input_filename)
+        self._image_reader.Update()
 
-        self._source_largest_region = self.image_reader.GetOutput().GetLargestPossibleRegion()
-        logging.info("Largest possible region: %s.", self._source_largest_region)
+        self._source_largest_region = self._image_reader.GetOutput().GetLargestPossibleRegion()
+        self._logger.info("Largest possible region: %s.", self._source_largest_region)
 
         # Define slicing region (in its initial form)
         self._define_slicing_region()
 
         # Define filter for extracting slices
-        logging.debug("Setting slice region.")
-        self.extract_slice = itk.ExtractImageFilter[self._input_image_type, self._output_image_type].New()
-        self.extract_slice.SetExtractionRegion(self._new_region)
-        self.extract_slice.SetInput(self.image_reader.GetOutput())
-        self.extract_slice.SetDirectionCollapseToIdentity()
-        self.extract_slice.Update()
+        self._logger.debug("Setting slice region.")
+        self._extract_slice = itk.ExtractImageFilter[self._input_image_type, self._output_image_type].New()
+        self._extract_slice.SetExtractionRegion(self._new_region)
+        self._extract_slice.SetInput(self._image_reader.GetOutput())
+        self._extract_slice.SetDirectionCollapseToIdentity()
+        self._extract_slice.Update()
 
-        logging.debug("Setting image writer.")
-        self.image_writer = itk.ImageFileWriter[self._output_image_type].New()
-        self.image_writer.SetInput(self.extract_slice.GetOutput())
+        self._logger.debug("Setting image writer.")
+        self._image_writer = itk.ImageFileWriter[self._output_image_type].New()
+        self._image_writer.SetInput(self._extract_slice.GetOutput())
 
-        logging.debug("Getting indexed of slices to extract.")
+        self._logger.debug("Getting indexed of slices to extract.")
         self._define_slicing_range()
 
-        logging.debug("Extracting slices.")
+        self._logger.debug("Extracting slices.")
         for i in self._slicingRange:
             self._extract_single_slice(i)
 
-        logging.debug("Done. Have a nice day.")
-
+        self._logger.debug("Done. Have a nice day.")
 
     def _define_slicing_region(self):
         """
@@ -211,7 +213,7 @@ class extract_slices_from_volume(object):
 
         # Well, we assume that volume that we slice is three dimensional
         # otherwise the script is gonna crush.
-        logging.debug("Setting slice region.")
+        self._logger.debug("Setting slice region.")
         self._new_region = itk.ImageRegion[3]()
         slice_size = itk.Size[3]()
 
@@ -227,22 +229,22 @@ class extract_slices_from_volume(object):
 
         # Finally I can put the size into region object.
         self._new_region.SetSize(slice_size)
-        logging.info("Computed slice region: %s.", self._new_region)
+        self._logger.info("Computed slice region: %s.", self._new_region)
 
     def _define_slicing_range(self):
         """
         Defines indexes of slices that are to be extracted from the volume.
         The default set of slices to extract are all the sliced in the slicing plane.
         """
-        logging.debug("Defining set of slices to extract.")
+        self._logger.debug("Defining set of slices to extract.")
 
         # The default slide range is a full slide range (all slices in given
         # plane). When non-empty slide range is provided, the slices to extract
         # are defined according to provided settings.
 
         if self.options['sliceRange'] is None:
-            logging.debug("No custom slice range provided. Extracting all slices in given plane.")
-            logging.debug("Selecting slices from LargestPossibleRegion: %s",
+            self._logger.debug("No custom slice range provided. Extracting all slices in given plane.")
+            self._logger.debug("Selecting slices from LargestPossibleRegion: %s",
                           self._source_largest_region)
 
             # Grab indexes of all slices in slicing plane
@@ -253,7 +255,7 @@ class extract_slices_from_volume(object):
             # Get only those sliced that user wants to.
             self._slicingRange = range(*self.options['sliceRange'])
 
-        logging.info("Selected slices: %s", " ".join(map(str, self._slicingRange)))
+        self._logger.info("Selected slices: %s", " ".join(map(str, self._slicingRange)))
 
     def _extract_single_slice(self, slice_index):
         """
@@ -262,23 +264,23 @@ class extract_slices_from_volume(object):
         :type slice_index: int
         :param slice_index: index of the slice to be extracted.
         """
-        logging.debug("Extracing slice: %d", slice_index)
+        self._logger.debug("Extracing slice: %d", slice_index)
 
         region_index = [0,0,0]
         region_index[self.options['sliceAxisIndex']] = slice_index
         self._new_region.SetIndex(region_index)
 
-        logging.debug("Region to extract: %s", self._new_region)
+        self._logger.debug("Region to extract: %s", self._new_region)
 
         # Now, get the output filename. Filename depends on the slice
         # region_index :)
         filename = \
                 self.options['outputImagesFormat'] % (slice_index + self.options['shiftIndexes'], )
 
-        logging.info("Saving slice %d to: %s", slice_index, filename)
-        self.extract_slice.SetExtractionRegion(self._new_region)
-        self.image_writer.SetFileName(filename)
-        self.image_writer.Update()
+        self._logger.info("Saving slice %d to: %s", slice_index, filename)
+        self._extract_slice.SetExtractionRegion(self._new_region)
+        self._image_writer.SetFileName(filename)
+        self._image_writer.Update()
 
     @staticmethod
     def parseArgs():
@@ -304,7 +306,7 @@ class extract_slices_from_volume(object):
 
         logging_settings = OptionGroup(parser, 'Logging options')
         logging_settings.add_option('--loglevel', dest='loglevel', type='str',
-                default='WARNING', help='Severity of the messages to report: CRITICAL | ERROR | WARNING | INFO | DEBUG')
+                default='INFO', help='Severity of the messages to report: CRITICAL | ERROR | WARNING | INFO | DEBUG')
         logging_settings.add_option('--logFilename', dest='logFilename',
                 default=None, action='store', type='str',
                 help='If defined, puts the log into given file instead of printing it to stderr.')
@@ -312,9 +314,6 @@ class extract_slices_from_volume(object):
 
         (options, args) = parser.parse_args()
 
-        if not options.inputFilename:
-            parser.print_help()
-            exit(1)
         return (options, args)
 
 if __name__ == '__main__':

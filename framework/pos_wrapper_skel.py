@@ -1,58 +1,15 @@
 #!/usr/bin/python
-
 import sys
 import os
 import multiprocessing
 
 import time
 import datetime
+import logging
 from optparse import OptionParser, OptionGroup
 import copy
 import pos_wrappers
-
-
-def get_basename(path, with_extension=False):
-    """
-    Extract the very filename from the path provided. The filename can be
-    extracted with or without extension. Behaviour of the function is not
-    validated against multiple extensions (e.g. nii.gz) and most probaby will
-    not work properly.
-
-    :param path: Path to extract filename from
-    :type path: str
-
-    :param with_extension: Decides wheter the filename will be extracted with or
-    without extension.
-    :type with_extension: bool
-
-    >>> get_basename("/home/user/file.txt")
-    'file'
-
-    >>> get_basename("/home/user/file.txt", with_extension = False)
-    'file'
-
-    >>> get_basename("/home/user/file.txt", with_extension = True)
-    'file.txt'
-
-    >>> get_basename("/home/user/file.txt", True)
-    'file.txt'
-
-    >>> get_basename("file.txt", True)
-    'file.txt'
-
-    >>> get_basename("/home/user/image.nii.gz", True)
-    'image.nii.gz'
-
-    >>> get_basename("/home/user/image.nii.gz")
-    'image.nii'
-
-    >>> get_basename(get_basename("/home/user/image.nii.gz"))
-    'image'
-    """
-    if with_extension is True:
-        return os.path.basename(path)
-    else:
-        return os.path.splitext(os.path.basename(path))[0]
+import pos_common
 
 
 class generic_workflow(object):
@@ -90,9 +47,26 @@ class generic_workflow(object):
         if not self.options.cpuNo:
             self.options.cpuNo = multiprocessing.cpu_count()
 
+        self._initializeLogging()
         self._initializeOptions()
+        self._validateOptions()
         self._initializeDirectories()
         self._overrideDefaults()
+
+    def _initializeLogging(self):
+        pos_common.setup_logging(self.options.logFilename,
+                      self.options.loglevel)
+
+        logging.debug("Logging module initialized. Saving to: %s, Loglevel: %s",
+                      self.options.logFilename, self.options.loglevel)
+
+        # Assign the the string that will identify all messages from this
+        # script
+        self._logger = logging.getLogger(self.__class__.__name__)
+
+        self._logger.info("%s workflow options:", self.__class__.__name__)
+        for k,v in self.options.__dict__.items():
+            self._logger.info("%s : %s", k, v)
 
     def _initializeOptions(self):
         """
@@ -124,6 +98,11 @@ class generic_workflow(object):
         """
         A generic function for altering some configuration that was set with
         default values. Should be reimplemented in subclasses.
+        """
+        pass
+
+    def _validateOptions(self):
+        """
         """
         pass
 
@@ -165,7 +144,7 @@ class generic_workflow(object):
 
     @staticmethod
     def _basesame(path, withExtension=False):
-        return get_basename(path, withExtension)
+        return pos_common.get_basename(path, withExtension)
 
     def _cleanUp(self, immediate=False):
         self._rmdir(self.options.workdir)
@@ -182,7 +161,11 @@ class generic_workflow(object):
 
         :param parallel: Enables execution in parallel mode
         :type parallel: bool
+
         """
+
+        #TODO: Implement pbs job dependencies
+        # (https://docs.loni.org/wiki/PBS_Job_Chains_and_Dependencies)
 
         # If single command is provided, it is supposed to be a string. Convert
         # to list with a single element.
@@ -220,7 +203,7 @@ class generic_workflow(object):
                 default=None, help='Job identifier. An optional value identyfying this particular workflow. If ommited, the jobId will be generated automatically.')
         workflowSettings.add_option('--workDir', '-d', dest='workdir', type='str',
                 default=None, help='Sets the working directory of the process. Overrides the "--disableSharedMemory" switch.')
-        workflowSettings.add_option('--log', dest='log', type='str',
+        workflowSettings.add_option('--loglevel', dest='loglevel', type='str',
                 default='WARNING', help='Loglevel: CRITICAL | ERROR | WARNING | INFO | DEBUG')
         workflowSettings.add_option('--logFilename', dest='logFilename',
                 default=None, action='store', type='str',

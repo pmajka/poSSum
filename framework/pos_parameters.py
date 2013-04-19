@@ -230,6 +230,7 @@ class list_parameter(generic_parameter):
         else:
             return ""
 
+
 class vector_parameter(list_parameter):
     """
     A specialized class for holding lists which are intended to be a vector.  A
@@ -479,7 +480,7 @@ class filename(generic_parameter):
         >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
         True
 
-        override_fname property
+        override_path property
 
         >>> f.override_path == None
         True

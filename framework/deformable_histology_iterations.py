@@ -23,8 +23,8 @@ class deformable_reconstruction_iteration(generic_workflow):
 
     _usage = ""
 
-    def __init__(self, options, args, pool = None):
-        super(self.__class__, self).__init__(options, args, pool)
+    def __init__(self, options, args):
+        super(self.__class__, self).__init__(options, args)
 
         start, end, eps = self._get_edges()
         self.slice_range = range(start, end +1)
