@@ -17,7 +17,7 @@ JACOBIAN_COLOR_PALETTE_NAME = 'cool-warm'
 DEFORMATION_FILED_PALETTE_NAME = 'bb'
 
 
-class vtk_slice_image(pos_wrappers.generic_wrapper):
+class convert_slice_image(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d {input_image} {spacing} -o {output_image}"""
 
     _parameters = {
@@ -28,7 +28,7 @@ class vtk_slice_image(pos_wrappers.generic_wrapper):
             }
 
 
-class vtk_warp(pos_wrappers.generic_wrapper):
+class convert_wrap_file(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -mcs {input_image} \
             -foreach {spacing} -endfor\
             -omc 2 {output_image}"""
@@ -41,7 +41,7 @@ class vtk_warp(pos_wrappers.generic_wrapper):
             }
 
 
-class vtk_jacobian(pos_wrappers.generic_wrapper):
+class generate_jacobian_vtk(pos_wrappers.generic_wrapper):
     _template = """ANTSJacobian {dimension} {input_image} {output_naming};
     c{dimension}d {input_jacobian_image} {spacing} -o {output_image}"""
 
@@ -205,8 +205,6 @@ class deformation_field_visualizer(generic_workflow):
 
         mapper = vtk.vtkDataSetMapper()
         mapper.SetInput(calculator.GetOutput())
-        # TODO: Compare output with and without the line below
-        #mapper.SetScalarRange(calculator.GetOutput().GetScalarRange())
         mapper.SetScalarVisibility(1)
         mapper.SetLookupTable(lut)
 
@@ -266,26 +264,19 @@ class deformation_field_visualizer(generic_workflow):
         glyph.SetSource(source_glyph.GetOutput())
         glyph.ScalingOn()
 
-        #glyph.SetColorModeToColorByScalar()
-        #glyph.SetColorModeToColorByScale()
         glyph.SetColorModeToColorByVector()
 
         glyph.SetScaleModeToScaleByVector()
-        #glyph.SetScaleModeToScaleByScalar()
         glyph.SetScaleFactor(self.options.glyphConfiguration[2])
 
         glyph.SetVectorModeToUseVector()
 
-        #glyph.SetIndexModeToVector()
-        #glyph.SetIndexModeToScalar()
-        #glyph.SetIndexModeToOff()
         glyph.OrientOn()
 
         mapper = vtk.vtkPolyDataMapper()
         mapper.SetInput(glyph.GetOutput())
         mapper.SetScalarRange(points.GetOutput().GetScalarRange())
         mapper.SetLookupTable(lut)
-        #hhogMapper.SetUseLookupTableScalarRange(0)
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
@@ -320,8 +311,8 @@ class deformation_field_visualizer(generic_workflow):
                 JACOBIAN_BAR_SIZE, lut)
 
     def _prepare_files(self):
-        prepare_jacobian_command = vtk_jacobian(
-                dimension=2,
+        prepare_jacobian_command = generate_jacobian_vtk(
+                dimension = 2,
                 input_image   = self.options.warpImage,
                 output_naming = self.f['src_naming'](),
                 input_jacobian_image = self.f['src_jacobian'](),
@@ -329,21 +320,21 @@ class deformation_field_visualizer(generic_workflow):
                 output_image = self.f['jacobian']())
         prepare_jacobian_command()
 
-        prepare_deformation_wrap = vtk_warp(
-                dimension=2,
+        prepare_deformation_wrap = convert_wrap_file(
+                dimension = 2,
                 input_image  = self.options.warpImage,
                 output_image = self.f['deformation'](),
                 spacing = self.options.spacing)
         prepare_deformation_wrap()
 
-        prepare_slice_image = vtk_slice_image(
-                dimension=2,
+        prepare_slice_image = convert_slice_image(
+                dimension = 2,
                 input_image  = self.options.sliceImage,
                 output_image = self.f['image'](),
                 spacing = self.options.spacing)
         prepare_slice_image()
 
-    def _display(self):
+    def launch(self):
         self._prepare_files()
 
         jacobian_image_file = self.f['jacobian']()
@@ -365,45 +356,48 @@ class deformation_field_visualizer(generic_workflow):
         ptMask = self._get_deformation_points(reader)
         # ---- end of preparing the data ----
 
+
         # ---- begin create renderer and load the data
-        ren    = vtk.vtkRenderer()
-        renWin = vtk.vtkRenderWindow()
-        renWin.SetSize(*tuple(self.options.rendererWindowSize))
-        renWin.AddRenderer(ren)
+        renderer      = vtk.vtkRenderer()
+        render_window = vtk.vtkRenderWindow()
+
+        # ---------------
+        if self.options.rendererWindowSize:
+            render_window.SetSize(*tuple(self.options.rendererWindowSize))
+        else:
+            reader_dimensions = \
+                map(lambda x: reader.GetOutput().GetDimensions()[x], [0,1])
+            render_window.SetSize(*tuple(reader_dimensions))
+        render_window.AddRenderer(renderer)
 
         # Load all the actors to the renderer
-        ren.AddActor(slice_image_actor)
-        ren.AddActor(jacobian_image_actor)
-        ren.AddActor(deformation_magnitude_image_actor)
+        renderer.AddActor(slice_image_actor)
+        renderer.AddActor(jacobian_image_actor)
+        renderer.AddActor(deformation_magnitude_image_actor)
 
         # Add glyphs
         if not self.options.hideGlyphs:
-            ren.AddActor(self._get_glyphs_actor(ptMask, deformation_mag_lut))
+            renderer.AddActor(self._get_glyphs_actor(ptMask, deformation_mag_lut))
 
         # Add scalar bars
         if not self.options.hideColorBars:
-            ren.AddActor(self._get_jacobian_scalar_bar(deformation_mag_lut))
-            ren.AddActor(self._get_deformation_scalar_bar(jacobian_lut))
+            renderer.AddActor(self._get_jacobian_scalar_bar(deformation_mag_lut))
+            renderer.AddActor(self._get_deformation_scalar_bar(jacobian_lut))
 
         # ---- end adding data to renderer ----
         iren = vtk.vtkRenderWindowInteractor()
-        iren.SetRenderWindow(renWin)
+        iren.SetRenderWindow(render_window)
         interactorstyle = iren.GetInteractorStyle()
         interactorstyle.SetCurrentStyleToTrackballCamera()
 
-        cpos = self.options.cameraPosition
-        camera = ren.GetActiveCamera()
-        camera.SetPosition(*cpos)
-        camera.SetFocalPoint(cpos[0], cpos[1], 0)
-        camera.SetViewUp(0, -1, 0)
+        self._configure_camera(renderer, reader)
 
-        renWin.Render()
+        render_window.Render()
 
-        #TODO: Put this code into a separated function
         if self.options.screenshot:
             wif = vtk.vtkRenderLargeImage()
-            wif.SetMagnification(4)
-            wif.SetInput(ren)
+            wif.SetMagnification(self.options.screenshotMagnification)
+            wif.SetInput(renderer)
             wif.Update()
 
             writer = vtk.vtkPNGWriter()
@@ -413,6 +407,27 @@ class deformation_field_visualizer(generic_workflow):
         else:
             iren.Initialize()
             iren.Start()
+
+        if self.options.cleanup:
+            self._cleanUp()
+
+    def _configure_camera(self, renderer, reader):
+        camera = renderer.GetActiveCamera()
+        camera.ParallelProjectionOn()
+
+        origin = reader.GetOutput().GetOrigin()
+        extent = reader.GetOutput().GetWholeExtent()
+        spacing = reader.GetOutput().GetSpacing()
+        xc = origin[0] + 0.5*(extent[0] + extent[1])*spacing[0]
+        yc = origin[1] + 0.5*(extent[2] + extent[3])*spacing[1]
+        xd = (extent[1] - extent[0] + 1)*spacing[0]
+        yd = (extent[3] - extent[2] + 1)*spacing[1]
+
+        d = camera.GetDistance()
+        camera.SetParallelScale(0.5*yd)
+        camera.SetFocalPoint(xc,yc,0.0)
+        camera.SetPosition(xc,yc,-d)
+        camera.SetViewUp(0, -1, 0)
 
     @classmethod
     def _getCommandLineParser(cls):
@@ -442,13 +457,13 @@ class deformation_field_visualizer(generic_workflow):
         parser.add_option('--glyphConfiguration', default=[5000, 10, 6],
                 type='float', dest='glyphConfiguration', nargs=3,
                 help='Glyph configuration (int:max_probe_points:5000, int:probe_ratio:10, int:scale_factor:6)')
-        parser.add_option('--rendererWindowSize', default=[500, 350],
+        parser.add_option('--rendererWindowSize', default=None,
                 type='int', dest='rendererWindowSize', nargs=2,
                 help='Size of the render window.')
         parser.add_option('--spacing', default=[1, 1],
                 type='float', dest='spacing', nargs=2,
                 help='Spacing of the image/deformation field/jacobian.')
-        parser.add_option('--cameraPosition', default=[75, 75, -20],
+        parser.add_option('--cameraPosition', default=None,
                 type='float', dest='cameraPosition', nargs=3,
                 help='Position of the camera... What did you expect?')
         parser.add_option('--hideColorBars', default=False,
@@ -457,10 +472,13 @@ class deformation_field_visualizer(generic_workflow):
         parser.add_option('--hideGlyphs', default=False,
                 dest='hideGlyphs', action='store_const', const=True,
                 help='Do not display deformation files vectors.')
+        parser.add_option('--screenshotMagnification', default=1,
+                dest='screenshotMagnification', action='store', type=int,
+                help='Screenshot magnification.')
 
         return parser
 
 if __name__ == '__main__':
     options, args = deformation_field_visualizer.parseArgs()
     d = deformation_field_visualizer(options, args)
-    d._display()
+    d.launch()

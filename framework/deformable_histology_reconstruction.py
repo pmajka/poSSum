@@ -239,10 +239,13 @@ class deformable_reconstruction_workflow(generic_workflow):
                 slice_image = self.f['init_slice'](idx=i),
                 screenshot_filename = self.f['warp_field_visualization'](idx=i),
                 deformation_opacity = 0.0,
-                jacobian_opacity = 0.5,
-                deformation_range = [0,1],
-                spacing = [0.03, 0.03])
+                jacobian_opacity = 0.4,
+                jacobian_mapping = [0.8, 1.0, 1.2],
+                glyphs_configuration = [5000, 10, 2],
+                deformation_range = [0, 0.4],
+                spacing = [self.options.outputVolumeSpacing[0]]*2)
             commands.append(copy.deepcopy(command))
+
         self.execute(commands, parallel=False)
 
     def _get_edges(self):
