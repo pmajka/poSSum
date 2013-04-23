@@ -66,6 +66,9 @@ class deformation_field_visualizer(generic_workflow):
         'analysis'   : filename('analysis', work_dir='05_analysis', str_template='analysis.txt')
         }
 
+    def __init__(self, options, args):
+        super(self.__class__, self).__init__(options, args)
+
     def _get_vtk_image_from_file(self, filename):
         """
         Read vtkImageData from the provided file.
@@ -79,9 +82,10 @@ class deformation_field_visualizer(generic_workflow):
         reader.Update()
 
         valuerange = reader.GetOutput().GetScalarRange()
-        print "Reading :", filename
-        print "Value range: ", valuerange
-        print
+
+        self._logger.info("Loading vtk image %s.", filename)
+        self._logger.info("Scalar range of image %s: %s.",
+                          filename, valuerange)
 
         return reader
 
@@ -100,6 +104,8 @@ class deformation_field_visualizer(generic_workflow):
 
         # Map the 0-1 range to using the provided control points.
         jacobian_mapping = [(0.0, jmin), (0.5, jmid), (1.0, jmax)]
+        self._logger.debug("Loading jacobian scale mapping: %s",
+                           str(jacobian_mapping))
 
         # Get and return the lookup table.
         palette = pos_palette.lib(JACOBIAN_COLOR_PALETTE_NAME)
@@ -134,6 +140,9 @@ class deformation_field_visualizer(generic_workflow):
 
         :return: vtkActor
         """
+        self._logger.debug("Genarating jacobian image actor from %s.",
+                           filename)
+
         reader = self._get_vtk_image_from_file(filename)
 
         mapper = vtk.vtkDataSetMapper()
@@ -157,6 +166,9 @@ class deformation_field_visualizer(generic_workflow):
         :param filename: Filename if the jacobian image. Trivial
         :return: vtkImageActor
         """
+        self._logger.debug("Genarating slice image actor from %s.",
+                           filename)
+
         reader = self._get_vtk_image_from_file(filename)
 
         cast = vtk.vtkImageCast()
@@ -189,7 +201,8 @@ class deformation_field_visualizer(generic_workflow):
         # Because we want our deformation field to be scaled in milimeters, we
         # need to multiply it by pixel size.
         pixel_size = float(self.options.spacing[0])
-        #TODO: pixel_size should be readout from the source image.
+        self._logger.debug("Using pixel size: %f for deformation magnitude calculations.",
+                           pixel_size)
 
         calculator = vtk.vtkArrayCalculator()
         calculator.SetInputConnection(source_image.GetOutputPort())
@@ -200,8 +213,8 @@ class deformation_field_visualizer(generic_workflow):
         calculator.SetFunction("mag(u*iHat+v*jHat) * %f" % pixel_size)
         calculator.Update()
 
-        print "Deformation field magnitude range:"
-        print calculator.GetOutput().GetScalarRange()
+        self._logger.debug("Deformation field magnitude range %s.",
+                           calculator.GetOutput().GetScalarRange())
 
         mapper = vtk.vtkDataSetMapper()
         mapper.SetInput(calculator.GetOutput())
@@ -227,6 +240,8 @@ class deformation_field_visualizer(generic_workflow):
         # Because we want our deformation field to be scaled in milimeters, we
         # need to multiply it by pixel size.
         pixel_size = float(self.options.spacing[0])
+        self._logger.debug("Using pixel size: %f for glyph calculation.",
+                           pixel_size)
 
         # Use the array calculaptor to convert 2d deformation filed containing
         # a two-component image data into vector-type point data.

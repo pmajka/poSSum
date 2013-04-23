@@ -2,12 +2,13 @@
 import sys
 import os
 import multiprocessing
+import copy
 
 import time
 import datetime
 import logging
 from optparse import OptionParser, OptionGroup
-import copy
+
 import pos_wrappers
 import pos_common
 
@@ -54,6 +55,7 @@ class generic_workflow(object):
         self._overrideDefaults()
 
     def _initializeLogging(self):
+
         pos_common.setup_logging(self.options.logFilename,
                       self.options.loglevel)
 
