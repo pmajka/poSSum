@@ -238,12 +238,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                 warp_image = self.f['final_deformations'](idx=i),
                 slice_image = self.f['init_slice'](idx=i),
                 screenshot_filename = self.f['warp_field_visualization'](idx=i),
-                deformation_opacity = 0.0,
-                jacobian_opacity = 0.4,
-                jacobian_mapping = [0.8, 1.0, 1.2],
-                glyphs_configuration = [5000, 10, 2],
-                deformation_range = [0, 0.4],
-                spacing = [self.options.outputVolumeSpacing[0]]*2)
+                configuration_filename = self.options.glyphConfiguration)
             commands.append(copy.deepcopy(command))
 
         self.execute(commands, parallel=False)
@@ -467,6 +462,9 @@ class deformable_reconstruction_workflow(generic_workflow):
                 help='Skip slice preprocessing.')
         parser.add_option('--stackFinalDeformation', default=False, const=True,
                 dest='stackFinalDeformation', action='store_const',
+                help='Stack filnal deformation fileld.')
+        parser.add_option('--glyphConfiguration', default=None, type=str,
+                dest='glyphConfiguration', action='store',
                 help='Stack filnal deformation fileld.')
 
         regSettings = \
