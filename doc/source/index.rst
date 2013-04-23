@@ -16,6 +16,9 @@ Contents:
    pos_palette
    pos_parameters
    pos_wrappers
+   pos_slice_volume
+   pos_mdt_dev
+   pos_mdt_tutorial
 
 
 Indices and tables
