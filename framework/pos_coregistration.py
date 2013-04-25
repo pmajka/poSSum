@@ -62,7 +62,6 @@ class multimodal_coregistration(generic_workflow):
         'raw_images' : pos_parameters.filename('src_images', work_dir = '01_raw_images', str_template = '{id}.nii.gz'),
         'init_affine' : pos_parameters.filename('init_affine', work_dir = '02_init_supp', str_template = 'initial_affine.txt'),
         'init_warp'   : pos_parameters.filename('init_warp', work_dir = '02_init_supp', str_template = 'initial_warp.nii.gz'),
-        'constant_images' : pos_parameters.filename('const_images', work_dir = '03_const_images', str_template = '{idx:04d}.nii.gz'),
         'init_images' : pos_parameters.filename('src_images', work_dir = '04_iniit_images', str_template = '{id}.nii.gz'),
         # Iteration
         'iteration'  : pos_parameters.filename('iteration', work_dir = '05_iterations',  str_template = '{iter:04d}'),
@@ -88,6 +87,56 @@ class multimodal_coregistration(generic_workflow):
             self._jacobian(i)
             self._evaluate(i)
 
+    def _get_file(self, image_id):
+        return self.cfg.files.get(image_id).path
+
+    def _get_transformation_list(self, iteration):
+        deformable_list = []
+        affine_list = []
+
+        if iteration != 0:
+            deformable_list =\
+                    map(lambda j:
+                        self.f['iter_transform'](iter=j),
+                        range(iteration+1))
+
+        if os.path.isfile(self.cfg.parameters.initial_deformable):
+            deformable_list = [self.f['init_warp']] + deformable_list
+
+        if os.path.isfile(self.cfg.parameters.initial_affine):
+            affine_list.append(self.f['init_warp'])
+
+        return affine_list, deformable_list
+
+    def _reslice(self, image_id, replace=False):
+        """
+        """
+        i = self.iteration
+        if replace:
+            command = replace_values(
+                dimension = 3,
+                input_image = self._get_file(image_id),
+                replacement = replace,
+                output_image = self.f[target_dir](iter=i,id=image_id))
+            self.execute(command)
+            inp = self.f[target_dir](iter=i,id=image_id)
+        else:
+            inp = self._get_file(image_id)
+
+        affine_list, deformable_list = \
+            self._get_transformation_list(iteration)
+
+        command = pos_wrappers.ants_reslice(
+            dimension = 3,
+            moving_image = inp,
+            output_image = self.f[target_dir](iter=i,id=image_id),
+            reference_image = self._get_file('fixed'),
+            useNN = None,
+            useBspline = None,
+            deformable_list = deformable_list,
+            affine_list = affine_list)
+        self.execute(command)
+
     def _preprocess_images(self, iteration, reslice = False):
 
         target_dir = 'iteration_input'
@@ -109,75 +158,67 @@ class multimodal_coregistration(generic_workflow):
                 image_id = metric.fixed_points
                 command = replace_values(
                     dimension = 3,
-                    input_image = self.cfg.files.get(image_id).path,
+                    input_image = self._get_file(image_id),
                     replacement = repl_fixed,
                     output_image = self.f[target_dir](iter=iteration,id=image_id))
-                print command
-               #self.execute(command)
+                self.execute(command)
 
-                deformable_list = map(lambda j: self.f['iter_transform'](idx=0,iter=j), range(iteration+1))
-                if iteration == 0:
-                    deformable_list = []
-                deformable_list = [self.f['init_warp']] + deformable_list
+                affine_list, deformable_list = \
+                    self._get_transformation_list(iteration)
 
                 command = pos_wrappers.ants_reslice(
                     dimension = 3,
                     moving_image = self.f[target_dir](iter=iteration,id=image_id),
                     output_image = self.f[target_dir](iter=iteration,id=image_id),
-                    reference_image = self.cfg.files.get(image_id).path,
+                    reference_image = self._get_file(image_id),
                     useNN = None,
                     useBspline = None,
                     deformable_list = deformable_list,
-                    affine_list = [self.f['init_affine']()])
-                print command
-               #self.execute(command)
+                    affine_list = affine_list)
+                self.execute(command)
 
                 image_id = metric.moving_points
                 command = replace_values(
                     dimension = 3,
-                    input_image = self.cfg.files.get(image_id).path,
+                    input_image = self._get_file(image_id),
                     replacement = repl_moving,
                     output_image = self.f[target_dir](iter=iteration,id=image_id))
-                print command
-               #self.execute(command)
+                self.execute(command)
 
                 command = pos_wrappers.ants_reslice(
                     dimension = 3,
                     moving_image = self.f[target_dir](iter=iteration,id=image_id),
                     output_image = self.f[target_dir](iter=iteration,id=image_id),
-                    reference_image = self.cfg.files.get(image_id).path,
+                    reference_image = self._get_file(image_id),
                     useNN = None,
                     useBspline = None,
                     deformable_list = deformable_list,
-                    affine_list = [self.f['init_affine']()])
-                print command
-               #self.execute(command)
+                    affine_list = affine_list)
+                self.execute(command)
 
             image_id = metric.fixed_image
             command = pos_wrappers.ants_reslice(
                 dimension = 3,
-                moving_image = self.cfg.files.get(image_id).path,
+                moving_image = self._get_file(image_id),
                 output_image = self.f[target_dir](iter=iteration,id=image_id),
-                reference_image = self.cfg.files.get(image_id).path,
+                reference_image = self._get_file(image_id),
                 useNN = None,
                 useBspline = None,
                 deformable_list = deformable_list,
-                affine_list = [self.f['init_affine']()])
-            print command
-            #self.execute(command)
+                affine_list = affine_list)
+            self.execute(command)
 
             image_id = metric.moving_image
             command = pos_wrappers.ants_reslice(
                 dimension = 3,
-                moving_image = self.cfg.files.get(image_id).path,
+                moving_image = self._get_file(image_id),
                 output_image = self.f['iteration_input'](iter=iteration,id=image_id),
-                reference_image = self.cfg.files.get(image_id).path,
+                reference_image = self._get_file(image_id),
                 useNN = None,
                 useBspline = None,
                 deformable_list = deformable_list,
-                affine_list = [self.f['init_affine']()])
-            #self.execute(command)
-            print command
+                affine_list = affine_list)
+            self.execute(command)
 
     def _register(self, iteration):
         iterdata = self.cfg.iterations[iteration]
@@ -194,6 +235,7 @@ class multimodal_coregistration(generic_workflow):
                     point_set_percentage = me.point_set_percentage,
                     point_set_sigma = me.point_set_sigma,
                     boundary_points_only = me.boundary_points_only)
+
             if me.type == "I":
                 metric = pos_wrappers.ants_intensity_meric(
                     metric = me.kind,
@@ -218,17 +260,17 @@ class multimodal_coregistration(generic_workflow):
             affineMetricType = "CC",
             maskImage = self.cfg.files.get(iterdata.fixed_image_mask).path,
             miOption = [32, 1600])
-        print command
+        self.execute(command)
 
     def _jacobian(self, iteration):
-        deformable_list = map(lambda j: self.f['iter_transform'](idx=0,iter=j), range(iteration+1))
+        deformable_list = map(lambda j: self.f['iter_transform'](iter=j), range(iteration+1))
         deformable_list = [self.f['init_warp']] + deformable_list
 
         command = pos_wrappers.ants_jacobian(
             dimension = 3,
             input_image = self.f['iter_transform'](iter=iteration),
-            output_naming =self.f['iteration_out_naming'](iter=iteration,idx=0))
-        print command
+            output_naming =self.f['iteration_out_naming'](iter=iteration))
+        self.execute(command)
 
         command = pos_wrappers.ants_compose_multi_transform(
             dimension = 3,
@@ -236,13 +278,13 @@ class multimodal_coregistration(generic_workflow):
             reference_image = self.cfg.files.fixed.path,
             deformable_list = deformable_list,
             affine_list = [self.f['init_affine']()])
-        print command
+        self.execute(command)
 
         command = pos_wrappers.ants_jacobian(
             dimension = 3,
             input_image = self.f['iter_cum_wrap'](iter=iteration),
             output_naming =self.f['iter_cum_naming'](iter=iteration))
-        print command
+        self.execute(command)
 
     def _evaluate(self, iteration):
 
@@ -256,8 +298,7 @@ class multimodal_coregistration(generic_workflow):
             deformed_segmentation =  self.f['iteration_resliced'](iter=iteration,id='moving_seg'),
             eval_file = self.f['iter_eval'](iter=iteration),
             segmentation_file =self.f['iter_seg'](iter=iteration))
-        print command
-
+        self.execute(command)
 
     @classmethod
     def _getCommandLineParser(cls):
@@ -268,6 +309,7 @@ class multimodal_coregistration(generic_workflow):
                 help='Use a file to provide registration settings.')
 
         return parser
+
 
 if __name__ == '__main__':
     options, args = multimodal_coregistration.parseArgs()
