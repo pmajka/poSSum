@@ -604,6 +604,15 @@ class stack_slices_rgb_wrapper(generic_wrapper):
     }
 
 
+class ants_jacobian(generic_wrapper):
+    _template = """ANTSJacobian {dimension} {input_image} {output_naming}"""
+
+    _parameters = {
+            'dimension'     : value_parameter('dimension', 2),
+            'input_image'   : filename_parameter('input_image', None),
+            'output_naming' : filename_parameter('output_naming', None),
+            }
+
 
 class mkdir_wrapper(generic_wrapper):
     _template = """mkdir -p {dir_list}"""
