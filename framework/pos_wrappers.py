@@ -631,6 +631,15 @@ class rmdir_wrapper(generic_wrapper):
     }
 
 
+class copy_wrapper(generic_wrapper):
+    _template = """cp -rfv {source} {target}"""
+
+    _parameters = {
+        'source': list_parameter('source', [], str_template='{_list}'),
+        'target': value_parameter('target')
+    }
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
