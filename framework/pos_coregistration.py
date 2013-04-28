@@ -11,7 +11,7 @@ import pos_parameters
 from pos_wrapper_skel import generic_workflow
 
 
-class evaluate_reg(pos_wrappers.generic_wrapper):
+class evaluate_registration_results(pos_wrappers.generic_wrapper):
     """
     """
 
@@ -34,6 +34,19 @@ class evaluate_reg(pos_wrappers.generic_wrapper):
         'segmentation_file'  : pos_parameters.filename_parameter('segmentation_file')
     }
 
+class archive_registration_results(pos_wrappers.generic_wrapper):
+    """
+    """
+
+    _template = """tar -cvvzf  {archive_filename}.tgz {job_working_dir}/. ; \
+            mv -fv {archive_filename}.tgz {backup_directory}"""
+
+    _parameters = {
+        'job_working_dir' : pos_parameters.filename_parameter('job_working_dir'),
+        'archive_filename' : pos_parameters.filename_parameter('archive_filename'),
+        'backup_directory' : pos_parameters.filename_parameter('backup_directory')
+    }
+
 
 class multimodal_coregistration(generic_workflow):
     """
@@ -44,40 +57,84 @@ class multimodal_coregistration(generic_workflow):
         'raw_images' : pos_parameters.filename('raw_images', work_dir = '01_raw_images', str_template = '{id}.nii.gz'),
         'init_affine' : pos_parameters.filename('init_affine', work_dir = '02_init_supp', str_template = 'initial_affine.txt'),
         'init_warp'   : pos_parameters.filename('init_warp', work_dir = '02_init_supp', str_template = 'initial_warp.nii.gz'),
-        'init_images' : pos_parameters.filename('src_images', work_dir = '04_iniit_images', str_template = '{id}.nii.gz'),
+        'init_images' : pos_parameters.filename('src_images', work_dir = '04_init_images', str_template = '{id}.nii.gz'),
         # Iteration
         'iteration'  : pos_parameters.filename('iteration', work_dir = '05_iterations',  str_template = '{iter:04d}'),
-        'iteration_transform'  : pos_parameters.filename('iteration_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/resultWarp.nii.gz'),
+        'iteration_transform' : pos_parameters.filename('iteration_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/resultWarp.nii.gz'),
         'iteration_resliced'  : pos_parameters.filename('iteration_resliced', work_dir = '05_iterations', str_template = '{iter:04d}/20_resliced/{id}.nii.gz')
         }
 
     def _overrideDefaults(self):
+        # Load the registration setting from the provided file.
         self.cfg = Config(open(self.options.settingsFile))
 
     def launch(self):
+        """
+        Execute the registration process. The registration consists of several
+        steps.:
+            
+            * Copying the initial files (e.g. images to be used, initial
+              ransfomrations, etc.) to the working directory of the process.
+            * Executing consecutive iteration step.
+            * Compression if the results and backing them up.
+        """
+        
+        # Copy the images, initial adffine and deformable registration and the
+        # configuration file to the working directory.
         self._copy_initial_files()
 
         for i in range(len(self.cfg.iterations)):
+            # Gradb the current iteration index:
             self.iteration = i
 
+            # Deep copy the arguments and options passed via the command line.
+            # We use deep copy as the setting may be changed by the child
+            # process and we don't want them to backpropagate.
             step_options = copy.deepcopy(self.options)
             step_args = copy.deepcopy(self.args)
 
+            # Override working directory of the child process. Instead of having
+            # the default wokring directory we will nest it within the directory
+            # of the parent process (pretty cool, isin't it?).
             step_options.workdir = os.path.join(self.f['iteration'](iter=i))
             single_step = multimodal_coregistration_iteration(step_options, step_args)
+
+            # Pass the current iteration index and configuration to the child
+            # process (they are passed by reference as they will not be
+            # changed).
             single_step.parent = self
             single_step.iteration = i
             single_step.cfg = self.cfg
 
+            # The we need to set up the input directory of the child process to
+            # be (in the first iteration) the input of the whole process, and
+            # (in case of all the other iterations) the output of the previous
+            # iteration.
             if i!= 0:
                 single_step.f['input'].override_dir = \
                     os.path.dirname(self.f['iteration_resliced'](iter=i-1,id=0))
 
+            # Then just execute the calculations.
             single_step()
+           
+        # Do some cleanup, compress the results and copy the compressed file to
+        # the backup directory. Ten, copy the final resliced image to the
+        # provided directory.
+        self._tidy_up()
+        self._backup_results()
+        self._propagate_results()
 
     def _copy_initial_files(self):
         """
         """
+        # Generate the start tag - a file created at the beginning of the
+        # calculations (according to its timestamp).
+        start_file = os.path.join(self.options.workdir,"start")
+        command = pos_wrappers.touch_wrapper(files=[start_file])
+        self.execute(command)
+
+        # Copy all files enumerated in the "files" section of the configuration
+        # file into the working directory.
         commands = []
         for image_id in self.cfg.files:
             command = pos_wrappers.copy_wrapper(
@@ -85,6 +142,8 @@ class multimodal_coregistration(generic_workflow):
                 target = self.f['raw_images'](id=image_id))
             commands.append(copy.deepcopy(command))
 
+        # Then copy the initial affine tranformation and the iniial deformation
+        # field to the working directory of the process.
         for f,t in [(self.cfg.parameters.initial_deformable, 'init_warp'),
                     (self.cfg.parameters.initial_affine, 'init_affine')]:
             if os.path.isfile(f):
@@ -93,12 +152,50 @@ class multimodal_coregistration(generic_workflow):
                     target = self.f[t]())
                 commands.append(copy.deepcopy(command))
 
+        # Copy the configuration file itself to the working directory.
         command = pos_wrappers.copy_wrapper(
                 source = [self.options.settingsFile],
                 target = self.options.workdir)
         commands.append(copy.deepcopy(command))
 
         self.execute(commands)
+
+    def _tidy_up(self):
+        """
+        """
+        # Touch a file to mark the end of the calculations:
+        stop_file = os.path.join(self.options.workdir,"stop")
+        command = pos_wrappers.touch_wrapper(files=[stop_file])
+        self.execute(command)
+
+    def _backup_results(self):
+        """
+        Compress and copy the results to the backup directory if the backup
+        directory is provided in the configuration file. In the other case, this
+        step is not executed.
+        """
+        if self.cfg.parameters.backup_dir:
+            command = archive_registration_results(
+                job_working_dir = self.options.workdir,
+                archive_filename = self.options.jobId,
+                backup_directory = self.cfg.parameters.backup_dir)
+            self.execute(command)
+
+    def _propagate_results(self):
+        """
+        Copy the resliced moving image (result from the last iteration) to a
+        directory provided in the configuration file. If the directory is not
+        provided, this step is not executed.
+        """
+
+        if self.cfg.parameters.propagation:
+            i = self.iteration # just an alias
+            target_file = os.path.join(self.cfg.parameters.propagation,
+                                       self.options.jobId + ".nii.gz"))
+            command = pos_wrappers.copy_wrapper(
+                source = [self.f['iteration_resliced'](iter=i,id='moving')],
+                target = target_file)
+            self.execute(command)
 
     @classmethod
     def _getCommandLineParser(cls):
@@ -107,6 +204,7 @@ class multimodal_coregistration(generic_workflow):
         parser.add_option('--settingsFile', default=None,
                 dest='settingsFile', action='store', type='str',
                 help='Use a file to provide registration settings.')
+
 
         return parser
 
@@ -122,9 +220,6 @@ class multimodal_coregistration_iteration(generic_workflow):
         'seg'      : pos_parameters.filename('seg', work_dir = '11_transformations', str_template = 'seg.txt'),
         'resliced' : pos_parameters.filename('resliced', work_dir = '20_resliced', str_template = '{id}.nii.gz')
         }
-
-    def _get_file(self, image_id):
-        return self.parent.f['raw_images'](id=image_id)
 
     def _get_transformation_list(self):
         iteration = self.iteration
@@ -163,18 +258,24 @@ class multimodal_coregistration_iteration(generic_workflow):
     def _reslice_images(self):
         i = self.iteration
 
-        target_dir = 'resliced'
-
+        commands = []
         for metric in self.cfg.iterations[i].metrics:
 
             if metric.type == "PSE":
                 image_id = metric.moving_points
-                self._reslice(image_id, target_dir, nn=True)
+                command = self._reslice(image_id, nn=True)
+                commands.append(copy.deepcopy(command))
 
             image_id = metric.moving_image
-            self._reslice(image_id, target_dir)
+            command = self._reslice(image_id)
+            commands.append(copy.deepcopy(command))
 
-    def _reslice(self, image_id, target_dir, nn=False):
+        self.execute(commands)
+
+    def _get_file(self, image_id):
+        return self.parent.f['raw_images'](id=image_id)
+
+    def _reslice(self, image_id, nn=False):
         """
         """
         affine_list, deformable_list = \
@@ -183,13 +284,13 @@ class multimodal_coregistration_iteration(generic_workflow):
         command = pos_wrappers.ants_reslice(
             dimension = 3,
             moving_image = self._get_file(image_id),
-            output_image = self.f[target_dir](id=image_id),
+            output_image = self.f['resliced'](id=image_id),
             reference_image = self._get_file('fixed'),
             useNN = bool(nn),
             useBspline = None,
             deformable_list = deformable_list,
             affine_list = affine_list)
-        self.execute(command)
+        return command
 
     def _prepare_image(self, image_id):
         """
@@ -206,7 +307,7 @@ class multimodal_coregistration_iteration(generic_workflow):
         metrics = []
 
         for me in iterdata.metrics:
-            if me.type == "PSE":
+            if me.type in ["PSE"]:
                 metric = pos_wrappers.ants_point_set_estimation_metric(
                     fixed_image = self.parent.f['raw_images'](id=me.fixed_image),
                     moving_image = self.f['input'](id=me.moving_image),
@@ -217,9 +318,9 @@ class multimodal_coregistration_iteration(generic_workflow):
                     point_set_sigma = me.point_set_sigma,
                     boundary_points_only = me.boundary_points_only)
 
-            if me.type == "I":
+            if me.type in ["CC", "MSQ"]:
                 metric = pos_wrappers.ants_intensity_meric(
-                    metric = me.kind,
+                    metric = me.type,
                     fixed_image = self.parent.f['raw_images'](id=me.fixed_image),
                     moving_image = self.f['input'](id=me.moving_image),
                     weight =  me.weight,
@@ -229,7 +330,6 @@ class multimodal_coregistration_iteration(generic_workflow):
         mask_image = None
         if iterdata.fixed_image_mask:
             mask_image = self.parent.f['raw_images'](id='fixed_mask')
-        print "--------------------", mask_image
 
         command = pos_wrappers.ants_registration(
             dimension = 3,
@@ -275,7 +375,7 @@ class multimodal_coregistration_iteration(generic_workflow):
     def _evaluate(self):
         i = self.iteration
 
-        command = evaluate_reg(
+        command = evaluate_registration_results(
             dimension = 3,
             fixed_mask = self.parent.f['raw_images'](id='fixed_mask'),
             deformed_mask = self.f['resliced'](id='moving_mask'),

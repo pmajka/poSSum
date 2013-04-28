@@ -639,6 +639,13 @@ class copy_wrapper(generic_wrapper):
         'target': value_parameter('target')
     }
 
+class touch_wrapper(generic_wrapper):
+    _template = """touch {files}"""
+
+    _parameters = {
+        'files': list_parameter('files', [], str_template='{_list}'),
+    }
+
 
 if __name__ == '__main__':
     import doctest
