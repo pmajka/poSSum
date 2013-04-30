@@ -1,6 +1,5 @@
 #!/usr/bin/python
-import os,sys
-import numpy as np
+import os
 
 from optparse import OptionParser, OptionGroup
 from config import Config
@@ -72,13 +71,13 @@ class multimodal_coregistration(generic_workflow):
         """
         Execute the registration process. The registration consists of several
         steps.:
-            
+
             * Copying the initial files (e.g. images to be used, initial
               ransfomrations, etc.) to the working directory of the process.
             * Executing consecutive iteration step.
             * Compression if the results and backing them up.
         """
-        
+
         # Copy the images, initial adffine and deformable registration and the
         # configuration file to the working directory.
         self._copy_initial_files()
@@ -116,7 +115,7 @@ class multimodal_coregistration(generic_workflow):
 
             # Then just execute the calculations.
             single_step()
-           
+
         # Do some cleanup, compress the results and copy the compressed file to
         # the backup directory. Ten, copy the final resliced image to the
         # provided directory.
@@ -158,6 +157,14 @@ class multimodal_coregistration(generic_workflow):
                 target = self.options.workdir)
         commands.append(copy.deepcopy(command))
 
+        # Copy the script file itself to the working directory in order
+        # to be able to reproduce the results
+        command = pos_wrappers.copy_wrapper(
+                source = [os.path.abspath(__file__)],
+                target = self.options.workdir)
+        commands.append(copy.deepcopy(command))
+
+
         self.execute(commands)
 
     def _tidy_up(self):
@@ -191,7 +198,7 @@ class multimodal_coregistration(generic_workflow):
         if self.cfg.parameters.propagation:
             i = self.iteration # just an alias
             target_file = os.path.join(self.cfg.parameters.propagation,
-                                       self.options.jobId + ".nii.gz"))
+                                       self.options.jobId + ".nii.gz")
             command = pos_wrappers.copy_wrapper(
                 source = [self.f['iteration_resliced'](iter=i,id='moving')],
                 target = target_file)
@@ -281,12 +288,15 @@ class multimodal_coregistration_iteration(generic_workflow):
         affine_list, deformable_list = \
             self._get_transformation_list()
 
+        # TODO: Go to documentation of the ANTS
+        # wrapper and add note on passing the proper value
+        # of --use-NN switch
         command = pos_wrappers.ants_reslice(
             dimension = 3,
             moving_image = self._get_file(image_id),
             output_image = self.f['resliced'](id=image_id),
             reference_image = self._get_file('fixed'),
-            useNN = bool(nn),
+            useNN = [None,bool(nn)][int(nn)],
             useBspline = None,
             deformable_list = deformable_list,
             affine_list = affine_list)
