@@ -117,6 +117,16 @@ class ants_registration(generic_wrapper):
 
 class ants_reslice(generic_wrapper):
     """
+
+    :note: Be carefull when setting the useNN parameter as it is easy to
+    misconfigure the value. The correct way to set the parameter is to use the
+    following syntax::
+
+    useNN = [None, nn][int(nn)]
+
+    where nn is the boolean value indicating the NN interpolation. In other
+    words, when NN interpolation is not required useNN should be None, in the
+    other case is shiuld be True. A bit strange, but that's how it works.
     """
     _template = """WarpImageMultiTransform {dimension} \
                   {moving_image} {output_image} \
@@ -139,7 +149,6 @@ class ants_reslice(generic_wrapper):
         'dimension': 'dimension',
         'output_image': 'input_image'
     }
-
 
 
 class ants_intensity_meric(generic_wrapper):

@@ -33,6 +33,7 @@ class evaluate_registration_results(pos_wrappers.generic_wrapper):
         'segmentation_file'  : pos_parameters.filename_parameter('segmentation_file')
     }
 
+
 class archive_registration_results(pos_wrappers.generic_wrapper):
     """
     """
@@ -129,6 +130,7 @@ class multimodal_coregistration(generic_workflow):
         # Generate the start tag - a file created at the beginning of the
         # calculations (according to its timestamp).
         start_file = os.path.join(self.options.workdir,"start")
+        self._logger.debug("Touching 'start' file: %s", start_file)
         command = pos_wrappers.touch_wrapper(files=[start_file])
         self.execute(command)
 
@@ -136,8 +138,12 @@ class multimodal_coregistration(generic_workflow):
         # file into the working directory.
         commands = []
         for image_id in self.cfg.files:
+            source_file_path = self.cfg.files.get(image_id).path
+            self._logger.debug("Copying source image file %s: %s",
+                    image_id, source_file_path)
+
             command = pos_wrappers.copy_wrapper(
-                source = [self.cfg.files.get(image_id).path],
+                source = [source_file_path],
                 target = self.f['raw_images'](id=image_id))
             commands.append(copy.deepcopy(command))
 
@@ -164,7 +170,6 @@ class multimodal_coregistration(generic_workflow):
                 target = self.options.workdir)
         commands.append(copy.deepcopy(command))
 
-
         self.execute(commands)
 
     def _tidy_up(self):
@@ -172,6 +177,7 @@ class multimodal_coregistration(generic_workflow):
         """
         # Touch a file to mark the end of the calculations:
         stop_file = os.path.join(self.options.workdir,"stop")
+        self._logger.debug("Touching 'stop' file: %s", stop_file)
         command = pos_wrappers.touch_wrapper(files=[stop_file])
         self.execute(command)
 
@@ -280,6 +286,10 @@ class multimodal_coregistration_iteration(generic_workflow):
         self.execute(commands)
 
     def _get_file(self, image_id):
+        """
+        Get the source image according to its image_id as provided in the
+        configuration file.
+        """
         return self.parent.f['raw_images'](id=image_id)
 
     def _reslice(self, image_id, nn=False):
@@ -288,9 +298,6 @@ class multimodal_coregistration_iteration(generic_workflow):
         affine_list, deformable_list = \
             self._get_transformation_list()
 
-        # TODO: Go to documentation of the ANTS
-        # wrapper and add note on passing the proper value
-        # of --use-NN switch
         command = pos_wrappers.ants_reslice(
             dimension = 3,
             moving_image = self._get_file(image_id),
@@ -407,7 +414,6 @@ class multimodal_coregistration_iteration(generic_workflow):
 
     def __call__(self, *args, **kwargs):
         return self.launch()
-
 
 if __name__ == '__main__':
     options, args = multimodal_coregistration.parseArgs()
