@@ -287,6 +287,8 @@ class vtk_oblique_slice_mapper():
 class vtk_four_renderers_scene():
 
     layouts = {
+        'main' :    [(0, 0, 0.95, 0.95), (0.95, 0, 1.0, 0.95),
+                     (0.95, 0.95, 1, 1), (0, 0.95, 0.95, 1.0)],
         'equal' :    [(0, 0, 0.5, 0.5), (0.5, 0, 1.0, 0.5),
                      (0.5, 0.5, 1, 1), (0, 0.5, 0.5, 1.0)],
         'vertical':  [(0, 0, 0.67,  1), (0.67, 0, 1.0, 0.33),
@@ -300,7 +302,7 @@ class vtk_four_renderers_scene():
         self._renderers = []
         for i in range(4):
             self._renderers.append(vtk.vtkRenderer())
-            self._renderers[i].SetViewport(*self.layouts['vertical'][i])
+            self._renderers[i].SetViewport(*self.layouts['main'][i])
 
         self._render_win = vtk.vtkRenderWindow()
         self._render_interactor = vtk.vtkRenderWindowInteractor()
@@ -331,7 +333,7 @@ class vtk_four_renderers_scene():
             self._renderers[i].SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(1800, 1200)
+        self._render_win.SetSize(1600, 1200)
 
     def _prepare_camera(self):
         self._camera = self._renderers[0].GetActiveCamera()
@@ -384,8 +386,8 @@ class vtk_four_renderers_scene():
 #       modalities_readers = ['myelin_reader', 'nissl_reader', 'mri_reader', 'blockface_reader']
 #       modalities_volumes = ['myelin_volume', 'nissl_volume', 'mri_volume', 'blockface_volume']
 
-        modalities_readers = ['uct_reader','mri_reader']
-        modalities_volumes = ['uct_volume','mri_volume']
+        modalities_readers = ['uct_reader']
+        modalities_volumes = ['uct_volume']
 
         modalities_readers = ['uct_reader']
         modalities_volumes = ['uct_volume']
@@ -408,11 +410,71 @@ class vtk_four_renderers_scene():
                 self.readers[0].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
-        self._cutActor = self._cut.reload_configuration()
-        self._renderers[0].AddActor(self._cutActor)
+#       self._cutActor = self._cut.reload_configuration()
+#       self._renderers[0].AddActor(self._cutActor)
+        self._renderers[0].AddActor(self.get_cube((0, 0.5, 35, 45, 5, 5.5)))
 
-        for idx, modality in enumerate(modalities_volumes[:1]):
-            self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
+#       for idx, modality in enumerate(modalities_volumes[:1]):
+#           self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
+
+    def get_bregma(self):
+        vl = self.get_labels_file(2)
+        x, y, z = vl[0] * 0.05, (1178 - vl[1])*0.05, (555 - vl[2]) * 0.05
+        return self.get_sphere((x,y,z), 0.5, (1,0,0))
+
+    def get_lambda(self):
+        vl = self.get_labels_file(3)
+        x, y, z = vl[0] * 0.05, (1178 - vl[1])*0.05, (555 - vl[2]) * 0.05
+        return self.get_sphere((x,y,z), 0.5, (0,0,1))
+
+    def get_ial_R(self):
+        vl = self.get_labels_file(1)
+        y, z = (1178 - vl[1])*0.05, (555 - vl[2]) * 0.05
+        return self.get_sphere((3, y, z), 0.5, (0,1,0))
+
+    def get_ial_L(self):
+        vl = self.get_labels_file(1)
+        y, z = (1178 - vl[1])*0.05, (555 - vl[2]) * 0.05
+        return self.get_sphere((25, y, z), 0.5, (0,1,0))
+
+    def get_earbar(self):
+        vl = self.get_labels_file(1)
+        y, z = (1178 - vl[1])*0.05, (555 - vl[2]) * 0.05
+        return self.get_cube((3, 25, y-0.1, y+0.1, z-0.1, z+0.1), (0,1,0))
+
+    def get_labels_file(self, label_id):
+        label_file_path = "/home/pmajka/possum/processing_supplement/02_02_NN2_auxiliary_files/02_02_NN2_stereotactic_labels_in_uct_space.txt"
+        label_file = open(label_file_path).readlines()
+        return map(int, label_file[label_id].strip().split()[1:4])
+
+    def get_sphere(self, center, radius, color):
+        # create source
+        source = vtk.vtkSphereSource()
+        source.SetCenter(*center)
+        source.SetRadius(radius)
+
+        # mapper
+        mapper = vtk.vtkPolyDataMapper()
+        mapper.SetInput(source.GetOutput())
+
+        # actor
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(*color)
+
+        return actor
+
+    def get_cube(self, bounds, color = (0,0,0)):
+        cube = vtk.vtkCubeSource()
+        cube.SetBounds(*bounds)
+
+        mapper = vtk.vtkPolyDataMapper()
+        mapper.SetInput(cube.GetOutput())
+
+        aCube = vtk.vtkActor()
+        aCube.SetMapper(mapper);
+        aCube.GetProperty().SetColor(*color)
+        return aCube
 
     def _assign_events(self):
         self._render_interactor.AddObserver("KeyPressEvent", self.key_press_dispather)
@@ -447,13 +509,25 @@ class vtk_four_renderers_scene():
         self._global_time = 0
         self._screenshot_index=0
 
+        self._take_screenshot()
         # Setup initial camera location
         self._camera.Azimuth(90)
-        self._camera.Zoom(1.2)
+        self._camera.Zoom(1.7)
         self._take_screenshot()
 
         self._camera.Elevation(90)
         self._take_screenshot()
+
+        self._renderers[0].AddActor(self.get_bregma())
+        self._renderers[0].AddActor(self.get_lambda())
+        self._renderers[0].AddActor(self.get_ial_R())
+        self._renderers[0].AddActor(self.get_ial_L())
+        self._renderers[0].AddActor(self.get_earbar())
+        self._take_screenshot()
+
+        self._camera.Elevation(-90)
+        self._take_screenshot()
+
 
 #       plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
 #       first_origin = plane.GetOrigin()
