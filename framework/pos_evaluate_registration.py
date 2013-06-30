@@ -1,6 +1,5 @@
 import os
 import sys
-import datetime, time
 from optparse import OptionParser, OptionGroup
 
 import nifti
