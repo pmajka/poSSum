@@ -340,6 +340,7 @@ class deformation_field_visualizer(generic_workflow):
                 input_jacobian_image = self.f['src_jacobian'](),
                 spacing = self.cfg['spacing'],
                 output_image = self.f['jacobian']())
+        print prepare_jacobian_command
         prepare_jacobian_command()
 
         prepare_deformation_wrap = convert_wrap_file(
@@ -347,6 +348,7 @@ class deformation_field_visualizer(generic_workflow):
                 input_image  = self.options.warpImage,
                 output_image = self.f['deformation'](),
                 spacing = self.cfg['spacing'])
+        print prepare_deformation_wrap
         prepare_deformation_wrap()
 
         prepare_slice_image = convert_slice_image(
@@ -354,6 +356,7 @@ class deformation_field_visualizer(generic_workflow):
                 input_image  = self.options.sliceImage,
                 output_image = self.f['image'](),
                 spacing = self.cfg['spacing'])
+        print prepare_slice_image
         prepare_slice_image()
 
     def launch(self):

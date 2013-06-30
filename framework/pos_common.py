@@ -48,14 +48,13 @@ def get_basename(path, with_extension=False):
 
 def setup_logging(log_filename = None, log_level = 'WARNING'):
     """
-    Initialize the logging subsystem. The logging is handled (suprisingly!)
+    Initialize the logging subsystem. The logging is handled (suprisingly! :)
     by the logging module. Depending on the command line options the log may
     be streamed to a specified file or printed directly to the stderr.
 
     :param log_filename: file to which the log will be redirected. If None
                          provided, the logging is redirected to stderr. None by default.
     :type log_filename: str
-
 
     :param log_level: Severity level of the logging module. Supports all the
                       default severity levels implemented in python logging
