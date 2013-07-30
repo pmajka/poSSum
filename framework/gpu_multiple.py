@@ -384,8 +384,11 @@ class vtk_four_renderers_scene():
         modalities_readers = ['blockface_reader','myelin_reader', 'nissl_reader', 'mri_reader']
         modalities_volumes = ['blockface_volume','myelin_volume', 'nissl_volume', 'mri_volume']
 
-#       modalities_readers = ['myelin_reader']
-#       modalities_volumes = ['myelin_volume']
+        modalities_readers = ['nissl_reader','myelin_reader', 'blockface_reader', 'mri_reader']
+        modalities_volumes = ['nissl_volume','myelin_volume', 'blockface_volume', 'mri_volume']
+
+        modalities_readers = ['mri_reader']
+        modalities_volumes = ['mri_volume']
 
         self.readers = []
         self.volumes = []
@@ -401,11 +404,11 @@ class vtk_four_renderers_scene():
 
         self._cut = vtk_oblique_slice_mapper( \
                 self._configuration_filename, \
-                self.readers[0].reload_configuration().GetOutput(),\
+                self.readers[2].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
-        self._cutActor = self._cut.reload_configuration()
-#       self._renderers[0].AddActor(self._cutActor)
+#       self._cutActor = self._cut.reload_configuration()
+#       self._renderers[2].AddActor(self._cutActor)
 
         for idx, modality in enumerate(modalities_volumes):
             self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
