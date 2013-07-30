@@ -2,15 +2,14 @@ import os, sys
 import codecs
 import numpy as np
 import re
+import datetime, logging
 from optparse import OptionParser, OptionGroup
 
+import pos_common
 import pos_wrappers
+
 from pos_deformable_wrappers import gnuplot_wrapper
 from pos_parameters import filename_parameter, string_parameter, list_parameter, value_parameter
-
-f1="/home/pmajka/x.txt"
-f2="/home/pmajka/y.txt"
-ld="/home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/label_descriptions.txt"
 
 class evaluation_plot(pos_wrappers.generic_wrapper):
     _parameters = {
@@ -80,9 +79,8 @@ class overlap_comparison_summary(object):
         self.options = options
         self.args = args
 
-        self.base = self.options.base
-        self.compare = self.options.compare
-        self.labelfile = self.options.labels
+        # Initializa logging to be able to track what is going on
+        #self._initializeLogging()
 
     def read_overlay_data(self, filename):
         file_contents = open(filename).readlines()
@@ -124,9 +122,9 @@ class overlap_comparison_summary(object):
         return results
 
     def results(self):
-        a1 = self.read_overlay_data(self.base)
-        a2 = self.read_overlay_data(self.compare)
-        lab= self.read_label_descriptions(self.labelfile)
+        a1 = self.read_overlay_data(self.options.base)
+        a2 = self.read_overlay_data(self.options.compare)
+        lab= self.read_label_descriptions(self.options.labels)
 
         types = [self.jaccard, self.dice]
 
@@ -171,6 +169,7 @@ class overlap_comparison_summary(object):
         # Get names of the gnuplot plot file, output svg file,
         # and output png file for the the normalized correlation coefficient
         # plot
+
         plot_file, svg_file, png_file, = \
                 self._get_plot_filenames(self.options.plotComparisonNaming)
         results_filename = self.options.plotComparisonNaming + "_results"
@@ -221,4 +220,7 @@ class overlap_comparison_summary(object):
 if __name__ == '__main__':
     options, args = overlap_comparison_summary.parseArgs()
     evaluate = overlap_comparison_summary(options, args)
-    evaluate.launch()
+    try:
+        evaluate.launch()
+    except:
+        pass
