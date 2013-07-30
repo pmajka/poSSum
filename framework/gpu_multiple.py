@@ -331,7 +331,7 @@ class vtk_four_renderers_scene():
             self._renderers[i].SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(600, 400)
+        self._render_win.SetSize(2*800, 2*600)
 
     def _prepare_camera(self):
         self._camera = self._renderers[0].GetActiveCamera()
@@ -362,8 +362,8 @@ class vtk_four_renderers_scene():
         magnification = \
                 self.cfg['scene']['screenshots_settings']['SetMagnification']
 
-      # w2i = vtk.vtkWindowToImageFilter()
-        w2i = vtk.vtkRenderLargeImage()
+        w2i = vtk.vtkWindowToImageFilter()
+      # w2i = vtk.vtkRenderLargeImage()
         w2i.SetMagnification(magnification)
         w2i.SetInput(self._render_win)
         w2i.Update()
@@ -387,8 +387,8 @@ class vtk_four_renderers_scene():
         modalities_readers = ['nissl_reader','myelin_reader', 'blockface_reader', 'mri_reader']
         modalities_volumes = ['nissl_volume','myelin_volume', 'blockface_volume', 'mri_volume']
 
-        modalities_readers = ['mri_reader']
-        modalities_volumes = ['mri_volume']
+#       modalities_readers = ['mri_reader']
+#       modalities_volumes = ['mri_volume']
 
         self.readers = []
         self.volumes = []
@@ -407,10 +407,16 @@ class vtk_four_renderers_scene():
                 self.readers[2].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
-#       self._cutActor = self._cut.reload_configuration()
+        self._cutActor = self._cut.reload_configuration()
 #       self._renderers[2].AddActor(self._cutActor)
 
         for idx, modality in enumerate(modalities_volumes):
+            self._cut = vtk_oblique_slice_mapper( \
+                    self._configuration_filename, \
+                    self.readers[idx].reload_configuration().GetOutput(),\
+                    self._render_interactor)
+            self._cutActor = self._cut.reload_configuration()
+            self._renderers[idx].AddActor(self._cutActor)
             self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
 
     def _assign_events(self):
@@ -448,7 +454,27 @@ class vtk_four_renderers_scene():
 
         # Setup initial camera location
         self._camera.Azimuth(90)
-        self._camera.Zoom(2.0)
+        self._camera.Zoom(1.8)
+
+        self._take_screenshot()
+        for i in range(360):
+            self._camera.Azimuth(1)
+            self._take_screenshot()
+
+    def _pre_animate_oblique_slice(self):
+        # Initialize global timer and screenshot iterator
+        self._global_time = 0
+        self._screenshot_index=0
+
+        # Setup initial camera location
+        self._camera.Azimuth(90)
+        self._camera.Zoom(1.8)
+
+#       self._take_screenshot()
+#       for i in range(360):
+#           self._camera.Azimuth(1)
+#           self._take_screenshot()
+        self._take_screenshot()
 
         plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
         first_origin = plane.GetOrigin()
@@ -458,9 +484,9 @@ class vtk_four_renderers_scene():
         self.transform.PostMultiply()
 
         self.transform.Translate(*tuple(map(lambda x: -1*x, first_origin)))
-        self.transform.RotateX(130)
-        self.transform.RotateY(90)
-        self.transform.RotateZ(130)
+        self.transform.RotateX(0)
+        self.transform.RotateY(0)
+        self.transform.RotateZ(0)
         self.transform.Translate(*first_origin)
 
         new_normal = self.transform.TransformDoubleNormal(*first_normal)
@@ -471,15 +497,31 @@ class vtk_four_renderers_scene():
         self._cut.plane_widget.SetOrigin(*new_origin)
         self._cut.plane_widget.SetNormal(*new_normal)
 
-#       self._camera.SetFocalPoint(*new_origin)
-#       d=-10
-#       new_loc = d * np.array(new_normal) + np.array(new_origin)
-#       self._camera.SetPosition(*tuple(new_loc))
-#       print new_loc, new_origin, new_normal
-#       self._renderers[0].ResetCameraClippingRange()
-#       self._camera.OrthogonalizeViewUp()
+        self._camera.SetFocalPoint(*new_origin)
+        d=-10
+        new_loc = d * np.array(new_normal) + np.array(new_origin)
+        self._camera.SetPosition(*tuple(new_loc))
+        print new_loc, new_origin, new_normal
+        self._renderers[0].ResetCameraClippingRange()
+        self._camera.OrthogonalizeViewUp()
 
-#       self._take_screenshot()
+        self._take_screenshot()
+
+        new_origin = plane.GetOrigin()
+        new_loc = -3.7 * np.array(new_normal) + np.array(new_origin)
+        self.volumes[0].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+        self.volumes[1].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+        self.volumes[2].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+        self.volumes[3].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+
+        for i in range(300):
+            new_origin = plane.GetOrigin()
+            new_loc = float(i)/float(1000) * np.array(new_normal) + np.array(new_origin)
+            self.volumes[0].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+            self.volumes[1].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+            self.volumes[2].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+            self.volumes[3].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
+            self._take_screenshot()
 
     def animate(self):
         pass
