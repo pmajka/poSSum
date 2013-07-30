@@ -390,6 +390,9 @@ class vtk_four_renderers_scene():
         modalities_readers = ['uct_reader']
         modalities_volumes = ['uct_volume']
 
+        modalities_readers = ['mri_reader']
+        modalities_volumes = ['mri_volume']
+
         self.readers = []
         self.volumes = []
         for idx, modality in enumerate(modalities_readers):
@@ -408,11 +411,11 @@ class vtk_four_renderers_scene():
                 self.readers[0].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
-        self._cutActor = self._cut.reload_configuration()
-        self._renderers[0].AddActor(self._cutActor)
+       #self._cutActor = self._cut.reload_configuration()
+       #self._renderers[0].AddActor(self._cutActor)
 
-        for idx, modality in enumerate(modalities_volumes[:1]):
-            self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
+       #for idx, modality in enumerate(modalities_volumes[:1]):
+       #    self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
 
     def _assign_events(self):
         self._render_interactor.AddObserver("KeyPressEvent", self.key_press_dispather)
@@ -447,13 +450,18 @@ class vtk_four_renderers_scene():
         self._global_time = 0
         self._screenshot_index=0
 
-        # Setup initial camera location
-        self._camera.Azimuth(90)
-        self._camera.Zoom(1.2)
-        self._take_screenshot()
+#       # Setup initial camera location
+#       self._camera.Azimuth(90)
+#       self._camera.Zoom(1.2)
+#       self._take_screenshot()
 
-        self._camera.Elevation(90)
-        self._take_screenshot()
+#       self._camera.Elevation(90)
+#       self._take_screenshot()
+
+#       self._camera.Zoom(1.2)
+#       for i in range(360):
+#           self._camera.Azimuth(1)
+#           self._take_screenshot()
 
 #       plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
 #       first_origin = plane.GetOrigin()

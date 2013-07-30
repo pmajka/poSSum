@@ -513,8 +513,16 @@ class vtk_four_renderers_scene():
         # Setup initial camera location
         self._camera.Azimuth(90)
         self._camera.Zoom(1.7)
+        self._take_screenshot() # Left
+
+        self._camera.Elevation(-90)
         self._take_screenshot()
 
+        self._camera.Elevation(90)
+        self._camera.Azimuth(30)
+        self._take_screenshot()
+
+        self._camera.Azimuth(-30)
         self._camera.Elevation(90)
         self._take_screenshot()
 
@@ -528,6 +536,12 @@ class vtk_four_renderers_scene():
         self._camera.Elevation(-90)
         self._take_screenshot()
 
+        self._camera.Elevation(-90)
+        self._take_screenshot()
+
+        self._camera.Elevation(90)
+        self._camera.Azimuth(30)
+        self._take_screenshot()
 
 #       plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
 #       first_origin = plane.GetOrigin()
