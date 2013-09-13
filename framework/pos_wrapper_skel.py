@@ -44,7 +44,7 @@ class generic_workflow(object):
 
         # Get number of cpus for parallel processing.
         # Multiprocessing modlue is used to determine the number of cpus. This
-        # behavior can be overriden with --cpuNO switch.
+        # behavior can be overriden with --cpuNo switch.
         if not self.options.cpuNo:
             self.options.cpuNo = multiprocessing.cpu_count()
 
@@ -148,7 +148,7 @@ class generic_workflow(object):
     def _basesame(path, withExtension=False):
         return pos_common.get_basename(path, withExtension)
 
-    def _cleanUp(self, immediate=False):
+    def _clean_up(self, immediate=False):
         self._rmdir(self.options.workdir)
 
     def execute(self, commands, parallel=True):

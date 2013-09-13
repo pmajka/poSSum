@@ -80,7 +80,7 @@ def autodetect_file_type(image_path):
     logger = logging.getLogger('autodetect_file_type')
     logger.info("Autodetecting file type: %s",  image_path)
 
-    # Initialize itk imageIO factory which allows to do some strange thing
+    # Initialize itk imageIO factory which allows to do some strange things
     # (this function a pythonized code of an itk example from
     # http://www.itk.org/Wiki/ITK/Examples/IO/ReadUnknownImageType
     # Cheers!

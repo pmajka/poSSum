@@ -434,7 +434,7 @@ class deformation_field_visualizer(generic_workflow):
             iren.Start()
 
         if self.options.cleanup:
-            self._cleanUp()
+            self._clean_up()
 
     def _configure_camera(self, renderer, reader):
         camera = renderer.GetActiveCamera()
