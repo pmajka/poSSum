@@ -333,7 +333,8 @@ class vtk_four_renderers_scene():
             self._renderers[i].SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(1600, 1200)
+        self._render_win.SetSize(1600/2, 1200/2)
+       #self._render_win.SetSize(1600, 1200)
 
     def _prepare_camera(self):
         self._camera = self._renderers[0].GetActiveCamera()
@@ -386,11 +387,11 @@ class vtk_four_renderers_scene():
 #       modalities_readers = ['myelin_reader', 'nissl_reader', 'mri_reader', 'blockface_reader']
 #       modalities_volumes = ['myelin_volume', 'nissl_volume', 'mri_volume', 'blockface_volume']
 
-        modalities_readers = ['uct_reader']
-        modalities_volumes = ['uct_volume']
+#       modalities_readers = ['uct_reader']
+#       modalities_volumes = ['uct_volume']
 
-        modalities_readers = ['uct_reader']
-        modalities_volumes = ['uct_volume']
+        modalities_readers = ['uct_reader', 'blockface_reader']
+        modalities_volumes = ['uct_volume', 'blockface_volume']
 
         self.readers = []
         self.volumes = []
@@ -410,9 +411,10 @@ class vtk_four_renderers_scene():
                 self.readers[0].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
-#       self._cutActor = self._cut.reload_configuration()
+        self._cutActor = self._cut.reload_configuration()
 #       self._renderers[0].AddActor(self._cutActor)
-        self._renderers[0].AddActor(self.get_cube((0, 0.5, 35, 45, 5, 5.5)))
+#       self._renderers[0].AddActor(self.get_cube((0, 0.5, 35, 45, 5, 5.5)))
+#       self.volumes[0].clippingPlanes.AddItem(self._cut.plane)
 
 #       for idx, modality in enumerate(modalities_volumes[:1]):
 #           self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
@@ -504,7 +506,7 @@ class vtk_four_renderers_scene():
 
         self.animate()
 
-    def _pre_animate(self):
+    def _pre_animate_rotate(self):
         # Initialize global timer and screenshot iterator
         self._global_time = 0
         self._screenshot_index=0
@@ -515,33 +517,74 @@ class vtk_four_renderers_scene():
         self._camera.Zoom(1.7)
         self._take_screenshot() # Left
 
-        self._camera.Elevation(-90)
-        self._take_screenshot()
-
-        self._camera.Elevation(90)
-        self._camera.Azimuth(30)
-        self._take_screenshot()
-
-        self._camera.Azimuth(-30)
-        self._camera.Elevation(90)
-        self._take_screenshot()
-
         self._renderers[0].AddActor(self.get_bregma())
         self._renderers[0].AddActor(self.get_lambda())
         self._renderers[0].AddActor(self.get_ial_R())
         self._renderers[0].AddActor(self.get_ial_L())
         self._renderers[0].AddActor(self.get_earbar())
+
+        self._take_screenshot() # Left
+
+#       plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
+#       plane.SetOrigin(0.01, 20, 20)
+
+#       self._camera.Elevation(30)
+#       for i in range(360):
+#           self._camera.Azimuth(1)
+#           self._take_screenshot()
+
+#       self._camera.Elevation(-90)
+#       for i in range(360):
+#           self._camera.Elevation(1)
+#           self._take_screenshot()
+
+#       for i in range(284):
+#           plane.SetOrigin(i*0.05, 20, 20)
+#           self._take_screenshot()
+
+#   def _pre_animate_individual_shots(self):
+    def _pre_animate(self):
+        # Initialize global timer and screenshot iterator
+        self._global_time = 0
+        self._screenshot_index=0
+
+        self._take_screenshot()
+        # Setup initial camera location
+        self._camera.Azimuth(90)
+        self._camera.Zoom(1.7)
+#       self._take_screenshot() # Left
+
+        self._camera.Elevation(33)
+        self._camera.Azimuth(-45)
         self._take_screenshot()
 
-        self._camera.Elevation(-90)
-        self._take_screenshot()
+#       self._camera.Elevation(-90)
+#       self._take_screenshot()
 
-        self._camera.Elevation(-90)
-        self._take_screenshot()
+#       self._camera.Elevation(90)
+#       self._camera.Azimuth(30)
+#       self._take_screenshot()
 
-        self._camera.Elevation(90)
-        self._camera.Azimuth(30)
-        self._take_screenshot()
+#       self._camera.Azimuth(-30)
+#       self._camera.Elevation(90)
+#       self._take_screenshot()
+
+#       self._renderers[0].AddActor(self.get_bregma())
+#       self._renderers[0].AddActor(self.get_lambda())
+#       self._renderers[0].AddActor(self.get_ial_R())
+#       self._renderers[0].AddActor(self.get_ial_L())
+#       self._renderers[0].AddActor(self.get_earbar())
+#       self._take_screenshot()
+
+#       self._camera.Elevation(-90)
+#       self._take_screenshot()
+
+#       self._camera.Elevation(-90)
+#       self._take_screenshot()
+
+#       self._camera.Elevation(90)
+#       self._camera.Azimuth(30)
+#       self._take_screenshot()
 
 #       plane = self.volumes[0].clippingPlanes.GetItemAsObject(0)
 #       first_origin = plane.GetOrigin()

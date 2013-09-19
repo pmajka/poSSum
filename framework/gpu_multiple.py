@@ -6,6 +6,8 @@ import numpy as np
 import pos_palette
 from config import Config
 
+from pos_strct import _prepare_actors, label_indexes, _sigmoid
+
 class vtk_volume_image_reader():
     def __init__(self, reader_name, configuration_file, filename = None):
         self._configuration_filename = configuration_file
@@ -300,7 +302,7 @@ class vtk_four_renderers_scene():
         self._renderers = []
         for i in range(4):
             self._renderers.append(vtk.vtkRenderer())
-            self._renderers[i].SetViewport(*self.layouts['equal'][i])
+            self._renderers[i].SetViewport(*self.layouts['vertical'][i])
 
         self._render_win = vtk.vtkRenderWindow()
         self._render_interactor = vtk.vtkRenderWindowInteractor()
@@ -314,6 +316,8 @@ class vtk_four_renderers_scene():
             self._renderers[i].GetCullers().InitTraversal()
             culler = self._renderers[i].GetCullers().GetNextItem()
             culler.SetSortingStyleToBackToFront()
+#           culler.SetSortingStyleToFrontToBack()
+#           culler.SetSortingStyleToNone()
         self._render_interactor.SetRenderWindow(self._render_win)
 
         if self.cfg['scene']['general_settings']['use_light_kit']:
@@ -331,7 +335,15 @@ class vtk_four_renderers_scene():
             self._renderers[i].SetBackground(1.0, 1.0, 1.0)
 
     def _prepare_render_window(self):
-        self._render_win.SetSize(2*800, 2*600)
+       #self._render_win.SetSize(2*800, 2*600)
+        self._render_win.SetSize(1*800, 1*600)
+       #self._render_win.SetAlphaBitPlanes(1)
+        self._render_win.SetMultiSamples(1)
+        self._render_win.LineSmoothingOn()
+        self._render_win.PolygonSmoothingOn()
+        self._render_win.PointSmoothingOn()
+       #renderWindow.SetAAFrames(5)
+
 
     def _prepare_camera(self):
         self._camera = self._renderers[0].GetActiveCamera()
@@ -381,17 +393,18 @@ class vtk_four_renderers_scene():
 
     def add_actors(self):
 
-        modalities_readers = ['blockface_reader','myelin_reader', 'nissl_reader', 'mri_reader']
-        modalities_volumes = ['blockface_volume','myelin_volume', 'nissl_volume', 'mri_volume']
+#       modalities_readers = ['blockface_reader','myelin_reader', 'nissl_reader', 'mri_reader']
+#       modalities_volumes = ['blockface_volume','myelin_volume', 'nissl_volume', 'mri_volume']
 
-        modalities_readers = ['nissl_reader','myelin_reader', 'blockface_reader', 'mri_reader']
-        modalities_volumes = ['nissl_volume','myelin_volume', 'blockface_volume', 'mri_volume']
+#       modalities_readers = ['nissl_reader','myelin_reader', 'blockface_reader', 'mri_reader']
+#       modalities_volumes = ['nissl_volume','myelin_volume', 'blockface_volume', 'mri_volume']
 
-#       modalities_readers = ['mri_reader']
-#       modalities_volumes = ['mri_volume']
+        modalities_readers = ['blockface_reader','mri_reader','nissl_reader', 'myelin_reader']
+        modalities_volumes = ['blockface_volume','mri_volume','nissl_volume', 'myelin_volume']
 
         self.readers = []
         self.volumes = []
+
         for idx, modality in enumerate(modalities_readers):
             self.readers.append(vtk_volume_image_reader(modality,
                                                         self._configuration_filename))
@@ -404,19 +417,19 @@ class vtk_four_renderers_scene():
 
         self._cut = vtk_oblique_slice_mapper( \
                 self._configuration_filename, \
-                self.readers[2].reload_configuration().GetOutput(),\
+                self.readers[0].reload_configuration().GetOutput(),\
                 self._render_interactor)
 
         self._cutActor = self._cut.reload_configuration()
-#       self._renderers[2].AddActor(self._cutActor)
+        self._renderers[0].AddActor(self._cutActor)
 
         for idx, modality in enumerate(modalities_volumes):
             self._cut = vtk_oblique_slice_mapper( \
                     self._configuration_filename, \
                     self.readers[idx].reload_configuration().GetOutput(),\
                     self._render_interactor)
-            self._cutActor = self._cut.reload_configuration()
-            self._renderers[idx].AddActor(self._cutActor)
+#           self._cutActor = self._cut.reload_configuration()
+#           self._renderers[idx].AddActor(self._cutActor)
             self.volumes[idx].clippingPlanes.AddItem(self._cut.plane)
 
     def _assign_events(self):
@@ -454,9 +467,55 @@ class vtk_four_renderers_scene():
 
         # Setup initial camera location
         self._camera.Azimuth(90)
-        self._camera.Zoom(1.8)
+        self._camera.Zoom(1.6)
 
+        label_reader = vtk_volume_image_reader('label_reader', self._configuration_filename)
+        self._label_actors = _prepare_actors(label_reader.reload_configuration())
+        map(lambda x: self._renderers[0].AddActor(x), self._label_actors.values())
+       #self._renderers[0].SetUseDepthPeeling(1)
+       #self._renderers[0].SetMaximumNumberOfPeels(100)
+       #self._renderers[0].SetOcclusionRatio(0.1)
+
+        textActor = vtk.vtkTextActor()
+        textActor.GetTextProperty().SetFontSize(24)
+        textActor.GetTextProperty().SetFontFamilyToArial()
+        textActor.SetTextScaleModeToViewport()
+        textActor.SetPosition(10,10)
+        self._renderers[0].AddActor2D(textActor)
+        textActor.SetInput("Hello world")
+        textActor.GetTextProperty().SetColor(1.0, 0.0, 0.0)
+
+    def animate(self):
+        from time import sleep
+        self._camera.Elevation(33)
+        for i in range(-10,1200,1):
+            ss={}
+            print i
+            self._camera.Azimuth(0.2)
+            for v in label_indexes:
+                ss[v] = _sigmoid(float(i)/2.-20.*v)
+                self._label_actors[v].GetProperty().SetOpacity(ss[v])
+#               sleep(6./1000.)
+            self._renderers[0].Render()
+            self._render_win.Render()
+
+#   def animate(self):
+#       pass
+
+    def _pre_animate_just_rotate(self):
+        # Initialize global timer and screenshot iterator
+        self._global_time = 0
+        self._screenshot_index=0
+
+        # Setup initial camera location
+        self._camera.Azimuth(90)
+        self._camera.Zoom(1.6)
+
+        self._camera.Azimuth(-45)
+#       self._camera.Elevation(33)
         self._take_screenshot()
+
+        self._camera.Azimuth(45)
         for i in range(360):
             self._camera.Azimuth(1)
             self._take_screenshot()
@@ -469,6 +528,8 @@ class vtk_four_renderers_scene():
         # Setup initial camera location
         self._camera.Azimuth(90)
         self._camera.Zoom(1.8)
+
+        self._camera.Azimuth(270)
 
 #       self._take_screenshot()
 #       for i in range(360):
@@ -497,13 +558,13 @@ class vtk_four_renderers_scene():
         self._cut.plane_widget.SetOrigin(*new_origin)
         self._cut.plane_widget.SetNormal(*new_normal)
 
-        self._camera.SetFocalPoint(*new_origin)
+#       self._camera.SetFocalPoint(*new_origin)
         d=-10
         new_loc = d * np.array(new_normal) + np.array(new_origin)
-        self._camera.SetPosition(*tuple(new_loc))
+#       self._camera.SetPosition(*tuple(new_loc))
         print new_loc, new_origin, new_normal
         self._renderers[0].ResetCameraClippingRange()
-        self._camera.OrthogonalizeViewUp()
+#       self._camera.OrthogonalizeViewUp()
 
         self._take_screenshot()
 
@@ -522,9 +583,6 @@ class vtk_four_renderers_scene():
             self.volumes[2].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
             self.volumes[3].clippingPlanes.GetItemAsObject(0).SetOrigin(*new_loc)
             self._take_screenshot()
-
-    def animate(self):
-        pass
 
     def key_press_dispather(self, obj, event):
         key = obj.GetKeySym()
