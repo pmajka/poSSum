@@ -12,8 +12,9 @@ def get_basename(path, with_extension=False):
     :param path: Path to extract filename from
     :type path: str
 
-    :param with_extension: Decides wheter the filename will be extracted with or
-    without extension.
+    :param with_extension: Decides wheter the filename will be extracted with
+    or without extension.
+
     :type with_extension: bool
 
     >>> get_basename("/home/user/file.txt")
@@ -46,25 +47,28 @@ def get_basename(path, with_extension=False):
         return os.path.splitext(os.path.basename(path))[0]
 
 
-def setup_logging(log_filename = None, log_level = 'WARNING'):
+def setup_logging(log_filename=None, log_level='WARNING'):
     """
     Initialize the logging subsystem. The logging is handled (suprisingly! :)
     by the logging module. Depending on the command line options the log may
     be streamed to a specified file or printed directly to the stderr.
 
     :param log_filename: file to which the log will be redirected. If None
-                         provided, the logging is redirected to stderr. None by default.
+             provided, the logging is redirected to stderr. None by default.
+
     :type log_filename: str
 
-    :param log_level: Severity level of the logging module. Supports all the
-                      default severity levels implemented in python logging
-                      module. WARNING by default. (see http://docs.python.org/2.6/library/logging.html for more details.)
+    :param log_level: Severity level of the logging module.
+                      Supports all the default severity levels implemented
+                      in python logging module. WARNING by default.
+                      (see http://docs.python.org/2.6/library/logging.html
+                      for more details.)
     :type log_level: str
     """
 
     # Intialize the logging module.
-    logging.basicConfig(\
-            level = getattr(logging, log_level),
-            filename = log_filename,
-            format = '%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
-            datefmt = '%m/%d/%Y %H:%M:%S')
+    logging.basicConfig(
+            level=getattr(logging, log_level),
+            filename=log_filename,
+            format='%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
+            datefmt='%m/%d/%Y %H:%M:%S')
