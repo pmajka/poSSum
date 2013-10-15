@@ -1,32 +1,41 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
-###############################################################################
-#                                                                             #
-#    This file is part of Multimodal Atlas of Monodelphis Domestica           #
-#                                                                             #
-#    Copyright (C) 2011-2012 Piotr Majka                                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is free software: you can redistribute      #
-#    it and/or modify it under the terms of the GNU General Public License    #
-#    as published by the Free Software Foundation, either version 3 of        #
-#    the License, or (at your option) any later version.                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is distributed in the hope that it          #
-#    will be useful, but WITHOUT ANY WARRANTY; without even the implied       #
-#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.         #
-#    See the GNU General Public License for more details.                     #
-#                                                                             #
-#    You should have received a copy of the GNU General Public License        #
-#    along  with  3d  Brain  Atlas  Reconstructor.   If  not,  see            #
-#    http://www.gnu.org/licenses/.                                            #
-#                                                                             #
-###############################################################################
+
+"""A volume slicing module
+
+This file is part of Multimodal Atlas of Monodelphis Domestica
+
+Copyright (C) 2011-2013 Piotr Majka
+
+3d Brain Atlas Reconstructor is free software: you can redistribute
+it and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+3d Brain Atlas Reconstructor is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the atlas. Ifnot, see http://www.gnu.org/licenses/.
+"""
+
+
 import sys, os
 import datetime, logging
 from optparse import OptionParser, OptionGroup
 import pos_common
 
 import itk
+
+
+def get_image_region(image_dim, crop_index, crop_size):
+    bounding_box = itk.ImageRegion[image_dim]()
+    bounding_box.SetIndex(map(int, crop_index))
+    bounding_box.SetSize(map(int, crop_size))
+
+    return bounding_box
 
 # Dictionary below copied from (Sun Apr  7 14:04:28 CEST 2013)
 # http://code.google.com/p/medipy/source/browse/lib/medipy/itk/types.py?name=default&r=0da35e1099e5947151dee239f7a09f405f4e105c
@@ -55,6 +64,7 @@ io_component_string_name_to_image_type = {
         ('scalar', 'short', 2) : itk.Image.SS2,
         ('scalar', 'unsigned_short', 2) : itk.Image.US2,
         ('vector', 'unsigned_char', 2) : itk.Image.RGBUC2,
+        ('vector', 'float', 3) : itk.Image.VF33,
         ('scalar', 'unsigned_char', 2) : itk.Image.UC2,
         ('scalar', 'float', 2) : itk.Image.F2,
         ('rgb', 'unsigned_char', 2) : itk.Image.RGBUC2
@@ -76,6 +86,8 @@ def autodetect_file_type(image_path):
 
     :param image_path: filename to be investigated
     :type image_path: str
+
+    :returns: (pixel_type, component_type, number_of_dimensions) of the image according to ITK classes
     """
     logger = logging.getLogger('autodetect_file_type')
     logger.info("Autodetecting file type: %s",  image_path)
@@ -200,8 +212,6 @@ class extract_slices_from_volume(object):
         for i in self._slicingRange:
             self._extract_single_slice(i)
 
-        self._logger.debug("Done. Have a nice day.")
-
     def _define_slicing_region(self):
         """
         Create slicing region - a region that will be used for slicing.
@@ -222,6 +232,27 @@ class extract_slices_from_volume(object):
         # so both sizes would be binded. Inevitable catastrophy!
         for i in range(3):
             slice_size[i] = self._source_largest_region.GetSize()[i]
+
+        # The code below is responsible for selecting a subregion of a
+        # extracted slide. The definition of the subregion comes from the
+        # --extractionROI command line parameter. If the parameters is not
+        # provided the subregion is equal to the full region.
+        if self.options['extractionROI']:
+
+            # Remove the index of the slicing plane and use the remaining
+            # indexes to define region to extract.
+
+            reg_definition = self.options['extractionROI']
+            self._logger.debug("Extracting subregion: %s.",\
+                    " ".join(map(str,reg_definition)))
+
+            indexes_left =  range(3)
+            indexes_left.pop(self.options['sliceAxisIndex'])
+            slice_size[indexes_left[0]] = reg_definition[2]
+            slice_size[indexes_left[1]] = reg_definition[3]
+
+            self._new_region.SetIndex(indexes_left[0], reg_definition[0])
+            self._new_region.SetIndex(indexes_left[1], reg_definition[1])
 
         # And now I reset the dimension in the slicing axis. So simple in
         # comparision with numpy:
@@ -265,17 +296,19 @@ class extract_slices_from_volume(object):
         :param slice_index: index of the slice to be extracted.
         """
         self._logger.debug("Extracing slice: %d", slice_index)
-
-        region_index = [0,0,0]
-        region_index[self.options['sliceAxisIndex']] = slice_index
-        self._new_region.SetIndex(region_index)
-
+        self._new_region.SetIndex(self.options['sliceAxisIndex'], slice_index)
         self._logger.debug("Region to extract: %s", self._new_region)
 
         # Now, get the output filename. Filename depends on the slice
         # region_index :)
-        filename = \
-                self.options['outputImagesFormat'] % (slice_index + self.options['shiftIndexes'], )
+        # Ok, this is a bit dirty hack. If we want the output image which name
+        # does not depend on the slice index, we need to handle type error:
+        try:
+            filename = \
+                    self.options['outputImagesFormat'] \
+                    % (slice_index + self.options['shiftIndexes'], )
+        except TypeError:
+            filename = self.options['outputImagesFormat']
 
         self._logger.info("Saving slice %d to: %s", slice_index, filename)
         self._extract_slice.SetExtractionRegion(self._new_region)
@@ -303,6 +336,9 @@ class extract_slices_from_volume(object):
                 default=None, help='File that is going to be sliced.')
         parser.add_option('--shiftIndexes', dest='shiftIndexes', type='int',
                 default=0, help='Shift output file numbers by given value (has to be integer).')
+        parser.add_option('--extractionROI', default=None,
+                            type='int', dest='extractionROI',  nargs=4,
+                            help='ROI of the input image used for registration (ox, oy, sx, sy).')
 
         logging_settings = OptionGroup(parser, 'Logging options')
         logging_settings.add_option('--loglevel', dest='loglevel', type='str',
