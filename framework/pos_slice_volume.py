@@ -23,7 +23,7 @@ along with the atlas. Ifnot, see http://www.gnu.org/licenses/.
 
 
 import sys, os
-import datetime, logging
+import logging
 from optparse import OptionParser, OptionGroup
 import pos_common
 
@@ -128,13 +128,20 @@ def autodetect_file_type(image_path):
 class extract_slices_from_volume(object):
     """
     Class which purpose is to extract a slice(s) from 3d volume. So much buzzz
-    about so simple thing...
+    about so simple thing... yeap, that's itk.
     """
 
     def __init__(self, optionsDict, args):
         """
+        :param optionsDict: Command line options
+        :type optionsDict: dict
+
+        :param args: Command line arguments
+        :type args: list 
         """
         # Store filter configuration withing the class instance
+        # Sometimes, the command line parameters are not passed as a dictionary
+        # We need to convert it to a dictionary.
         if type(optionsDict) != type({}):
             self.options = eval(str(optionsDict))
         else:
