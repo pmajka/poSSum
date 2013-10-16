@@ -2,7 +2,6 @@
 import sys
 import os
 import multiprocessing
-import copy
 
 import time
 import datetime
@@ -15,23 +14,21 @@ import pos_common
 
 class generic_workflow(object):
     """
-    A generic command-line workflow class. Workflow should be understood as a configurable pipeline with a configurable execution settings.
+    A generic command-line workflow class. Workflow should be understood as a
+    configurable pipeline with a configurable execution settings.
 
     The workflow / pipeline may consist of different stages use a numbser of
     different files, etc. The reason for this class is to use command line tools
     which functionality cannot be achieved in any other way.
-
     """
+    
+    # _f is a dictionary holding definitions of files beeing a part of the
+    # workflow. The purpose of this dictionary is to be able to easily access
+    # and utilize filenames (from each stage of the workflow). You're gonna like
+    # it.
     _f = {}
 
-    # -----------------------------------------------
-    # Directory templates - environmental
-    # ----------------------------------------------
-    _dirTemplates = {
-            'sharedbf': '/dev/shm/',
-            'tempbf'  : '/tmp/',
-            }
-
+    # Override this attribute in the inherited classes.
     _usage = ""
 
     def __init__(self, options, args):
@@ -55,7 +52,11 @@ class generic_workflow(object):
         self._overrideDefaults()
 
     def _initializeLogging(self):
-
+        """
+        Seems to be self explaining - initialized the logging module using
+        either ethe default logging settings or customized logging settings
+        according to provided command line paramteres.
+        """
         pos_common.setup_logging(self.options.logFilename,
                       self.options.loglevel)
 
@@ -98,34 +99,43 @@ class generic_workflow(object):
 
     def _overrideDefaults(self):
         """
-        A generic function for altering some configuration that was set with
+        A generic function for altering configuration that was set with
         default values. Should be reimplemented in subclasses.
         """
         pass
 
     def _validateOptions(self):
         """
+        A generic command line options validation function. Should be customized
+        in subclasses. A lot of assertions is expected to be here!
         """
         pass
 
     def _initializeDirectories(self):
         """
         """
+        # The directiories in the dictionary below are the potential working
+        # dirs for the workflow. The 'sharedbf' is used when given mashine
+        # has a ramdisk, otherwise 'tempbf'. These are the default locations for
+        # the workdir. Typically, the working directory location is a custom
+        # one.
+        _dirTemplates = {
+                'sharedbf': '/dev/shm/',
+                'tempbf'  : '/tmp/',
+                }
+
         # That's clever idea: When one don't want (or cannot) use shared memory
-        # on given mashine the regular /tmp/ directory is used to support the computations.
+        # on given mashine, the regular /tmp/ directory is used to support the computations.
         # The tmp directory can be also set manually to, e.g., directory shared
         # among whole computer cluster.
         if self.options.disableSharedMemory:
             top_directory = self._dirTemplates['tempbf']
         else:
             top_directory = self._dirTemplates['sharedbf']
-        # Ok, so that was for the very top workflow directory (let's call him
-        # the 'working directory' TODO: Make all the names uniform across the
-        # code and documentation.
 
         # If the working directory (the directory holding all the
         # job's calculations) is not defined, we define it automatically
-        # When the working directory name IS provided we just use it
+        # When the working directory name IS provided we just use it.
         if not self.options.workdir:
             self.options.workdir = os.path.join(top_directory, self.options.jobId)
         self._ensureDir(self.options.workdir)
@@ -139,9 +149,23 @@ class generic_workflow(object):
         map(self._ensureDir, dirs_to_create)
 
     def _ensureDir(self, path):
+        """
+        Makes sure that the given directory exists and is avalilable.
+
+        :param path: Location to be tested. Note that only directory names are
+        valid paths. Passing filenames will probably end badly...
+        :type path: str
+        """
         return pos_wrappers.mkdir_wrapper(dir_list=[path])()
 
     def _rmdir(self, path):
+        """
+        Removes given location. Watch out as the files and/or directories are
+        removed recursively and uninvertabely (as in `rm -rfv` command).
+
+        :param path: Location to be removed.
+        :type path: str
+        """
         return pos_wrappers.rmdir_wrapper(dir_list=[path])()
 
     @staticmethod
@@ -149,6 +173,17 @@ class generic_workflow(object):
         return pos_common.get_basename(path, withExtension)
 
     def _clean_up(self, immediate=False):
+        """
+        Erases the job's working directory.
+
+        #TODO: 
+        
+        .. warninig: The `immediate` switch is not implemented as of yet.
+
+        :param immediate: Decides if the job's working directory will be erased
+        immediately or as a last step of the workflow.
+        :type immediate: bool
+        """
         self._rmdir(self.options.workdir)
 
     def execute(self, commands, parallel=True):
@@ -163,7 +198,6 @@ class generic_workflow(object):
 
         :param parallel: Enables execution in parallel mode
         :type parallel: bool
-
         """
 
         #TODO: Implement pbs job dependencies
@@ -189,10 +223,19 @@ class generic_workflow(object):
             print "\n".join(map(str, commands))
 
     def execute_callable(self, command):
-        if self.options.dryRun:
-            print command
-        else:
-            command()
+        """
+        Immediately executes the command.
+
+        .. deprecated:: 0.1 :)
+            This function is redundant. The same effect can be achieved by
+            invoking `self.execute(command, parallel=False)`. TODO: Please find
+            all invocations of this function and replace them.
+        
+        :param command: Command to be executed.
+        :type command: `generic_wrapper`
+        """
+
+        self.execute(command, parallel=False):
 
     @classmethod
     def _getCommandLineParser(cls):

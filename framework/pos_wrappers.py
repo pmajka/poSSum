@@ -66,6 +66,8 @@ class generic_wrapper(object):
 class ants_registration(generic_wrapper):
     """
     """
+    #TODO: Assume that ants path is set properly:
+    # so the invokation like $ANTS should be fine.
     #_template = """ANTS {dimension} \
     _template = """/opt/ANTs-1.9.x-Linux/bin/ANTS {dimension} \
        {verbose} \
@@ -117,7 +119,6 @@ class ants_registration(generic_wrapper):
 
 class ants_reslice(generic_wrapper):
     """
-
     :note: Be carefull when setting the useNN parameter as it is easy to
     misconfigure the value. The correct way to set the parameter is to use the
     following syntax::
@@ -548,7 +549,6 @@ class chain_affine_transforms(generic_wrapper):
     }
 
 
-
 class stack_slices_gray_wrapper(generic_wrapper):
     _template = """StackSlices {temp_volume_fn} -1 -1 0 {stack_mask};\
             reorientImage.py -i {temp_volume_fn} \
@@ -575,7 +575,6 @@ class stack_slices_gray_wrapper(generic_wrapper):
         'interpolation': string_parameter('interpolation', None, str_template='--{_name} {_value}'),
         'resample': list_parameter('resample', [], str_template='--{_name} {_list}')
     }
-
 
 
 class stack_slices_rgb_wrapper(generic_wrapper):
@@ -631,7 +630,6 @@ class mkdir_wrapper(generic_wrapper):
     }
 
 
-
 class rmdir_wrapper(generic_wrapper):
     _template = """rm -rfv {dir_list}"""
 
@@ -647,6 +645,7 @@ class copy_wrapper(generic_wrapper):
         'source': list_parameter('source', [], str_template='{_list}'),
         'target': value_parameter('target')
     }
+
 
 class touch_wrapper(generic_wrapper):
     _template = """touch {files}"""

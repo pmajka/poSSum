@@ -3,23 +3,15 @@
 
 """A volume slicing module
 
-This file is part of Multimodal Atlas of Monodelphis Domestica
+This file is part of Multimodal Atlas of Monodelphis Domestica,
 
-Copyright (C) 2011-2013 Piotr Majka
+Usage examples:
+ * pos_slice_vol.py -i filename.nii.gz -s 1 -r 10 20 1 -o %03d.nii.gz
 
-3d Brain Atlas Reconstructor is free software: you can redistribute
-it and/or modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation, either version 3 of
-the License, or (at your option) any later version.
-
-3d Brain Atlas Reconstructor is distributed in the hope that it
-will be useful, but WITHOUT ANY WARRANTY; without even the implied
-warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with the atlas. Ifnot, see http://www.gnu.org/licenses/.
 """
+###TODO!!!
+#XXX Add usage examples
+#Plenty of them, plenty
 
 
 import sys, os
