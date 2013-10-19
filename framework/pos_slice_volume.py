@@ -1,13 +1,42 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
 
-"""A volume slicing module
+"""
+.. module:: pos_slice_volume
+    :platform: Ubuntu
+    :synopsis: A volume slicing module.
+
+.. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
+
+Volume slicing script
+*********************
 
 This file is part of Multimodal Atlas of Monodelphis Domestica.
 (c) Piotr Majka 2011-2013. Restricted, damnit!
 
+Syntax
+======
+
+.. highlight:: bash
+
+Summary
+-------
+
+All supported features in one invocation (an example) ::
+
+    $pos_slice_vol.py  -i filename.nii.gz
+                       -s 1
+    [start, end, step] -r 20 50 1
+                       -o /some/path/prefix_%04d_suffix.ext
+                       --shiftIndexes 1
+    [ox, oy, sx, sy]   --extractionROI 20 30 50 50
+
+Details
+-------
+
 This module provide a script for extracting slices from given input volume in a
 number of ways. Check the examples below.
+
 
 The script requires only one input parameter - the image to slice:
 `inputFileName` which is supposed to be a valid three dimensional image
@@ -64,6 +93,8 @@ size of the extracted region. E.g.::
 
 Will extract the square slice of 50x50 pixel that originates in pixel (40,100).
 
+Reference
+=========
 """
 
 #TODO: Assert, if the the slicing range is within the allowed limin for the
