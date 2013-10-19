@@ -406,7 +406,7 @@ class extract_slices_from_volume(object):
 
     @staticmethod
     def parseArgs():
-        usage = "python pos_slice_volume.py  -r <range> -s <axis> -o <input filename> [options]"
+        usage = "python pos_slice_volume.py  -i <input_filename> [options]"
         parser = OptionParser(usage = usage)
 
         parser.add_option('--outputImagesFormat', '-o',
