@@ -99,109 +99,13 @@ Reference
 
 #TODO: Assert, if the the slicing range is within the allowed limin for the
 # given slicing plane
-
 import sys, os
 import logging
 from optparse import OptionParser, OptionGroup
 import pos_common
 
 import itk
-
-
-def get_image_region(image_dim, crop_index, crop_size):
-    bounding_box = itk.ImageRegion[image_dim]()
-    bounding_box.SetIndex(map(int, crop_index))
-    bounding_box.SetSize(map(int, crop_size))
-
-    return bounding_box
-
-# Dictionary below copied from (Sun Apr  7 14:04:28 CEST 2013)
-# http://code.google.com/p/medipy/source/browse/lib/medipy/itk/types.py?name=default&r=0da35e1099e5947151dee239f7a09f405f4e105c
-io_component_type_to_type = {
-        itk.ImageIOBase.UCHAR : itk.UC,
-        itk.ImageIOBase.CHAR : itk.SC,
-        itk.ImageIOBase.USHORT : itk.US,
-        itk.ImageIOBase.SHORT : itk.SS,
-        itk.ImageIOBase.UINT : itk.UI,
-        itk.ImageIOBase.INT : itk.SI,
-        itk.ImageIOBase.ULONG : itk.UL,
-        itk.ImageIOBase.LONG : itk.SL,
-        itk.ImageIOBase.FLOAT : itk.F,
-        itk.ImageIOBase.DOUBLE : itk.D,
-        }
-
-# And this is my own invention: a dictionary that converts tuple of specific
-# image parameters into itk image type. We all love ITK heavy templated code
-# style!
-io_component_string_name_to_image_type = {
-        ('scalar', 'short', 3) : itk.Image.SS3,
-        ('scalar', 'unsigned_short', 3) : itk.Image.US3,
-        ('scalar', 'unsigned_char', 3) : itk.Image.UC3,
-        ('vector', 'unsigned_char', 3) : itk.Image.RGBUC3,
-        ('scalar', 'float', 3) : itk.Image.F3,
-        ('scalar', 'short', 2) : itk.Image.SS2,
-        ('scalar', 'unsigned_short', 2) : itk.Image.US2,
-        ('vector', 'unsigned_char', 2) : itk.Image.RGBUC2,
-        ('vector', 'float', 3) : itk.Image.VF33,
-        ('scalar', 'unsigned_char', 2) : itk.Image.UC2,
-        ('scalar', 'float', 2) : itk.Image.F2,
-        ('rgb', 'unsigned_char', 2) : itk.Image.RGBUC2
-        }
-
-# Another quite clever dictionary. This one converts given image type to the
-# same type but with number of dimensions reduced by one (e.g. 3->2).
-types_reduced_dimensions = {
-        itk.Image.SS3 : itk.Image.SS2,
-        itk.Image.US3 : itk.Image.US2,
-        itk.Image.UC3 : itk.Image.UC2,
-        itk.Image.RGBUC3 : itk.Image.RGBUC2,
-        itk.Image.F3 : itk.Image.F2
-    }
-
-def autodetect_file_type(image_path):
-    """
-    Autodetects image dimensions and size as well as pixel type and component size.
-
-    :param image_path: filename to be investigated
-    :type image_path: str
-
-    :returns: (pixel_type, component_type, number_of_dimensions) of the image according to ITK classes
-    """
-    logger = logging.getLogger('autodetect_file_type')
-    logger.info("Autodetecting file type: %s",  image_path)
-
-    # Initialize itk imageIO factory which allows to do some strange things
-    # (this function a pythonized code of an itk example from
-    # http://www.itk.org/Wiki/ITK/Examples/IO/ReadUnknownImageType
-    # Cheers!
-    image_io = itk.ImageIOFactory.CreateImageIO(image_path, itk.ImageIOFactory.ReadMode)
-    image_io.SetFileName(image_path)
-    image_io.ReadImageInformation()
-
-    # Extracting information for determining image type
-    image_size = map(image_io.GetDimensions, range(image_io.GetNumberOfDimensions()))
-    component_type = image_io.GetComponentTypeAsString(image_io.GetComponentType())
-    pixel_type = image_io.GetPixelTypeAsString(image_io.GetPixelType())
-    number_of_dimensions = image_io.GetNumberOfDimensions()
-
-    logger.debug("Finished extracting header information.")
-
-    logger.info("   Number of dimensions: %d", number_of_dimensions)
-    logger.info("   Image size: %s", str(image_size))
-    logger.info("   Component type: %s", component_type)
-    logger.info("   Pixel type: %s", pixel_type)
-    logger.debug(image_io)
-    logger.info("Matching image type...")
-
-    # Matching corresponding image type
-    image_type = io_component_string_name_to_image_type[
-        (pixel_type, component_type, number_of_dimensions)]
-
-    logger.info("Matched ITK image type: %s", image_type)
-
-    # Hurrayy!!
-    return image_type
-
+import pos_itk_core
 
 class extract_slices_from_volume(object):
     """
@@ -261,8 +165,8 @@ class extract_slices_from_volume(object):
         # At the very beginning, determine input image type to configure the
         # reader.
         input_filename = self.options['inputFileName']
-        self._input_image_type = autodetect_file_type(input_filename)
-        self._output_image_type = types_reduced_dimensions[self._input_image_type]
+        self._input_image_type = pos_itk_core.autodetect_file_type(input_filename)
+        self._output_image_type = pos_itk_core.types_reduced_dimensions[self._input_image_type]
 
         self._logger.info("Determined input image type: %s", self._input_image_type)
         self._logger.info("Determined slices' image type: %s", self._output_image_type)
@@ -276,7 +180,7 @@ class extract_slices_from_volume(object):
         self._logger.info("Largest possible region: %s.", self._source_largest_region)
         # Checking if the provided file IS a volume -- it has to be exactly
         # three dimensional, no more, no less!
-        assert len(self._source_largest_region) == 3, \
+        assert len(self._source_largest_region.GetSize()) == 3, \
             self._logger.error("The provided file is not three dimensional. Plase provide a 3D one.")
 
         # Define slicing region (in its initial form)

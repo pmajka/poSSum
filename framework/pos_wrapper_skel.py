@@ -8,8 +8,8 @@ import datetime
 import logging
 from optparse import OptionParser, OptionGroup
 
-import pos_wrappers
 import pos_common
+import pos_wrappers
 
 
 class generic_workflow(object):
@@ -32,6 +32,14 @@ class generic_workflow(object):
     _usage = ""
 
     def __init__(self, options, args):
+        """
+        :param optionsDict: Command line options
+        :type optionsDict: dict
+
+        :param args: Command line arguments
+        :type args: list
+        """
+
         self.options = options
         self.args = args
 
@@ -124,14 +132,21 @@ class generic_workflow(object):
                 'tempbf'  : '/tmp/',
                 }
 
+        # Sometimes we just don't want create any work_dir (e.g. out workflow
+        # is done without creating any files. When 'workdir' command line
+        # parameter is set to skip, we just skip it. Anything that happens
+        # afterwards is a liability of the develeoper.
+        if self.options.workdir == 'skip':
+            return
+
         # That's clever idea: When one don't want (or cannot) use shared memory
         # on given mashine, the regular /tmp/ directory is used to support the computations.
         # The tmp directory can be also set manually to, e.g., directory shared
         # among whole computer cluster.
         if self.options.disableSharedMemory:
-            top_directory = self._dirTemplates['tempbf']
+            top_directory = _dirTemplates['tempbf']
         else:
-            top_directory = self._dirTemplates['sharedbf']
+            top_directory = _dirTemplates['sharedbf']
 
         # If the working directory (the directory holding all the
         # job's calculations) is not defined, we define it automatically
@@ -202,6 +217,8 @@ class generic_workflow(object):
 
         #TODO: Implement pbs job dependencies
         # (https://docs.loni.org/wiki/PBS_Job_Chains_and_Dependencies)
+        # http://librarian.phys.washington.edu/athena/index.php/Job_Submission_Tutorial#NEW:_PBS_Job_Dependencies_.28advanced.29
+        # http://beige.ucs.indiana.edu/I590/node45.html
 
         # If single command is provided, it is supposed to be a string. Convert
         # to list with a single element.

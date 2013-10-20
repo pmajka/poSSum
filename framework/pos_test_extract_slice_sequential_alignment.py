@@ -1,127 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
-###############################################################################
-#                                                                             #
-#    This file is part of Multimodal Atlas of Monodelphis Domestica           #
-#                                                                             #
-#    Copyright (C) 2011-2012 Piotr Majka                                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is free software: you can redistribute      #
-#    it and/or modify it under the terms of the GNU General Public License    #
-#    as published by the Free Software Foundation, either version 3 of        #
-#    the License, or (at your option) any later version.                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is distributed in the hope that it          #
-#    will be useful, but WITHOUT ANY WARRANTY; without even the implied       #
-#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.         #
-#    See the GNU General Public License for more details.                     #
-#                                                                             #
-#    You should have received a copy of the GNU General Public License        #
-#    along  with  3d  Brain  Atlas  Reconstructor.   If  not,  see            #
-#    http://www.gnu.org/licenses/.                                            #
-#                                                                             #
-###############################################################################
 
+"""
+"""
 import sys, os
 import datetime, logging
 from optparse import OptionParser, OptionGroup
 
 import itk
-from pos_slice_volume import autodetect_file_type, types_reduced_dimensions
 import pos_common
+from pos_itk_core import get_image_region, autodetect_file_type, types_reduced_dimensions, resample_image_filter
 
-def resample_image_filter(input_image, input_type, output_type,
-                          scaling_factor, default_value=0):
-    """
-    Reimplemented after:
-    http://sourceforge.net/p/c3d/git/ci/master/tree/adapters/ResampleImage.cxx#l12
-
-    """
-
-    # Read out the image dimension to be to use it further in the routine.
-    # This is done by pretty simple yet effective way :)
-    image_dim = len(input_image.GetSpacing())
-
-    # Declare an image interpolation function. The function is by default a
-    # linear interpolation function, however it my be switched to any other
-    # image interpolation function by altering the code below.
-    interpolator = itk.LinearInterpolateImageFunction[input_type, itk.D].New()
-
-    # Declare resampling filter and initialize the filter with two dimensional
-    # identity transformation as well as image interpolation function
-    resample_filter = itk.ResampleImageFilter[input_type, output_type].New()
-    resample_filter.SetInput(input_image)
-    resample_filter.SetTransform(itk.IdentityTransform[itk.D, image_dim].New())
-    resample_filter.SetInterpolator(interpolator)
-
-    # Compute the spacing of the new image
-    # The new spacing is computed by
-
-    # Get original spacing of the input image:
-    pre_spacing = input_image.GetSpacing()
-
-    # Initialize recomputed size vector. Note that the vector is initialized
-    # with zeroes:
-    post_size = itk.Vector[itk.US, image_dim]([0]*image_dim)
-
-    # Initialize scaling vector based on provided scaling factor
-    scaling = itk.Vector[itk.F, image_dim]([scaling_factor]*image_dim)
-
-    # Initialize vector holding spacing of the output image. Note that the
-    # vector is initalized with zeroes.
-    post_spacing = itk.Vector[itk.F, image_dim]([0]*image_dim)
-
-    for i in range(image_dim):
-        post_spacing[i] = pre_spacing[i] * 1.0 / scaling[i]
-        post_size[i] = int(input_image.GetBufferedRegion().GetSize()[i] * \
-                           1.0 * scaling[i])
-
-    print "Spacing post", post_spacing
-    print "Size post", post_size
-
-    # Get the bounding box of the input image
-    pre_origin = input_image.GetOrigin()
-
-    # Recalculate the origin. The origin describes the center of voxel 0,0,0
-    # so that as the voxel size changes, the origin will change as well.
-    pre_offset = input_image.GetDirection() * pre_spacing
-    post_offset = input_image.GetDirection() * post_spacing
-    for i in range(pre_offset.Size()):
-        pre_offset[i] *= 0.5
-        post_offset[i] *= 0.5
-    origin_post = pre_origin - pre_offset + post_offset
-
-    # Set the image sizes, spacing, origins and image direction matrix:
-    resample_filter.SetSize(post_size)
-    resample_filter.SetOutputSpacing(post_spacing)
-    resample_filter.SetOutputOrigin(origin_post)
-    resample_filter.SetOutputDirection(input_image.GetDirection())
-
-    # Set the unknown intensity to positive value
-    resample_filter.SetDefaultPixelValue(default_value)
-
-    # Describe what we are doing
-    print " Input spacing: " , pre_spacing
-    print " Input origin: " , pre_origin
-    print " Output spacing: " , post_spacing
-    print " Output origin: " , origin_post
-
-    # Perform resampling
-    resample_filter.UpdateLargestPossibleRegion()
-
-    # Return resampled image:
-    return resample_filter.GetOutput()
-
-
-def get_image_region(image_dim, crop_index, crop_size):
-    bounding_box = itk.ImageRegion[image_dim]()
-    bounding_box.SetIndex(map(int, crop_index))
-    bounding_box.SetSize(map(int, crop_size))
-
-    return bounding_box
-
-
-def prepare_single_channel(input_image, input_type,
+def prepare_single_channel(input_image,
                            scale_factor=None, crop_index=None, crop_size=None,
                            median_radius=None, invert=False, invert_max=255,
                            rescale_min=None, rescale_max=None):
@@ -136,7 +26,7 @@ def prepare_single_channel(input_image, input_type,
     if crop_index and crop_size:
         bounding_box = get_image_region(image_dim, crop_index, crop_size)
 
-        crop_filter = itk.RegionOfInterestImageFilter[input_type, input_type].New()
+        crop_filter = itk.RegionOfInterestImageFilter[input_image, input_image].New()
         crop_filter.SetInput(input_image)
         crop_filter.SetRegionOfInterest(bounding_box)
         crop_filter.Update()
@@ -150,10 +40,10 @@ def prepare_single_channel(input_image, input_type,
 
     # Handle image inversion:
     if invert:
-        max_filter = itk.MinimumMaximumImageFilter[input_type].New()
+        max_filter = itk.MinimumMaximumImageFilter[input_image].New()
         max_filter.SetInput(last_res)
 
-        invert_filter = itk.InvertIntensityImageFilter[input_type, input_type].New()
+        invert_filter = itk.InvertIntensityImageFilter[input_image, input_image].New()
         invert_filter.SetInput(last_res)
 
         if invert_max:
@@ -166,7 +56,7 @@ def prepare_single_channel(input_image, input_type,
 
     # Handle median filtering
     if median_radius :
-        median = itk.MedianImageFilter[input_type, input_type].New()
+        median = itk.MedianImageFilter[input_image, input_image].New()
         median.SetInput(last_res)
         median.SetRadius(median_radius)
         median.Update()
@@ -175,12 +65,11 @@ def prepare_single_channel(input_image, input_type,
 
     # Handle image rescaling
     if (scale_factor is not None) and (int(scale_factor) != 1):
-        last_res  = resample_image_filter(last_res, input_type,
-                                          input_type, scale_factor)
+        last_res  = resample_image_filter(last_res, scale_factor)
 
     # Handle results rescaling
     if all([rescale_min, rescale_max]):
-        rescaler = itk.RescaleIntensityImageFilter[input_type, input_type].New()
+        rescaler = itk.RescaleIntensityImageFilter[input_image, input_image].New()
         rescaler.SetInput(last_res)
         rescaler.SetOutputMinimum(rescale_min)
         rescaler.SetOutputMaximum(rescale_max)
@@ -226,7 +115,7 @@ def collapse_pseudo_3d_image(input_image, input_type,
     else:
         # Just pass the initial images and input types
         result = input_image
-        return input_image, input_type
+        return input_image, input_typee
 
 
 class prepare_slice_for_seq_alignment(object):
@@ -234,6 +123,7 @@ class prepare_slice_for_seq_alignment(object):
     Assumptions:
         1) RGB: three channel integer (0-255) image.
         2) Grayscale: single channel 8-bit (0-255) image.
+        3) Other single component: any.
         Providing images not matching provided.
 
     Output image types:
@@ -344,10 +234,9 @@ class prepare_slice_for_seq_alignment(object):
                             Index = i)
 
                 # Process the extracted components.
-                self._logger.debug("Processing component: %s.", i)
                 crop_index_s, crop_size_s = self._get_crop_settings()
                 processed_channel = prepare_single_channel(
-                    extract_filter.GetOutput(), self._rgb_out_component_type,
+                    extract_filter.GetOutput(),
                     scale_factor = self.options['registrationResize'],
                     crop_index = crop_index_s,
                     crop_size = crop_size_s,
@@ -414,7 +303,7 @@ class prepare_slice_for_seq_alignment(object):
             self._logger.debug("Processing a single channel...")
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
-                    caster.GetOutput(), self._grayscale_out_type,
+                    caster.GetOutput(),
                     scale_factor = self.options['registrationResize'],
                     crop_index = crop_index_s,
                     crop_size = crop_size_s,
@@ -462,7 +351,7 @@ class prepare_slice_for_seq_alignment(object):
 
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
-                caster.GetOutput(), self._rgb_out_component_type,
+                caster.GetOutput(),
                 scale_factor = self.options['registrationResize'],
                 crop_index = crop_index_s,
                 crop_size = crop_size_s,
@@ -491,7 +380,7 @@ class prepare_slice_for_seq_alignment(object):
             self._logger.debug("Extracting grayscale(grayscale) image.")
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
-                    self._collapsed, self._input_type,
+                    self._collapsed,
                     scale_factor = self.options['registrationResize'],
                     crop_index = crop_index_s,
                     crop_size = crop_size_s,
@@ -541,8 +430,8 @@ class prepare_slice_for_seq_alignment(object):
                             registration will be performed. Has no meaning for \
                             grayscale input images. Possible values: r/red, g/green, b/blue.')
         parser.add_option('--medianFilterRadius', default=None,
-                dest='medianFilterRadius', type='str',
-                help='Median filter radius according to ImageMagick syntax.')
+                dest='medianFilterRadius', type='int', nargs=2,
+                help='Median filter radius in voxels e.g. 2 2')
         parser.add_option('--invertSourceImage', default=False,
                 dest='invertSourceImage',  action='store_const', const=True,
                 help='Invert source image: both, grayscale and multichannel, before registration')
