@@ -21,7 +21,7 @@ class generic_workflow(object):
     different files, etc. The reason for this class is to use command line tools
     which functionality cannot be achieved in any other way.
     """
-    
+
     # _f is a dictionary holding definitions of files beeing a part of the
     # workflow. The purpose of this dictionary is to be able to easily access
     # and utilize filenames (from each stage of the workflow). You're gonna like
@@ -176,8 +176,8 @@ class generic_workflow(object):
         """
         Erases the job's working directory.
 
-        #TODO: 
-        
+        #TODO:
+
         .. warninig: The `immediate` switch is not implemented as of yet.
 
         :param immediate: Decides if the job's working directory will be erased
@@ -226,16 +226,19 @@ class generic_workflow(object):
         """
         Immediately executes the command.
 
-        .. deprecated:: 0.1 :)
-            This function is redundant. The same effect can be achieved by
-            invoking `self.execute(command, parallel=False)`. TODO: Please find
-            all invocations of this function and replace them.
-        
+        .. deprecated:: 0.1
+           Redundant. The same effect can be achieved by
+           invoking :py:func:`self.execute(command, parallel=False)`.
+
+        .. todo::
+           TODO: Please find
+           all invocations of this function and replace them.
+
         :param command: Command to be executed.
-        :type command: `generic_wrapper`
+        :type command: :py:class:`pos_wrappers.generic_wrapper`
         """
 
-        self.execute(command, parallel=False):
+        self.execute(command, parallel=False)
 
     @classmethod
     def _getCommandLineParser(cls):

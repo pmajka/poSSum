@@ -13,8 +13,7 @@ def get_basename(path, with_extension=False):
     :type path: str
 
     :param with_extension: Decides wheter the filename will be extracted with
-    or without extension.
-
+                           or without extension.
     :type with_extension: bool
 
     >>> get_basename("/home/user/file.txt")
@@ -41,6 +40,7 @@ def get_basename(path, with_extension=False):
     >>> get_basename(get_basename("/home/user/image.nii.gz"))
     'image'
     """
+
     if with_extension is True:
         return os.path.basename(path)
     else:
@@ -50,17 +50,16 @@ def get_basename(path, with_extension=False):
 def setup_logging(log_filename=None, log_level='WARNING'):
     """
     Initialize the logging subsystem. The logging is handled (suprisingly! :)
-    by the logging module. Depending on the command line options the log may
-    be streamed to a specified file or printed directly to the stderr.
+    by the :py:mod:`logging` module. Depending on the command line options, the
+    log may be streamed to a specified file or printed directly to the stderr.
 
-    :param log_filename: file to which the log will be redirected. If None
-             provided, the logging is redirected to stderr. None by default.
-
+    :param log_filename: file to which the log will be redirected. If not
+             provided, the logging is redirected to `sys.stderr`. `None` by default.
     :type log_filename: str
 
     :param log_level: Severity level of the logging module.
                       Supports all the default severity levels implemented
-                      in python logging module. WARNING by default.
+                      in python :py:mod:`logging` module. `WARNING` by default.
                       (see http://docs.python.org/2.6/library/logging.html
                       for more details.)
     :type log_level: str

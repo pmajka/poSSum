@@ -35,46 +35,46 @@ Details
 -------
 
 This module provide a script for extracting slices from given input volume in a
-number of ways. Check the examples below.
+flexible way. Check the examples below.
 
 
 The script requires only one input parameter - the image to slice:
 `inputFileName` which is supposed to be a valid three dimensional image
-supported by itk. So the simplest invocation is::
+supported by itk. The simplest invocation is::
 
     $pos_slice_vol.py -i filename.nii.gz
 
-Will slice the provided file `filename.nii.gz` according to the default
-settings. In order to select a particulat slicing plane use `--sliceAxisIndex`
+It will slice the provided file `filename.nii.gz` according to the default
+settings. In order to select a particular slicing plane use `--sliceAxisIndex`
 or `-s` switch::
 
     $pos_slice_vol.py -i filename.nii.gz -s <slicing_plane=0,1,2>
 
 One can also select a particular range of slices to extract. Note the range has
 to be within image's limit - it cannot exceed the actual number of slices in
-given plane. Otherwise, an error will occur. The slicing range is works like
-python `range` function. Use either `--sliceRange` or `-r` switch to set slices
+given plane, otherwise, an error will occur. The slicing range works like
+python :py:func:`range` function. Use either `--sliceRange` or `-r` switch to set slices
 to extract, e.g. ::
 
     $pos_slice_vol.py -i filename.nii.gz -s 1 --sliceRange 0 20 1
 
 Will extract the first twenty slices slicing the image through Y (second) axis.
 
-So fat, the extracted slices were saved using default output naming scheme
-which is `%04d.png`. One can assign any valid naming scheme which should
+So far, the extracted slices were saved using default output naming scheme
+which is `%04d.png`. One can use any valid naming scheme which should
 include output path as well as output filename scheme. E.g. to save the
 extracted slices in home directory, using `slice_` prefix, pad the output up to
 three digits and save slices as jpegs, the `--outputImagesFormat` or `-o`
-parameter should be the following (remember to use `%d` format!)::
+parameter should be the following (**remember to use `%d` format!**)::
 
     $pos_slice_vol.py -i filename.nii.gz --outputImagesFormat /home/user/slice_%03d.jpg
 
 Note that the output format has to support the input image type. For instance,
-if the input file has a float type, saving extracted slices as PNGs will cause
+if the input file has a float data type, saving extracted slices as PNGs will cause
 a type error. Please make sure that your input and output types are
-compatibile.
+compatible.
 
-Sometimes one will need to to shift the indexes of the output slices, for
+Sometimes, one will need to shift the indexes of the output slices, for
 instance, save slice 0 as file 5, slice 5 as slice 10 and so on (e.g. to match
 some other series). This effect may be achieved by issuing `--shiftIndexes
 <int>` switch which shifts the output naming by provided number (either
@@ -258,7 +258,7 @@ class extract_slices_from_volume(object):
     def launchFilter(self):
         """
         """
-        # At the very beginnig, determine input image type to configure the
+        # At the very beginning, determine input image type to configure the
         # reader.
         input_filename = self.options['inputFileName']
         self._input_image_type = autodetect_file_type(input_filename)
