@@ -76,7 +76,7 @@ class generic_workflow(object):
         self._logger = logging.getLogger(self.__class__.__name__)
 
         self._logger.info("%s workflow options:", self.__class__.__name__)
-        for k,v in self.options.__dict__.items():
+        for k, v in self.options.__dict__.items():
             self._logger.info("%s : %s", k, v)
 
     def _initializeOptions(self):
@@ -87,15 +87,13 @@ class generic_workflow(object):
 
         # What the heck is a "specimen ID"? It is supposed to be at least single
         # value which will allow to assign an instance of the workflow to
-        # particual animal. When you have multiple animals they can get
-        # confused easily. In the future, specimen ID, will act as database ID
-        # for given specimen. Thus, it is hardcoded to not allow any
-        # computations without this ID. Simple as it is.
-        try:
-            self.options.specimenId
-        except:
-            print >>sys.stderr, "No specimen ID provided. Please provide a specimen ID."
-            sys.exit(1)
+        # particual animal. When you have multiple animals they can get confused
+        # easily. In the future, specimen ID, will act as database ID for given
+        # specimen. Thus, it is hardcoded to not allow any computations without
+        # this ID. Simple as it is.
+
+        assert self.options.specimenId, \
+            self._logger.error("No specimen ID provided. Please provide a specimen ID.")
 
         # Job ID is another value for accointing and managing. Oppoosite to the
         # specimen ID, this one may not be explicitly stated. In that case, it
@@ -129,8 +127,8 @@ class generic_workflow(object):
         # one.
         _dirTemplates = {
                 'sharedbf': '/dev/shm/',
-                'tempbf'  : '/tmp/',
-                }
+                'tempbf'  : '/tmp/'}
+
 
         # Sometimes we just don't want create any work_dir (e.g. out workflow
         # is done without creating any files. When 'workdir' command line
@@ -140,9 +138,9 @@ class generic_workflow(object):
             return
 
         # That's clever idea: When one don't want (or cannot) use shared memory
-        # on given mashine, the regular /tmp/ directory is used to support the computations.
-        # The tmp directory can be also set manually to, e.g., directory shared
-        # among whole computer cluster.
+        # on given mashine, the regular /tmp/ directory is used to support the
+        # computations.  The tmp directory can be also set manually to, e.g.,
+        # directory shared among whole computer cluster.
         if self.options.disableSharedMemory:
             top_directory = _dirTemplates['tempbf']
         else:
@@ -152,7 +150,8 @@ class generic_workflow(object):
         # job's calculations) is not defined, we define it automatically
         # When the working directory name IS provided we just use it.
         if not self.options.workdir:
-            self.options.workdir = os.path.join(top_directory, self.options.jobId)
+            self.options.workdir =\
+                os.path.join(top_directory, self.options.jobId)
         self._ensureDir(self.options.workdir)
 
         # Assign path to work dir to all templates:
@@ -160,7 +159,7 @@ class generic_workflow(object):
             v.job_dir = self.options.workdir
 
         # And, as a last point, just create the directories.
-        dirs_to_create = list(set(map(lambda v: v.base_dir,  self.f.itervalues())))
+        dirs_to_create = list(set(map(lambda v: v.base_dir, self.f.itervalues())))
         map(self._ensureDir, dirs_to_create)
 
     def _ensureDir(self, path):
@@ -205,11 +204,13 @@ class generic_workflow(object):
         """
         One of the most important methods in the whole class. Executes the
         workflow. The execution can be launched in parallel mode, and / or in
-        the 'dry run' mode. With the latter, the commands to be executed are actually only printed.
-        The 'dry run' mode is selected / deselected using command line workflow settings.
+        the 'dry run' mode. With the latter, the commands to be executed are
+        actually only printed.  The 'dry run' mode is selected / deselected
+        using command line workflow settings.
 
         :param commands: The commands to be executed
-        :type commands: An interable (in case of multiple commands - the usual case), a string in case of a singe command.
+        :type commands: An interable (in case of multiple commands - the usual
+                        case), a string in case of a singe command.
 
         :param parallel: Enables execution in parallel mode
         :type parallel: bool
