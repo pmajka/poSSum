@@ -53,8 +53,8 @@ or `-s` switch::
 One can also select a particular range of slices to extract. Note the range has
 to be within image's limit - it cannot exceed the actual number of slices in
 given plane, otherwise, an error will occur. The slicing range works like
-python :py:func:`range` function. Use either `--sliceRange` or `-r` switch to set slices
-to extract, e.g. ::
+python :py:func:`range` function. Use either `--sliceRange` or `-r` switch to
+set slices to extract, e.g. ::
 
     $pos_slice_vol.py -i filename.nii.gz -s 1 --sliceRange 0 20 1
 
@@ -70,8 +70,8 @@ parameter should be the following (**remember to use `%d` format!**)::
     $pos_slice_vol.py -i filename.nii.gz --outputImagesFormat /home/user/slice_%03d.jpg
 
 Note that the output format has to support the input image type. For instance,
-if the input file has a float data type, saving extracted slices as PNGs will cause
-a type error. Please make sure that your input and output types are
+if the input file has a float data type, saving extracted slices as PNGs will
+cause a type error. Please make sure that your input and output types are
 compatible.
 
 Sometimes, one will need to shift the indexes of the output slices, for
@@ -107,6 +107,7 @@ import pos_common
 import itk
 import pos_itk_core
 
+
 class extract_slices_from_volume(object):
     """
     Class which purpose is to extract a slice(s) from 3d volume. So much buzzz
@@ -124,7 +125,7 @@ class extract_slices_from_volume(object):
         # Store filter configuration withing the class instance
         # Sometimes, the command line parameters are not passed as a dictionary
         # We need to convert it to a dictionary.
-        if type(optionsDict) != type({}):
+        if not isinstance(optionsDict, dict):
             self.options = eval(str(optionsDict))
         else:
             self.options = optionsDict
@@ -139,10 +140,10 @@ class extract_slices_from_volume(object):
         self._validate_options()
 
     def _validate_options(self):
-        assert self.options['sliceAxisIndex'] in [0,1,2] , \
+        assert self.options['sliceAxisIndex'] in [0, 1, 2],\
             self._logger.error("The slicing plane has to be either 0, 1 or 2.")
 
-        assert self.options['inputFileName'] is not None, \
+        assert self.options['inputFileName'] is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
 
         # XXX: Note that we do not check if the slicing range is within limit
@@ -165,8 +166,10 @@ class extract_slices_from_volume(object):
         # At the very beginning, determine input image type to configure the
         # reader.
         input_filename = self.options['inputFileName']
-        self._input_image_type = pos_itk_core.autodetect_file_type(input_filename)
-        self._output_image_type = pos_itk_core.types_reduced_dimensions[self._input_image_type]
+        self._input_image_type =\
+            pos_itk_core.autodetect_file_type(input_filename)
+        self._output_image_type =\
+            pos_itk_core.types_reduced_dimensions[self._input_image_type]
 
         self._logger.info("Determined input image type: %s", self._input_image_type)
         self._logger.info("Determined slices' image type: %s", self._output_image_type)
@@ -188,7 +191,8 @@ class extract_slices_from_volume(object):
 
         # Define filter for extracting slices
         self._logger.debug("Setting slice region.")
-        self._extract_slice = itk.ExtractImageFilter[self._input_image_type, self._output_image_type].New()
+        self._extract_slice = itk.ExtractImageFilter[
+            self._input_image_type, self._output_image_type].New()
         self._extract_slice.SetExtractionRegion(self._new_region)
         self._extract_slice.SetInput(self._image_reader.GetOutput())
         self._extract_slice.SetDirectionCollapseToIdentity()
@@ -236,10 +240,10 @@ class extract_slices_from_volume(object):
             # indexes to define region to extract.
 
             reg_definition = self.options['extractionROI']
-            self._logger.debug("Extracting subregion: %s.",\
-                    " ".join(map(str,reg_definition)))
+            self._logger.debug("Extracting subregion: %s.",
+                    " ".join(map(str, reg_definition)))
 
-            indexes_left =  range(3)
+            indexes_left = range(3)
             indexes_left.pop(self.options['sliceAxisIndex'])
             slice_size[indexes_left[0]] = reg_definition[2]
             slice_size[indexes_left[1]] = reg_definition[3]
@@ -258,7 +262,8 @@ class extract_slices_from_volume(object):
     def _define_slicing_range(self):
         """
         Defines indexes of slices that are to be extracted from the volume.
-        The default set of slices to extract are all the sliced in the slicing plane.
+        The default set of slices to extract are all the sliced in the slicing
+        plane.
         """
         self._logger.debug("Defining set of slices to extract.")
 
@@ -279,7 +284,8 @@ class extract_slices_from_volume(object):
             # Get only those sliced that user wants to.
             self._slicingRange = range(*self.options['sliceRange'])
 
-        self._logger.info("Selected slices: %s", " ".join(map(str, self._slicingRange)))
+        self._logger.info("Selected slices: %s",
+                          " ".join(map(str, self._slicingRange)))
 
     def _extract_single_slice(self, slice_index):
         """
@@ -298,8 +304,8 @@ class extract_slices_from_volume(object):
         # does not depend on the slice index, we need to handle type error:
         try:
             filename = \
-                    self.options['outputImagesFormat'] \
-                    % (slice_index + self.options['shiftIndexes'], )
+                self.options['outputImagesFormat'] \
+                % (slice_index + self.options['shiftIndexes'], )
         except TypeError:
             filename = self.options['outputImagesFormat']
 
@@ -310,8 +316,8 @@ class extract_slices_from_volume(object):
 
     @staticmethod
     def parseArgs():
-        usage = "python pos_slice_volume.py  -i <input_filename> [options]"
-        parser = OptionParser(usage = usage)
+        usage_string = "python pos_slice_volume.py  -i <input_filename> [options]"
+        parser = OptionParser(usage=usage_string)
 
         parser.add_option('--outputImagesFormat', '-o',
                         dest='outputImagesFormat', type='str',
