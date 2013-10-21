@@ -47,9 +47,8 @@ types_reduced_dimensions = {
 
 # This time a dictionary for stacking slices (a reverse of
 # types_reduced_dimensions dict):
-types_increased_dimensions = \
-    dict((types_reduced_dimensions[k], k) \
-        for k in types_reduced_dimensions)
+types_increased_dimensions = dict((types_reduced_dimensions[k], k)
+                               for k in types_reduced_dimensions)
 
 
 def get_image_region(image_dim, crop_index, crop_size):
@@ -62,12 +61,14 @@ def get_image_region(image_dim, crop_index, crop_size):
 
 def autodetect_file_type(image_path):
     """
-    Autodetects image dimensions and size as well as pixel type and component size.
+    Autodetects image dimensions and size as well as pixel type and component
+    size.
 
     :param image_path: filename to be investigated
     :type image_path: str
 
-    :returns: (pixel_type, component_type, number_of_dimensions) of the image according to ITK classes
+    :returns: (pixel_type, component_type, number_of_dimensions) of the image
+              according to ITK classes
     """
     logger = logging.getLogger('autodetect_file_type')
     logger.info("Autodetecting file type: %s",  image_path)
@@ -76,13 +77,16 @@ def autodetect_file_type(image_path):
     # (this function a pythonized code of an itk example from
     # http://www.itk.org/Wiki/ITK/Examples/IO/ReadUnknownImageType
     # Cheers!
-    image_io = itk.ImageIOFactory.CreateImageIO(image_path, itk.ImageIOFactory.ReadMode)
+    image_io = itk.ImageIOFactory.CreateImageIO(image_path,\
+                                itk.ImageIOFactory.ReadMode)
     image_io.SetFileName(image_path)
     image_io.ReadImageInformation()
 
     # Extracting information for determining image type
-    image_size = map(image_io.GetDimensions, range(image_io.GetNumberOfDimensions()))
-    component_type = image_io.GetComponentTypeAsString(image_io.GetComponentType())
+    image_size = map(image_io.GetDimensions,
+                     range(image_io.GetNumberOfDimensions()))
+    component_type = \
+        image_io.GetComponentTypeAsString(image_io.GetComponentType())
     pixel_type = image_io.GetPixelTypeAsString(image_io.GetPixelType())
     number_of_dimensions = image_io.GetNumberOfDimensions()
 
@@ -105,7 +109,7 @@ def autodetect_file_type(image_path):
     return image_type
 
 
-def resample_image_filter(input_image, scaling_factor, default_value=0,\
+def resample_image_filter(input_image, scaling_factor, default_value=0,
                           interpolation='linear'):
     """
     Reimplemented after:
@@ -147,21 +151,21 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,\
 
     # Initialize recomputed size vector. Note that the vector is initialized
     # with zeroes:
-    post_size = itk.Vector[itk.US, image_dim]([0]*image_dim)
+    post_size = itk.Vector[itk.US, image_dim]([0] * image_dim)
 
     # Initialize scaling vector based on provided scaling factor
     if hasattr(scaling_factor, '__iter__'):
         scaling = itk.Vector[itk.F, image_dim](scaling_factor)
     else:
-        scaling = itk.Vector[itk.F, image_dim]([scaling_factor]*image_dim)
+        scaling = itk.Vector[itk.F, image_dim]([scaling_factor] * image_dim)
 
     # Initialize vector holding spacing of the output image. Note that the
     # vector is initalized with zeroes.
-    post_spacing = itk.Vector[itk.F, image_dim]([0]*image_dim)
+    post_spacing = itk.Vector[itk.F, image_dim]([0] * image_dim)
 
     for i in range(image_dim):
         post_spacing[i] = pre_spacing[i] * 1.0 / scaling[i]
-        post_size[i] = int(input_image.GetBufferedRegion().GetSize()[i] * \
+        post_size[i] = int(input_image.GetBufferedRegion().GetSize()[i] *
                            1.0 * scaling[i])
 
     # Get the bounding box of the input image
