@@ -112,14 +112,31 @@ def autodetect_file_type(image_path):
 def resample_image_filter(input_image, scaling_factor, default_value=0,
                           interpolation='linear'):
     """
-    Reimplemented after:
+    An image resampling function - pipeline - small workflow. Reimplemented after:
     http://sourceforge.net/p/c3d/git/ci/master/tree/adapters/ResampleImage.cxx#l12
-	TODO: ADD VERBOSE INFORMATION
-    TODO: Add interpolation function (actually: create a separate function that created
-    a dedicated interpolator depending on provided settings)
-    TODO: Document the interpolation function
-    TODO: Scaling: single value or array of dim floats
-    """
+
+    :param input_image: Input image to resample
+    :type input_image: itk image
+
+    :param scaling_factor:
+    :type scaling_factor: two options possible, either float or iterable of floats.
+
+    :param default_value: default voxel value (used, when the actual voxel
+                          value cannot be defined. Leave default, if you are not sure.
+    :type default_value: the same type as the `input_image` type. Usually
+                         `uchar`, `ushort`, or `float`.
+
+    :param interpolation: defines image interpolation function. Several options
+        are possible: `n`, `NEAREST` or `NEARESTNEIGHBOR` causes the function to
+        use NN interpolation.  'L' or 'linear' switches to linear interpolation.
+    The case of the letters does not matter.  :type interpolation: str """
+
+    logger = logging.getLogger('resample_image_filter')
+    logger.info("Resampling image: %s times", str(scaling_factor))
+
+    logger.debug(str(input_image))
+    logger.debug("   + Using %s interpolation.", interpolation)
+    logger.debug("   + Setting %s as a default pixel value.", default_value)
 
     # Read out the image dimension to be to use it further in the routine.
     # This is done by pretty simple yet effective way :)
@@ -128,7 +145,7 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
     # Declare an image interpolation function. The function is by default a
     # linear interpolation function, however it my be switched to any other
     # image interpolation function.
-    if interpolation.upper() in ['NN', 'NEAREST', 'NEARESTNEIGHBOR']:
+    if interpolation.upper() in ['NN', 'NEAREST', 'NEARESTNEIGHBOR','NN']:
         interpolator = \
             itk.NearestNeighborInterpolateImageFunction[input_image, itk.D].New()
 
@@ -136,15 +153,17 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
         interpolator = \
             itk.LinearInterpolateImageFunction[input_image, itk.D].New()
 
+    logger.debug("   + Selected image interpolation function: %s", \
+                 str(itk.LinearInterpolateImageFunction))
+
+
     # Declare resampling filter and initialize the filter with two dimensional
     # identity transformation as well as image interpolation function
+    logger.debug("   + Initializing resampling filter.")
     resample_filter = itk.ResampleImageFilter[input_image, input_image].New()
     resample_filter.SetInput(input_image)
     resample_filter.SetTransform(itk.IdentityTransform[itk.D, image_dim].New())
     resample_filter.SetInterpolator(interpolator)
-
-    # Compute the spacing of the new image
-    # The new spacing is computed by
 
     # Get original spacing of the input image:
     pre_spacing = input_image.GetSpacing()
@@ -155,8 +174,10 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
 
     # Initialize scaling vector based on provided scaling factor
     if hasattr(scaling_factor, '__iter__'):
+        logger.debug("   + Multiple scaling factors provided.")
         scaling = itk.Vector[itk.F, image_dim](scaling_factor)
     else:
+        logger.debug("   + A single scaling factor was provided.")
         scaling = itk.Vector[itk.F, image_dim]([scaling_factor] * image_dim)
 
     # Initialize vector holding spacing of the output image. Note that the
@@ -167,6 +188,8 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
         post_spacing[i] = pre_spacing[i] * 1.0 / scaling[i]
         post_size[i] = int(input_image.GetBufferedRegion().GetSize()[i] *
                            1.0 * scaling[i])
+    logger.info("   + Computed final size: %s", str(post_size))
+    logger.info("   + Computed final spacing: %s", str(post_spacing))
 
     # Get the bounding box of the input image
     pre_origin = input_image.GetOrigin()
@@ -179,6 +202,7 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
         pre_offset[i] *= 0.5
         post_offset[i] *= 0.5
     origin_post = pre_origin - pre_offset + post_offset
+    logger.info("   + Computed final origin: %s", str(origin_post))
 
     # Set the image sizes, spacing, origins and image direction matrix:
     resample_filter.SetSize(post_size)
