@@ -87,8 +87,6 @@ def collapse_pseudo_3d_image(input_image, input_type,
     dimensional. The procedure will not work for images with dimensionality
     larger than 3. For dimensionality equal to 2, no processing is performed.
     """
-    #TODO: Insert assertion checking if dimensionality is larger than 3.
-
     # Determine image dimensionality:
     image_dim = len(input_image.GetSpacing())
 

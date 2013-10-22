@@ -190,9 +190,7 @@ class generic_workflow(object):
         """
         Erases the job's working directory.
 
-        #TODO:
-
-        .. warninig: The `immediate` switch is not implemented as of yet.
+        .. warninig: The `immediate` switch is not implemented as of yet. TODO!
 
         :param immediate: Decides if the job's working directory will be erased
         immediately or as a last step of the workflow.
