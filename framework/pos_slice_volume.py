@@ -97,8 +97,6 @@ Reference
 =========
 """
 
-#TODO: Assert, if the the slicing range is within the allowed limin for the
-# given slicing plane
 import sys, os
 import logging
 from optparse import OptionParser, OptionGroup
@@ -271,16 +269,27 @@ class extract_slices_from_volume(object):
         # plane). When non-empty slide range is provided, the slices to extract
         # are defined according to provided settings.
 
+        # First, we extract the number of slices in the volume in the provided
+        # slicing plane.
+        max_slice_number = self._source_largest_region.GetSize()\
+                                [self.options['sliceAxisIndex']]
+
         if self.options['sliceRange'] is None:
             self._logger.debug("No custom slice range provided. Extracting all slices in given plane.")
             self._logger.debug("Selecting slices from LargestPossibleRegion: %s",
                           self._source_largest_region)
 
             # Grab indexes of all slices in slicing plane
-            slice_number = self._source_largest_region.GetSize()[self.options['sliceAxisIndex']]
-            self._slicingRange = range(0, slice_number)
+            self._slicingRange = range(0, max_slice_number)
 
         else:
+            # Check if the requested slices are within the volume size:
+            assert self.options['sliceRange'][1] < max_slice_number,\
+                self._logger.error("Index of the last slice (%d)\
+                                   is higher that maximum number of slices within\
+                                   given slicing plane (%d)." %\
+                        self.options['sliceRange'][1], max_slice_number)
+
             # Get only those sliced that user wants to.
             self._slicingRange = range(*self.options['sliceRange'])
 
