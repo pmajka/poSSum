@@ -365,7 +365,6 @@ class ants_average_affine_transform(generic_wrapper):
     AverageAffineTransform ImageDimension output_affine_transform
                    [-R reference_affine_transform]
                    {[-i] affine_transform_txt [weight(=1)] ]}
-    TODO: Add weights and inversion of the affine transforms
 
     >>> ants_average_affine_transform
     <class '__main__.ants_average_affine_transform'>
