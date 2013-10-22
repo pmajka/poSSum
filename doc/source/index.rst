@@ -21,6 +21,7 @@ Contents:
    pos_parameters
    pos_wrapper_skel
    pos_wrappers
+   pos_itk_core
 
    pos_palette
 
