@@ -1,6 +1,7 @@
 import itk
 import logging
 
+
 # Dictionary below copied from (Sun Apr  7 14:04:28 CEST 2013)
 # http://code.google.com/p/medipy/source/browse/lib/medipy/itk/types.py?name=default&r=0da35e1099e5947151dee239f7a09f405f4e105c
 io_component_type_to_type = {
@@ -52,6 +53,7 @@ types_increased_dimensions = dict((types_reduced_dimensions[k], k)
 
 
 def get_image_region(image_dim, crop_index, crop_size):
+    #TODO: Provide documentation for this method.
     bounding_box = itk.ImageRegion[image_dim]()
     bounding_box.SetIndex(map(int, crop_index))
     bounding_box.SetSize(map(int, crop_size))
@@ -107,6 +109,7 @@ def autodetect_file_type(image_path):
 
     # Hurrayy!!
     return image_type
+
 
 
 def resample_image_filter(input_image, scaling_factor, default_value=0,
@@ -218,3 +221,87 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
 
     # Return resampled image:
     return resample_filter.GetOutput()
+
+
+def get_itk_direction_matrix(code):
+    """
+    Generates direction matrix based on provided RAI code.
+    Reimplemented from:
+    http://sourceforge.net/p/c3d/git/ci/master/tree/adapters/SetOrientation.cxx
+
+    :param code: RAI orientation code.
+    :type code: str
+
+    :return: `itk.Matrix.D33` orientation matric, according to the provided
+              orientation code.
+
+    .. note::
+        The function assumes that the provided RAI code has the proper form.
+
+    .. todo::
+        TODO implement RAI code validation.
+
+    """
+    # TODO: Add logging information
+    rai = code.upper()
+    eye_matrix = itk.vnl_matrix_fixed.D_3_3()
+    eye_matrix.set_identity()
+
+    dir_matrix = itk.vnl_matrix_fixed.D_3_3()
+    dir_matrix.set_identity()
+
+    rai_codes = [["R","L"], ["A","P"], ["I","S"]]
+
+    # The code below is awful! But sorry, that is what happens, if you use itk
+    # from python!. Anyway, the code below created direction matrix based on
+    # provided RAI code.
+    for i in range(3):
+        matched = False
+        for j in range(3):
+            for k in range(2):
+                if rai[i] == rai_codes[j][k]:
+                    m = [-1.0, 1.0][k==0]
+                    dir_matrix.set(0, i, eye_matrix.get(j,0) * m)
+                    dir_matrix.set(1, i, eye_matrix.get(j,1) * m)
+                    dir_matrix.set(2, i, eye_matrix.get(j,2) * m)
+
+                    rai_codes[j][0] = rai_codes[j][1] = 'X'
+                    matched = True
+
+    return itk.Matrix.D33(dir_matrix)
+
+
+def itk_get_transformation_from_file(transformation_filename):
+    """
+    TODO: Provide some documentation
+
+    .. note::
+        This function supports only one stored transformation per file.
+    """
+    logger = logging.getLogger('itk_get_transformation_from_file')
+    logger.info("Loading transformation file: %s",
+                transformation_filename)
+
+    # Define the transformation reader and load the transformation file
+    transform_reader = itk.TransformFileReader.New()
+    transform_reader.SetFileName(transformation_filename)
+    transform_reader.Update()
+
+    # Load the transformation from the file.
+    transformation = transform_reader.GetTransformList().front()
+
+    # Then get the parameters
+    parameters = transformation.GetParameters()
+    param_list = map(lambda i: parameters.get(i), range(parameters.size()))
+
+    # Finally, print all the parameters as well as the transformation type
+    logger.info("Detected transformation type: %s",
+                 transformation.GetTransformTypeAsString())
+    logger.info("Size of the parameters vector: %d",
+                 parameters.size())
+
+    for i in range(parameters.size()):
+        logger.info("Printing parameter %d: %d", i, parameters.get(i))
+
+    return (transformation.GetTransformTypeAsString(),
+            param_list)

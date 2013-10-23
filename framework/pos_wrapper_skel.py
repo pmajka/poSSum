@@ -55,7 +55,7 @@ class generic_workflow(object):
 
         self._initializeLogging()
         self._initializeOptions()
-        self._validateOptions()
+        self._validate_options()
         self._initializeDirectories()
         self._overrideDefaults()
 
@@ -110,7 +110,7 @@ class generic_workflow(object):
         """
         pass
 
-    def _validateOptions(self):
+    def _validate_options(self):
         """
         A generic command line options validation function. Should be customized
         in subclasses. A lot of assertions is expected to be here!

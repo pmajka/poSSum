@@ -49,6 +49,7 @@ class generic_wrapper(object):
     def __call__(self, *args, **kwargs):
         command = str(self)
         # TODO: Replace with subprocess
+        # ... and collect stdin/err
         os.system(command)
 
         execution = {'port': {}}
