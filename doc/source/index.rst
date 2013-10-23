@@ -22,6 +22,7 @@ Contents:
    pos_wrapper_skel
    pos_wrappers
    pos_itk_core
+   pos_stack_reorient
 
    pos_palette
 
