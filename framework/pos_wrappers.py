@@ -1,4 +1,3 @@
-import os
 import copy
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
                 ants_transformation_parameter, vector_parameter, list_parameter, \
@@ -67,10 +66,7 @@ class generic_wrapper(object):
 class ants_registration(generic_wrapper):
     """
     """
-    #TODO: Assume that ants path is set properly:
-    # so the invokation like $ANTS should be fine.
-    #_template = """ANTS {dimension} \
-    _template = """/opt/ANTs-1.9.x-Linux/bin/ANTS {dimension} \
+    _template = """ANTS {dimension} \
        {verbose} \
        {transformation} {regularization} {outputNaming} \
        {imageMetrics} \

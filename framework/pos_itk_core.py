@@ -1,7 +1,6 @@
 import itk
 import logging
 
-
 # Dictionary below copied from (Sun Apr  7 14:04:28 CEST 2013)
 # http://code.google.com/p/medipy/source/browse/lib/medipy/itk/types.py?name=default&r=0da35e1099e5947151dee239f7a09f405f4e105c
 io_component_type_to_type = {
@@ -53,7 +52,32 @@ types_increased_dimensions = dict((types_reduced_dimensions[k], k)
 
 
 def get_image_region(image_dim, crop_index, crop_size):
-    #TODO: Provide documentation for this method.
+    """
+    This functions makes `itk.ImageRegion` out of index and size tuples of
+    aproperiate size. What is an image region? According to itk reference:
+
+    | ImageRegion is an class that represents some structured portion or piece of
+    | an Image. The ImageRegion is represented with an index and a size in each
+    | of the n-dimensions of the image. (The index is the corner of the image,
+    | the size is the lengths of the image in each of the topological
+    | directions.)
+
+    Don't believe? Check it out:
+    http://www.itk.org/Wiki/ITK/Examples/Images/ImageRegion
+
+    Anyway, it seems that the image region is a one of the most important
+    classes in the whole `itk` universe.
+
+    :param image_dim: dimensionality of the region.
+    :type image_dim: int, either 2 or 3
+
+    :param crop_index: index of the beginning of the image region
+    :type crop_index: tuple of 2 or 3 integer values, it depends on the region
+                      dimensionality
+
+    :param crop_size: size of the region.
+    :type crop_size: tuple of 2 or 3 integer values.
+    """
     bounding_box = itk.ImageRegion[image_dim]()
     bounding_box.SetIndex(map(int, crop_index))
     bounding_box.SetSize(map(int, crop_size))
@@ -238,12 +262,13 @@ def get_itk_direction_matrix(code):
     .. note::
         The function assumes that the provided RAI code has the proper form.
 
-    .. todo::
-        TODO implement RAI code validation.
-
     """
-    # TODO: Add logging information
+    # Just make the code upper case to avoid any ambiguity
     rai = code.upper()
+
+    logger = logging.getLogger('get_itk_direction_matrix')
+    logger.info("Generating direction matrix for the RAI code of %s.", code)
+
     eye_matrix = itk.vnl_matrix_fixed.D_3_3()
     eye_matrix.set_identity()
 
@@ -273,10 +298,18 @@ def get_itk_direction_matrix(code):
 
 def itk_get_transformation_from_file(transformation_filename):
     """
-    TODO: Provide some documentation
+    Reads the first `itk.Transform` from the provided file.
+
+    :param transformation_filename: filename of the transformation file.
+    :type transformation_filename: str
 
     .. note::
-        This function supports only one stored transformation per file.
+        This function reads only the first transformation from the file, even
+        that there more than one stored.
+
+        Some transformation will cause ITK to crash. Sorry. You have to sort
+        these things out yourself.
+
     """
     logger = logging.getLogger('itk_get_transformation_from_file')
     logger.info("Loading transformation file: %s",
@@ -305,3 +338,38 @@ def itk_get_transformation_from_file(transformation_filename):
 
     return (transformation.GetTransformTypeAsString(),
             param_list)
+
+
+def get_cast_image_type_from_string(target_image_type, dim=3):
+    """
+    Cast a itk image type to a given type. Not all combinations are allowed.
+    This function works only with single channel images.
+
+    :param target_image_type: type of the output images provided as string
+    :type target_image_type: str
+
+    :param dim: ouput image dimensionality
+    :type dim: int (either 2 or 3)
+
+    :returns: `itkImage`
+
+    """
+    types = {'uchar' : ('scalar', 'unsigned_char', dim),
+             'short':  ('scalar', 'short', dim),
+             'ushort': ('scalar', 'unsigned_short', dim),
+             'float' : ('scalar', 'float', dim),
+             'double': ('scalar', 'double', dim)}
+    return io_component_string_name_to_image_type[types[target_image_type]]
+
+
+def print_vnl_matrix(matrix):
+    """
+    Echoes `itk` `vnl_matrix`
+
+    :param matrix: matrix to print
+    :type matrix: `itk.vnl_matrix`
+    """
+
+    for i in range(matrix.rows()):
+        row = map(lambda x: matrix.get(i, x), range(matrix.cols()))
+        print "[ " + " ".map(str, row) + " ]"

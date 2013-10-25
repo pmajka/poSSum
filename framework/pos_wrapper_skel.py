@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import sys
 import os
 import multiprocessing
 
@@ -30,6 +29,9 @@ class generic_workflow(object):
 
     # Override this attribute in the inherited classes.
     _usage = ""
+
+    # Just to avoid hadcoded strings further
+    _DO_NOT_CREATE_WORKDIR = 'skip'
 
     def __init__(self, options, args):
         """
@@ -134,7 +136,7 @@ class generic_workflow(object):
         # is done without creating any files. When 'workdir' command line
         # parameter is set to skip, we just skip it. Anything that happens
         # afterwards is a liability of the develeoper.
-        if self.options.workdir == 'skip':
+        if self.options.workdir == self._DO_NOT_CREATE_WORKDIR:
             return
 
         # That's clever idea: When one don't want (or cannot) use shared memory
@@ -247,8 +249,8 @@ class generic_workflow(object):
            invoking :py:func:`self.execute(command, parallel=False)`.
 
         .. todo::
-           TODO: Please find
-           all invocations of this function and replace them.
+           TODO: Please find all invocations of this function
+           and replace them.
 
         :param command: Command to be executed.
         :type command: :py:class:`pos_wrappers.generic_wrapper`
@@ -297,6 +299,27 @@ class generic_workflow(object):
         (options, args) = parser.parse_args()
         return (options, args)
 
+
+class enclosed_workflow(generic_workflow):
+    """
+    TODO: Proveide extensive documentation.
+    This workflow is deditacted for pipelines that don't use
+    working directories and which do not store temponary data aduring processing.
+    It has disabled some features regarding jobdirs, parallel execution,
+    cleaning up the working directories, etc.
+    """
+    def _initializeOptions(self):
+        super(enclosed_workflow, self)._initializeOptions()
+
+        # Force workdir to be 'skip' as we do not want to create
+        # A job directory for this script. Alse, we set dryRun and
+        # cleanup to false, as this workflow does not use any
+        # directories. Everything is done iin the memory.
+        # Moreover, we set cpuNo to 1 as it does not matter :)
+        self.options.workdir = self._DO_NOT_CREATE_WORKDIR
+        self.options.dryRun = False
+        self.options.cleanup = False
+        self.options.cpuNo = 1
 
 if __name__ == '__main__':
     import doctest
