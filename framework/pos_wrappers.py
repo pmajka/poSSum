@@ -48,6 +48,7 @@ class generic_wrapper(object):
     def __call__(self, *args, **kwargs):
         command = shlex.split(str(self))
 
+        #TODO: Document what is going on here
         print "Executing: %s" % str(self)
         stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
                             stderr=sub.PIPE).communicate()
@@ -589,7 +590,6 @@ class chain_affine_transforms(generic_wrapper):
 
 
 class stack_and_reorient_wrapper(generic_wrapper):
-    #TODO: Rename this class
     #TODO: Provide some doctests
     _template = """pos_stack_reorient.py \
             -i {stack_mask} \

@@ -249,24 +249,6 @@ class generic_workflow(object):
         else:
             print "\n".join(map(str, commands))
 
-    def execute_callable(self, command):
-        """
-        Immediately executes the command.
-
-        .. deprecated:: 0.1
-           Redundant. The same effect can be achieved by
-           invoking :py:func:`self.execute(command, parallel=False)`.
-
-        .. todo::
-           TODO: Please find all invocations of this function
-           and replace them.
-
-        :param command: Command to be executed.
-        :type command: :py:class:`pos_wrappers.generic_wrapper`
-        """
-
-        self.execute(command, parallel=False)
-
     @classmethod
     def _getCommandLineParser(cls):
         """
@@ -308,9 +290,9 @@ class generic_workflow(object):
         (options, args) = parser.parse_args()
         return (options, args)
 
+
 class enclosed_workflow(generic_workflow):
     """
-    TODO: Proveide extensive documentation.
     This workflow is deditacted for pipelines that don't use
     working directories and which do not store temponary data aduring processing.
     It has disabled some features regarding jobdirs, parallel execution,
