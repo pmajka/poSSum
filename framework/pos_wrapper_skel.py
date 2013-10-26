@@ -188,16 +188,11 @@ class generic_workflow(object):
     def _basesame(path, withExtension=False):
         return pos_common.get_basename(path, withExtension)
 
-    def _clean_up(self, immediate=False):
+    def _clean_up(self):
         """
         Erases the job's working directory.
-
-        .. warninig: The `immediate` switch is not implemented as of yet. TODO!
-
-        :param immediate: Decides if the job's working directory will be erased
-        immediately or as a last step of the workflow.
-        :type immediate: bool
         """
+
         self._rmdir(self.options.workdir)
 
     def execute(self, commands, parallel=True):
