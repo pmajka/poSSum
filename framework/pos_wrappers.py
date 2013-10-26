@@ -1,4 +1,6 @@
 import copy
+import subprocess as sub
+import shlex
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
                 ants_transformation_parameter, vector_parameter, list_parameter, \
                 switch_parameter, ants_regularization_parameter, boolean_parameter
@@ -33,10 +35,8 @@ class generic_wrapper(object):
     _parameters = {}
 
     def __init__(self, **kwargs):
-
         # Hardcopy the parameters to split instance parameters
         # from default class parameters
-        #self.p = dict(self._parameters)
         self.p = copy.deepcopy(self._parameters)
 
         self.updateParameters(kwargs)
@@ -46,12 +46,16 @@ class generic_wrapper(object):
         return self._template.format(**replacement)
 
     def __call__(self, *args, **kwargs):
-        command = str(self)
-        # TODO: Replace with subprocess
-        # ... and collect stdin/err
-        os.system(command)
+        command = shlex.split(str(self))
 
-        execution = {'port': {}}
+        print "Executing: %s" % str(self)
+        stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
+                            stderr=sub.PIPE).communicate()
+        print stdout.strip()
+        print stderr.strip()
+
+        execution = {'port': {}, 'stdout': stdout, 'stderr': stderr}
+
         if hasattr(self, '_io_pass'):
             for k, v in self._io_pass.iteritems():
                 execution['port'][v] = str(self.p[k])
@@ -61,6 +65,48 @@ class generic_wrapper(object):
         for (name, value) in parameters.items():
             self.p[name].value = value
         return self
+
+class touch_wrapper(generic_wrapper):
+    _template = """touch {files}"""
+
+    _parameters = {
+        'files': list_parameter('files', [], str_template='{_list}'),
+    }
+
+
+class mkdir_wrapper(generic_wrapper):
+    _template = """mkdir -p {dir_list}"""
+
+    _parameters = {
+        'dir_list': list_parameter('dir_list', [], str_template='{_list}')
+    }
+
+
+class rmdir_wrapper(generic_wrapper):
+    _template = """rm -rfv {dir_list}"""
+
+    _parameters = {
+        'dir_list': list_parameter('dir_list', [], str_template='{_list}')
+    }
+
+
+class copy_wrapper(generic_wrapper):
+    _template = """cp -rfv {source} {target}"""
+
+    _parameters = {
+        'source': list_parameter('source', [], str_template='{_list}'),
+        'target': value_parameter('target')
+    }
+
+
+class ants_jacobian(generic_wrapper):
+    _template = """ANTSJacobian {dimension} {input_image} {output_naming}"""
+
+    _parameters = {
+            'dimension'     : value_parameter('dimension', 2),
+            'input_image'   : filename_parameter('input_image', None),
+            'output_naming' : filename_parameter('output_naming', None),
+            }
 
 
 class ants_registration(generic_wrapper):
@@ -112,7 +158,6 @@ class ants_registration(generic_wrapper):
         execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
 
         return execution
-
 
 class ants_reslice(generic_wrapper):
     """
@@ -246,7 +291,6 @@ class ants_intensity_meric(generic_wrapper):
 
     value = property(_get_value, _set_value)
 
-
 class ants_point_set_estimation_metric(generic_wrapper):
     """
     Wrapper for ANTS Point Set Estimation metric template.  The role of this
@@ -355,7 +399,6 @@ class ants_point_set_estimation_metric(generic_wrapper):
         pass
 
     value = property(_get_value, _set_value)
-
 
 class ants_average_affine_transform(generic_wrapper):
     """
@@ -546,23 +589,26 @@ class chain_affine_transforms(generic_wrapper):
 
 
 class stack_slices_gray_wrapper(generic_wrapper):
-    _template = """StackSlices {temp_volume_fn} -1 -1 0 {stack_mask};\
-            reorientImage.py -i {temp_volume_fn} \
-            --permutationOrder {permutation_order} \
+    #TODO: Rename this class
+    #TODO: Provide some doctests
+    _template = """pos_stack_reorient.py \
+            -i {stack_mask} \
+            -o {output_volume_fn} \
+            --stackingOptions {slice_start} {slice_end} {slice_step} \
+            --permutation {permutation_order} \
             --orientationCode {orientation_code} \
-            --outputVolumeScalarType {output_type} \
+            --setType {output_type} \
             --setSpacing {spacing} \
             --setOrigin {origin} \
             {interpolation} \
-            {resample} \
-            -o {output_volume_fn} \
-            --cleanup | bash -xe;
-            rm {temp_volume_fn};"""
+            {resample}"""
 
     _parameters = {
-        'temp_volume_fn': filename_parameter('temp_volume_fn', None),
-        'output_volume_fn': filename_parameter('output_volume_fn', None),
         'stack_mask': filename_parameter('stack_mask', None),
+        'slice_start': value_parameter('slice_start', None),
+        'slice_end': value_parameter('slice_end', None),
+        'slice_step': value_parameter('slice_end', 1),
+        'output_volume_fn': filename_parameter('output_volume_fn', None),
         'permutation_order': list_parameter('permutation_order', [0, 2, 1], str_template='{_list}'),
         'orientation_code': string_parameter('orientation_code', 'RAS'),
         'output_type': string_parameter('output_type', 'uchar'),
@@ -570,84 +616,6 @@ class stack_slices_gray_wrapper(generic_wrapper):
         'origin': list_parameter('origin', [0, 0, 0], str_template='{_list}'),
         'interpolation': string_parameter('interpolation', None, str_template='--{_name} {_value}'),
         'resample': list_parameter('resample', [], str_template='--{_name} {_list}')
-    }
-
-
-class stack_slices_rgb_wrapper(generic_wrapper):
-    _template = """stack_rgb_slices.py \
-            -f {stack_mask} \
-            -b {slice_start} \
-            -e {slice_end} \
-            -o {temp_volume_fn};\
-         reorientImage.py -i {temp_volume_fn} \
-            --permutationOrder {permutation_order} \
-            --orientationCode {orientation_code} \
-            --outputVolumeScalarType {output_type} \
-            --setSpacing {spacing} \
-            --setOrigin {origin} \
-            --multichannelImage \
-            {interpolation} \
-            {resample} \
-            -o {output_volume_fn} \
-            --cleanup | bash -xe;
-            rm {temp_volume_fn};"""
-
-    _parameters = {
-        'stack_mask': filename_parameter('stack_mask', None),
-        'slice_start': value_parameter('slice_start', None),
-        'slice_end': value_parameter('slice_end', None),
-        'temp_volume_fn': filename_parameter('temp_volume_fn', None),
-        'permutation_order': list_parameter('permutation_order', [0, 2, 1], str_template='{_list}'),
-        'orientation_code': string_parameter('orientation_code', 'RAS'),
-        'output_type': string_parameter('output_type', 'uchar'),
-        'spacing': list_parameter('spacing', [1., 1., 1.], str_template='{_list}'),
-        'origin': list_parameter('origin', [0, 0, 0], str_template='{_list}'),
-        'interpolation': string_parameter('interpolation', None, str_template='--{_name} {_value}'),
-        'resample': list_parameter('resample', [], str_template='--{_name} {_list}'),
-        'output_volume_fn': filename_parameter('output_volume_fn', None)
-    }
-
-
-class ants_jacobian(generic_wrapper):
-    _template = """ANTSJacobian {dimension} {input_image} {output_naming}"""
-
-    _parameters = {
-            'dimension'     : value_parameter('dimension', 2),
-            'input_image'   : filename_parameter('input_image', None),
-            'output_naming' : filename_parameter('output_naming', None),
-            }
-
-
-class mkdir_wrapper(generic_wrapper):
-    _template = """mkdir -p {dir_list}"""
-
-    _parameters = {
-        'dir_list': list_parameter('dir_list', [], str_template='{_list}')
-    }
-
-
-class rmdir_wrapper(generic_wrapper):
-    _template = """rm -rfv {dir_list}"""
-
-    _parameters = {
-        'dir_list': list_parameter('dir_list', [], str_template='{_list}')
-    }
-
-
-class copy_wrapper(generic_wrapper):
-    _template = """cp -rfv {source} {target}"""
-
-    _parameters = {
-        'source': list_parameter('source', [], str_template='{_list}'),
-        'target': value_parameter('target')
-    }
-
-
-class touch_wrapper(generic_wrapper):
-    _template = """touch {files}"""
-
-    _parameters = {
-        'files': list_parameter('files', [], str_template='{_list}'),
     }
 
 

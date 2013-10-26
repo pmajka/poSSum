@@ -284,10 +284,10 @@ class extract_slices_from_volume(object):
 
         else:
             # Check if the requested slices are within the volume size:
-            assert self.options['sliceRange'][1] < max_slice_number,\
+            assert self.options['sliceRange'][1] <= max_slice_number,\
                 self._logger.error("Index of the last slice (%d)\
                                    is higher that maximum number of slices within\
-                                   given slicing plane (%d)." %\
+                                   given slicing plane (%d).",\
                         self.options['sliceRange'][1], max_slice_number)
 
             # Get only those sliced that user wants to.

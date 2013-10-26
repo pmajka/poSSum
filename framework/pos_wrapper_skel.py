@@ -1,5 +1,6 @@
 #!/usr/bin/python
-import os
+import os, shlex
+import subprocess as sub
 import multiprocessing
 
 import time
@@ -9,7 +10,6 @@ from optparse import OptionParser, OptionGroup
 
 import pos_common
 import pos_wrappers
-
 
 class generic_workflow(object):
     """
@@ -94,8 +94,8 @@ class generic_workflow(object):
         # specimen. Thus, it is hardcoded to not allow any computations without
         # this ID. Simple as it is.
 
-        assert self.options.specimenId, \
-            self._logger.error("No specimen ID provided. Please provide a specimen ID.")
+        #assert self.options.specimenId, \
+        #    self._logger.error("No specimen ID provided. Please provide a specimen ID.")
 
         # Job ID is another value for accointing and managing. Oppoosite to the
         # specimen ID, this one may not be explicitly stated. In that case, it
@@ -233,8 +233,17 @@ class generic_workflow(object):
             if parallel:
                 command_filename = os.path.join(self.options.workdir, str(time.time()))
                 open(command_filename, 'w').write("\n".join(map(str, commands)))
-                os.system('cat %s | parallel -k -j %d ' %
-                        (command_filename, self.options.cpuNo))
+                self._logger.info("Saving command file: %s", command_filename)
+
+                command_str = 'parallel -a %s -k -j %d ' %\
+                        (command_filename, self.options.cpuNo)
+                command = shlex.split(command_str)
+                self._logger.debug("Executing: %s", command_str)
+
+                stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
+                                    stderr=sub.PIPE).communicate()
+                self._logger.debug("Last commands stdout: %s", stdout)
+                self._logger.debug("Last commands stderr: %s", stderr)
             else:
                 map(lambda x: x(), commands)
         else:
@@ -298,7 +307,6 @@ class generic_workflow(object):
         parser = cls._getCommandLineParser()
         (options, args) = parser.parse_args()
         return (options, args)
-
 
 class enclosed_workflow(generic_workflow):
     """

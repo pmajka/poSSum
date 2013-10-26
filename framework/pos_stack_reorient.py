@@ -273,7 +273,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         start, stop, step = tuple(self.options.stackingOptions)
 
         # Then, determine the filename for the first slice
-        first_slice = self.options.inputFile % (start)
+        first_slice = self.options.inputFile % (start,)
 
         # Autodetect the type of the slice. Note that the rest of the slices
         # has to have the same image type as the first file.
