@@ -364,7 +364,7 @@ class deformable_reconstruction_workflow(generic_workflow):
         """
         iteration = self.current_iteration
 
-        stack_grayscale =  pos_wrappers.stack_slices_gray_wrapper(
+        stack_grayscale =  pos_wrappers.stack_and_reorient_wrapper(
                 stack_mask = self.f['iteration_stack_mask'](iter=iteration),
                 slice_start = self.options.startSlice,
                 slice_end = self.options.endSlice,

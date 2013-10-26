@@ -588,7 +588,7 @@ class chain_affine_transforms(generic_wrapper):
     }
 
 
-class stack_slices_gray_wrapper(generic_wrapper):
+class stack_and_reorient_wrapper(generic_wrapper):
     #TODO: Rename this class
     #TODO: Provide some doctests
     _template = """pos_stack_reorient.py \

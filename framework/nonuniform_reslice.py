@@ -216,7 +216,7 @@ class nonuniform_relice(generic_workflow):
         return results
 
     def prepare_output_grayscale_volume(self):
-        stack_grayscale =  pos_wrappers.stack_slices_gray_wrapper(
+        stack_grayscale =  pos_wrappers.stack_and_reorient_wrapper(
                 temp_volume_fn = self.f['tmp_gray_vol'](),
                 stack_mask = self.f['weighted_grayscale_mask'](),
                 permutation_order = self.options.outputVolumePermutationOrder,
