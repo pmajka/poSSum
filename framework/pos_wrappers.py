@@ -46,10 +46,9 @@ class generic_wrapper(object):
         return self._template.format(**replacement)
 
     def __call__(self, *args, **kwargs):
+        print "Executing: %s" % str(self)
         command = shlex.split(str(self))
 
-        #TODO: Document what is going on here
-        print "Executing: %s" % str(self)
         stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
                             stderr=sub.PIPE).communicate()
         print stdout.strip()
@@ -100,14 +99,23 @@ class copy_wrapper(generic_wrapper):
     }
 
 
+class compress_wrapper(generic_wrapper):
+    _template = """tar -cvvzf {archive_filename}.tgz {pathname}"""
+
+    _parameters = {
+        'archive_filename': filename_parameter('archive_filename', None),
+        'pathname' : filename_parameter('pathname', None),
+    }
+
+
 class ants_jacobian(generic_wrapper):
     _template = """ANTSJacobian {dimension} {input_image} {output_naming}"""
 
     _parameters = {
-            'dimension'     : value_parameter('dimension', 2),
-            'input_image'   : filename_parameter('input_image', None),
-            'output_naming' : filename_parameter('output_naming', None),
-            }
+        'dimension'     : value_parameter('dimension', 2),
+        'input_image'   : filename_parameter('input_image', None),
+        'output_naming' : filename_parameter('output_naming', None),
+        }
 
 
 class ants_registration(generic_wrapper):
@@ -590,11 +598,20 @@ class chain_affine_transforms(generic_wrapper):
 
 
 class stack_and_reorient_wrapper(generic_wrapper):
-    #TODO: Provide some doctests
+    """
+    A wraper for a swiss army kife for reorienting, stacking, permuting and
+    flipping input volumes. For more details please check manual for
+    `pos_stack_reorient.py` script.
+
+    .. note:: Please be careful when stacking the input volume as `slice_start`
+              - the parameters: `slice_start` `slice_end` `slice_step` has to
+              go togeather.
+
+    """
     _template = """pos_stack_reorient.py \
             -i {stack_mask} \
             -o {output_volume_fn} \
-            --stackingOptions {slice_start} {slice_end} {slice_step} \
+            {slice_start} {slice_end} {slice_step} \
             --permutation {permutation_order} \
             --orientationCode {orientation_code} \
             --setType {output_type} \
@@ -605,9 +622,9 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
     _parameters = {
         'stack_mask': filename_parameter('stack_mask', None),
-        'slice_start': value_parameter('slice_start', None),
+        'slice_start': value_parameter('stackingOptions', None, str_template='--{_name} {_value}'),
         'slice_end': value_parameter('slice_end', None),
-        'slice_step': value_parameter('slice_end', 1),
+        'slice_step': value_parameter('slice_end', None),
         'output_volume_fn': filename_parameter('output_volume_fn', None),
         'permutation_order': list_parameter('permutation_order', [0, 2, 1], str_template='{_list}'),
         'orientation_code': string_parameter('orientation_code', 'RAS'),
