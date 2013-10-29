@@ -88,7 +88,7 @@ def get_image_region(image_dim, crop_index, crop_size):
 def autodetect_file_type(image_path):
     """
     Autodetects image dimensions and size as well as pixel type and component
-    size.
+    size. `autodetect_file_type(*image_path*)`
 
     :param image_path: filename to be investigated
     :type image_path: str
@@ -133,7 +133,6 @@ def autodetect_file_type(image_path):
 
     # Hurrayy!!
     return image_type
-
 
 
 def resample_image_filter(input_image, scaling_factor, default_value=0,
