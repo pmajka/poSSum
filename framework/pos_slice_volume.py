@@ -144,9 +144,6 @@ class extract_slices_from_volume(object):
         assert self.options['inputFileName'] is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
 
-        # XXX: Note that we do not check if the slicing range is within limit
-        # of the volume. This will be determined during execution.
-
     def _initializeLogging(self):
         pos_common.setup_logging(self.options['logFilename'],
                       self.options['loglevel'])
@@ -179,6 +176,7 @@ class extract_slices_from_volume(object):
 
         self._source_largest_region = self._image_reader.GetOutput().GetLargestPossibleRegion()
         self._logger.info("Largest possible region: %s.", self._source_largest_region)
+
         # Checking if the provided file IS a volume -- it has to be exactly
         # three dimensional, no more, no less!
         assert len(self._source_largest_region.GetSize()) == 3, \
