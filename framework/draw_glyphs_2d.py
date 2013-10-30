@@ -351,7 +351,6 @@ class deformation_field_visualizer(generic_workflow):
                 input_jacobian_image = self.f['src_jacobian'](),
                 spacing = self.cfg['spacing'],
                 output_image = self.f['jacobian']())
-        print prepare_jacobian_command
         prepare_jacobian_command()
 
         prepare_jacobian_command = generate_jacobian_tovtk(
@@ -361,7 +360,6 @@ class deformation_field_visualizer(generic_workflow):
                 input_jacobian_image = self.f['src_jacobian'](),
                 spacing = self.cfg['spacing'],
                 output_image = self.f['jacobian']())
-        print prepare_jacobian_command
         prepare_jacobian_command()
 
         prepare_deformation_wrap = convert_wrap_file(
@@ -369,7 +367,6 @@ class deformation_field_visualizer(generic_workflow):
                 input_image  = self.options.warpImage,
                 output_image = self.f['deformation'](),
                 spacing = self.cfg['spacing'])
-        print prepare_deformation_wrap
         prepare_deformation_wrap()
 
         prepare_slice_image = convert_slice_image(
@@ -377,10 +374,11 @@ class deformation_field_visualizer(generic_workflow):
                 input_image  = self.options.sliceImage,
                 output_image = self.f['image'](),
                 spacing = self.cfg['spacing'])
-        print prepare_slice_image
         prepare_slice_image()
 
     def launch(self):
+        super(self.__class__, self)._pre_launch()
+
         self._prepare_files()
 
         jacobian_image_file = self.f['jacobian']()
@@ -454,8 +452,8 @@ class deformation_field_visualizer(generic_workflow):
             iren.Initialize()
             iren.Start()
 
-        if self.options.cleanup:
-            self._clean_up()
+        # Run parent's post execution activities
+        super(self.__class__, self)._post_launch()
 
     def _configure_camera(self, renderer, reader):
         camera = renderer.GetActiveCamera()

@@ -121,7 +121,7 @@ class ants_jacobian(generic_wrapper):
 class ants_registration(generic_wrapper):
     """
     """
-    _template = """ANTS {dimension} \
+    _template = """/opt/ANTs-1.9.x-Linux/bin//ANTS {dimension} \
        {verbose} \
        {transformation} {regularization} {outputNaming} \
        {imageMetrics} \

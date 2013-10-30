@@ -71,3 +71,30 @@ def setup_logging(log_filename=None, log_level='WARNING'):
             filename=log_filename,
             format='%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
             datefmt='%m/%d/%Y %H:%M:%S')
+
+
+def which(program):
+    """
+    Method that checks if a given if executable exists.
+    Brutally copied from:
+    http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
+
+    :param program: The executable name to test
+    :type program: str
+    """
+
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None

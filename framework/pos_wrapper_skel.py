@@ -20,6 +20,8 @@ class generic_workflow(object):
     different files, etc. The reason for this class is to use command line tools
     which functionality cannot be achieved in any other way.
     """
+    # Define the name for GNU parallel executeble name.
+    __PARALLEL_EXECUTABLE_NAME="parallel"
 
     # _f is a dictionary holding definitions of files beeing a part of the
     # workflow. The purpose of this dictionary is to be able to easily access
@@ -96,6 +98,13 @@ class generic_workflow(object):
 
         #assert self.options.specimenId, \
         #    self._logger.error("No specimen ID provided. Please provide a specimen ID.")
+
+        # We need to check if the GNU parallel of availeble. If it's not, we
+        # cannot perform parallel computations.
+        if not pos_common.which(self.__PARALLEL_EXECUTABLE_NAME) and\
+           self.options.cpuNo > 1:
+            self._logger.error("Parallel execution was selected but GNU parallel is not available!")
+            sys.exit(1)
 
         # Job ID is another value for accointing and managing. Oppoosite to the
         # specimen ID, this one may not be explicitly stated. In that case, it
@@ -188,13 +197,6 @@ class generic_workflow(object):
     def _basesame(path, withExtension=False):
         return pos_common.get_basename(path, withExtension)
 
-    def _clean_up(self):
-        """
-        Erases the job's working directory.
-        """
-
-        self._rmdir(self.options.workdir)
-
     def execute(self, commands, parallel=True):
         """
         One of the most important methods in the whole class. Executes the
@@ -244,6 +246,54 @@ class generic_workflow(object):
         else:
             print "\n".join(map(str, commands))
 
+    def launch(self):
+        """
+        TODO: Povide some documentation here
+        """
+        self._pre_launch()
+        self._post_launch()
+
+    def _pre_launch(self):
+        """
+        TODO: Povide some documentation here
+        """
+        pass
+
+    def _post_launch(self):
+        """
+        TODO: Povide some documentation here
+        """
+        if self.options.archiveWorkDir:
+            self._archive_workflow()
+
+        if self.options.cleanup:
+            self._clean_up()
+
+    def _archive_workflow(self):
+        """
+        This method archived the workdir of the current workflow. The archive
+        name taken from the JobDir option while the dir of the archive is
+        provided by the `archiveWorkDir` command line parameter.
+
+        There's nothing much more to tell about this method... well, watch out
+        as the archive may be really (by which I mean really big). Be prepared
+        for gigabytes.
+        """
+        arvhive_filename = os.path.join(self.options.archiveWorkDir,
+                                        self.options.jobId)
+
+        compress_command = pos_wrappers.compress_wrapper(
+            archive_filename = arvhive_filename,
+            pathname = self.options.workdir)
+        compress_command()
+
+    def _clean_up(self):
+        """
+        Erases the job's working directory.
+        """
+
+        self._rmdir(self.options.workdir)
+
     @classmethod
     def _getCommandLineParser(cls):
         """
@@ -260,9 +310,6 @@ class generic_workflow(object):
         workflowSettings.add_option('--logFilename', dest='logFilename',
                 default=None, action='store', type='str',
                 help='Sets dumping the execution log file instead stderr')
-        workflowSettings.add_option('--cleanup', default=False,
-                dest='cleanup', action='store_const', const=True,
-                help='Remove the worklfow directory after calculations. Use when you are sure that the workflow will execute correctly.')
         workflowSettings.add_option('--disableSharedMemory', default=False,
             dest='disableSharedMemory', action='store_const', const=True,
             help='Forces script to use hard drive to store the worklfow data instaed of using RAM disk.')
@@ -275,7 +322,12 @@ class generic_workflow(object):
         workflowSettings.add_option('--cpuNo', '-n', default=None,
                 type='int', dest='cpuNo',
                 help='Set a number of CPUs for parallel processing. If skipped, the number of CPUs will be automatically detected.')
-
+        workflowSettings.add_option('--archiveWorkDir',default=None,
+                type='str', dest='archiveWorkDir',
+                help='Compresses (.tgz) and moves workdir to a given directory')
+        workflowSettings.add_option('--cleanup', default=False,
+                dest='cleanup', action='store_const', const=True,
+                help='Remove the worklfow directory after calculations. Use when you are sure that the workflow will execute correctly.')
         parser.add_option_group(workflowSettings)
         return parser
 
