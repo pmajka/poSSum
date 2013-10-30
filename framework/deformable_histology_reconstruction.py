@@ -161,6 +161,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         Launch the deformable registration process.
         """
 
+        # Execute the parents before-execution activities
+        super(self.__class__, self)._pre_launch()
+
         # Preprocessing the input sliced can be supressed by issuing a command
         # line parameter
         if not self.options.skipSlicePreprocess:
@@ -221,6 +224,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         if self.options.stackFinalDeformation:
             self._generate_final_transforms()
             self._visualize_warps()
+
+        # Run parent's post execution activities
+        super(self.__class__, self)._post_launch()
 
     def _visualize_warps(self):
         """

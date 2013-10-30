@@ -237,10 +237,11 @@ class generic_workflow(object):
                 command = shlex.split(command_str)
                 self._logger.debug("Executing: %s", command_str)
 
-                stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
-                                    stderr=sub.PIPE).communicate()
-                self._logger.debug("Last commands stdout: %s", stdout)
-                self._logger.debug("Last commands stderr: %s", stderr)
+                os.system(command_str)
+                #stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
+                #                    stderr=sub.PIPE).communicate()
+                #self._logger.debug("Last commands stdout: %s", stdout)
+                #self._logger.debug("Last commands stderr: %s", stderr)
             else:
                 map(lambda x: x(), commands)
         else:
@@ -248,25 +249,32 @@ class generic_workflow(object):
 
     def launch(self):
         """
-        TODO: Povide some documentation here
+        The workflow execution routine. Has to be customized and documenten in
+        every subclass A stub of method. Raise NotImplementedError. Every
+        `lauch` method has to invoke _post_launch()`_pre_launch()` and
+        `_post_launch()` as they are required to run the workflow properly.
         """
-        self._pre_launch()
-        self._post_launch()
+        raise NotImplementedError, "Virtual method executed."
 
     def _pre_launch(self):
         """
-        TODO: Povide some documentation here
+        A generic just-before-execution rutine. Should be customized in
+        subclasses.
         """
         pass
 
     def _post_launch(self):
         """
-        TODO: Povide some documentation here
+        A generic pos-execution routine. Should be customized in subclasses. In
+        its most basic form, it provides archiving the workflow and removing
+        the job directory. If you want you can customize it so it will send you
+        a notification email!
         """
         if self.options.archiveWorkDir:
             self._archive_workflow()
 
         if self.options.cleanup:
+            #TODO: Add loggigng information
             self._clean_up()
 
     def _archive_workflow(self):
@@ -279,6 +287,7 @@ class generic_workflow(object):
         as the archive may be really (by which I mean really big). Be prepared
         for gigabytes.
         """
+        #TODO: Add loggigng information
         arvhive_filename = os.path.join(self.options.archiveWorkDir,
                                         self.options.jobId)
 
@@ -297,6 +306,7 @@ class generic_workflow(object):
     @classmethod
     def _getCommandLineParser(cls):
         """
+        #TODO: Create a separate class for workflows that end with a volume.
         """
         parser = OptionParser(usage=cls._usage)
 
