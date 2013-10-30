@@ -5,7 +5,9 @@ import numpy as np
 from optparse import OptionParser, OptionGroup
 import copy
 
-from pos_deformable_wrappers import preprocess_slice_volume, visualize_wrap_field
+from pos_deformable_wrappers import preprocess_slice_volume,\
+                  visualize_wrap_field, convert_slice_image,\
+                  convert_slice_image_grayscale
 from pos_wrapper_skel import generic_workflow
 from deformable_histology_iterations import deformable_reconstruction_iteration
 import pos_wrappers
@@ -54,6 +56,8 @@ class deformable_reconstruction_workflow(generic_workflow):
         'inter_res_outline_vol'   : pos_parameters.filename('inter_res_outline_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_outline_{iter:04d}.nii.gz'),
         'inter_res_custom_vol'   : pos_parameters.filename('inter_res_custom_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_cmask_{iter:04d}.nii.gz'),
         'final_deformations'   : pos_parameters.filename('final_deformations',   work_dir = '09_final_deformation', str_template = '{idx:04d}.nii.gz'),
+        'rescaled_deformations': pos_parameters.filename('rescaled_deformations',   work_dir = '10_rescaled_deformation', str_template = '{idx:04d}.nii.gz'),
+        'rescaled_source': pos_parameters.filename('rescaled_source',   work_dir = '11_rescaled_source', str_template = '{idx:04d}.nii.gz'),
         'iteration_stack_mask' : pos_parameters.filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/%04d.nii.gz'),
         'iteration_stack_outline' : pos_parameters.filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/%04d.nii.gz'),
         'iteration_stack_cmask' : pos_parameters.filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/%04d.nii.gz'),
@@ -100,6 +104,7 @@ class deformable_reconstruction_workflow(generic_workflow):
         preprocess_slices = preprocess_slice_volume(\
                 input_image = self.options.inputVolume,
                 output_naming = self.f['init_slice_naming'](), \
+                slicing_plane = self.options.slicingPlane,\
                 start_slice = self.options.startSlice, \
                 end_slice = self.options.endSlice + 1, \
                 shift_indexes = self.options.shiftIndexes, \
@@ -236,8 +241,8 @@ class deformable_reconstruction_workflow(generic_workflow):
 
         for i in range(start, end +1):
             command = visualize_wrap_field(
-                warp_image = self.f['final_deformations'](idx=i),
-                slice_image = self.f['init_slice'](idx=i),
+                warp_image = self.f['rescaled_deformations'](idx=i),
+                slice_image = self.f['rescaled_source'](idx=i),
                 screenshot_filename = self.f['warp_field_visualization'](idx=i),
                 configuration_filename = self.options.glyphConfiguration)
             commands.append(copy.deepcopy(command))
@@ -360,8 +365,36 @@ class deformable_reconstruction_workflow(generic_workflow):
                     'output_image': self.f['final_deformations'](idx=i)
                     })
             commands.append(copy.deepcopy(command))
-
         self.execute(commands)
+
+        # The deformation fileds are scaled so that spacing is 1x1mm We have to
+        # rescale them, in terms of values as well as well as in terms of
+        # spacing.
+
+        # Extract the spacing.
+        norm_spacing = float(self.options.planeSpacing)
+
+        commands = []
+        for i in range(start, end +1):
+            command = convert_slice_image(
+                input_image = self.f['final_deformations'](idx=i),
+                output_image = self.f['rescaled_deformations'](idx=i),
+                scaling = norm_spacing,
+                spacing = [norm_spacing, norm_spacing])
+            commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
+        # Ok, now we prepare rescaled source images (we have to change the
+        # spacing as, again, the spacing used in computations is ... 1x1mm
+        commands = []
+        for i in range(start, end +1):
+            command = convert_slice_image_grayscale(
+                input_image = self.f['init_slice'](idx=i),
+                output_image = self.f['rescaled_source'](idx=i),
+                spacing = [norm_spacing, norm_spacing])
+            commands.append(copy.deepcopy(command))
+        self.execute(commands)
+
 
     def _get_stack_intermediate_command(self):
         """
@@ -424,6 +457,9 @@ class deformable_reconstruction_workflow(generic_workflow):
     def _getCommandLineParser(cls):
         parser = generic_workflow._getCommandLineParser()
 
+        parser.add_option('--slicingPlane', default=1,
+                type='int', dest='slicingPlane',
+                help='Index of the slicing plane. Default: 1. Allowed values: 0,1,2')
         parser.add_option('--startSlice', default=0,
                 type='int', dest='startSlice',
                 help='Index of the first slice of the stack')
@@ -485,11 +521,14 @@ class deformable_reconstruction_workflow(generic_workflow):
                 type='str', dest='antsRegularizationType',
                 help='Ants regulatization type.')
         regSettings.add_option('--antsRegularization', default=[3.0,1.0],
-                type='float', nargs =2, dest='antsRegularization',
+                type='float', nargs = 2, dest='antsRegularization',
                 help='Ants regulatization.')
         regSettings.add_option('--antsIterations', default="1000x1000x1000x1000x1000",
                 type='str', dest='antsIterations',
                 help='Number of deformable registration iterations.')
+        regSettings.add_option('--planeSpacing', default=1.,
+                type='float', dest='planeSpacing',
+                help='In plane pixel size. Assuming isotropic pixel size.')
 
         outputVolumeSettings = \
                 OptionGroup(parser, 'OutputVolumeSettings.')
@@ -509,10 +548,6 @@ class deformable_reconstruction_workflow(generic_workflow):
             help='Apply axes permutation. Permutation has to be provided as sequence of 3 integers separated by space. Identity (0,1,2) permutation is a default one.')
         outputVolumeSettings.add_option('--outputVolumeOrientationCode',  dest='outputVolumeOrientationCode', type='str',
                 default='RAS', help='')
-        outputVolumeSettings.add_option('--grayscaleVolumeFilename',  dest='grayscaleVolumeFilename',
-                type='str', default=None)
-        outputVolumeSettings.add_option('--rgbVolumeFilename',  dest='rgbVolumeFilename',
-                type='str', default=None)
         outputVolumeSettings.add_option('--setInterpolation',
                           dest='setInterpolation', type='str', default=None,
                           help='<NearestNeighbor|Linear|Cubic|Sinc|Gaussian>')

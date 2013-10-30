@@ -20,26 +20,23 @@ DEFORMATION_FILED_PALETTE_NAME = 'bb'
 
 
 class convert_slice_image(pos_wrappers.generic_wrapper):
-    _template = """c{dimension}d {input_image} {spacing} -o {output_image}"""
+    _template = """c{dimension}d {input_image} -o {output_image}"""
 
     _parameters = {
             'dimension'     : value_parameter('dimension', 2),
             'input_image'   : filename_parameter('input_image', None),
-            'output_image'  : filename_parameter('output_image', None),
-            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
+            'output_image'  : filename_parameter('output_image', None)
             }
 
 
 class convert_wrap_file(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -mcs {input_image} \
-            -foreach {spacing} -endfor\
-            -omc 2 {output_image}"""
+            -omc {dimension} {output_image}"""
 
     _parameters = {
             'dimension'     : value_parameter('dimension', 2),
             'input_image'     : filename_parameter('input_image', None),
-            'output_image'    : filename_parameter('output_image', None),
-            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
+            'output_image'    : filename_parameter('output_image', None)
             }
 
 
@@ -53,13 +50,12 @@ class generate_jacobian_vtk(pos_wrappers.generic_wrapper):
             }
 
 class convert_jacobian_to_vtk(pos_wrappers.generic_wrapper):
-    _template = """c{dimension}d {input_jacobian_image} {spacing} -o {output_image}"""
+    _template = """c{dimension}d {input_jacobian_image} -o {output_image}"""
 
     _parameters = {
             'dimension'     : value_parameter('dimension', 2),
             'input_jacobian_image'   : filename_parameter('input_jacobian_image', None),
-            'output_image'    : filename_parameter('output_image', None),
-            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
+            'output_image'    : filename_parameter('output_image', None)
             }
 
 
@@ -211,19 +207,13 @@ class deformation_field_visualizer(generic_workflow):
         # the vector for each pixel of the image. To perform this calcualtion we
         # will use a vtkArrayCalculator.
 
-        # Because we want our deformation field to be scaled in milimeters, we
-        # need to multiply it by pixel size.
-        pixel_size = float(self.cfg['spacing'][0])
-        self._logger.debug("Using pixel size: %f for deformation magnitude calculations.",
-                           pixel_size)
-
         calculator = vtk.vtkArrayCalculator()
         calculator.SetInputConnection(source_image.GetOutputPort())
         calculator.SetAttributeModeToUsePointData()
         calculator.SetResultArrayName("result")
         calculator.AddScalarVariable("u", "scalars", 0)
         calculator.AddScalarVariable("v", "scalars", 1)
-        calculator.SetFunction("mag(u*iHat+v*jHat) * %f" % pixel_size)
+        calculator.SetFunction("mag(u*iHat+v*jHat)")
         calculator.Update()
 
         self._logger.debug("Deformation field magnitude range %s.",
@@ -250,12 +240,6 @@ class deformation_field_visualizer(generic_workflow):
         :return: vtkPointData
         """
 
-        # Because we want our deformation field to be scaled in milimeters, we
-        # need to multiply it by pixel size.
-        pixel_size = float(self.cfg['spacing'][0])
-        self._logger.debug("Using pixel size: %f for glyph calculation.",
-                           pixel_size)
-
         # Use the array calculaptor to convert 2d deformation filed containing
         # a two-component image data into vector-type point data.
         ac = vtk.vtkArrayCalculator()
@@ -264,7 +248,7 @@ class deformation_field_visualizer(generic_workflow):
         ac.SetResultArrayName("result")
         ac.AddScalarVariable("u", "scalars", 0)
         ac.AddScalarVariable("v", "scalars", 1)
-        ac.SetFunction("(-1*u*iHat+-1*v*jHat) * %f" % pixel_size)
+        ac.SetFunction("(-1*u*iHat+-1*v*jHat)")
 
         # Take a random subset of point data (according to provided settings)
         # and return it.
@@ -348,22 +332,19 @@ class deformation_field_visualizer(generic_workflow):
         prepare_jacobian_command = convert_jacobian_to_vtk(
                 dimension = self.cfg['ndims'],
                 input_jacobian_image = self.f['src_jacobian'](),
-                spacing = self.cfg['spacing'],
                 output_image = self.f['jacobian']())
         prepare_jacobian_command()
 
         prepare_deformation_wrap = convert_wrap_file(
                 dimension = self.cfg['ndims'],
                 input_image  = self.options.warpImage,
-                output_image = self.f['deformation'](),
-                spacing = self.cfg['spacing'])
+                output_image = self.f['deformation']())
         prepare_deformation_wrap()
 
         prepare_slice_image = convert_slice_image(
                 dimension = self.cfg['ndims'],
                 input_image  = self.options.sliceImage,
-                output_image = self.f['image'](),
-                spacing = self.cfg['spacing'])
+                output_image = self.f['image']())
         prepare_slice_image()
 
     def launch(self):

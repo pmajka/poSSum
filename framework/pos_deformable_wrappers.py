@@ -1,5 +1,6 @@
 from pos_parameters import filename_parameter, value_parameter, \
-                            string_parameter, list_parameter
+                           string_parameter, list_parameter,\
+                           vector_parameter
 import pos_wrappers
 
 
@@ -48,7 +49,7 @@ class visualize_wrap_field(pos_wrappers.generic_wrapper):
         --warpImage {warp_image} \
         --sliceImage {slice_image} \
         --screenshot {screenshot_filename} \
-        --configuration {configuration_filename} \
+        --configuration {configuration_filename}\
         --cleanup"""
 
     _parameters = {
@@ -57,3 +58,31 @@ class visualize_wrap_field(pos_wrappers.generic_wrapper):
         'screenshot_filename'  : filename_parameter('screenshot_filename', None),
         'configuration_filename' : filename_parameter('configuration_filename', None)
         }
+
+
+class convert_slice_image(pos_wrappers.generic_wrapper):
+    _template = """c{dimension}d -mcs {input_image}\
+            -foreach {spacing} {scaling} -endfor \
+            -omc {dimension} {output_image}"""
+
+    _parameters = {
+            'dimension'     : value_parameter('dimension', 2),
+            'input_image'   : filename_parameter('input_image', None),
+            'output_image'  : filename_parameter('output_image', None),
+            'scaling'       : value_parameter('scaling', None, "-scale {_value}"),
+            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
+            }
+
+
+class convert_slice_image_grayscale(pos_wrappers.generic_wrapper):
+    _template = """c{dimension}d {input_image}\
+                    {spacing} {scaling}\
+                   -o {output_image}"""
+
+    _parameters = {
+            'dimension'     : value_parameter('dimension', 2),
+            'input_image'   : filename_parameter('input_image', None),
+            'output_image'  : filename_parameter('output_image', None),
+            'scaling'       : value_parameter('scaling', None, "-scale {_value}"),
+            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
+            }
