@@ -25,5 +25,5 @@ python ../../deformable_histology_reconstruction.py -s marmoset\
     --outputVolumeOrientationCode RAS \
     --stackFinalDeformation \
     --loglevel DEBUG \
-    --glyphConfiguration draw_glyphs_configuration.cfg \
+    --glyphConfiguration deformable_reconstruction_marmoset_glyphs.cfg \
     --skipTransformations 
