@@ -49,20 +49,15 @@ class generate_jacobian_vtk(pos_wrappers.generic_wrapper):
     _parameters = {
             'dimension'     : value_parameter('dimension', 2),
             'input_image'   : filename_parameter('input_image', None),
-            'input_jacobian_image'   : filename_parameter('input_jacobian_image', None),
-            'output_naming' : filename_parameter('output_naming', None),
-            'output_image'    : filename_parameter('output_image', None),
-            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
+            'output_naming' : filename_parameter('output_naming', None)
             }
 
-class generate_jacobian_tovtk(pos_wrappers.generic_wrapper):
+class convert_jacobian_to_vtk(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d {input_jacobian_image} {spacing} -o {output_image}"""
 
     _parameters = {
             'dimension'     : value_parameter('dimension', 2),
-            'input_image'   : filename_parameter('input_image', None),
             'input_jacobian_image'   : filename_parameter('input_jacobian_image', None),
-            'output_naming' : filename_parameter('output_naming', None),
             'output_image'    : filename_parameter('output_image', None),
             'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
             }
@@ -347,16 +342,11 @@ class deformation_field_visualizer(generic_workflow):
         prepare_jacobian_command = generate_jacobian_vtk(
                 dimension = self.cfg['ndims'],
                 input_image   = self.options.warpImage,
-                output_naming = self.f['src_naming'](),
-                input_jacobian_image = self.f['src_jacobian'](),
-                spacing = self.cfg['spacing'],
-                output_image = self.f['jacobian']())
+                output_naming = self.f['src_naming']())
         prepare_jacobian_command()
 
-        prepare_jacobian_command = generate_jacobian_tovtk(
+        prepare_jacobian_command = convert_jacobian_to_vtk(
                 dimension = self.cfg['ndims'],
-                input_image   = self.options.warpImage,
-                output_naming = self.f['src_naming'](),
                 input_jacobian_image = self.f['src_jacobian'](),
                 spacing = self.cfg['spacing'],
                 output_image = self.f['jacobian']())
