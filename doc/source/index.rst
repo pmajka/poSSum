@@ -13,10 +13,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   Descriptions of individual tools:
    pos_slice_volume
-   
-   Documentation for developers:
    pos_common
    pos_parameters
    pos_wrapper_skel
