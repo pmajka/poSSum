@@ -53,6 +53,8 @@ class generic_wrapper(object):
                             stderr=sub.PIPE).communicate()
         print stdout.strip()
         print stderr.strip()
+        # TODO: Test out the execution of multiple commands
+        #http://stackoverflow.com/questions/359347/execute-commands-sequentially-in-python
 
         execution = {'port': {}, 'stdout': stdout, 'stderr': stderr}
 
