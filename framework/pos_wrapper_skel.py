@@ -237,11 +237,10 @@ class generic_workflow(object):
                 command = shlex.split(command_str)
                 self._logger.debug("Executing: %s", command_str)
 
-                os.system(command_str)
-                #stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
-                #                    stderr=sub.PIPE).communicate()
-                #self._logger.debug("Last commands stdout: %s", stdout)
-                #self._logger.debug("Last commands stderr: %s", stderr)
+                stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
+                                    stderr=sub.PIPE).communicate()
+                self._logger.debug("Last commands stdout: %s", stdout)
+                self._logger.debug("Last commands stderr: %s", stderr)
             else:
                 map(lambda x: x(), commands)
         else:

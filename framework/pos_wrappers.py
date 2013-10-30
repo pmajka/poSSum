@@ -1,5 +1,5 @@
 import copy
-import subprocess as sub, os
+import subprocess as sub
 import shlex
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
                 ants_transformation_parameter, vector_parameter, list_parameter, \
@@ -49,14 +49,12 @@ class generic_wrapper(object):
         print "Executing: %s" % str(self)
         command = shlex.split(str(self))
 
-        #stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
-        #                    stderr=sub.PIPE).communicate()
-        #print stdout.strip()
-        #print stderr.strip()
-        os.system(str(self))
+        stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
+                            stderr=sub.PIPE).communicate()
+        print stdout.strip()
+        print stderr.strip()
 
-        #execution = {'port': {}, 'stdout': stdout, 'stderr': stderr}
-        execution = {'port': {}}
+        execution = {'port': {}, 'stdout': stdout, 'stderr': stderr}
 
         if hasattr(self, '_io_pass'):
             for k, v in self._io_pass.iteritems():
