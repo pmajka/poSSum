@@ -30,15 +30,15 @@ class deformable_reconstruction_workflow(generic_workflow):
          # Initial grayscale slices
         'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
         'init_slice_mask' : pos_parameters.filename('init_slice_mask', work_dir = '01_init_slices', str_template = '????.png'),
-        'init_slice_naming' : pos_parameters.filename('init_slice_naming', work_dir = '01_init_slices', str_template = '%04d.png'),
+        'init_slice_naming' : pos_parameters.filename('init_slice_naming', work_dir = '01_init_slices', str_template = '%04d.nii.gz'),
         # Initial outline mask
         'init_outline' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '{idx:04d}.nii.gz'),
         'init_outline_mask' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '????.png'),
-        'init_outline_naming' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.png'),
+        'init_outline_naming' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.nii.gz'),
         # Initial custom outlier mask
         'init_custom' : pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '{idx:04d}.nii.gz'),
         'init_custom_mask' : pos_parameters.filename('init_custom_mask', work_dir = '04_custom_slices', str_template = '????.png'),
-        'init_custom_naming' : pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '%04d.png'),
+        'init_custom_naming' : pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '%04d.nii.gz'),
         # Iteration
         'iteration'  : pos_parameters.filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
         'iteration_out_naming' : pos_parameters.filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
@@ -50,14 +50,13 @@ class deformable_reconstruction_workflow(generic_workflow):
         'iteration_resliced_custom'   : pos_parameters.filename('iteration_resliced_custom' , work_dir = '05_iterations', str_template  = '{iter:04d}/24_resliced_custom/'),
         'iteration_resliced_custom_slice' : pos_parameters.filename('iteration_resliced_custom_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/24_resliced_custom/{idx:04d}.nii.gz'),
         'inter_res'  : pos_parameters.filename('inter_res',  work_dir = '08_intermediate_results', str_template = ''),
-        'tmp_gray_vol' : pos_parameters.filename('tmp_gray_vol', work_dir = '08_intermediate_results', str_template = '__temp__vol__gray.vtk'),
         'inter_res_gray_vol'   : pos_parameters.filename('inter_res_gray_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_{iter:04d}.nii.gz'),
         'inter_res_outline_vol'   : pos_parameters.filename('inter_res_outline_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_outline_{iter:04d}.nii.gz'),
         'inter_res_custom_vol'   : pos_parameters.filename('inter_res_custom_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_cmask_{iter:04d}.nii.gz'),
         'final_deformations'   : pos_parameters.filename('final_deformations',   work_dir = '09_final_deformation', str_template = '{idx:04d}.nii.gz'),
-        'iteration_stack_mask' : pos_parameters.filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/????.nii.gz'),
-        'iteration_stack_outline' : pos_parameters.filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/????.nii.gz'),
-        'iteration_stack_cmask' : pos_parameters.filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/????.nii.gz'),
+        'iteration_stack_mask' : pos_parameters.filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/%04d.nii.gz'),
+        'iteration_stack_outline' : pos_parameters.filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/%04d.nii.gz'),
+        'iteration_stack_cmask' : pos_parameters.filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/%04d.nii.gz'),
         # Analysis
         'warp_field_visualization' : pos_parameters.filename('warp_field_visualization', work_dir = '15_deformation_analysis', str_template = '{idx:04d}.png')
         }
@@ -104,7 +103,6 @@ class deformable_reconstruction_workflow(generic_workflow):
                 start_slice = self.options.startSlice, \
                 end_slice = self.options.endSlice + 1, \
                 shift_indexes = self.options.shiftIndexes, \
-                slice_mask = self.f['init_slice_mask'](),
                 output_dir = self.f['init_slice'].base_dir)
 
         return preprocess_slices
@@ -129,7 +127,6 @@ class deformable_reconstruction_workflow(generic_workflow):
             preprocess_grayscale_slices.updateParameters({
                 'input_image' : self.options.inputVolume,
                 'output_naming' : self.f['init_slice_naming'](), \
-                'slice_mask' : self.f['init_slice_mask'](),
                 'output_dir' : self.f['init_slice'].base_dir})
             preprocess_grayscale_slices()
 
@@ -142,7 +139,6 @@ class deformable_reconstruction_workflow(generic_workflow):
             prepare_outline_volume.updateParameters({
                 'input_image' : self.options.outlineVolume,
                 'output_naming' : self.f['init_outline_naming'](),
-                'slice_mask' : self.f['init_outline_mask'],
                 'output_dir' : self.f['init_outline_naming'].base_dir})
             prepare_outline_volume()
 
@@ -155,7 +151,6 @@ class deformable_reconstruction_workflow(generic_workflow):
             prepare_masked_volume.updateParameters({
                 'input_image' : self.options.maskedVolume,
                 'output_naming' : self.f['init_custom_naming'](),
-                'slice_mask' : self.f['init_custom_mask'],
                 'output_dir' : self.f['init_custom_naming'].base_dir,
                 'leave_overflows': True})
 
@@ -165,6 +160,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         """
         Launch the deformable registration process.
         """
+
+        # Execute the parents before-execution activities
+        super(self.__class__, self)._pre_launch()
 
         # Preprocessing the input sliced can be supressed by issuing a command
         # line parameter
@@ -226,6 +224,9 @@ class deformable_reconstruction_workflow(generic_workflow):
         if self.options.stackFinalDeformation:
             self._generate_final_transforms()
             self._visualize_warps()
+
+        # Run parent's post execution activities
+        super(self.__class__, self)._post_launch()
 
     def _visualize_warps(self):
         """
@@ -369,9 +370,11 @@ class deformable_reconstruction_workflow(generic_workflow):
         """
         iteration = self.current_iteration
 
-        stack_grayscale =  pos_wrappers.stack_slices_gray_wrapper(
-                temp_volume_fn = self.f['tmp_gray_vol'](),
+        stack_grayscale =  pos_wrappers.stack_and_reorient_wrapper(
                 stack_mask = self.f['iteration_stack_mask'](iter=iteration),
+                slice_start = self.options.startSlice,
+                slice_end = self.options.endSlice,
+                slice_step = 1,
                 permutation_order = self.options.outputVolumePermutationOrder,
                 orientation_code = self.options.outputVolumeOrientationCode,
                 output_type = self.options.outputVolumeScalarType,

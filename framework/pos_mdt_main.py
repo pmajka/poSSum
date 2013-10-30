@@ -32,7 +32,7 @@ class minimum_deformation_template_wrokflow(generic_workflow):
 
     _usage = ""
 
-    def _validateOptions(self):
+    def _validate_options(self):
         # Handling situation when no volume is provided
         assert self.options.inputVolume, \
             self._logger.error("No input directory provided. Please provide input directory (-i) and try again.")

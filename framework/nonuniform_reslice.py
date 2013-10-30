@@ -216,7 +216,7 @@ class nonuniform_relice(generic_workflow):
         return results
 
     def prepare_output_grayscale_volume(self):
-        stack_grayscale =  pos_wrappers.stack_slices_gray_wrapper(
+        stack_grayscale =  pos_wrappers.stack_and_reorient_wrapper(
                 temp_volume_fn = self.f['tmp_gray_vol'](),
                 stack_mask = self.f['weighted_grayscale_mask'](),
                 permutation_order = self.options.outputVolumePermutationOrder,
@@ -228,10 +228,10 @@ class nonuniform_relice(generic_workflow):
                 resample = self.options.outputVolumeResample,
                 output_volume_fn = self.f['output_volumes']())
 
-        self.execute_callable(stack_grayscale)
+        self.execute(stack_grayscale)
 
     def prepare_output_multichannel_volume(self):
-        stack_multichannel =  pos_wrappers.stack_slices_rgb_wrapper(
+        stack_multichannel =  pos_wrappers.stack_and_reorient_wrapper(
                 stack_mask = self.f['weighted_multichannel_mask'](),
                 slice_start= 0,
                 slice_end  = len(self.coords_to)-1,
@@ -245,7 +245,7 @@ class nonuniform_relice(generic_workflow):
                 resample = self.options.outputVolumeResample,
                 output_volume_fn = self.f['output_volumes']())
 
-        self.execute_callable(stack_multichannel)
+        self.execute(stack_multichannel)
 
     @classmethod
     def _getCommandLineParser(cls):

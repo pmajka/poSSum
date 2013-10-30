@@ -1,40 +1,49 @@
 #!/usr/bin/python
-import sys
-import os
+import os, shlex
+import subprocess as sub
 import multiprocessing
-import copy
 
 import time
 import datetime
 import logging
 from optparse import OptionParser, OptionGroup
 
-import pos_wrappers
 import pos_common
-
+import pos_wrappers
 
 class generic_workflow(object):
     """
-    A generic command-line workflow class. Workflow should be understood as a configurable pipeline with a configurable execution settings.
+    A generic command-line workflow class. Workflow should be understood as a
+    configurable pipeline with a configurable execution settings.
 
     The workflow / pipeline may consist of different stages use a numbser of
     different files, etc. The reason for this class is to use command line tools
     which functionality cannot be achieved in any other way.
-
     """
+    # Define the name for GNU parallel executeble name.
+    __PARALLEL_EXECUTABLE_NAME="parallel"
+
+    # _f is a dictionary holding definitions of files beeing a part of the
+    # workflow. The purpose of this dictionary is to be able to easily access
+    # and utilize filenames (from each stage of the workflow). You're gonna like
+    # it.
     _f = {}
 
-    # -----------------------------------------------
-    # Directory templates - environmental
-    # ----------------------------------------------
-    _dirTemplates = {
-            'sharedbf': '/dev/shm/',
-            'tempbf'  : '/tmp/',
-            }
-
+    # Override this attribute in the inherited classes.
     _usage = ""
 
+    # Just to avoid hadcoded strings further
+    _DO_NOT_CREATE_WORKDIR = 'skip'
+
     def __init__(self, options, args):
+        """
+        :param optionsDict: Command line options
+        :type optionsDict: dict
+
+        :param args: Command line arguments
+        :type args: list
+        """
+
         self.options = options
         self.args = args
 
@@ -50,12 +59,16 @@ class generic_workflow(object):
 
         self._initializeLogging()
         self._initializeOptions()
-        self._validateOptions()
+        self._validate_options()
         self._initializeDirectories()
         self._overrideDefaults()
 
     def _initializeLogging(self):
-
+        """
+        Seems to be self explaining - initialized the logging module using
+        either ethe default logging settings or customized logging settings
+        according to provided command line paramteres.
+        """
         pos_common.setup_logging(self.options.logFilename,
                       self.options.loglevel)
 
@@ -67,7 +80,7 @@ class generic_workflow(object):
         self._logger = logging.getLogger(self.__class__.__name__)
 
         self._logger.info("%s workflow options:", self.__class__.__name__)
-        for k,v in self.options.__dict__.items():
+        for k, v in self.options.__dict__.items():
             self._logger.info("%s : %s", k, v)
 
     def _initializeOptions(self):
@@ -78,14 +91,19 @@ class generic_workflow(object):
 
         # What the heck is a "specimen ID"? It is supposed to be at least single
         # value which will allow to assign an instance of the workflow to
-        # particual animal. When you have multiple animals they can get
-        # confused easily. In the future, specimen ID, will act as database ID
-        # for given specimen. Thus, it is hardcoded to not allow any
-        # computations without this ID. Simple as it is.
-        try:
-            self.options.specimenId
-        except:
-            print >>sys.stderr, "No specimen ID provided. Please provide a specimen ID."
+        # particual animal. When you have multiple animals they can get confused
+        # easily. In the future, specimen ID, will act as database ID for given
+        # specimen. Thus, it is hardcoded to not allow any computations without
+        # this ID. Simple as it is.
+
+        #assert self.options.specimenId, \
+        #    self._logger.error("No specimen ID provided. Please provide a specimen ID.")
+
+        # We need to check if the GNU parallel of availeble. If it's not, we
+        # cannot perform parallel computations.
+        if not pos_common.which(self.__PARALLEL_EXECUTABLE_NAME) and\
+           self.options.cpuNo > 1:
+            self._logger.error("Parallel execution was selected but GNU parallel is not available!")
             sys.exit(1)
 
         # Job ID is another value for accointing and managing. Oppoosite to the
@@ -98,36 +116,53 @@ class generic_workflow(object):
 
     def _overrideDefaults(self):
         """
-        A generic function for altering some configuration that was set with
+        A generic function for altering configuration that was set with
         default values. Should be reimplemented in subclasses.
         """
         pass
 
-    def _validateOptions(self):
+    def _validate_options(self):
         """
+        A generic command line options validation function. Should be customized
+        in subclasses. A lot of assertions is expected to be here!
         """
         pass
 
     def _initializeDirectories(self):
         """
         """
+        # The directiories in the dictionary below are the potential working
+        # dirs for the workflow. The 'sharedbf' is used when given mashine
+        # has a ramdisk, otherwise 'tempbf'. These are the default locations for
+        # the workdir. Typically, the working directory location is a custom
+        # one.
+        _dirTemplates = {
+                'sharedbf': '/dev/shm/',
+                'tempbf'  : '/tmp/'}
+
+
+        # Sometimes we just don't want create any work_dir (e.g. out workflow
+        # is done without creating any files. When 'workdir' command line
+        # parameter is set to skip, we just skip it. Anything that happens
+        # afterwards is a liability of the develeoper.
+        if self.options.workdir == self._DO_NOT_CREATE_WORKDIR:
+            return
+
         # That's clever idea: When one don't want (or cannot) use shared memory
-        # on given mashine the regular /tmp/ directory is used to support the computations.
-        # The tmp directory can be also set manually to, e.g., directory shared
-        # among whole computer cluster.
+        # on given mashine, the regular /tmp/ directory is used to support the
+        # computations.  The tmp directory can be also set manually to, e.g.,
+        # directory shared among whole computer cluster.
         if self.options.disableSharedMemory:
-            top_directory = self._dirTemplates['tempbf']
+            top_directory = _dirTemplates['tempbf']
         else:
-            top_directory = self._dirTemplates['sharedbf']
-        # Ok, so that was for the very top workflow directory (let's call him
-        # the 'working directory' TODO: Make all the names uniform across the
-        # code and documentation.
+            top_directory = _dirTemplates['sharedbf']
 
         # If the working directory (the directory holding all the
         # job's calculations) is not defined, we define it automatically
-        # When the working directory name IS provided we just use it
+        # When the working directory name IS provided we just use it.
         if not self.options.workdir:
-            self.options.workdir = os.path.join(top_directory, self.options.jobId)
+            self.options.workdir =\
+                os.path.join(top_directory, self.options.jobId)
         self._ensureDir(self.options.workdir)
 
         # Assign path to work dir to all templates:
@@ -135,39 +170,53 @@ class generic_workflow(object):
             v.job_dir = self.options.workdir
 
         # And, as a last point, just create the directories.
-        dirs_to_create = list(set(map(lambda v: v.base_dir,  self.f.itervalues())))
+        dirs_to_create = list(set(map(lambda v: v.base_dir, self.f.itervalues())))
         map(self._ensureDir, dirs_to_create)
 
     def _ensureDir(self, path):
+        """
+        Makes sure that the given directory exists and is avalilable.
+
+        :param path: Location to be tested. Note that only directory names are
+        valid paths. Passing filenames will probably end badly...
+        :type path: str
+        """
         return pos_wrappers.mkdir_wrapper(dir_list=[path])()
 
     def _rmdir(self, path):
+        """
+        Removes given location. Watch out as the files and/or directories are
+        removed recursively and uninvertabely (as in `rm -rfv` command).
+
+        :param path: Location to be removed.
+        :type path: str
+        """
         return pos_wrappers.rmdir_wrapper(dir_list=[path])()
 
     @staticmethod
     def _basesame(path, withExtension=False):
         return pos_common.get_basename(path, withExtension)
 
-    def _clean_up(self, immediate=False):
-        self._rmdir(self.options.workdir)
-
     def execute(self, commands, parallel=True):
         """
         One of the most important methods in the whole class. Executes the
         workflow. The execution can be launched in parallel mode, and / or in
-        the 'dry run' mode. With the latter, the commands to be executed are actually only printed.
-        The 'dry run' mode is selected / deselected using command line workflow settings.
+        the 'dry run' mode. With the latter, the commands to be executed are
+        actually only printed.  The 'dry run' mode is selected / deselected
+        using command line workflow settings.
 
         :param commands: The commands to be executed
-        :type commands: An interable (in case of multiple commands - the usual case), a string in case of a singe command.
+        :type commands: An interable (in case of multiple commands - the usual
+                        case), a string in case of a singe command.
 
         :param parallel: Enables execution in parallel mode
         :type parallel: bool
-
         """
 
         #TODO: Implement pbs job dependencies
         # (https://docs.loni.org/wiki/PBS_Job_Chains_and_Dependencies)
+        # http://librarian.phys.washington.edu/athena/index.php/Job_Submission_Tutorial#NEW:_PBS_Job_Dependencies_.28advanced.29
+        # http://beige.ucs.indiana.edu/I590/node45.html
 
         # If single command is provided, it is supposed to be a string. Convert
         # to list with a single element.
@@ -181,22 +230,82 @@ class generic_workflow(object):
             if parallel:
                 command_filename = os.path.join(self.options.workdir, str(time.time()))
                 open(command_filename, 'w').write("\n".join(map(str, commands)))
-                os.system('cat %s | parallel -k -j %d ' %
-                        (command_filename, self.options.cpuNo))
+                self._logger.info("Saving command file: %s", command_filename)
+
+                command_str = 'parallel -a %s -k -j %d ' %\
+                        (command_filename, self.options.cpuNo)
+                command = shlex.split(command_str)
+                self._logger.debug("Executing: %s", command_str)
+
+                stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
+                                    stderr=sub.PIPE).communicate()
+                self._logger.debug("Last commands stdout: %s", stdout)
+                self._logger.debug("Last commands stderr: %s", stderr)
             else:
                 map(lambda x: x(), commands)
         else:
             print "\n".join(map(str, commands))
 
-    def execute_callable(self, command):
-        if self.options.dryRun:
-            print command
-        else:
-            command()
+    def launch(self):
+        """
+        The workflow execution routine. Has to be customized and documenten in
+        every subclass A stub of method. Raise NotImplementedError. Every
+        `lauch` method has to invoke _post_launch()`_pre_launch()` and
+        `_post_launch()` as they are required to run the workflow properly.
+        """
+        raise NotImplementedError, "Virtual method executed."
+
+    def _pre_launch(self):
+        """
+        A generic just-before-execution rutine. Should be customized in
+        subclasses.
+        """
+        pass
+
+    def _post_launch(self):
+        """
+        A generic pos-execution routine. Should be customized in subclasses. In
+        its most basic form, it provides archiving the workflow and removing
+        the job directory. If you want you can customize it so it will send you
+        a notification email!
+        """
+        if self.options.archiveWorkDir:
+            self._archive_workflow()
+
+        if self.options.cleanup:
+            #TODO: Add loggigng information
+            self._clean_up()
+
+    def _archive_workflow(self):
+        """
+        This method archived the workdir of the current workflow. The archive
+        name taken from the JobDir option while the dir of the archive is
+        provided by the `archiveWorkDir` command line parameter.
+
+        There's nothing much more to tell about this method... well, watch out
+        as the archive may be really (by which I mean really big). Be prepared
+        for gigabytes.
+        """
+        #TODO: Add loggigng information
+        arvhive_filename = os.path.join(self.options.archiveWorkDir,
+                                        self.options.jobId)
+
+        compress_command = pos_wrappers.compress_wrapper(
+            archive_filename = arvhive_filename,
+            pathname = self.options.workdir)
+        compress_command()
+
+    def _clean_up(self):
+        """
+        Erases the job's working directory.
+        """
+
+        self._rmdir(self.options.workdir)
 
     @classmethod
     def _getCommandLineParser(cls):
         """
+        #TODO: Create a separate class for workflows that end with a volume.
         """
         parser = OptionParser(usage=cls._usage)
 
@@ -210,9 +319,6 @@ class generic_workflow(object):
         workflowSettings.add_option('--logFilename', dest='logFilename',
                 default=None, action='store', type='str',
                 help='Sets dumping the execution log file instead stderr')
-        workflowSettings.add_option('--cleanup', default=False,
-                dest='cleanup', action='store_const', const=True,
-                help='Remove the worklfow directory after calculations. Use when you are sure that the workflow will execute correctly.')
         workflowSettings.add_option('--disableSharedMemory', default=False,
             dest='disableSharedMemory', action='store_const', const=True,
             help='Forces script to use hard drive to store the worklfow data instaed of using RAM disk.')
@@ -225,7 +331,12 @@ class generic_workflow(object):
         workflowSettings.add_option('--cpuNo', '-n', default=None,
                 type='int', dest='cpuNo',
                 help='Set a number of CPUs for parallel processing. If skipped, the number of CPUs will be automatically detected.')
-
+        workflowSettings.add_option('--archiveWorkDir',default=None,
+                type='str', dest='archiveWorkDir',
+                help='Compresses (.tgz) and moves workdir to a given directory')
+        workflowSettings.add_option('--cleanup', default=False,
+                dest='cleanup', action='store_const', const=True,
+                help='Remove the worklfow directory after calculations. Use when you are sure that the workflow will execute correctly.')
         parser.add_option_group(workflowSettings)
         return parser
 
@@ -235,6 +346,26 @@ class generic_workflow(object):
         (options, args) = parser.parse_args()
         return (options, args)
 
+
+class enclosed_workflow(generic_workflow):
+    """
+    This workflow is deditacted for pipelines that don't use
+    working directories and which do not store temponary data aduring processing.
+    It has disabled some features regarding jobdirs, parallel execution,
+    cleaning up the working directories, etc.
+    """
+    def _initializeOptions(self):
+        super(enclosed_workflow, self)._initializeOptions()
+
+        # Force workdir to be 'skip' as we do not want to create
+        # A job directory for this script. Alse, we set dryRun and
+        # cleanup to false, as this workflow does not use any
+        # directories. Everything is done iin the memory.
+        # Moreover, we set cpuNo to 1 as it does not matter :)
+        self.options.workdir = self._DO_NOT_CREATE_WORKDIR
+        self.options.dryRun = False
+        self.options.cleanup = False
+        self.options.cpuNo = 1
 
 if __name__ == '__main__':
     import doctest

@@ -44,14 +44,20 @@ class convert_wrap_file(pos_wrappers.generic_wrapper):
 
 
 class generate_jacobian_vtk(pos_wrappers.generic_wrapper):
-    _template = """ANTSJacobian {dimension} {input_image} {output_naming};
-    c{dimension}d {input_jacobian_image} {spacing} -o {output_image}"""
+    _template = """ANTSJacobian {dimension} {input_image} {output_naming}"""
 
     _parameters = {
             'dimension'     : value_parameter('dimension', 2),
             'input_image'   : filename_parameter('input_image', None),
+            'output_naming' : filename_parameter('output_naming', None)
+            }
+
+class convert_jacobian_to_vtk(pos_wrappers.generic_wrapper):
+    _template = """c{dimension}d {input_jacobian_image} {spacing} -o {output_image}"""
+
+    _parameters = {
+            'dimension'     : value_parameter('dimension', 2),
             'input_jacobian_image'   : filename_parameter('input_jacobian_image', None),
-            'output_naming' : filename_parameter('output_naming', None),
             'output_image'    : filename_parameter('output_image', None),
             'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
             }
@@ -336,11 +342,14 @@ class deformation_field_visualizer(generic_workflow):
         prepare_jacobian_command = generate_jacobian_vtk(
                 dimension = self.cfg['ndims'],
                 input_image   = self.options.warpImage,
-                output_naming = self.f['src_naming'](),
+                output_naming = self.f['src_naming']())
+        prepare_jacobian_command()
+
+        prepare_jacobian_command = convert_jacobian_to_vtk(
+                dimension = self.cfg['ndims'],
                 input_jacobian_image = self.f['src_jacobian'](),
                 spacing = self.cfg['spacing'],
                 output_image = self.f['jacobian']())
-        print prepare_jacobian_command
         prepare_jacobian_command()
 
         prepare_deformation_wrap = convert_wrap_file(
@@ -348,7 +357,6 @@ class deformation_field_visualizer(generic_workflow):
                 input_image  = self.options.warpImage,
                 output_image = self.f['deformation'](),
                 spacing = self.cfg['spacing'])
-        print prepare_deformation_wrap
         prepare_deformation_wrap()
 
         prepare_slice_image = convert_slice_image(
@@ -356,10 +364,11 @@ class deformation_field_visualizer(generic_workflow):
                 input_image  = self.options.sliceImage,
                 output_image = self.f['image'](),
                 spacing = self.cfg['spacing'])
-        print prepare_slice_image
         prepare_slice_image()
 
     def launch(self):
+        super(self.__class__, self)._pre_launch()
+
         self._prepare_files()
 
         jacobian_image_file = self.f['jacobian']()
@@ -433,8 +442,8 @@ class deformation_field_visualizer(generic_workflow):
             iren.Initialize()
             iren.Start()
 
-        if self.options.cleanup:
-            self._clean_up()
+        # Run parent's post execution activities
+        super(self.__class__, self)._post_launch()
 
     def _configure_camera(self, renderer, reader):
         camera = renderer.GetActiveCamera()

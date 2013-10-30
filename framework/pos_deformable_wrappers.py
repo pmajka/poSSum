@@ -4,14 +4,12 @@ import pos_wrappers
 
 
 class preprocess_slice_volume(pos_wrappers.generic_wrapper):
-    _template = """sliceVol.py \
+    _template = """pos_slice_volume.py \
             -i {input_image} \
             -o "{output_naming}" \
             -s {slicing_plane} \
             -r {start_slice} {end_slice} {step} \
-            {leave_overflows} \
-            {shift_indexes}; \
-            set -xe; for i in `ls -1 {slice_mask}`; do c2d $i {output_type} -o {output_dir}/`basename $i .png`.nii.gz; done; """
+            {shift_indexes}"""
 
     _parameters = { \
             'input_image'   : filename_parameter('input_image', None),
@@ -20,9 +18,6 @@ class preprocess_slice_volume(pos_wrappers.generic_wrapper):
             'start_slice' : value_parameter('start_slice', None),
             'end_slice'   : value_parameter('end_slice', None),
             'step'        : value_parameter('step', 1),
-            'slice_mask'  : filename_parameter('slice_mask', None),
-            'output_type'     : string_parameter('output_type', 'uchar', str_template = "-type {_value}"),
-            'leave_overflows' : value_parameter('leaveOverflows', None, str_template="--{_name}"),
             'shift_indexes' : value_parameter('shift_indexes', None, str_template="--{_name} {_value}"),
             'output_dir'   : string_parameter('output_dir', None),
             }
