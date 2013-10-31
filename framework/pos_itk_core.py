@@ -31,8 +31,9 @@ io_component_string_name_to_image_type = {
         ('vector', 'float', 3) : itk.Image.VF33,
         ('scalar', 'unsigned_char', 2) : itk.Image.UC2,
         ('scalar', 'float', 2) : itk.Image.F2,
+        ('scalar', 'double', 3) : itk.Image.D3,
         ('rgb', 'unsigned_char', 2) : itk.Image.RGBUC2,
-        ('rgb', 'unsigned_char', 3) : itk.Image.RGBUC3
+        ('rgb', 'unsigned_char', 3) : itk.Image.RGBUC3,
         }
 
 # Another quite clever dictionary. This one converts given image type to the
@@ -42,7 +43,8 @@ types_reduced_dimensions = {
         itk.Image.US3 : itk.Image.US2,
         itk.Image.UC3 : itk.Image.UC2,
         itk.Image.RGBUC3 : itk.Image.RGBUC2,
-        itk.Image.F3 : itk.Image.F2
+        itk.Image.F3 : itk.Image.F2,
+        itk.Image.D3 : itk.Image.D2
     }
 
 # This time a dictionary for stacking slices (a reverse of
