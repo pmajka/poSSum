@@ -323,6 +323,7 @@ class extract_slices_from_volume(object):
 
     @staticmethod
     def parseArgs():
+        #TODO: subclas from enclosed workflow
         usage_string = "python pos_slice_volume.py  -i <input_filename> [options]"
         parser = OptionParser(usage=usage_string)
 

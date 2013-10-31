@@ -273,7 +273,6 @@ class generic_workflow(object):
             self._archive_workflow()
 
         if self.options.cleanup:
-            #TODO: Add loggigng information
             self._clean_up()
 
     def _archive_workflow(self):
@@ -286,9 +285,10 @@ class generic_workflow(object):
         as the archive may be really (by which I mean really big). Be prepared
         for gigabytes.
         """
-        #TODO: Add loggigng information
         arvhive_filename = os.path.join(self.options.archiveWorkDir,
                                         self.options.jobId)
+        self._logger.info("Archiving the job directory to: %s",\
+                          arvhive_filename)
 
         compress_command = pos_wrappers.compress_wrapper(
             archive_filename = arvhive_filename,
@@ -299,6 +299,7 @@ class generic_workflow(object):
         """
         Erases the job's working directory.
         """
+        self._logger.info("Removing job directory.")
 
         self._rmdir(self.options.workdir)
 
