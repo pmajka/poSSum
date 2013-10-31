@@ -100,67 +100,34 @@ Reference
 import sys, os
 import logging
 from optparse import OptionParser, OptionGroup
-import pos_common
+import pos_wrapper_skel
 
 import itk
 import pos_itk_core
 
 
-class extract_slices_from_volume(object):
+class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
     """
     Class which purpose is to extract a slice(s) from 3d volume. So much buzzz
     about so simple thing... yeap, that's itk.
     """
 
-    def __init__(self, optionsDict, args):
-        """
-        :param optionsDict: Command line options
-        :type optionsDict: dict
-
-        :param args: Command line arguments
-        :type args: list
-        """
-        # Store filter configuration withing the class instance
-        # Sometimes, the command line parameters are not passed as a dictionary
-        # We need to convert it to a dictionary.
-        if not isinstance(optionsDict, dict):
-            self.options = eval(str(optionsDict))
-        else:
-            self.options = optionsDict
-
-        self._args = args
-
-        # Yes, we need logging even in so simple script.
-        self._initializeLogging()
-
-        # Check, if all the provided parameters are valid and mutually
-        # consistent.
-        self._validate_options()
-
     def _validate_options(self):
-        assert self.options['sliceAxisIndex'] in [0, 1, 2],\
+        super(self.__class__, self)._initializeOptions()
+
+        assert self.options.sliceAxisIndex in [0, 1, 2],\
             self._logger.error("The slicing plane has to be either 0, 1 or 2.")
 
-        assert self.options['inputFileName'] is not None,\
+        assert self.options.inputFileName is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
 
-    def _initializeLogging(self):
-        pos_common.setup_logging(self.options['logFilename'],
-                      self.options['loglevel'])
+    def launch(self):
+        # Execute the parents before-execution activities
+        super(self.__class__, self)._pre_launch()
 
-        logging.debug("Logging module initialized. Saving to: %s, Loglevel: %s",
-                      self.options['logFilename'], self.options['loglevel'])
-
-        # Assign the the string that will identify all messages from this
-        # script
-        self._logger = logging.getLogger(self.__class__.__name__)
-
-    def launchFilter(self):
-        """
-        """
         # At the very beginning, determine input image type to configure the
         # reader.
-        input_filename = self.options['inputFileName']
+        input_filename = self.options.inputFileName
         self._input_image_type =\
             pos_itk_core.autodetect_file_type(input_filename)
         self._output_image_type =\
@@ -205,6 +172,9 @@ class extract_slices_from_volume(object):
         for i in self._slicingRange:
             self._extract_single_slice(i)
 
+        # Run parent's post execution activities
+        super(self.__class__, self)._post_launch()
+
     def _define_slicing_region(self):
         """
         Create slicing region - a region that will be used for slicing.
@@ -230,17 +200,17 @@ class extract_slices_from_volume(object):
         # extracted slide. The definition of the subregion comes from the
         # --extractionROI command line parameter. If the parameters is not
         # provided the subregion is equal to the full region.
-        if self.options['extractionROI']:
+        if self.options.extractionROI:
 
             # Remove the index of the slicing plane and use the remaining
             # indexes to define region to extract.
 
-            reg_definition = self.options['extractionROI']
+            reg_definition = self.options.extractionROI
             self._logger.debug("Extracting subregion: %s.",
                     " ".join(map(str, reg_definition)))
 
             indexes_left = range(3)
-            indexes_left.pop(self.options['sliceAxisIndex'])
+            indexes_left.pop(self.options.sliceAxisIndex)
             slice_size[indexes_left[0]] = reg_definition[2]
             slice_size[indexes_left[1]] = reg_definition[3]
 
@@ -249,7 +219,7 @@ class extract_slices_from_volume(object):
 
         # And now I reset the dimension in the slicing axis. So simple in
         # comparision with numpy:
-        slice_size[self.options['sliceAxisIndex']] = 0
+        slice_size[self.options.sliceAxisIndex] = 0
 
         # Finally I can put the size into region object.
         self._new_region.SetSize(slice_size)
@@ -270,9 +240,9 @@ class extract_slices_from_volume(object):
         # First, we extract the number of slices in the volume in the provided
         # slicing plane.
         max_slice_number = self._source_largest_region.GetSize()\
-                                [self.options['sliceAxisIndex']]
+                                [self.options.sliceAxisIndex]
 
-        if self.options['sliceRange'] is None:
+        if self.options.sliceRange is None:
             self._logger.debug("No custom slice range provided. Extracting all slices in given plane.")
             self._logger.debug("Selecting slices from LargestPossibleRegion: %s",
                           self._source_largest_region)
@@ -282,14 +252,14 @@ class extract_slices_from_volume(object):
 
         else:
             # Check if the requested slices are within the volume size:
-            assert self.options['sliceRange'][1] <= max_slice_number,\
+            assert self.options.sliceRange[1] <= max_slice_number,\
                 self._logger.error("Index of the last slice (%d)\
                                    is higher that maximum number of slices within\
                                    given slicing plane (%d).",\
-                        self.options['sliceRange'][1], max_slice_number)
+                        self.options.sliceRange[1], max_slice_number)
 
             # Get only those sliced that user wants to.
-            self._slicingRange = range(*self.options['sliceRange'])
+            self._slicingRange = range(*self.options.sliceRange)
 
         self._logger.info("Selected slices: %s",
                           " ".join(map(str, self._slicingRange)))
@@ -302,7 +272,7 @@ class extract_slices_from_volume(object):
         :param slice_index: index of the slice to be extracted.
         """
         self._logger.debug("Extracing slice: %d", slice_index)
-        self._new_region.SetIndex(self.options['sliceAxisIndex'], slice_index)
+        self._new_region.SetIndex(self.options.sliceAxisIndex, slice_index)
         self._logger.debug("Region to extract: %s", self._new_region)
 
         # Now, get the output filename. Filename depends on the slice
@@ -311,10 +281,10 @@ class extract_slices_from_volume(object):
         # does not depend on the slice index, we need to handle type error:
         try:
             filename = \
-                self.options['outputImagesFormat'] \
-                % (slice_index + self.options['shiftIndexes'], )
+                self.options.outputImagesFormat \
+                % (slice_index + self.options.shiftIndexes, )
         except TypeError:
-            filename = self.options['outputImagesFormat']
+            filename = self.options.outputImagesFormat
 
         self._logger.info("Saving slice %d to: %s", slice_index, filename)
         self._extract_slice.SetExtractionRegion(self._new_region)
@@ -323,9 +293,8 @@ class extract_slices_from_volume(object):
 
     @staticmethod
     def parseArgs():
-        #TODO: subclas from enclosed workflow
         usage_string = "python pos_slice_volume.py  -i <input_filename> [options]"
-        parser = OptionParser(usage=usage_string)
+        parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--outputImagesFormat', '-o',
                         dest='outputImagesFormat', type='str',
@@ -347,14 +316,6 @@ class extract_slices_from_volume(object):
                             type='int', dest='extractionROI',  nargs=4,
                             help='ROI of the input image used for registration (ox, oy, sx, sy).')
 
-        logging_settings = OptionGroup(parser, 'Logging options')
-        logging_settings.add_option('--loglevel', dest='loglevel', type='str',
-                default='INFO', help='Severity of the messages to report: CRITICAL | ERROR | WARNING | INFO | DEBUG')
-        logging_settings.add_option('--logFilename', dest='logFilename',
-                default=None, action='store', type='str',
-                help='If defined, puts the log into given file instead of printing it to stderr.')
-        parser.add_option_group(logging_settings)
-
         (options, args) = parser.parse_args()
 
         return (options, args)
@@ -362,4 +323,4 @@ class extract_slices_from_volume(object):
 if __name__ == '__main__':
     options, args = extract_slices_from_volume.parseArgs()
     filter = extract_slices_from_volume(options, args)
-    filter.launchFilter()
+    filter.launch()
