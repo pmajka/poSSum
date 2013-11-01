@@ -47,14 +47,14 @@ class generic_wrapper(object):
 
     def __call__(self, *args, **kwargs):
         print "Executing: %s" % str(self)
-        command = shlex.split(str(self))
 
-        stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
-                            stderr=sub.PIPE).communicate()
+        # Tested against execution of multiple commands
+        # http://stackoverflow.com/questions/359347/execute-commands-sequentially-in-python
+        stdout, stderr =  sub.Popen(str(self), stdout=sub.PIPE,
+                            stderr=sub.PIPE, shell=True,
+                            close_fds=True).communicate()
         print stdout.strip()
         print stderr.strip()
-        # TODO: Test out the execution of multiple commands
-        #http://stackoverflow.com/questions/359347/execute-commands-sequentially-in-python
 
         execution = {'port': {}, 'stdout': stdout, 'stderr': stderr}
 

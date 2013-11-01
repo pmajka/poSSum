@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
 
-import os, shlex
+import os
 import subprocess as sub
 import multiprocessing
 
@@ -230,17 +230,19 @@ class generic_workflow(object):
         # are dumped into a file and executed with the GNU parallel.
         if not self.options.dryRun:
             if parallel:
-                command_filename = os.path.join(self.options.workdir, str(time.time()))
+                command_filename = \
+                    os.path.join(self.options.workdir, str(time.time()))
                 open(command_filename, 'w').write("\n".join(map(str, commands)))
                 self._logger.info("Saving command file: %s", command_filename)
 
                 command_str = 'parallel -a %s -k -j %d ' %\
                         (command_filename, self.options.cpuNo)
-                command = shlex.split(command_str)
                 self._logger.debug("Executing: %s", command_str)
 
-                stdout, stderr =  sub.Popen(command, stdout=sub.PIPE,\
-                                    stderr=sub.PIPE).communicate()
+                # Tested against execution of multiple commands
+                stdout, stderr =  sub.Popen(command_str,
+                                    stdout=sub.PIPE, stderr=sub.PIPE,
+                                    shell=True, close_fds=True).communicate()
                 self._logger.debug("Last commands stdout: %s", stdout)
                 self._logger.debug("Last commands stderr: %s", stderr)
             else:
