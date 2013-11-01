@@ -1,19 +1,18 @@
 #!/usr/bin/python
-import os,sys
-import numpy as np
-
+import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
 
-from pos_deformable_wrappers import preprocess_slice_volume,\
-                  visualize_wrap_field, convert_slice_image,\
-                  convert_slice_image_grayscale
-from pos_wrapper_skel import generic_workflow
 from deformable_histology_iterations import deformable_reconstruction_iteration
 import pos_wrappers
 import pos_parameters
 
-class deformable_reconstruction_workflow(generic_workflow):
+from pos_deformable_wrappers import preprocess_slice_volume,\
+                  visualize_wrap_field, convert_slice_image,\
+                  convert_slice_image_grayscale
+from pos_wrapper_skel import output_volume_workflow
+
+class deformable_reconstruction_workflow(output_volume_workflow):
     """
     A framework for performing deformable reconstruction of histological volumes
     based on histological slices. The framework combines:
@@ -455,7 +454,7 @@ class deformable_reconstruction_workflow(generic_workflow):
 
     @classmethod
     def _getCommandLineParser(cls):
-        parser = generic_workflow._getCommandLineParser()
+        parser = output_volume_workflow._getCommandLineParser()
 
         parser.add_option('--slicingPlane', default=1,
                 type='int', dest='slicingPlane',
@@ -530,30 +529,7 @@ class deformable_reconstruction_workflow(generic_workflow):
                 type='float', dest='planeSpacing',
                 help='In plane pixel size. Assuming isotropic pixel size.')
 
-        outputVolumeSettings = \
-                OptionGroup(parser, 'OutputVolumeSettings.')
-        outputVolumeSettings.add_option('--outputVolumeOrigin', dest='outputVolumeOrigin',
-                default=[0.,0.,0.], action='store', type='float', nargs =3, help='')
-        outputVolumeSettings.add_option('--outputVolumeScalarType', default='uchar',
-                type='str', dest='outputVolumeScalarType',
-                help='Data type for output volume\'s voxels. Allowed values: char | uchar | short | ushort | int | uint | float | double')
-        outputVolumeSettings.add_option('--outputVolumeSpacing', default=[1,1,1],
-            type='float', nargs=3, dest='outputVolumeSpacing',
-            help='Spacing of the output volume in mm (both grayscale and color volume).')
-        outputVolumeSettings.add_option('--outputVolumeResample',
-                          dest='outputVolumeResample', type='float', nargs=3, default=None,
-                          help='Apply additional resampling to the volume')
-        outputVolumeSettings.add_option('--outputVolumePermutationOrder', default=[0,1,2],
-            type='int', nargs=3, dest='outputVolumePermutationOrder',
-            help='Apply axes permutation. Permutation has to be provided as sequence of 3 integers separated by space. Identity (0,1,2) permutation is a default one.')
-        outputVolumeSettings.add_option('--outputVolumeOrientationCode',  dest='outputVolumeOrientationCode', type='str',
-                default='RAS', help='')
-        outputVolumeSettings.add_option('--setInterpolation',
-                          dest='setInterpolation', type='str', default=None,
-                          help='<NearestNeighbor|Linear|Cubic|Sinc|Gaussian>')
-
         parser.add_option_group(regSettings)
-        parser.add_option_group(outputVolumeSettings)
 
         return parser
 
