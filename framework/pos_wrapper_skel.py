@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*
+
 import os, shlex
 import subprocess as sub
 import multiprocessing
@@ -346,6 +348,82 @@ class generic_workflow(object):
         parser = cls._getCommandLineParser()
         (options, args) = parser.parse_args()
         return (options, args)
+
+
+class output_volume_workflow(generic_workflow):
+    """
+    This class is designed to support workflows providing volume as one of the
+    outputs. It handles additional command line parameters for defining the
+    origin, spacing, orientation, type, anatomical orientation and many many
+    other.
+    """
+
+    __output_vol_command_line_args_help = {}
+    __output_vol_command_line_args_help['outputVolumeOrigin'] =\
+"""Set the origin of the image --  the center of the voxel (0,0,0) in the image.
+Should be specified in millimeters. Default: 0,0,0."""
+    __output_vol_command_line_args_help['outputVolumeScalarType'] =\
+"""Specifies the pixel type for the output image.  Data type for output volume's
+voxels. The allowed values are: char | uchar | short | ushort | int | uint |
+float | double. The default type, unlike in Convert3d is char."""
+    __output_vol_command_line_args_help['outputVolumeSpacing'] =\
+"""Sets the voxel spacing of the image.  A vector of three positive values is
+required (e.g. '0.5 0.5 0.5'). The spacing is assumed to be provided in
+milimeters. The defaults spacing is 1x1x1mm."""
+    __output_vol_command_line_args_help['outputVolumeResample'] =\
+"""Requests additional resampling of the output volume. The resampling is applied
+_before_ settting the output spacing. The resampling settings are provided as
+three positive float values corresponding to the resampling factor (e.g. 0.25
+1.0 0.75). Watch out when combining this whith other parameters like setting
+spacing. By default there is no resampling."""
+    __output_vol_command_line_args_help['outputVolumePermutationOrder'] =\
+"""Apply axes permutation. Permutation has to be provided as sequence of 3
+integers separated by space. Identity (0,1,2) permutation is a default one."""
+    __output_vol_command_line_args_help['outputVolumeOrientationCode'] =\
+"""Set the orientation of the image using one of 48 canonical orientations. The
+orientation describes the mapping from the voxel coordinate system (i,j,k) to
+the physical coordinate system (x,y,z). In the voxel coordinate system, i runs
+along columns of voxels, j runs along rows of voxels, and k runs along slices
+of voxels. It is assumed (by the NIFTI convention) that the axes of the
+physical coordinate system run as follows: x from (L)eft to (R)ight, y from
+(P)osterior to (A)nterior, z from (I)nferior to (S)uperior.  (the explanation
+is copied from Convert3D documentation:
+http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation)"""
+    __output_vol_command_line_args_help['setInterpolation'] =\
+"""Specifies the interpolation method for resampling the output volume. Be default
+the linear interpolation is set. The other allowed values are: NearestNeighbor
+| Linear | Cubic | Sinc | Gaussian."""
+
+    @classmethod
+    def _getCommandLineParser(cls):
+        parser = generic_workflow._getCommandLineParser()
+
+        outputVolumeSettings = \
+            OptionGroup(parser, 'Output volumes settings')
+        outputVolumeSettings.add_option('--outputVolumeOrigin', dest='outputVolumeOrigin',
+            default=[0.,0.,0.], action='store', type='float', nargs =3,
+            help=cls.__output_vol_command_line_args_help['outputVolumeOrigin'])
+        outputVolumeSettings.add_option('--outputVolumeScalarType', default='uchar',
+            type='str', dest='outputVolumeScalarType',
+            help=cls.__output_vol_command_line_args_help['outputVolumeScalarType'])
+        outputVolumeSettings.add_option('--outputVolumeSpacing', default=[1,1,1],
+            type='float', nargs=3, dest='outputVolumeSpacing',
+            help=cls.__output_vol_command_line_args_help['outputVolumeSpacing'])
+        outputVolumeSettings.add_option('--outputVolumeResample',
+            dest='outputVolumeResample', type='float', nargs=3, default=None,
+            help=cls.__output_vol_command_line_args_help['outputVolumeResample'])
+        outputVolumeSettings.add_option('--outputVolumePermutationOrder', default=[0,1,2],
+            type='int', nargs=3, dest='outputVolumePermutationOrder',
+            help=cls.__output_vol_command_line_args_help['outputVolumePermutationOrder'])
+        outputVolumeSettings.add_option('--outputVolumeOrientationCode',
+            dest='outputVolumeOrientationCode', type='str', default='RAS',
+            help=cls.__output_vol_command_line_args_help['outputVolumeOrientationCode'])
+        outputVolumeSettings.add_option('--setInterpolation',
+            dest='setInterpolation', type='str', default=None,
+            help=cls.__output_vol_command_line_args_help['setInterpolation'])
+
+        parser.add_option_group(outputVolumeSettings)
+        return parser
 
 
 class enclosed_workflow(generic_workflow):

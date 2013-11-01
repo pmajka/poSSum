@@ -310,6 +310,9 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
 
     @classmethod
     def _getCommandLineParser(cls):
+        """
+        #TODO: Provide some extended documentation here.
+        """
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--outputFile', '-o', dest='outputFile', type='str',
@@ -343,7 +346,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             nargs=3, default=None,
             help='Set origin values instead of voxel location. Origin has to be provided as three floats.')
         parser.add_option('--setType', dest='setType', type='str', default=None,
-            help='Allowed values: uchar | ushort |float | double')
+            help='Allowed values: uchar | ushort | float | double')
 
         return parser
 
