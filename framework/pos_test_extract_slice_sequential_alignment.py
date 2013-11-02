@@ -116,6 +116,7 @@ def collapse_pseudo_3d_image(input_image, input_type,
         return input_image, input_typee
 
 
+#TODO make this script compatibile with the generic_workflow class
 class prepare_slice_for_seq_alignment(object):
     """
     Assumptions:
@@ -312,8 +313,6 @@ class prepare_slice_for_seq_alignment(object):
             self._logger.debug("Writing the grayscale image to %s.",
                             self.options['grayscaleOutputImage'])
             writer = itk.ImageFileWriter[self._grayscale_out_type].New()
-            print processed_channel
-            print self._grayscale_out_type
             writer.SetInput(processed_channel)
             writer.SetFileName(self.options['grayscaleOutputImage'])
             writer.Update()

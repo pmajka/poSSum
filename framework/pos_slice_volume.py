@@ -322,5 +322,5 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
 
 if __name__ == '__main__':
     options, args = extract_slices_from_volume.parseArgs()
-    filter = extract_slices_from_volume(options, args)
-    filter.launch()
+    workflow = extract_slices_from_volume(options, args)
+    workflow.launch()
