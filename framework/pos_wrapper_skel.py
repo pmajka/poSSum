@@ -310,7 +310,6 @@ class generic_workflow(object):
     @classmethod
     def _getCommandLineParser(cls):
         """
-        #TODO: Create a separate class for workflows that end with a volume.
         """
         parser = OptionParser(usage=cls._usage)
 
