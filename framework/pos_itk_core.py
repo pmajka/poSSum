@@ -1,5 +1,17 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*
+
+"""
+.. module:: pos_itk_core
+    :platform: Ubuntu
+    :synopsis: Core functions for itk support in Python.
+
+.. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
+"""
 import itk
 import logging
+
+# http://sphinx-doc.org/domains.html#the-python-domain
 
 # Dictionary below copied from (Sun Apr  7 14:04:28 CEST 2013)
 # http://code.google.com/p/medipy/source/browse/lib/medipy/itk/types.py?name=default&r=0da35e1099e5947151dee239f7a09f405f4e105c
@@ -374,3 +386,110 @@ def print_vnl_matrix(matrix):
     for i in range(matrix.rows()):
         row = map(lambda x: matrix.get(i, x), range(matrix.cols()))
         print "[ " + " ".map(str, row) + " ]"
+
+
+def reorder_volume(input_image, reorder_mapping, slicing_plane):
+    """
+    Funtion for reordering the slices along the `slicing_plane` in the provided
+    `input_image` according to the `reorder_mapping`.
+
+    .. note::
+        Only grayscale images are supported. Poor python `itk` bindings...
+
+    :param input_image: Input image which serves as a source for the reordering
+                        routine. Only grayscale images are supported.
+    :type input_image: `itk.Image`
+
+    :param reorder_mapping: Mapping from the input image slice order to the
+        output image slice order. The length of the mapping has to be the same
+        as the numer of slices in the slicing plane.
+
+    :type reorder_mapping: `iterable`. The length of the iterable has to be
+        the same as the number of slices in the `slicing_plane`.
+        However it has not to be 1:1 mapping. The form of the mapping has to be
+        `mapping[output_slice] = input_slice`.
+
+    :param slicing_plane: Image plane along with the slices will be reordered.
+        Allowed values are: 0,1,2.
+    :type slicing_plane: int
+
+    :returns: `itk.image` with reordered slices.
+    """
+    logger = logging.getLogger('reorder_volume')
+
+    image_shape = input_image.GetLargestPossibleRegion().GetSize()
+    ndim = len(image_shape)
+    logger.info("Provided image has a shape of : %s", map(str, image_shape))
+    logger.info("Selected slicing plane: %d", slicing_plane)
+
+    logger.debug("Duplicating the input image.")
+    image_duplicator = itk.ImageDuplicator[input_image].New()
+    image_duplicator.SetInputImage(input_image)
+    image_duplicator.Update()
+    duplicate = image_duplicator.GetOutput()
+
+    # This is a filter that will erase (make all voxel values to zero)
+    # it is not necessary step, but will help to catch any errors.
+    logger.debug("Zeroing the duplicated image.")
+    zeroer = itk.ShiftScaleImageFilter[duplicate, duplicate].New()
+    zeroer.SetScale(0)
+    zeroer.SetInput(image_duplicator.GetOutput())
+
+    # This is a filter that will copy consecutive slices from one volume
+    # to the other
+    paste_filter = itk.PasteImageFilter[duplicate].New()
+
+    # Now we extract the number of slices in a given slicng plane
+    slicing_plane_extent = image_shape[slicing_plane]
+    logger.debug("Defining the number of slices along the slicing plane: %d",
+                 slicing_plane_extent)
+
+    # This is the empty image of the same size and shape as the original
+    # image. This image fill be filled with consecutive slices from the
+    # original image.
+    output_image = zeroer.GetOutput()
+
+    # The next step is to loop over all slices' indexes in the slicing
+    # plane, and copy each slice to its new location in the output image.
+    for slice_idx in range(slicing_plane_extent):
+
+        logger.info("Copying: (intput) %d --> %d (output)",
+                    reorder_mapping[slice_idx], slice_idx)
+
+        # Input region changes with each iteration (obviously)
+        input_region_origin = [0, 0, 0]
+        input_region_origin[slicing_plane] = reorder_mapping[slice_idx]
+
+        # Define the input region size, the input region size it, actually,
+        # the same in each iteration. Technically this could easily go outside
+        # the loop but to keep the region definition close togeather, it is
+        # inside the loop.
+        input_region_size = list(image_shape)
+        input_region_size[slicing_plane] = 1
+
+        # Compose input region origin and size into itk region.
+        input_region = get_image_region(ndim,
+                input_region_origin, input_region_size)
+
+        # The output region index is the place where the given slice will be
+        # located. To define the output region we use the provided lookup
+        # table.
+        output_region_origin = [0, 0, 0]
+        output_region_origin[slicing_plane] = slice_idx
+
+        # Configure the image pasting filter.
+        logger.debug("Input image origin: %s", input_region_origin)
+        logger.debug("Input image size: %s", input_region_size)
+        logger.debug("Output image origin: %s", output_region_origin)
+        paste_filter.SetSourceImage(input_image)
+        paste_filter.SetDestinationImage(output_image)
+        paste_filter.SetSourceRegion(input_region)
+        paste_filter.SetDestinationIndex(output_region_origin)
+
+        # Latch the filter and capture the output.
+        paste_filter.Update()
+        output_image = paste_filter.GetOutput()
+
+    logger.info("Done.")
+    # After conducting all iterations return the output image.
+    return output_image

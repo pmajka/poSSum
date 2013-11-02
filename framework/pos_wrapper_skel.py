@@ -350,7 +350,6 @@ class generic_workflow(object):
         (options, args) = parser.parse_args()
         return (options, args)
 
-
 class output_volume_workflow(generic_workflow):
     """
     This class is designed to support workflows providing volume as one of the
