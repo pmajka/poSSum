@@ -81,7 +81,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         assert len(self._image_shape) == 3, \
             self._logger.error("The provided image is not three dimensional one. A three dimensional image is required.")
 
-    def _get_random_slices_permutation(self):
+    def _random_slices_permutation(self):
         """
         """
         self._reorder_mapping =\
@@ -95,6 +95,9 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         http://docs.python.org/2/library/csv.html#csv.Sniffer
         # TODO make this function in the way that we start from one!
         # Yes!, we assume that the mapping starts from one
+        # TODO: Another important remark:
+        # The form of the mapping is the following:
+        # map[new_slice_idx] = source_slice_idx!!!, not the reverse!
         """
         with open(self.options.mapping, 'rb') as mapping_file:
             dialect = csv.Sniffer().sniff(mapping_file.read(1024))
@@ -104,6 +107,10 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
                 dict(map(lambda (x, y): (int(x), int(y)), list(reader)))
 
     def _check_mapping_structure(self):
+        """
+        Checks if the provided mapping is a correct one. The criteria are following:
+        #TODO: Put the criteria here.
+        """
         pass
 
     def _get_reorder_mapping(self):
@@ -122,10 +129,25 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         or tab as a delimiter. No header lines and no comments are allowed.
         """
 
-        try:
-            self._get_mapping_from_file()
-        except:
-            self._logger.error("The mapping file cannot be parsed for some reason. Please check it.")
+        if not self.options.mapping:
+            self._random_slices_permutation()
+        else:
+            try:
+                self._get_mapping_from_file()
+            except:
+                self._logger.error("The mapping file cannot be parsed for some reason. Please check it.")
+
+        # Whatever is the source of the mapping, it is better to check if the
+        # mapping itself is a correct one. In the future there may be more
+        # ways to provide the mapping. Let's then assume that we check the
+        # mapping whatever the source is.
+        #for slice_idx in range(self._numbers_of_components):
+
+        # quick alias:
+        mapping = self._reorder_mapping
+        if len(mapping.keys()) != len(set(mapping.keys())):
+            print "PROBLEM, keys has to be unique!"
+
 
     def _process_multichannel_image(self):
         """
