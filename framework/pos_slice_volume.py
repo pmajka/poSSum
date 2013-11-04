@@ -97,11 +97,7 @@ Reference
 =========
 """
 
-import sys, os
-import logging
-from optparse import OptionParser, OptionGroup
 import pos_wrapper_skel
-
 import itk
 import pos_itk_core
 
@@ -133,16 +129,20 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         self._output_image_type =\
             pos_itk_core.types_reduced_dimensions[self._input_image_type]
 
-        self._logger.info("Determined input image type: %s", self._input_image_type)
-        self._logger.info("Determined slices' image type: %s", self._output_image_type)
+        self._logger.info("Determined input image type: %s",
+                          self._input_image_type)
+        self._logger.info("Determined slices' image type: %s",
+                          self._output_image_type)
 
         self._logger.debug("Reading volume file %s", input_filename)
         self._image_reader = itk.ImageFileReader[self._input_image_type].New()
         self._image_reader.SetFileName(input_filename)
         self._image_reader.Update()
 
-        self._source_largest_region = self._image_reader.GetOutput().GetLargestPossibleRegion()
-        self._logger.info("Largest possible region: %s.", self._source_largest_region)
+        self._source_largest_region =\
+            self._image_reader.GetOutput().GetLargestPossibleRegion()
+        self._logger.info("Largest possible region: %s.",
+            self._source_largest_region)
 
         # Checking if the provided file IS a volume -- it has to be exactly
         # three dimensional, no more, no less!
@@ -255,7 +255,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
             assert self.options.sliceRange[1] <= max_slice_number,\
                 self._logger.error("Index of the last slice (%d)\
                                    is higher that maximum number of slices within\
-                                   given slicing plane (%d).",\
+                                   given slicing plane (%d).",
                         self.options.sliceRange[1], max_slice_number)
 
             # Get only those sliced that user wants to.
