@@ -14,16 +14,22 @@ import itk
 import pos_itk_core
 import pos_wrapper_skel
 
-
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
     A class which purpose is to load a volume and then reorder slices along
     given axis according to the provided settings.
-    # TODO: Provide more documentation below.
+    # TODO: Provide more documentation below:
+    # TODO: Allowed grayscale image type
+    # TODO: Allowed multichannel image type.
+    # TODO: Mapping file format.
     """
 
-    #TODO: Document these attributes.
+    # This is the the one and only multichannel output image type supported by
+    # this script
     _rgb_out_type = itk.Image.RGBUC3
+
+    # This attrubute define the internal image type of each grayscale channel
+    # of the multichannel volume.
     _rgb_out_component_type = itk.Image.UC3
 
     def _validate_options(self):
@@ -64,7 +70,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         self._image_shape =\
             self._original_image.GetLargestPossibleRegion().GetSize()
 
-        # Checking if the provided file IS a volume -- it has to be exactly
+        # Checking if the provided file is a volume -- it has to be exactly
         # three dimensional, no more, no less!
         assert len(self._image_shape) == 3, \
             self._logger.error("The provided image is not three dimensional one. A three dimensional image is required.")
@@ -84,6 +90,12 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         self._reorder_mapping =\
             range(self._image_shape[self.options.sliceAxisIndex])
         random.shuffle(self._reorder_mapping)
+
+        for i in range(len(self._reorder_mapping)):
+            print i,self._reorder_mapping[i]
+
+    def _check_mapping_structure(self):
+        pass
 
     def _process_multichannel_image(self):
         """
@@ -170,8 +182,6 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
 
-    def _check_mapping_structure(self):
-        pass
 
     @staticmethod
     def parseArgs():
@@ -193,6 +203,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         (options, args) = parser.parse_args()
         return (options, args)
+
 
 if __name__ == '__main__':
     options, args = reorder_volume_workflow.parseArgs()
