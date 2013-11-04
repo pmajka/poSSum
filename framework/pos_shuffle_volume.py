@@ -9,10 +9,12 @@
 .. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
 """
 
-import random, csv
+import random
+import csv
 import itk
 import pos_itk_core
 import pos_wrapper_skel
+
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
@@ -43,6 +45,10 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # And we DO require an input image.
         assert self.options.inputImage is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
+
+        # Print a warning if no mapping file is provided.
+        if not self.options.mapping:
+            self._logger.warning("No mapping file has been provided! Slices will be reordered according to the randomly generated permutation.")
 
     def _read_input_image(self):
         """
@@ -75,6 +81,31 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         assert len(self._image_shape) == 3, \
             self._logger.error("The provided image is not three dimensional one. A three dimensional image is required.")
 
+    def _get_random_slices_permutation(self):
+        """
+        """
+        self._reorder_mapping =\
+            range(self._image_shape[self.options.sliceAxisIndex])
+        random.shuffle(self._reorder_mapping)
+
+    def _get_mapping_from_file(self):
+        """
+        Here I use pretty neat code snipper for determining the
+        dialect of teh csv file. Found at:
+        http://docs.python.org/2/library/csv.html#csv.Sniffer
+        # TODO make this function in the way that we start from one!
+        # Yes!, we assume that the mapping starts from one
+        """
+        with open(self.options.mapping, 'rb') as mapping_file:
+            dialect = csv.Sniffer().sniff(mapping_file.read(1024))
+            mapping_file.seek(0)
+            reader = csv.reader(mapping_file, dialect)
+            self._reorder_mapping =\
+                dict(map(lambda (x, y): (int(x), int(y)), list(reader)))
+
+    def _check_mapping_structure(self):
+        pass
+
     def _get_reorder_mapping(self):
         """
         Generates mapping of the slices from one image to another.
@@ -91,26 +122,10 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         or tab as a delimiter. No header lines and no comments are allowed.
         """
 
-        # Here I use pretty neat code snipper for determining the
-        # dialect of teh csv file. Found at:
-        # http://docs.python.org/2/library/csv.html#csv.Sniffer
-        # TODO: Put try ... except here
-        with open(self.options.mapping, 'rb') as csvfile:
-            dialect = csv.Sniffer().sniff(csvfile.read(1024))
-            csvfile.seek(0)
-            reader = csv.reader(csvfile, dialect)
-            self._reorder_mapping =\
-                dict(map(lambda (x, y): (int(x), int(y)), list(reader)))
-
-        #   self._reorder_mapping =\
-        #       range(self._image_shape[self.options.sliceAxisIndex])
-        #   random.shuffle(self._reorder_mapping)
-
-        #for i in range(len(self._reorder_mapping)):
-        #    print i,self._reorder_mapping[i]
-
-    def _check_mapping_structure(self):
-        pass
+        try:
+            self._get_mapping_from_file()
+        except:
+            self._logger.error("The mapping file cannot be parsed for some reason. Please check it.")
 
     def _process_multichannel_image(self):
         """
@@ -196,7 +211,6 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
-
 
     @staticmethod
     def parseArgs():
