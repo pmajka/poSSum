@@ -9,7 +9,7 @@
 .. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
 """
 
-import random
+import random, csv
 import itk
 import pos_itk_core
 import pos_wrapper_skel
@@ -41,7 +41,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
             self._logger.error("The slicing plane has to be either 0, 1 or 2.")
 
         # And we DO require an input image.
-        assert self.options.inputFileName is not None,\
+        assert self.options.inputImage is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
 
     def _read_input_image(self):
@@ -49,7 +49,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         Reads the input image and sets some auxiliary variables like image type
         and dimensionality.
         """
-        input_filename = self.options.inputFileName
+        input_filename = self.options.inputImage
 
         # Determine the input image type (data type and dimensionality)
         self._input_image_type =\
@@ -86,13 +86,28 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         If there is no mapping provided, a random permutation of the slices is
         generated and applied.
-        """
-        self._reorder_mapping =\
-            range(self._image_shape[self.options.sliceAxisIndex])
-        random.shuffle(self._reorder_mapping)
 
-        for i in range(len(self._reorder_mapping)):
-            print i,self._reorder_mapping[i]
+        The mapping file should be a typical CSV file wich either comma, space
+        or tab as a delimiter. No header lines and no comments are allowed.
+        """
+
+        # Here I use pretty neat code snipper for determining the
+        # dialect of teh csv file. Found at:
+        # http://docs.python.org/2/library/csv.html#csv.Sniffer
+        # TODO: Put try ... except here
+        with open(self.options.mapping, 'rb') as csvfile:
+            dialect = csv.Sniffer().sniff(csvfile.read(1024))
+            csvfile.seek(0)
+            reader = csv.reader(csvfile, dialect)
+            self._reorder_mapping =\
+                dict(map(lambda (x, y): (int(x), int(y)), list(reader)))
+
+        #   self._reorder_mapping =\
+        #       range(self._image_shape[self.options.sliceAxisIndex])
+        #   random.shuffle(self._reorder_mapping)
+
+        #for i in range(len(self._reorder_mapping)):
+        #    print i,self._reorder_mapping[i]
 
     def _check_mapping_structure(self):
         pass
@@ -188,14 +203,14 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         usage_string = "python pos_slice_volume.py  -i <input_filename> -o <output_filename> --reorderMapping <reorder_mapping_file>"
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
-        parser.add_option('--inputFileName', '-i', dest='inputFileName',
+        parser.add_option('--inputImage', '-i', dest='inputImage',
                 type='str', default=None,
                 help='File that is going to be sliced.')
         parser.add_option('--outputImage', '-o', dest='outputImage',
                 type='str', default=None,
                 help='Filename format for the the output images.')
-        parser.add_option('--reorderMappingFile', dest='sliceRange',
-                type='int', nargs=3, default=None,
+        parser.add_option('--mapping', dest='mapping',
+                type='str', default=None,
                 help='Reorder mapping file.')
         parser.add_option('--sliceAxisIndex', '-s', dest='sliceAxisIndex',
                 type='int', default=0,

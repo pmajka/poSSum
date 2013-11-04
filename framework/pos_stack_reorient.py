@@ -177,7 +177,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             self._logger.debug("Exiting grayscale workflow.")
 
         # After processing the input volume, save it.
-        self._logger.info("Writing the processed file to: %s.",\
+        self._logger.info("Writing the processed file to: %s.",
                           self.options.outputFile)
         self._writer=itk.ImageFileWriter[processed_image].New()
         self._writer.SetFileName(self.options.outputFile)
