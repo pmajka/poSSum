@@ -29,19 +29,20 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     def _validate_options(self):
         super(self.__class__, self)._initializeOptions()
 
+        # Well, that's simple: the script only accepts 0,1,2 as image slicing
+        # plane.
         assert self.options.sliceAxisIndex in [0, 1, 2],\
             self._logger.error("The slicing plane has to be either 0, 1 or 2.")
 
+        # And we DO require an input image.
         assert self.options.inputFileName is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
-
 
     def _read_input_image(self):
         """
         Reads the input image and sets some auxiliary variables like image type
         and dimensionality.
         """
-
         input_filename = self.options.inputFileName
 
         # Determine the input image type (data type and dimensionality)
@@ -60,7 +61,8 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         self._numbers_of_components =\
             self._image_reader.GetOutput().GetNumberOfComponentsPerPixel()
         self._original_image = self._image_reader.GetOutput()
-        self._image_shape = self._original_image.GetLargestPossibleRegion().GetSize()
+        self._image_shape =\
+            self._original_image.GetLargestPossibleRegion().GetSize()
 
         # Checking if the provided file IS a volume -- it has to be exactly
         # three dimensional, no more, no less!
@@ -79,10 +81,74 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         If there is no mapping provided, a random permutation of the slices is
         generated and applied.
         """
-        self._reorder_mapping = range(self._image_shape[self.options.sliceAxisIndex])
+        self._reorder_mapping =\
+            range(self._image_shape[self.options.sliceAxisIndex])
         random.shuffle(self._reorder_mapping)
 
+    def _process_multichannel_image(self):
+        """
+        Multichannel workflow.
+        """
+        self._logger.debug("Entering multichannel workflow.")
+
+        # This is gonna be a container for collecting all processed
+        # channels of a multichannel image.
+        processed_components = []
+
+        # Extract the component `channel_idx` from the composite image,
+        # process it and store:
+        for channel_idx in range(self._numbers_of_components):
+            self._logger.debug("Processing channel %d of %d.",
+                channel_idx, self._numbers_of_components)
+
+            extract_filter = \
+                itk.VectorIndexSelectionCastImageFilter[
+                self._input_image_type, self._rgb_out_component_type].New()
+            extract_filter.SetInput(self._image_reader.GetOutput()),
+            extract_filter.SetIndex(channel_idx)
+            extract_filter.Update()
+
+            processed_channel = pos_itk_core.reorder_volume(
+                extract_filter.GetOutput(),
+                self._reorder_mapping, self.options.sliceAxisIndex)
+            processed_components.append(processed_channel)
+
+            self._logger.debug("Finished processing %d.", channel_idx)
+
+        # After iterating over all channels, compose the individual
+        # components back into multichannel image.
+        self._logger.info("Composing back the processed channels.")
+        compose = itk.ComposeImageFilter[
+            self._rgb_out_component_type, self._input_image_type].New()
+        compose.SetInput1(processed_components[0])
+        compose.SetInput2(processed_components[1])
+        compose.SetInput3(processed_components[2])
+        compose.Update()
+
+        # At the end, save the image.
+        itk.write(compose.GetOutput(), self.options.outputImage)
+
+    def _process_grayscale_image(self):
+        """
+        This method handles the grayscale image processing workflow.
+        It's extremely simple - just an invocation of reordering function.
+        """
+        # Yeap. Just use the external reordering function and then save the
+        # result.
+        self._logger.debug("Entering grayscale workflow.")
+
+        processed_channel = pos_itk_core.reorder_volume(
+            self._image_reader.GetOutput(),
+            self._reorder_mapping, self.options.sliceAxisIndex)
+        self._logger.debug("Exiting grayscale workflow.")
+
+        # At the end, save the image.
+        self._logger.info("Writing the processed file to: %s.",
+                          self.options.outputImage)
+        itk.write(processed_channel, self.options.outputImage)
+
     def launch(self):
+
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
@@ -92,37 +158,14 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # Generate the reorder mapping.
         self._get_reorder_mapping()
 
-        # BEGIN reorder volume -------------
+        # If it happened that the provided images is multichannel, we iterate
+        # over all channels process it one by one.  If the image is fortunately
+        # a regular, grayscale image then a grayscale image workflow is
+        # invoked, which is faster and more reliable.
         if self._numbers_of_components > 1:
-            processed_components = []
-
-            for i in range(self._numbers_of_components):
-                extract_filter = \
-                    itk.VectorIndexSelectionCastImageFilter[
-                    self._input_image_type, self._rgb_out_component_type].New()
-                extract_filter.SetInput(self._image_reader.GetOutput()),
-                extract_filter.SetIndex(i)
-                extract_filter.Update()
-
-                processed_channel = pos_itk_core.reorder_volume(
-                    extract_filter.GetOutput(),
-                    self._reorder_mapping, self.options.sliceAxisIndex)
-                processed_components.append(processed_channel)
-
-            compose = itk.ComposeImageFilter[
-                self._rgb_out_component_type, self._input_image_type].New()
-            compose.SetInput1(processed_components[0])
-            compose.SetInput2(processed_components[1])
-            compose.SetInput3(processed_components[2])
-            compose.Update()
-
-            itk.write(compose.GetOutput(), self.options.outputImage)
+            self._process_multichannel_image()
         else:
-            processed_channel = pos_itk_core.reorder_volume(
-                self._image_reader.GetOutput(),
-                self._reorder_mapping, self.options.sliceAxisIndex)
-            itk.write(processed_channel, self.options.outputImage)
-        # END reorder volume -----------------
+            self._process_grayscale_image()
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
