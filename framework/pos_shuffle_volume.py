@@ -182,6 +182,9 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # Compose the keys and the values into a dictionary.
         self._reorder_mapping = dict(zip(mapping_keys, mapping_values))
 
+        for k,v in self._reorder_mapping.items():
+            print "%d %d" % (k,v)
+
     def _get_mapping_from_file(self):
         """
         Reads the mapping from a file.
