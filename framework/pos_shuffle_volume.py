@@ -15,6 +15,7 @@ import itk
 import pos_itk_core
 import pos_wrapper_skel
 
+#TODO: Check input mapping files that do not work.
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
