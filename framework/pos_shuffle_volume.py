@@ -16,6 +16,7 @@ import pos_itk_core
 import pos_wrapper_skel
 
 #TODO: Check input mapping files that do not work.
+#python pos_shuffle_volume.py ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz ~/app.nii.gz
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
@@ -375,4 +376,3 @@ if __name__ == '__main__':
     options, args = reorder_volume_workflow.parseArgs()
     workflow = reorder_volume_workflow(options, args)
     workflow.launch()
-#python pos_shuffle_volume.py ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz ~/app.nii.gz
