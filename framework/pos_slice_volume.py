@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*
 
 """
-.. module:: pos_slice_volume
-    :platform: Ubuntu
-    :synopsis: A volume slicing module.
-
-.. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
-
 Volume slicing script
 *********************
+
+:author: Piotr Majka <pmajka@nencki.gov.pl>
+:revision: $Rev$
+:date: $LastChangedDate$
+
+`pos_slice_volume`, a volume slicing module.
 
 This file is part of Multimodal Atlas of Monodelphis Domestica.
 (c) Piotr Majka 2011-2013. Restricted, damnit!

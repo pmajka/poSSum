@@ -18,12 +18,33 @@ import pos_wrapper_skel
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
+    The purpose of this
     A class which purpose is to load a volume and then reorder slices along
     given axis according to the provided settings.
     # TODO: Provide more documentation below:
     # TODO: Allowed grayscale image type
     # TODO: Allowed multichannel image type.
     # TODO: Mapping file format.
+
+    Generates mapping of the slices from one image to another. The mapping can be supplied in two ways.
+    The first way is to proivde a file wich slice to slice assignment using the ``--mapping`` command line option.
+    The other way is to not provide any mapping. In such case the output ordering onf the slices will be gererated by permuting the slices randomly.
+
+    If a slice-to-slice mapping is provided, if has to satisfy the
+    following conditions:
+        1. asdf
+        2. sdf #TODO Fill it up.
+
+    If there is no mapping provided, a random permutation of the slices is
+    generated and applied.
+
+    The mapping file should be a typical CSV file wich either comma, space
+    or tab as a delimiter. No header lines and no comments are allowed.
+        # TODO make this function in the way that we start from one!
+        # TODO: Another important remark:
+        # The form of the mapping is the following:
+        # map[new_slice_idx] = source_slice_idx!!!, not the reverse!
+        # Yes!, we assume that the mapping starts from one
     """
 
     # This is the the one and only multichannel output image type supported by
@@ -45,6 +66,10 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # And we DO require an input image.
         assert self.options.inputImage is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
+
+        # And we DO require the name of the output image.
+        assert self.options.outputImage is not None,\
+            self._logger.error("No outpu image name provided (-o). Plese supply input filename and try again.")
 
         # Print a warning if no mapping file is provided.
         if not self.options.mapping:
@@ -83,52 +108,87 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
     def _random_slices_permutation(self):
         """
+        Randomly permutes the slices indexes.
         """
-        self._reorder_mapping =\
-            range(self._image_shape[self.options.sliceAxisIndex])
-        random.shuffle(self._reorder_mapping)
+        # Define the mapping keys. These keys denote slices indexes in the
+        # target image. Note that we start from 1.
+        mapping_keys =\
+            range(1, self._image_shape[self.options.sliceAxisIndex] + 1)
+
+        # Define mapping values by permuting the ordered list. These values
+        # denote the slices' indexes of the source image. Note that we start
+        # from 1.
+        mapping_values =\
+            range(1, self._image_shape[self.options.sliceAxisIndex] + 1)
+        random.shuffle(mapping_values)
+
+        # Compose the keys and the values into a dictionary.
+        self._reorder_mapping = dict(zip(mapping_keys, mapping_values))
+
 
     def _get_mapping_from_file(self):
         """
-        Here I use pretty neat code snipper for determining the
-        dialect of teh csv file. Found at:
-        http://docs.python.org/2/library/csv.html#csv.Sniffer
-        # TODO make this function in the way that we start from one!
-        # Yes!, we assume that the mapping starts from one
-        # TODO: Another important remark:
-        # The form of the mapping is the following:
-        # map[new_slice_idx] = source_slice_idx!!!, not the reverse!
+        Reads the mapping from a file.
         """
+
+        # Here I use pretty neat code snipper for determining the
+        # dialect of teh csv file. Found at:
+        # http://docs.python.org/2/library/csv.html#csv.Sniffer
+
         with open(self.options.mapping, 'rb') as mapping_file:
             dialect = csv.Sniffer().sniff(mapping_file.read(1024))
             mapping_file.seek(0)
             reader = csv.reader(mapping_file, dialect)
+
+            # Then map the list from file into a dictionary.
             self._reorder_mapping =\
                 dict(map(lambda (x, y): (int(x), int(y)), list(reader)))
 
     def _check_mapping_structure(self):
         """
         Checks if the provided mapping is a correct one. The criteria are following:
-        #TODO: Put the criteria here.
+
+            - The mapping starts from slice no 1.
+            - The length of the mapping is the same as the number of the
+              slices along the slicing plane.
+            - The mapping contains an exactly one entry for each of the output
+              slices.
         """
-        pass
+        # Get the length of the mapping.
+        mapping_length = len(self._reorder_mapping.keys())
+        slicing_plane_length =\
+            self._image_shape[self.options.sliceAxisIndex]
+
+        # Assert the length of the mapping
+        assert mapping_length == slicing_plane_length,\
+            self._logger.error("The number of entries in the mapping (%d) does not match the number of slices (%d). Please check.",
+                mapping_length, slicing_plane_length)
+
+        # Assert the length of the mapping
+        assert max(self._reorder_mapping.keys()) == slicing_plane_length,\
+            self._logger.error("The extent of the mapping (%d) is different than the number of slices (%d). Please correct.",
+                max(self._reorder_mapping.keys()), slicing_plane_length)
+
+        # Check if the mapping starts with the proper index.
+        assert min(self._reorder_mapping.keys()) == 1,\
+            self._logger.error("The mapping has to start from exactly 1. A different value (%d) has been encountered. Please correct.",
+                min(self._reorder_mapping.keys()))
+
+        # Ok, let's sum up all the important information about the mapping:
+        self._logger.info("First slice of the mapping: %d.",
+            min(self._reorder_mapping.keys()))
+        self._logger.info("Last slice of the mapping: %d",
+            max(self._reorder_mapping.keys()))
+        self._logger.info("Length of the mapping: %d.", mapping_length)
 
     def _get_reorder_mapping(self):
         """
-        Generates mapping of the slices from one image to another.
-
-        If a slice-to-slice mapping is provided, if has to satisfy the
-        following conditions:
-            1. asdf
-            2. sdf #TODO Fill it up.
-
-        If there is no mapping provided, a random permutation of the slices is
-        generated and applied.
-
-        The mapping file should be a typical CSV file wich either comma, space
-        or tab as a delimiter. No header lines and no comments are allowed.
+        Read or generate the mapping for reordering the volume.
         """
 
+        # If no mapping file is provided, the mapping is generated by random
+        # permutation of the slices indexes. Otherwise try to load the mapping
+        # from file.
         if not self.options.mapping:
             self._random_slices_permutation()
         else:
@@ -141,17 +201,20 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # mapping itself is a correct one. In the future there may be more
         # ways to provide the mapping. Let's then assume that we check the
         # mapping whatever the source is.
-        #for slice_idx in range(self._numbers_of_components):
+        self._check_mapping_structure()
 
-        # quick alias:
-        mapping = self._reorder_mapping
-        if len(mapping.keys()) != len(set(mapping.keys())):
-            print "PROBLEM, keys has to be unique!"
-
+        # Fine. The very last step is to convert the mapping from human
+        # readable format, in which the mapping starts from one, to C-like
+        # format where it starts from 0:
+        self._logger.info("Reducing slices indexes by one.")
+        self._reorder_mapping = \
+            dict(map(lambda (k, v): (int(k - 1), int(v - 1)),
+                     self._reorder_mapping.items()))
+        self._logger.info("Reducing slices indexes by one ... Done.")
 
     def _process_multichannel_image(self):
         """
-        Multichannel workflow.
+        Conduct a multichannel workflow.
         """
         self._logger.debug("Entering multichannel workflow.")
 
