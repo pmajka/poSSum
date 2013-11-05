@@ -16,7 +16,9 @@ import pos_itk_core
 import pos_wrapper_skel
 
 #TODO: Check input mapping files that do not work.
+#TODO: Create testing directory and then perform some tests.
 #python pos_shuffle_volume.py ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz ~/app.nii.gz
+
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
@@ -354,20 +356,30 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     @staticmethod
     def parseArgs():
         usage_string = "python pos_slice_volume.py  -i <input_filename> -o <output_filename> --reorderMapping <reorder_mapping_file>"
-        parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
+        __output_vol_command_line_args_help = {}
+        __output_vol_command_line_args_help['inputImage'] =\
+                """Required: input image filename."""
+        __output_vol_command_line_args_help['outputImage'] =\
+                """Required: output image filename."""
+        __output_vol_command_line_args_help['mapping'] =\
+                """A mapping file for driving the reordering process."""
+        __output_vol_command_line_args_help['sliceAxisIndex'] =\
+                """A index of the axis along which the slices will be reordered. The only allowed values are 0, 1, 2. The default value is 0."""
+
+        parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
         parser.add_option('--inputImage', '-i', dest='inputImage',
                 type='str', default=None,
-                help='File that is going to be sliced.')
+                help=__output_vol_command_line_args_help['inputImage'])
         parser.add_option('--outputImage', '-o', dest='outputImage',
                 type='str', default=None,
-                help='Filename format for the the output images.')
+                help=__output_vol_command_line_args_help['outputImage'])
         parser.add_option('--mapping', dest='mapping',
                 type='str', default=None,
-                help='Reorder mapping file.')
+                help=__output_vol_command_line_args_help['mapping'])
         parser.add_option('--sliceAxisIndex', '-s', dest='sliceAxisIndex',
                 type='int', default=0,
-                help='Index of the slicing axis.')
+                help=__output_vol_command_line_args_help['sliceAxisIndex'])
 
         (options, args) = parser.parse_args()
         return (options, args)
