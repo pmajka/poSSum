@@ -56,7 +56,8 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     Mapping file
     ------------
 
-    The reordering may be driven by a mapping provided using `--mapping` option::
+    The reordering may be driven by a mapping provided using `--mapping`
+    option::
 
         $pos_reorder_volume.py  -i input.nii.gz \
                                 -o output.nii.gz\
