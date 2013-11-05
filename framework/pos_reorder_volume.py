@@ -15,11 +15,6 @@ import itk
 import pos_itk_core
 import pos_wrapper_skel
 
-#TODO: Check input mapping files that do not work.
-#TODO: Create testing directory and then perform some tests.
-#python pos_shuffle_volume.py ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz ~/app.nii.gz
-
-
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
     The purpose of this class is to change order of slices of given volume
@@ -386,7 +381,6 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         (options, args) = parser.parse_args()
         return (options, args)
-
 
 if __name__ == '__main__':
     options, args = reorder_volume_workflow.parseArgs()
