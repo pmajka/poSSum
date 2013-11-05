@@ -1,0 +1,3988 @@
+    1  ll
+    2  vim process_02_02_NN2_final_prepare.sh
+    3  ~ll
+    4  ll
+    5  cd 
+    6  cd Dropbox/python_multiprocessing_tests/framework/
+    7  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+    8  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+    9  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   10  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   11  ll
+   12  vim gpu_uct_opos_stereotaxy.py
+   13  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   14  vim gpu_uct_opos_stereotaxy.py
+   15  vim gpu_uct_opos_stereotaxy.py
+   16  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   17  vim gpu_uct_opos_stereotaxy.py
+   18  cp /home/pmajka/20864_0212.png ~/Dropbox/
+   19  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   20  git status
+   21  git add gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   22  git ci -m"Stereotaxic roatate MRI"
+   23  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   24  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   25  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   26  vim gpu_uct_opos_stereotaxy.py
+   27  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   28  rm /home/pmajka/377_*.png
+   29  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   30  ll /home/pmajka/nissl_rgb.vtk
+   31  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   32  git add gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   33  git ci -m"Stereotaxic roatate nissl"
+   34  vim gpu_uct_opos_stereotaxy.py
+   35  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   36  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   37  git add gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   38  git ci -m"Stereotaxic roatate myelin"
+   39  vim gpu_uct_opos_stereotaxy.py
+   40  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   41  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   42  rm ~/8881_00*
+   43  rm ~/8881_00*.*
+   44  vim 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   45  vim gpu_uct_opos_stereotaxy.py
+   46  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   47  git add gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   48  git ci -m"Stereotaxic roatate blockface"
+   49  gitk
+   50  gitk
+   51  vim gpu_uct_opos_stereotaxy.py
+   52  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   53  vim gpu_uct_opos_stereotaxy.py
+   54  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   55  vim gpu_uct_opos_stereotaxy.py
+   56  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   57  vim gpu_uct_opos_stereotaxy.py
+   58  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   59  vim gpu_uct_opos_stereotaxy.py
+   60  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   61  vim gpu_uct_opos_stereotaxy.py
+   62  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   63  vim gpu_uct_opos_stereotaxy.py
+   64  python gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   65  git add gpu_uct_opos_stereotaxy.py 03_01_NN3_uct_volumetric_rendering_settings.cfg
+   66  git ci -m"Stereotaxic roatate +30 deg elev., no scalebar"
+   67  gitk.
+   68  gitk
+   69  pwd
+   70  ll
+   71  pwd
+   72  pwd
+   73  pwd
+   74  rm ~/28006*.*
+   75  man tar
+   76  tar -cvvzf multimodal_deformed_rotate_elev_30 ~/7810_????.png
+   77  tar -cvvzf uct_myelin_skull_rotate.tgz ~/28795_????.png
+   78  tar -cvvzf mri_myelin_skull_rotate.tgz ~/21745_????.png
+   79  ll ~/*.tgz
+   80  mv *.tgz ~
+   81  ll ~/*.tgz
+   82  mv multimodal_deformed_rotate_elev_30 ~/multimodal_deformed_rotate_elev_30.tgz
+   83  ll
+   84  ll
+   85  ls *.tgz
+   86  ls ~/*.tgz
+   87  ll ~/*.tgz
+   88  history
+   89  tar -cvvzf mri_nissl_skull_rotate.tgz ~/9340_????.png
+   90  rm /home/pmajka/9340_????.png
+   91  ll
+   92  mv mri_nissl_skull_rotate.tgz ~
+   93  ll
+   94  tar -cvvzf ~/mri_nissl_skull_rotate.tgz ~/21745_????.png
+   95  rm /home/pmajka/21745_????.png
+   96  tar -cvvzf ~/myelin_skull_rotate.tgz ~/28795_????.png
+   97  rm /home/pmajka/28795_????.png
+   98  tar -cvvzf ~/multimodal_up_down.tgz ~/19765_????.png
+   99  rm /home/pmajka/14555_????.png
+  100  rm /home/pmajka/19765_????.png
+  101  ll ~/*.tgz
+  102  rm /home/pmajka/7810_????.png
+  103  is /home/pmajka/mri.vtk
+  104  c3d /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/nissl_stain_volume_deformed_in_srs.nii.gz -type uchar -o ~/nissl_rgb.vtk 
+  105  c3d -mcs /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/nissl_stain_volume_deformed_in_srs.nii.gz -type uchar -omc 3 ~/nissl_rgb.vtk 
+  106  c3d /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/micro_ct_in_srs.nii.gz -type uchar /dev/shm/opos.vtk 
+  107  c3d /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/micro_ct_in_srs.nii.gz -type uchar -o /dev/shm/opos.vtk 
+  108  is nissl_rgb.vtk 
+  109  cd possum/
+  110  ll
+  111  vim specimen_processing/process_02_02_NN2_coregistration_with_uct.sh 
+  112  bash -xe  specimen_processing/process_02_02_NN2_coregistration_with_uct.sh 
+  113  history
+  114  c3d -mcs /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/nissl_stain_volume_deformed_in_srs.nii.gz -type uchar -omc 3 ~/nissl_rgb.vtk
+  115  c3d /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/micro_ct_in_srs.nii.gz -type uchar -o /dev/shm/opos.vtk
+  116  is ~/nissl_rgb.vtk 
+  117  ls /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/nissl_stain_volume_deformed_in_srs.nii.gz
+  118  is /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs/nissl_stain_volume_deformed_in_srs.nii.gz
+  119  c3d -mcs /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_nissl_deformed_in_uct_space.nii.gz -type uchar -omc 3 ~/nissl_rgb.vtk 
+  120  c3d /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_02_02_NN2_uct_in_stereotaxic_coordinates.nii.gz -type uchar -o /dev/shm/opos.vtk
+  121  c3d /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_uct_in_stereotaxic_coordinates.nii.gz -type uchar -o /dev/shm/opos.vtk
+  122  is ~/nissl_rgb.vtk 
+  123  vim specimen_processing/process_02_02_NN2_coregistration_with_uct.sh 
+  124  bash -xe  specimen_processing/process_02_02_NN2_coregistration_with_uct.sh 
+  125  vim specimen_processing/process_02_02_NN2_coregistration_with_uct.sh 
+  126  bash -xe  specimen_processing/process_02_02_NN2_coregistration_with_uct.sh 
+  127  c3d /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_uct_in_stereotaxic_coordinates.nii.gz -type uchar -o /dev/shm/opos.vtk
+  128  c3d -mcs /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_nissl_deformed_in_uct_space.nii.gz -type uchar -omc 3 ~/nissl_rgb.vtk 
+  129  is ~/nissl_rgb.vtk 
+  130  c3d /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_mri_in_uct_space.nii.gz -type uchar -o ~/mri.vtk 
+  131  c3d -mcs /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_blockface_deformed_in_uct_space.nii.gz -type uchar -omc 3 ~/blockface_rgb.vtk
+  132  c3d -mcs /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_blockface_in_uct_space.nii.gz -omc 3 ~/blockface_rgb.vtk 
+  133  ls ~
+  134  ll ~/*.vtk
+  135  geeqie p
+  136  geeqie /home/pmajka/20864_0312.png
+  137  geeqie /home/pmajka/377_0180.png
+  138  geeqie /home/pmajka/11614_0105.png
+  139  geeqie /home/pmajka/24231_0105.png
+  140  pwd
+  141  ls ~/blockface_rgb.vtk 
+  142  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  143  ffmpeg -y -i ~/2431_%04d.png -sameq ~/Dropbox/2431.avi
+  144  ffmpeg -y -i ~/24231_%04d.png -sameq ~/Dropbox/24231.avi
+  145  ffmpeg -y -i ~/7810_%04d.png -sameq ~/Dropbox/7810.avi
+  146  ffmpeg -y -i ~/11614_%04d.png -sameq ~/Dropbox/11614.avi
+  147  ffmpeg -y -i ~/12657_%04d.png -sameq ~/Dropbox/12657.avi
+  148  ffmpeg -y -i ~/12657_%04d.png -sameq ~/Dropbox/12657.avi
+  149  ffmpeg -y -i ~/19765_%04d.png -sameq ~/Dropbox/19765.avi
+  150  ffmpeg -y -i ~/20664_%04d.png -sameq ~/Dropbox/20664.avi
+  151  ffmpeg -y -i ~/20864_%04d.png -sameq ~/Dropbox/20864.avi
+  152  ffmpeg -y -i ~/24231_%04d.png -sameq ~/Dropbox/24231.avi
+  153  ffmpeg -y -i ~/24728_%04d.png -sameq ~/Dropbox/24728.avi
+  154  ffmpeg -y -i ~/28006_%04d.png -sameq ~/Dropbox/28006.avi
+  155  ffmpeg -y -i ~/32127_%04d.png -sameq ~/Dropbox/32127.avi
+  156  ffmpeg -y -i ~/11407_%04d.png -sameq ~/Dropbox/11407.avi
+  157  rm ~/24728*.*
+  158  rm ~/24231*.*
+  159  rm ~/20864*.*
+  160  rm ~/11614*.*
+  161  rm ~/32127*.*
+  162  geeqie ..
+  163  geeqie ..
+  164  rm ~/12657*.*
+  165  geeqie ..
+  166  ffmpeg -y -i ~/11407_%04d.png -sameq ~/Dropbox/11407.avi
+  167  rm ~/11407*.*
+  168  ffmpeg -y -i ~/28795_%04d.png -sameq ~/Dropbox/28795.avi
+  169  geeqie /home/pmajka/1864_0241.png
+  170  rm ~/1864*.*
+  171  geeqie /home/pmajka/14555_0358.png
+  172  ffmpeg -y -i ~/14555_%04d.png -sameq ~/Dropbox/14555.avi
+  173  ffmpeg -y -i ~/26992_%04d.png -sameq ~/Dropbox/26992.avi
+  174  rm ~/26992*.*
+  175  ffmpeg -y -i ~/7373_%04d.png -sameq ~/Dropbox/7373.avi
+  176  rm ~/7373*.*
+  177  ls ~
+  178  ll
+  179  ffmpeg -y -i ~/28006_%04d.png -sameq ~/Dropbox/28006.avi
+  180  ffmpeg -y -i ~/7810_%04d.png -sameq ~/Dropbox/7810.avi
+  181  ffmpeg -y -i ~/21745_%04d.png -sameq ~/Dropbox/21745.avi
+  182  ffmpeg -y -i ~/20664_%04d.png -sameq ~/Dropbox/20644.avi
+  183  rm ~/20664*.*
+  184  ffmpeg -y -i ~/21745_%04d.png -sameq ~/Dropbox/21745.avi
+  185  ffmpeg -y -i ~/28795_%04d.png -sameq ~/Dropbox/28795.avi
+  186  ffmpeg -y -i ~/9340_%04d.png -sameq ~/Dropbox/9340.avi
+  187  ffmpeg -y -i ~/28795_%04d.png -sameq ~/Dropbox/28795.avi
+  188  ffmpeg -y -i ~/14555_%04d.png -sameq ~/Dropbox/14555.avi
+  189  ffmpeg -y -i ~/19765_%04d.png -sameq ~/Dropbox/19765.avi
+  190  screen -r
+  191  screen -r
+  192  screen -r
+  193  ssh nicluster1 
+  194  ll
+  195  cd possum/
+  196  ll
+  197  source setenv.sh 
+  198  ll
+  199  cd specimen_processing/
+  200  ll
+  201  vim process_02_02_NN2_analysis_linear_reg.shprocess_02_02_NN2_analysis_linear_reg.sh
+  202  vim process_02_02_NN2_analysis_linear_reg.sh 
+  203  pwd
+  204  ls -la
+  205  ll -t
+  206  vim process_02_02_NN2_final_prepare.sh
+  207  ll -t
+  208  vim process_02_02_NN2_coregistration_with_uct.sh
+  209  ll
+  210  pwd
+  211  ls -la
+  212  cp process_02_02_NN2_coregistration_with_uct.sh process_02_02_NN2_deformable_coregistration.sh
+  213  vim process_02_02_NN2_deformable_coregistration.sh
+  214  vim process_02_02_NN2_deformable_coregistration.sh
+  215  WarpImageMultiTransform 
+  216  WarpImageMultiTransform 
+  217  htop
+  218  cd /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration
+  219  ll
+  220  c3d -mcs 02_02_NN2_myelin_to_mri_fwd_in_uct_space.nii.gz -omc 3 /dev/shm/02_02_NN2_myelin_to_mri_fwd_in_uct_space.vtk
+  221  c3d 02_02_NN2_nissl_in_uct_space.nii.gz -o /dev/shm//dev/shm/02_02_NN2_mri_in_uct_space.vtk
+  222  c3d 02_02_NN2_nissl_in_uct_space.nii.gz -o /dev/shm/02_02_NN2_mri_in_uct_space.vtk
+  223  ll
+  224  ll -t
+  225  WarpImageMultiTransform 
+  226  WarpImageMultiTransform 3 02_02_NN2_blockface_in_uct_space.nii.gz bd.nii.gz --use-BSpline 02_02_NN2_nissl_to_mri_fwd_in_uct_space.nii.gz
+  227  WarpImageMultiTransform 3 02_02_NN2_nissl_in_uct_space.nii.gz bd.nii.gz --use-BSpline 02_02_NN2_nissl_to_mri_fwd_in_uct_space.nii.gz
+  228  WarpImageMultiTransform 3 02_02_NN2_nissl_in_uct_space.nii.gz bd.nii.gz 02_02_NN2_nissl_to_mri_fwd_in_uct_space.nii.gz
+  229  ll
+  230  itksnap -m bd.nii.gz -o 02_02_NN2_nissl_deformed_in_uct_space.nii.gz
+  231  ll
+  232  cd ../79_final_results/02_processing_and_evaluatation/
+  233  ll
+  234  ll
+  235  ll
+  236  WarpImageMultiTransform 
+  237  ll
+  238  WarpImageMultiTransform 3 mri.nii.gz o.nii.gz mri_to_myelin_warp.nii.gz
+  239  WarpImageMultiTransform 3 segmentation.nii.gz o.nii.gz mri_to_myelin_warp.nii.gz --use-NN
+  240  itksnap -m myelin_stain_affine.nii.gz -s o.nii.gz 
+  241  WarpImageMultiTransform 3 segmentation.nii.gz o.nii.gz mri_to_nissl_warp.nii.gz --use-NN
+  242  itksnap -m nissl_stain_affine.nii.gz -s o.nii.gz 
+  243  itksnap -m nissl_stain_volume_affine.nii.gz -s o.nii.gz 
+  244  itksnap -m nissl_stain_affine.nii.gz -o myelin_stain_affine.nii.gz 
+  245  ll
+  246  cd 
+  247  cd whole_amygdala/
+  248  ll
+  249  vim processing_supplement/
+  250  cd processing_supplement/
+  251  ll
+  252  cd ../specimen_processing/
+  253  ll
+  254  vim process_amy_preprocess.sh 
+  255  vim ../scripts/blockface_registration.py 
+  256  cd ../
+  257  bash -xe specimen_processing/process_amy_preprocess.sh 
+  258  ~
+  259  ll
+  260  source setenv.sh 
+  261  sliceVol.py -h
+  262  vim specimen_processing/process_amy_preprocess.sh 
+  263  bash -xe specimen_processing/process_amy_preprocess.sh 
+  264  vim specimen_processing/process_amy_preprocess.sh 
+  265  bash -xe specimen_processing/process_amy_preprocess.sh 
+  266  vim specimen_processing/process_amy_preprocess.sh 
+  267  bash -xe specimen_processing/process_amy_preprocess.sh 
+  268  ll /home/pmajka/whole_amygdala/data/amy//05_slices_raw/out_vol_rgb_rC_red_rROI_None_rS_1.0_rM_MSQ_rMP_32_rRS_30_oROI_None_oS_None_med5.nii.gz
+  269  itksnap /home/pmajka/whole_amygdala/data/amy//05_slices_raw/out_vol_rgb_rC_red_rROI_None_rS_1.0_rM_MSQ_rMP_32_rRS_30_oROI_None_oS_None_med5.nii.gz
+  270  cd am
+  271  cd whole_amygdala/
+  272  source setenv.sh 
+  273  screen -r
+  274  man vncserver 
+  275  screen -r
+  276  cd
+  277  screen -r
+  278  is /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_blockface_deformed_in_uct_space.nii.gz
+  279  cd
+  280  cd possum/processing_supplement/
+  281  ll
+  282  cd ../sopcd ../specimen_processing/
+  283  ll
+  284  cd ../specimen_processing/
+  285  svn status
+  286  svn revert process_02_02_NN2_coregistration_with_uct.sh
+  287  cd ../
+  288  source setenv.sh 
+  289  bash -xe specimen_processing/process_02_02_NN2_coregistration_with_uct.sh
+  290  cd /home/pmajka/possum/analysis/00_photo_pool/15_visualization_volumetric
+  291  make
+  292  pwd
+  293  cd ../16_visualization_oblique/
+  294  make
+  295  cd ../
+  296  cd 15_visualization_volumetric/
+  297  ll
+  298  svn add Makefile orientation_cube.png uct_with_blockface.png volumetric_visualization.svg
+  299  svn add .
+  300  cd ../
+  301  svn add 15_visualization_volumetric/
+  302  svn add 16_visualization_oblique/
+  303  svn ci -m"Updating figures" 15_visualization_volumetric 16_visualization_oblique
+  304  cd 16_visualization_oblique/
+  305  ll
+  306  svn rm oblique_visualization.pdf oblique_visualization.png
+  307  cd ../15_visualization_volumetric/
+  308  svn rm volumetric_visualization.pdf volumetric_visualization.png
+  309  cd ../
+  310  svn ci -m"Updating figures" 15_visualization_volumetric 16_visualization_oblique
+  311  cd 15_visualization_volumetric/
+  312  make
+  313  cd ../16_visualization_oblique/
+  314  make
+  315  cd /home/pmajka/possum/analysis/00_photo_pool/14_stereotaxic_cuts
+  316  make
+  317  make
+  318  make
+  319  make
+  320  make
+  321  vim Makefile 
+  322  make
+  323  vim Makefile 
+  324  vim reproduce.sh 
+  325  make
+  326  vim reproduce.sh 
+  327  vim reproduce.sh 
+  328  vim Makefile 
+  329  make
+  330  make -B
+  331  pwd
+  332  cd
+  333  cd possum/
+  334  vim specimen_processing/
+  335  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  336  bash -xe specimen_processing/process_02_02_NN2_final_prepare.sh 
+  337  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  338  bash -xe specimen_processing/process_02_02_NN2_final_prepare.sh 
+  339  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  340  bash -xe specimen_processing/process_02_02_NN2_final_prepare.sh 
+  341  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  342  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  343  screen -r
+  344  ll /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_uct_deformed_in_stereotaxic_coordinates.nii.gz
+  345  ll /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_uct_subset_in_stereotaxic_coordinates.nii.gz 
+  346  screen -r
+  347  cd po
+  348  cdw
+  349  cd 
+  350  cd possum/
+  351  svn up
+  352  source setenv.sh 
+  353  cd analysis/00_photo_pool/14_stereotaxic_cuts/
+  354  bash -xe reproduce.sh 
+  355  cp /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_blockface_in_uct_space.nii.gz  /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_blockface_deformed_in_uct_space.nii.gz
+  356  bash -xe reproduce.sh 
+  357  ll
+  358  vim reproduce.sh 
+  359  bash -xe reproduce.sh 
+  360  bash -xe reproduce.sh 
+  361  cp /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_blockface_in_uct_space.nii.gz  /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration/02_02_NN2_blockface_deformed_in_uct_space.nii.gz
+  362  bash -xe reproduce.sh 
+  363  bash -xe reproduce.sh 
+  364  svn status
+  365  svn ci -m"Updating the figures."
+  366  pwd
+  367  ls -la
+  368  pwed
+  369  pwd
+  370  sudo apt-get install kdenlive
+  371  sudo apt-get purge melt
+  372  sudo apt-get install kdenlive
+  373  kdenlive
+  374  screen -r
+  375  cd possum/
+  376  source setenv.sh 
+  377  ll specimen_processing/
+  378  bash -xe specimen_processing/process_02_02_NN2_final_prepare.sh 
+  379  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  380  bash -xe specimen_processing/process_02_02_NN2_final_prepare.sh 
+  381  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  382  bash -xe specimen_processing/process_02_02_NN2_final_prepare.sh 
+  383  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  384  bash -xe specimen_processing/process_02_02_NN2_final_prepare.sh 
+  385  cd
+  386  cd whole_amygdala/
+  387  cd specimen_processing/
+  388  ll
+  389  svn cp R601_preprocess.py amy_preprocess.py
+  390  CD ../
+  391  cd ../
+  392  python processing_supplement/R601_preprocess.py
+  393  python processing_supplement/amy_preprocess.py
+  394  python specimen_processing/amy_preprocess.py 
+  395  cd
+  396  cd 3dbrainatlases/
+  397  source setbarenv.sh 
+  398  cd am
+  399  cd 
+  400  cd am
+  401  cd whole_amygdala/
+  402  python specimen_processing/amy_preprocess.py 
+  403  echo $PYTHONPATH 
+  404  ll /home/pmajka/Dropbox/python_multiprocessing_tests/framework
+  405  echo $PYTHONPATH 
+  406  python specimen_processing/amy_preprocess.py 
+  407  python specimen_processing/amy_preprocess.py 
+  408  python specimen_processing/amy_preprocess.py 
+  409  python specimen_processing/amy_preprocess.py 
+  410  python specimen_processing/amy_preprocess.py 
+  411  python specimen_processing/amy_preprocess.py 
+  412  screen -r
+  413  screen -r
+  414  cd whole_amygdala/
+  415  ll
+  416  pwd
+  417  ls -la
+  418  cd specimen_processing/
+  419  ll
+  420  grep histology_masks.nii.gz *
+  421  vim amy_preprocess.py 
+  422  cd ../
+  423  cd
+  424  cd 3dbrainatlases/
+  425  source setbarenv.sh 
+  426  cd
+  427  cd whole_amygdala/
+  428  python specimen_processing/amy_preprocess.py 
+  429  vim specimen_processing/amy_preprocess.py 
+  430  python specimen_processing/amy_preprocess.py 
+  431  source setenv.sh 
+  432  python specimen_processing/amy_preprocess.py 
+  433  vim specimen_processing/amy_preprocess.py 
+  434  python specimen_processing/amy_preprocess.py 
+  435  vim specimen_processing/amy_preprocess.py 
+  436  pwd
+  437  pedf
+  438  pwd
+  439  ls -la
+  440  pwd
+  441  cd scripts/
+  442  ll
+  443  cd ../specimen_processing/
+  444  ll
+  445  vim process_R604_histology.sh process_amy_preprocess.sh
+  446  vim process_R604_histology.sh process_amy_preprocess.sh
+  447  vim process_R604_histology.sh process_amy_preprocess.sh
+  448  screen -r
+  449  screen -r
+  450  screen -r
+  451  ll
+  452  screen -r
+  453  screen -rd
+  454  screen -r
+  455  gnome-panel
+  456  vncviewer localhost:1
+  457  hotp
+  458  htop
+  459  vncserver -geometry 1600x1200 -depth 24 :1
+  460  rm -rfv /tmp/.X1-lock
+  461  vncserver -geometry 1600x1200 -depth 24 :1
+  462  rm -rfv /tmp/.X11-unix/X1
+  463  vncserver -geometry 1600x1200 -depth 24 :1
+  464  screen -r
+  465  screen -r
+  466  cd
+  467  cd possum/
+  468  svn up
+  469  cd analysis/00_photo_pool/
+  470  cd 14_stereotaxic_cuts/
+  471  make
+  472  cd ../08_landmarks/
+  473  make
+  474  make _B
+  475  make _V
+  476  make -B
+  477  cd ../16_visualization_oblique/
+  478  ll
+  479  make -B
+  480  pwd
+  481  pwd
+  482  ls -la
+  483  pwd
+  484  screen -r
+  485  vncserver -geometry 1600x1200 -depth 24 :1
+  486  vncviewer localhost:1
+  487  screen 0r
+  488  screen -r
+  489  vncviewer localhost:1
+  490  vncviewer localhost:1
+  491  cd
+  492  cd possum/
+  493  ll
+  494  cd
+  495  cd possum/sc` cd possum/scripts/ ll `
+  496  cd possum/scripts/
+  497  vim unsharpMaskFilter.py 
+  498  pwd
+  499  gnome-panel&
+  500  ipython
+  501  cd 
+  502  convert poster_sztokholm_0.pdf -density 150 p.tiff
+  503  convert poster_sztokholm_0.pdf -density 300 p.tiff
+  504  convert poster_sztokholm_0.pdf -density 300 p.tiff
+  505  convert -density 150 poster_sztokholm_0.pdf p.tiff 
+  506  cd /home/pmajka/Downloads/MRI
+  507  ANTS -h
+  508  vim a.sh
+  509  cd /home/pmajka/Downloads/MRI
+  510  ll
+  511  c3d 3DRARE.Oriented.nii -resample-mm 0.2mm -o f.nii.gz
+  512  c3d 3DRARE.Oriented.nii -resample-mm 0.2x0.2x0.02mm -o f.nii.gz
+  513  c3d 3DRARE.Oriented.nii -resample-mm 0.2x0.2x0.2mm -o f.nii.gz
+  514  screen -r
+  515  cd /home/pmajka/Downloads/MRI
+  516  ll
+  517  c3d m.nii -scale -1 -shift 255 -clip 0 255 -o neg.nii.gz 
+  518  c3d m.nii -scale 255 -scale -1 -shift 255 -clip 0 255 -o neg.nii.gz 
+  519  c3d m.nii -scale 200 -scale -1 -shift 255 -clip 0 255 -o neg.nii.gz 
+  520  c3d m.nii -scale 100 -scale -1 -shift 255 -clip 0 255 -o neg.nii.gz 
+  521  vim a.sh 
+  522  cd /home/pmajka/Downloads/MRI
+  523  ll
+  524  bash -xe a.sh 
+  525  WarpImageMultiTransform 
+  526  bash -xe a.sh 
+  527  ll
+  528  c3d f.nii.gz -scale 255 -scale -1 -shift 255 -o neg.nii.gz
+  529  c3d m.nii.gz -scale 255 -scale -1 -shift 255 -o neg.nii.gz
+  530  bash -xe a.sh 
+  531  bash -xe a.sh 
+  532  bash -xe a.sh 
+  533  ll
+  534  ll
+  535  bash -xe a.sh 
+  536  bash -xe a.sh 
+  537  bash -xe a.sh 
+  538  ANTSJacobian 3 
+  539  ANTSJacobian 3 dWarp.nii.gz dJ
+  540  bash -xe a.sh 
+  541  bash -xe a.sh 
+  542  ANTSJacobian 3 dWarp.nii.gz dJ
+  543  bash -xe a.sh 
+  544  bash -xe a.sh 
+  545  vim a.sh 
+  546  bash -xe a.sh 
+  547  vim a.sh 
+  548  bash -xe a.sh 
+  549  vim a.sh 
+  550  bash -xe a.sh 
+  551  vim a.sh 
+  552  bash -xe a.sh 
+  553  vim a.sh 
+  554  bash -xe a.sh 
+  555  vim a.sh 
+  556  bash -xe a.sh 
+  557  bash -xe a.sh 
+  558  sudo asu
+  559  sudo su
+  560  c3d /dev/shm/dt1/08_intermediate_results/intermediate_output__0002.nii.gz ~/a.vtk
+  561  c3d /dev/shm/dt1/08_intermediate_results/intermediate_output__0002.nii.gz -reslice-mm 0.03x0.03x0.03mm -o ~/a.vtk
+  562  c3d /dev/shm/dt1/08_intermediate_results/intermediate_output__0002.nii.gz -resample-mm 0.03x0.03x0.03mm -o ~/a.vtk
+  563  c3d /dev/shm/dt1/08_intermediate_results/intermediate_output__0002.nii.gz -resample-mm 0.03x0.1x0.03mm -o ~/a.vtk
+  564  c3d /dev/shm/dt1/08_intermediate_results/intermediate_output__0002.nii.gz -resample-mm 100%x500%x100% -o ~/a.vtk
+  565  c3d /dev/shm/dt1/08_intermediate_results/intermediate_output__0002.nii.gz -resample 100%x500%x100% -o ~/a.vtk
+  566  c3d /dev/shm/dt1/08_intermediate_results/intermediate_output__0002.nii.gz -interpolation Cubic -resample 100%x500%x100% -o ~/a.vtk
+  567  screen -r
+  568  cd
+  569  cd Downloads/marmoset_atlas/
+  570  ll
+  571  cd images/
+  572  ll
+  573  c3d oo.nii.gz -resample-mm 0.5x0.5x0.5mm -o a.nii.gz; is a.nii.gz
+  574  c3d oo.nii.gz -resample-mm 0.01x0.1x0.1mm -o a.nii.gz; is a.nii.gz
+  575  c3d oo.nii.gz -resample-mm 0.1x0.1x0.1mm -o a.nii.gz; is a.nii.gz
+  576  cd
+  577  cd 3dbrainatlases/
+  578  source 
+  579  source setbarenv.sh 
+  580  source setbarenv.sh 
+  581  make mbisc_11 
+  582  make mbisc_11 
+  583  make mbisc_11 
+  584  make mbisc_11 
+  585  make mbisc_11 
+  586  make mbisc_11 
+  587  screen -r
+  588  cd Dropbox/python_multiprocessing_tests/framework/
+  589  ll
+  590  cd tests/deformable_reconstruction_test_1/
+  591  ll
+  592  git checkout test2.sh
+  593  bash -xe test2.sh 
+  594  ll
+  595  vim test2.sh 
+  596  bash -xe test2.sh 
+  597  cd
+  598  cd possum/
+  599  source setenv.sh 
+  600  cd ~/Dropbox/python_multiprocessing_tests/framework/tests/deformable_reconstruction_test_1/
+  601  bash -xe test2.sh 
+  602  bash -xe test2.sh 
+  603  screen -r
+  604  screen -r
+  605  screen -r
+  606  sudo su
+  607  screen -r
+  608  screen -r
+  609  screen -r
+  610  cd
+  611  screen -rt
+  612  screen -r
+  613  cd
+  614  cd whole_amygdala/
+  615  svn status
+  616  svn up
+  617  svn status
+  618  svn add processing_supplement/amy_assignment.csv
+  619  svn ci -m"Just backing up the scripts" specimen_processing/amy_preprocess.py specimen_processing/process_amy_preprocess.sh scripts/linear_registration_coarse_fine.py processing_supplement/amy_assignment.csv processing_supplement/amy_assgnment.csv processing_supplement/amy_slices_masks.nii.gz
+  620  is -s processing_supplement/amy_slices_masks.nii.gz -m data/amy/05_slices_raw/__temp__slices.nii.gz 
+  621  is -s processing_supplement/amy_slices_masks.nii.gz -m 
+  622  c3d processing_supplement/amy_slices_masks.nii.gz -region 0x0x0vox 100%x100%x50vox -type uchar -o x.nii.gz
+  623  is -s x.nii.gz -m data/amy/05_slices_raw/__temp__slices.nii.gz 
+  624  is x.nii.gz 
+  625  c3d processing_supplement/amy_slices_masks.nii.gz -region 0x0x0vox 100%x50voxx100% -type uchar -o x.nii.gz
+  626  is -s x.nii.gz -m data/amy/05_slices_raw/__temp__slices.nii.gz 
+  627  is x.nii.gz 
+  628  c3d processing_supplement/amy_slices_masks.nii.gz -region 0x0x0vox 100%x50voxx100% -type uchar -o x.nii.gz
+  629  is -s x.nii.gz -m data/amy/05_slices_raw/__temp__slices.nii.gz 
+  630  is x.nii.gz 
+  631  is processing_supplement/amy_slices_masks.nii.gz
+  632  c3d processing_supplement/amy_slices_masks.nii.gz -region 0x0x0vox 100%x64%x100% -type uchar -o x.nii.gz
+  633  is processing_supplement/amy_slices_masks.nii.gz
+  634  is x.nii.gz 
+  635  is -s x.nii.gz -m data/amy/05_slices_raw/__temp__slices.nii.gz 
+  636  cp x.nii.gz processing_supplement/amy_slices_masks.nii.gz 
+  637  screen -r
+  638  screen -r
+  639  screen -r
+  640  screen -r
+  641  ll /dev/shm/dt2/08_intermediate_results/
+  642  ll -t /dev/shm/dt2/08_intermediate_results/
+  643  ll -t /dev/shm/dt2/08_intermediate_results/intermediate_output__0007.nii.gz
+  644  is /dev/shm/dt2/08_intermediate_results/intermediate_output__0007.nii.gz
+  645  cd po
+  646  cd
+  647  cd possum/
+  648  pwd
+  649  ls -las
+  650  ffmpeg -i coronal_flyby.avi -vf scale="'if(gt(a,16/9),1280,-1)':'if(gt(a,16/9),-1,720)'" output_720x720_boxed.avi
+  651  ffmpeg -i coronal_flyby.avi -vf scale="'if(gt(a,4/3),320,-1)':'if(gt(a,4/3),-1,240)'" output_320x240_boxed.avi
+  652  ffmpeg -i coronal_flyby.avi -vf scale="'if(gt((iw/ih),4/3),320,-1)':'if(gt((iw/ih),4/3),-1,240)'" output_320x240_boxed.avi
+  653  ffmpeg -y -i coronal_flyby.avi -vf scale="'if(gt((iw/ih),4/3),320,-1)':'if(gt((iw/ih),4/3),-1,240)'" output_320x240_boxed.avi
+  654  ffmpeg -i coronal_flyby.avi -vf scale="if(gt(a,4/3),320,-1):if(gt(a,4/3),-1,240)" output_320x240_boxed.avi
+  655  ffmpeg -i coronal_flyby.avi -vf scale="'if(gt(a,4/3),320,-1)':'if(gt(a,4/3),-1,240)'" output_320x240_boxed.avi
+  656  ffmpeg -y -i coronal_flyby.avi -vf scale="'if(gt(a,4/3),320,-1)':'if(gt(a,4/3),-1,240)'" output_320x240_boxed.avi
+  657  ffmpeg -y -i coronal_flyby.avi -vf scale=320,-1 output_320x240_boxed.avi
+  658  ffmpeg -y -i coronal_flyby.avi -vf scale='320,-1 output_320x240_boxed.avi
+  659  ffmpeg -y -i coronal_flyby.avi -vf scale="320,-1" output_320x240_boxed.avi
+  660  ffmpeg -y -i coronal_flyby.avi -vf scale="320,3" output_320x240_boxed.avi
+  661  ffmpeg -y -i coronal_flyby.avi -vf scale="'320,-1'" output_320x240_boxed.avi
+  662  ffmpeg -y -i coronal_flyby.avi -vf scale='320,-1' output_320x240_boxed.avi
+  663  pwd
+  664  ffmpeg -y -i coronal_flyby.avi -vf scale='320:-1' output_320x240_boxed.avi
+  665  ffmpeg -y -i coronal_flyby.avi -vf scale="'if(gt(a,4/3),320,-1)':'if(gt(a,4/3),-1,240)'" output_320x240_boxed.avi
+  666  ffmpeg -y -i coronal_flyby.avi -vf scale="'if(gt(a,4/3),320,-1):if(gt(a,4/3),-1,240)'" output_320x240_boxed.avi
+  667  ffmpeg -y -i coronal_flyby.avi -vf scale=720:-1  output_320x240_boxed.avi
+  668  ffmpeg -y -i coronal_flyby.avi -vf scale=720:-1 -vf 'pad=1280:720:(ow-iw)/2:(oh-ih)/2:white  output_320x240_boxed.avi
+  669  ffmpeg -y -i coronal_flyby.avi -vf scale=720:-1 -vf 'pad=1280:720:(ow-iw)/2:(oh-ih)/2:white'  output_320x240_boxed.avi
+  670  ffmpeg -y -i coronal_flyby.avi -vf scale=1280:-1 -vf 'pad=1280:720:(ow-iw)/2:(oh-ih)/2:white'  output_320x240_boxed.avi
+  671  ffmpeg -y -i coronal_flyby.avi -vf scale=1280:720 -vf 'pad=1280:720:(ow-iw)/2:(oh-ih)/2:white'  output_320x240_boxed.avi
+  672  ffmpeg -y -i coronal_flyby.avi -vf scale=1280:720   output_320x240_boxed.avi
+  673  ffmpeg -y -i coronal_flyby.avi -vf scale=1280:720   output_320x240_boxed.avi
+  674  ffmpeg -y -i coronal_flyby.avi -vf scale=1280:720   output_320x240_boxed.avi
+  675  screen -r
+  676  screen -r
+  677  cd 
+  678  cd 3dbrainatlases/
+  679  svn up
+  680  svn up
+  681  svn up
+  682  svn up
+  683  svn status
+  684  svn ci -m"Updating CAFinfo file for the marmoset parser - adding licencing information" auxiliary_scripts/caf-info/mbisc_11_3dbar-info.txt
+  685  screen -r
+  686  cd
+  687  cd pio
+  688  cd possum/
+  689  ll
+  690  svn status
+  691  inkscape processing_supplement/02_02_NN2_auxiliary_files/02_02_NN2_flyby_coronal_overlay.svg
+  692  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  693  vim specimen_processing/process_02_02_NN2_final_prepare.sh 
+  694  cd po
+  695  cd
+  696  cd possum/s
+  697  cd possum/
+  698  history
+  699  history
+  700  ffmpeg -y -i horizontal_flyby.avi -vf scale=1280:720   output_320x240_boxed.avi
+  701  ffmpeg -y -i horizontal_flyby.avi -vf scale=1280:720 -vcodec same  output_320x240_boxed.avi
+  702  ffmpeg -y -i horizontal_flyby.avi -vf scale=1280:720 -vcodec copy  output_320x240_boxed.avi
+  703  ffmpeg -i horizontal_flyby.avi -s hd720 -c:v libx264 -crf 23 -c:a aac -strict -2 output.mp4
+  704  ffmpeg -i coronal_flyby.avi -s hd720 -c:v libx264 -crf 23 -c:a aac -strict -2 output.mp4
+  705  ffmpeg -i coronal_flyby.avi -filter:v scale=720:-1 -acodec copy output.mkv
+  706  ffmpeg -i coronal_flyby.avi -filter:v scale="trunc(oh*a*2)/2:720" -acodec copy output.mkv
+  707  ffmpeg -i coronal_flyby.avi -filter:v scale="1280:trunc(ow/a/2)*2" -acodec copy output.mkv
+  708  screen -r
+  709  screen -r
+  710  cd
+  711  cdp opos.pvsm 
+  712  cd o
+  713  cd possum/
+  714  ll
+  715  cd
+  716  cd possum/
+  717  ll
+  718  vim specimen_processing/
+  719  ffmpeg 
+  720  ffmpeg --help
+  721  ffmpeg --h
+  722  ffmpeg -h
+  723  ffmpeg --help
+  724  sudo apt-get install libavcodec-extra-53
+  725  sudo apt-get install libavcodec-extra-52 
+  726  sudo apt-get install libavcodec-extra-52 libavcodec51 libavcodec-unstripped-52 libavcodec52 libavcodec-dev
+  727  sudo apt-get install libavcodec-extra-52  libavcodec-unstripped-52 libavcodec52 libavcodec-dev
+  728  sudo apt-get install libfaac0 
+  729  sudo apt-get install libfaac-dev 
+  730  cd
+  731  cd Downloads/
+  732  mkdir ffmpeg
+  733  subversion git cmake build-essential yasm libqt4-dev kdelibs5-dev libsdl1.2-dev libsdl-image1.2-dev libxml2-dev libx264-dev libtheora-dev libxvidcore-dev libogg-dev libvorbis-dev libschroedinger-dev libmp3lame-dev libfaac-dev libfaad-dev libgsm1-dev libopencore-amrnb-dev libopencore-amrwb-dev libsamplerate0-dev libjack-dev libsox-dev ladspa-sdk swh-plugins libmad0-dev libpango1.0-dev
+  734  svn git cmake build-essential yasm libqt4-dev kdelibs5-dev libsdl1.2-dev libsdl-image1.2-dev libxml2-dev libx264-dev libtheora-dev libxvidcore-dev libogg-dev libvorbis-dev libschroedinger-dev libmp3lame-dev libfaac-dev libfaad-dev libgsm1-dev libopencore-amrnb-dev libopencore-amrwb-dev libsamplerate0-dev libjack-dev libsox-dev ladspa-sdk swh-plugins libmad0-dev libpango1.0-dev
+  735  apt-get install subversion git cmake build-essential yasm libqt4-dev kdelibs5-dev libsdl1.2-dev libsdl-image1.2-dev libxml2-dev libx264-dev libtheora-dev libxvidcore-dev libogg-dev libvorbis-dev libschroedinger-dev libmp3lame-dev libfaac-dev libfaad-dev libgsm1-dev libopencore-amrnb-dev libopencore-amrwb-dev libsamplerate0-dev libjack-dev libsox-dev ladspa-sdk swh-plugins libmad0-dev libpango1.0-dev
+  736  sudo apt-get install subversion git cmake build-essential yasm libqt4-dev kdelibs5-dev libsdl1.2-dev libsdl-image1.2-dev libxml2-dev libx264-dev libtheora-dev libxvidcore-dev libogg-dev libvorbis-dev libschroedinger-dev libmp3lame-dev libfaac-dev libfaad-dev libgsm1-dev libopencore-amrnb-dev libopencore-amrwb-dev libsamplerate0-dev libjack-dev libsox-dev ladspa-sdk swh-plugins libmad0-dev libpango1.0-dev
+  737  sudo apt-get install subversion cmake build-essential yasm libqt4-dev kdelibs5-dev libsdl1.2-dev libsdl-image1.2-dev libxml2-dev libx264-dev libtheora-dev libxvidcore-dev libogg-dev libvorbis-dev libschroedinger-dev libmp3lame-dev libfaac-dev libfaad-dev libgsm1-dev libopencore-amrnb-dev libopencore-amrwb-dev libsamplerate0-dev libjack-dev libsox-dev ladspa-sdk swh-plugins libmad0-dev libpango1.0-dev
+  738  cd kdenlive/
+  739  ll
+  740  cd scripts/
+  741  ll
+  742  vim script001.sh
+  743  bash -xe script001.sh
+  744  vim script001.sh
+  745  ll
+  746  vim script001.sh.mlt
+  747  bash -xe script001.sh
+  748  ", "cqp=0", "me_method=dia", "subq=1", "qmin=10", "qcomp=0.6", "qdiff=4", "qmax=51", "partitions=-parti4x4-parti8x8-partp4x4-partp8x8-partb8x8", "trellis=1", "aspect=%dar") , -1 , -1 
+  749  Started render process:  "/usr/bin/melt"   "/home/pmajka/Downloads/kdenlive/scripts/script001.sh.mlt -profile hdv_720_25p -consumer avformat:/home/pmajka/Downloads/kdenlive/untitled.mp4 progress=1 f=mp4 acodec=aac ab=384k ar=48000 ac=2 pix_fmt=yuv420p vcodec=libx264 cqp=0 me_method=dia subq=1 qmin=10 qcomp=0.6 qdiff=4 qmax=51 partitions=-parti4x4-parti8x8-partp4x4-partp8x8-partb8x8 trellis=1 aspect=%dar"
+  750  bash -xe script001.sh
+  751  "/usr/bin/melt" , "hdv_720_25p" , "avformat" , "-" , "/home/pmajka/Downloads/kdenlive/scripts/script001.sh.mlt" , "/home/pmajka/Downloads/kdenlive/untitled.mp4" , () , ("f=mp4", "acodec=aac", "ab=384k", "ar=48000", "ac=2", "pix_fmt=yuv420p", "vcodec=libx264", "cqp=0", "me_method=dia", "subq=1", "qmin=10", "qcomp=0.6", "qdiff=4", "qmax=51", "partitions=-parti4x4-parti8x8-partp4x4-partp8x8-partb8x8", "trellis=1", "aspect=%dar") , -1 , -1 
+  752  /usr/bin/melt   "/home/pmajka/Downloads/kdenlive/scripts/script001.sh.mlt -profile hdv_720_25p -consumer avformat:/home/pmajka/Downloads/kdenlive/untitled.mp4 progress=1 f=mp4 acodec=aac ab=384k ar=48000 ac=2 pix_fmt=yuv420p vcodec=libx264 cqp=0 me_method=dia subq=1 qmin=10 qcomp=0.6 qdiff=4 qmax=51 partitions=-parti4x4-parti8x8-partp4x4-partp8x8-partb8x8 trellis=1 aspect=%dar
+  753  "
+  754  ll
+  755  rm script001.sh
+  756  bash -xe script001.sh
+  757  ll
+  758  rm script001.sh.mlt 
+  759  ll
+  760  vim script001.sh
+  761  bash -xe script001.sh
+  762  vim script001.sh
+  763  ll
+  764  vim script001.sh
+  765  bash -xe script001.sh
+  766  ll
+  767  rm f\=mp4 
+  768  ll
+  769  cd /home/pmajka/Downloads/kdenlive/scripts
+  770  ll
+  771  pwd
+  772  vim script001.sh
+  773  cd /home/pmajka/Downloads/kdenlive/scripts
+  774  ll
+  775  bash 0xe script002.sh
+  776  bash -xe script002.sh
+  777  bash -xe script002.sh
+  778  vim script002.sh
+  779   /usr/bin/kdenlive_render /usr/bin/melt hdv_720_25p avformat - /home/pmajka/Downloads/kdenlive/scripts/script002.sh.mlt /home/pmajka/Downloads/kdenlive/untitled.mp4 f=mp4 hq=1 acodec=aac ab=384k ar=48000 pix_fmt=yuv420p vcodec=libx264 minrate=0 b=25000k b_strategy=1 subcmp=2 cmp=2 coder=1 flags=+loop flags2=dct8x8 qmax=51 subq=7 qmin=10 qcomp=0.6 qdiff=4 trellis=1 aspect=@16/9 pass=2
+  780  /usr/bin/melt hdv_720_25p avformat - /home/pmajka/Downloads/kdenlive/scripts/script002.sh.mlt /home/pmajka/Downloads/kdenlive/untitled.mp4 f=mp4 hq=1 acodec=aac ab=384k ar=48000 pix_fmt=yuv420p vcodec=libx264 minrate=0 b=25000k b_strategy=1 subcmp=2 cmp=2 coder=1 flags=+loop flags2=dct8x8 qmax=51 subq=7 qmin=10 qcomp=0.6 qdiff=4 trellis=1 aspect=@16/9 pass=2
+  781  /usr/bin/kdenlive_render /usr/bin/melt hdv_720_25p avformat - /home/pmajka/Downloads/kdenlive/scripts/script002.sh.mlt /home/pmajka/Downloads/kdenlive/untitled.mp4 f=mp4 hq=1 acodec=aac ab=384k ar=48000 pix_fmt=yuv420p vcodec=libx264 minrate=0 b=25000k b_strategy=1 subcmp=2 cmp=2 coder=1 flags=+loop flags2=dct8x8 qmax=51 subq=7 qmin=10 qcomp=0.6 qdiff=4 trellis=1 aspect=@16/9 pass=2
+  782   /usr/bin/kdenlive_render /usr/bin/melt hdv_720_25p avformat - /home/pmajka/Downloads/kdenlive/scripts/script002.sh.mlt /home/pmajka/Downloads/kdenlive/untitled.mp4 f=mp4 hq=1 acodec=aac ab=384k ar=48000 pix_fmt=yuv420p vcodec=libx264 minrate=0 b=25000k b_strategy=1 subcmp=2 cmp=2 coder=1 flags=+loop flags2=dct8x8 qmax=51 subq=7 qmin=10 qcomp=0.6 qdiff=4 trellis=1 aspect=@16/9 pass=2
+  783  screen -r
+  784  cd 
+  785  cd possum/
+  786  cd processing_supplement/
+  787  ll
+  788  svn status
+  789  svn revert 02_02_NN2_auxiliary_files/02_02_NN2_flyby_coronal_overlay.svg 02_02_NN2_auxiliary_files/02_02_NN2_flyby_sagittal_overlay.svg 02_02_NN2_auxiliary_files/02_02_NN2_flyby_horizontal_overlay.svg 02_02_NN2_auxiliary_files/02_02_NN2_flyby_intro.svg
+  790  svn add 02_02_NN2_auxiliary_files/02_02_NN2_2013_rotate_overlay.svg 02_02_NN2_auxiliary_files/02_02_NN2_2013_flyby_intro.svg 02_02_NN2_auxiliary_files/02_02_NN2_2013_flyby_front_page_overlay.svg
+  791  svn ci -m"Updating the figures"
+  792  cd 3dbrainatlases/
+  793  source setbarenv.sh 
+  794  vim bin/parsers/mbisc_11/user_data.py
+  795  svn up
+  796  svn up
+  797  vim bin/parsers/mbisc_11/user_data.py
+  798  vim bin/parsers/mbisc_11/user_data.py
+  799  vim bin/parsers/mbisc_11/__init__.py 
+  800  svn status
+  801  svn up
+  802  vim bin/parsers/mbisc_11/__init__.py 
+  803  pyhton bin/parsers/mbisc_11/__init__.py 
+  804  python bin/parsers/mbisc_11/__init__.py 
+  805  ipython
+  806  source setbarenv.sh 
+  807  ipython
+  808  mkdir sql
+  809  cd sql
+  810  svn co http://svn.3dbar.org/svn/3dBrainAtlasReconstructor/trunk .
+  811  ll
+  812  cd ../
+  813  ipython
+  814  vim bin/parsers/mbisc_11/__init__.py 
+  815  vim bin/parsers/mbisc_11/user_data.py
+  816  ipython
+  817  python bin/parsers/mbisc_11/__init__.py 
+  818  ipython
+  819  svn status
+  820  svn revert bin/parsers/mbisc_11/__init__.py
+  821  svn ci -m"Final updates for the marmoset parser's metadata. Let's hope so." bin/parsers/mbisc_11/user_data.py
+  822  svn status
+  823  tstamp 
+  824  vim .bashrc 
+  825  screen -r
+  826  tstamp 
+  827  screen -r
+  828  cd
+  829  screen -r
+  830  cd Dropbox/
+  831  ll
+  832  is -m 2013-09-24_19-51-intermediate_output_0009.nii.gz -o intermediate_output__0014.nii.gz
+  833  pwd
+  834  cd
+  835  pwd
+  836  ssh neuroinf3
+  837  ssh -X neuroinf3
+  838  povray +H
+  839  povray -h
+  840  povray +H | grep X
+  841  povray -H | grep X
+  842  povray -h | grep X
+  843  cd whole_amygdala/
+  844  source setenv.sh 
+  845  ls
+  846  source setenv.sh 
+  847  bash -xe specimen_processing/process_amy_preprocess.sh 
+  848  ap
+  849  source setenv.sh 
+  850  bash -xe specimen_processing/process_amy_preprocess.sh 
+  851   -xe specimen_processing/process_amy_preprocess.sh 
+  852  p
+  853  ap
+  854  ll
+  855  vim specimen_processing/process_amy_preprocess.sh 
+  856  source setenv.sh 
+  857  chmod +x scripts/stackHistogramMatching.py 
+  858  source setenv.sh 
+  859  stackHistogramMatching.py 
+  860  stackHistogramMatching.py -h
+  861  ll
+  862  pwd
+  863  ll
+  864  vim specimen_processing/process_amy_preprocess.sh 
+  865  vim specimen_processing/process_amy_preprocess.sh 
+  866  bash -xe specimen_processing/process_amy_preprocess.sh 
+  867  bash -xe specimen_processing/process_amy_preprocess.sh 
+  868  bash -xe specimen_processing/process_amy_preprocess.sh 
+  869  bash -xe specimen_processing/process_amy_preprocess.sh 
+  870  bash -xe specimen_processing/process_amy_preprocess.sh 
+  871  bash -xe specimen_processing/process_amy_preprocess.sh 
+  872  bash -xe specimen_processing/process_amy_preprocess.sh 
+  873  bash -xe specimen_processing/process_amy_preprocess.sh 
+  874  bash -xe specimen_processing/process_amy_preprocess.sh 
+  875  bash -xe specimen_processing/process_amy_preprocess.sh 
+  876  bash -xe specimen_processing/process_amy_preprocess.sh 
+  877  bash -xe specimen_processing/process_amy_preprocess.sh 
+  878  bash -xe specimen_processing/process_amy_preprocess.sh 
+  879  bash -xe specimen_processing/process_amy_preprocess.sh 
+  880  vim specimen_processing/process_amy_preprocess.sh 
+  881  bash -xe specimen_processing/process_amy_preprocess.sh 
+  882  vim specimen_processing/process_amy_preprocess.sh 
+  883  bash -xe specimen_processing/process_amy_preprocess.sh 
+  884  vim specimen_processing/process_amy_preprocess.sh 
+  885  bash -xe specimen_processing/process_amy_preprocess.sh 
+  886  vim specimen_processing/process_amy_preprocess.sh 
+  887  bash -xe specimen_processing/process_amy_preprocess.sh 
+  888  vim specimen_processing/process_amy_preprocess.sh 
+  889  bash -xe specimen_processing/process_amy_preprocess.sh 
+  890  bash -xe specimen_processing/process_amy_preprocess.sh 
+  891  bash -xe specimen_processing/process_amy_preprocess.sh 
+  892  bash -xe specimen_processing/process_amy_preprocess.sh 
+  893  bash -xe specimen_processing/process_amy_preprocess.sh 
+  894  bash -xe specimen_processing/process_amy_preprocess.sh 
+  895  bash -xe specimen_processing/process_amy_preprocess.sh 
+  896  bash -xe specimen_processing/process_amy_preprocess.sh 
+  897  bash -xe specimen_processing/process_amy_preprocess.sh 
+  898  bash -xe specimen_processing/process_amy_preprocess.sh 
+  899  bash -xe specimen_processing/process_amy_preprocess.sh 
+  900  vim specimen_processing/process_amy_preprocess.sh 
+  901  bash -xe specimen_processing/process_amy_preprocess.sh 
+  902  vim specimen_processing/process_amy_preprocess.sh 
+  903  bash -xe specimen_processing/process_amy_preprocess.sh 
+  904  vim specimen_processing/process_amy_preprocess.sh 
+  905  bash -xe specimen_processing/process_amy_preprocess.sh 
+  906  vim specimen_processing/process_amy_preprocess.sh 
+  907  bash -xe specimen_processing/process_amy_preprocess.sh 
+  908  vim specimen_processing/process_amy_preprocess.sh 
+  909  bash -xe specimen_processing/process_amy_preprocess.sh 
+  910  ll
+  911  vim specimen_processing/process_amy_preprocess.sh 
+  912  bash -xe specimen_processing/process_amy_preprocess.sh 
+  913  bash -xe specimen_processing/process_amy_preprocess.sh 
+  914  vim specimen_processing/process_amy_preprocess.sh 
+  915  bash -xe specimen_processing/process_amy_preprocess.sh 
+  916  vim /home/pmajka/whole_amygdala/processing_supplement/amy_assgnment.csv
+  917  bash -x specimen_processing/process_amy_preprocess.sh 
+  918  ll /home/pmajka/whole_amygdala/data/amy//00_src/9AMYA1.tif
+  919  vim /home/pmajka/whole_amygdala/processing_supplement/amy_assgnment.csv
+  920  bash -x specimen_processing/process_amy_preprocess.sh 
+  921  vim specimen_processing/process_amy_preprocess.sh 
+  922  bash -xe specimen_processing/process_amy_preprocess.sh 
+  923  vim specimen_processing/process_amy_preprocess.sh 
+  924  bash -xe specimen_processing/process_amy_preprocess.sh 
+  925  vim specimen_processing/process_amy_preprocess.sh 
+  926  bash -xe specimen_processing/process_amy_preprocess.sh 
+  927  vim specimen_processing/process_amy_preprocess.sh 
+  928  bash -xe specimen_processing/process_amy_preprocess.sh 
+  929  vim specimen_processing/process_amy_preprocess.sh 
+  930  vim specimen_processing/process_amy_preprocess.sh 
+  931  bash -xe specimen_processing/process_amy_preprocess.sh 
+  932  vim specimen_processing/process_amy_preprocess.sh 
+  933  vim specimen_processing/amy_preprocess.py 
+  934  python specimen_processing/amy_preprocess.py 
+  935  cd
+  936  cd 3dbrainatlases/
+  937  source setbarenv.sh 
+  938  cd
+  939  cd whole_amygdala/
+  940  python specimen_processing/amy_preprocess.py
+  941  vim specimen_processing/amy_preprocess.py 
+  942  vim specimen_processing/process_amy_preprocess.sh 
+  943  vim specimen_processing/amy_preprocess.py 
+  944  vim specimen_processing/amy_preprocess.py 
+  945  python specimen_processing/amy_preprocess.py
+  946  vim specimen_processing/amy_preprocess.py 
+  947  python specimen_processing/amy_preprocess.py
+  948  vim specimen_processing/amy_preprocess.py 
+  949  python specimen_processing/amy_preprocess.py
+  950  vim specimen_processing/amy_preprocess.py 
+  951  python specimen_processing/amy_preprocess.py
+  952  vim specimen_processing/amy_preprocess.py 
+  953  bash -xe specimen_processing/process_amy_preprocess.sh 
+  954  vim specimen_processing/process_amy_preprocess.sh 
+  955  bash -xe specimen_processing/process_amy_preprocess.sh 
+  956  vim specimen_processing/process_amy_preprocess.sh 
+  957  bash -xe specimen_processing/process_amy_preprocess.sh 
+  958  vim specimen_processing/process_amy_preprocess.sh 
+  959  bash -xe specimen_processing/process_amy_preprocess.sh 
+  960  vim specimen_processing/process_amy_preprocess.sh 
+  961  bash -xe specimen_processing/process_amy_preprocess.sh 
+  962  svn diff /home/pmajka/whole_amygdala/processing_supplement/amy_assgnment.csv
+  963  bash -xe specimen_processing/process_amy_preprocess.sh 
+  964  vim specimen_processing/process_amy_preprocess.sh 
+  965  bash -xe specimen_processing/process_amy_preprocess.sh 
+  966  vim specimen_processing/process_amy_preprocess.sh 
+  967  bash -xe specimen_processing/process_amy_preprocess.sh 
+  968  vim specimen_processing/process_amy_preprocess.sh 
+  969  bash -xe specimen_processing/process_amy_preprocess.sh 
+  970  vim specimen_processing/process_amy_preprocess.sh 
+  971  pwd
+  972  vim specimen_processing/process_amy_preprocess.sh 
+  973  bash -xe specimen_processing/process_amy_preprocess.sh 
+  974  vim specimen_processing/process_amy_preprocess.sh 
+  975  bash -xe specimen_processing/process_amy_preprocess.sh 
+  976  vim specimen_processing/process_amy_preprocess.sh 
+  977  vim specimen_processing/process_amy_preprocess.sh 
+  978  bash -xe specimen_processing/process_amy_preprocess.sh 
+  979  cd
+  980  scp neuroinf3:*.mpg
+  981  scp neuroinf3:*.mpg .
+  982  pwd
+  983  pwd1
+  984  ls -la
+  985  screen -r
+  986  screen -r
+  987  pwd
+  988  screen -r
+  989  screen -r
+  990  screen -r
+  991  cd
+  992  cd Downloads/
+  993  ll
+  994  antsaffine.sh 3
+  995  antsaffine.sh 3 0000.nii.gz 0001.nii.gz d1_ 1
+  996  ll
+  997  c3d 0000.nii.gz -origin 0 -o s0001.nii.gz
+  998  c3d 0000.nii.gz -origin 0mm -o s0001.nii.gz
+  999  c3d 0000.nii.gz -origin 0mm -type uchar -o s0001.nii.gz
+ 1000  c3d 0000.nii.gz -origin 0mm -type uchar -o s0000.nii.gz
+ 1001  c3d 0001.nii.gz -origin 0mm -type uchar -o s0001.nii.gz
+ 1002  c3d 0002.nii.gz -origin 0mm -type uchar -o s0002.nii.gz
+ 1003  c3d 0003.nii.gz -origin 0mm -type uchar -o s0003.nii.gz
+ 1004  c3d 0004.nii.gz -origin 0mm -type uchar -o s0004.nii.gz
+ 1005  antsaffine.sh 3 s0000.nii.gz s0001.nii.gz d1_ 1
+ 1006  antsaffine.sh 3 s0000.nii.gz s0002.nii.gz d1_ 1
+ 1007  antsaffine.sh 3 s0000.nii.gz s0003.nii.gz d1_ 1
+ 1008  antsaffine.sh 3 s0000.nii.gz s0003.nii.gz d3_ 1
+ 1009  antsaffine.sh 3 s0000.nii.gz s0002.nii.gz d2_ 1
+ 1010  antsaffine.sh 3 s0000.nii.gz s0001.nii.gz d1_ 1
+ 1011  c3d s0000.nii.gz s0001.nii.gz -reslice-identity -type uchar  -o ss0001.nii.gz
+ 1012  antsaffine.sh 3 s0000.nii.gz s0001.nii.gz d1_ 1
+ 1013  sudo su
+ 1014  sudo su
+ 1015  sudo su
+ 1016  dcm2nii
+ 1017  cd
+ 1018  cd Downloads/
+ 1019  ll
+ 1020  ll
+ 1021  screen -r
+ 1022  cd /home/pmajka/possum/data/02_02_NN2/79_final_results/01_results_in_srs
+ 1023  ll
+ 1024  is -m blockface_volume_affine_in_srs.nii.gz -o mri_reference_in_srs.nii.gz
+ 1025  cd 
+ 1026  cd Dropbox/
+ 1027  ll
+ 1028  c3d intermediate_output__0014.nii.gz -o ~/a.nii.gz
+ 1029  c3d intermediate_output__0014.nii.gz -o ~/a.vtk
+ 1030  cd /home/pmajka/possum/analysis/00_photo_pool/03_deformable_reconstruction_results
+ 1031  make
+ 1032  make
+ 1033  cd po
+ 1034  cd
+ 1035  cd possum/
+ 1036  svn status
+ 1037  svn status
+ 1038  cd analysis/
+ 1039  asvn status
+ 1040  svn status
+ 1041  svn status | grep svg
+ 1042  geeqie 00_photo_pool/08_landmarks/landmark_discrepancy_summary.svg
+ 1043  svn status | grep svg
+ 1044  svm ci -m"Updating nonlinear comparision with literature."  00_photo_pool/03_deformable_reconstruction_results/brain_outline_ju_et_al.svg
+ 1045  svm ci -m"Updating nonlinear comparision with literature."  00_photo_pool/03_deformable_reconstruction_results/brain_outline_ju_et_al.svg 
+ 1046  svn ci -m"Updating nonlinear comparision with literature."  00_photo_pool/03_deformable_reconstruction_results/brain_outline_ju_et_al.svg 
+ 1047  make
+ 1048  ll
+ 1049  cd 00_photo_pool/03_deformable_reconstruction_results/
+ 1050  make
+ 1051  make -B
+ 1052  c3d 
+ 1053  c3d -h
+ 1054  cd 
+ 1055  cd Dropbox/python_multiprocessing_tests/framework/
+ 1056  ll
+ 1057  kk
+ 1058  ll
+ 1059  ll
+ 1060  vim a.py 
+ 1061  python a.py 
+ 1062  vim a.py 
+ 1063  python a.py 
+ 1064  vim a.py 
+ 1065  python a.py 
+ 1066  vim a.py 
+ 1067  cd possum/analysis/00_photo_pool/03_deformable_reconstruction_results/
+ 1068  ll
+ 1069  svn sttatus
+ 1070  svn status
+ 1071  svn add aba.png 
+ 1072  svn ci -m"Updating nonlinear comparision with literature." aba.png 
+ 1073  latex2rtf
+ 1074  sudo apt-get install latex2rtf
+ 1075  dc
+ 1076  cd
+ 1077  cd Dropbox/Dokumenty/PhD/
+ 1078  ll
+ 1079  latex2rtf 
+ 1080  man latex2rtf 
+ 1081  latex2rtf phd.tex
+ 1082  latex2rtf phd.tex
+ 1083  man latex2rtf 
+ 1084  tex2rft
+ 1085  tex2rrf
+ 1086  tex2rtf
+ 1087  sudo apt-get install tex2rtf
+ 1088  tex2doc
+ 1089  latex2doc
+ 1090  sudo apt-get install tex2rtf
+ 1091  latex2rtf phd.tex
+ 1092  pdf2rtf
+ 1093  pdftortf
+ 1094  latex2rtf mypaper
+ 1095  latex2rtf phd.tex
+ 1096  latex2rtf phd.tex
+ 1097  latex2html 
+ 1098  sudo apt-get install latex2html
+ 1099  latex2html phd.tex 
+ 1100  html2rtf
+ 1101  html2trf
+ 1102  html2rtf
+ 1103  sudo apt-get install html2rtf
+ 1104  m
+ 1105  hevea
+ 1106  sudo apt-get install hevea
+ 1107  hevea phd.tex 
+ 1108  cd /home/pmajka/possum/data/02_02_NN2/79_final_results/02_processing_and_evaluatation
+ 1109  ll
+ 1110  is -o nissl_stain_affine.nii.gz -m nissl_stain_deformed.nii.gz
+ 1111  cd /home/pmajka/Dropbox/Dokumenty/PhD
+ 1112  ll
+ 1113  grep Torrence1998 *
+ 1114  grep Torrence1998 *
+ 1115  pwd
+ 1116  pwd
+ 1117  grep Torrence1998 *
+ 1118  grep Torrence1998 *
+ 1119  pwd
+ 1120  grep Torrence1998 *
+ 1121  grep Torrence1998 *
+ 1122  htop
+ 1123  cd
+ 1124  cd whole_amygdala/data/amy/00_src
+ 1125  ll
+ 1126  ll
+ 1127  for i in `ls -1`;
+ 1128  ls -1
+ 1129  for i in `ls -1 *.tif`;
+ 1130  for i in `ls -1 *.tif`
+ 1131  ls -1 *.tif
+ 1132  for i in `ls -1 *.tif`; do convert $i -sample 10% y/$i; done
+ 1133  pwd
+ 1134  ls -1 x/*.tif
+ 1135  rm y/*
+ 1136  basename x/x/3AMYB2.tif
+ 1137  basename x/x/3AMYB2.tif .TIF
+ 1138  basename x/x/3AMYB2.tif .tif
+ 1139  for i in `ls -1 *.tif`; do convert $i -sample 10% y/`basename $i .tif`; done
+ 1140  rm y/*
+ 1141  for i in `ls -1 x/*.tif`; do convert $i -sample 10% y/`basename $i .tif`; done
+ 1142  sudo su
+ 1143  cd /home/pmajka/y
+ 1144  ll
+ 1145  ls -1
+ 1146  for i in `ls -1`; mv $i $i.tif; done;
+ 1147  for i in `ls -1`;do mv $i $i.tif; done;
+ 1148  ll
+ 1149  ssh 192.168.1.193
+ 1150  ll
+ 1151  pwd
+ 1152  pwd
+ 1153  ssh neuroinf3 
+ 1154  pwd
+ 1155  htop
+ 1156  htop
+ 1157  ll
+ 1158  rm CB_15x8.tif 
+ 1159  pwd
+ 1160  ls -la
+ 1161  pwd
+ 1162  ls -la
+ 1163  screen -r
+ 1164  screen -r
+ 1165  screen -r
+ 1166  screen -r
+ 1167  cd po
+ 1168  cd
+ 1169  cd possum/
+ 1170  ll
+ 1171  cd
+ 1172  cd possum/specimen_processing/
+ 1173  ll
+ 1174  vim process_02_02_NN2.sh
+ 1175  cd 
+ 1176  cd possum/
+ 1177  ll
+ 1178  vim specimen_processing/process_02_02_NN2_blockface.sh 
+ 1179  screen -r
+ 1180  screen -r
+ 1181  screen -r
+ 1182  sudo su
+ 1183  creen -r
+ 1184  screen -r
+ 1185  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/data_integration_scheme
+ 1186  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/data_integration_scheme
+ 1187  ll
+ 1188  make
+ 1189  man inkscape
+ 1190  make
+ 1191  make -B
+ 1192  man inkscape
+ 1193  make -B
+ 1194  pwd
+ 1195  ls -la
+ 1196  screen -r
+ 1197  screen -r
+ 1198  ll /dev/shm/dt2/09_final_deformation/0041.nii.gz
+ 1199  PrintHeader 0003.nii.gz
+ 1200  PrintHeader /dev/shm/dt2/09_final_deformation/0041.nii.gz
+ 1201  cd whole_amygdala/data/amy/05_slices_raw/
+ 1202  ;;
+ 1203  ll
+ 1204  cd ../00_src
+ 1205  cd ../00_src_extended/
+ 1206  ll
+ 1207  PrintHeader a0001.nii.gz
+ 1208  c3d -info
+ 1209  c3d  a0001.nii.gz -info
+ 1210  c3d  a0001.nii.gz -full-info
+ 1211  c3d  a0001.nii.gz -info-full
+ 1212  ll
+ 1213  ll
+ 1214  ll
+ 1215  ll
+ 1216  ll
+ 1217  ll
+ 1218  ll
+ 1219  ll
+ 1220  ll
+ 1221  screen -r
+ 1222  screen -r
+ 1223  cd
+ 1224  cd possum/
+ 1225  cd
+ 1226  cd Dropbox/atlas_mozgu_oposa/
+ 1227  ll
+ 1228  cd 2013_09_17_possum_paper
+ 1229  cd figures/
+ 1230  ll
+ 1231  ll
+ 1232  cd stereotaxic_reference_system
+ 1233  make
+ 1234  ll
+ 1235  rm reproduce.sh
+ 1236  ll
+ 1237  vim Makefile 
+ 1238  make
+ 1239  vim Makefile 
+ 1240  make
+ 1241  cd 
+ 1242  cd Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/stereotaxic_reference_system/
+ 1243  ll
+ 1244  ll
+ 1245  geeqie .
+ 1246  geeqie .
+ 1247  ll
+ 1248  rm establishing_stereotaxic_coordiates.svg
+ 1249  geeqie .
+ 1250  man inkscape
+ 1251  ll
+ 1252  vim ma
+ 1253  vim Makefile 
+ 1254  make
+ 1255  make -B
+ 1256  vim Makefile 
+ 1257  make -B
+ 1258  make -B
+ 1259  screen -r
+ 1260  cd /home/pmajka/Dropbox/Photos/oposy_skrawki/nietoperz
+ 1261  ll
+ 1262  is 
+ 1263  is -s manual_segmentation.nii.gz  -m nietoperz_finished_uchar.nii.gz 
+ 1264  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/data_integration_scheme
+ 1265  naje
+ 1266  make 
+ 1267  make 
+ 1268  make  -B
+ 1269          ii=`printf %04d $i`
+ 1270          ij=`printf %04d $[$i-1]`
+ 1271          c2d ${DIR_LOCAL_SRC_EXTENDED}/${ii}.jpg             -spacing 0.058823529x0.058823529mm -popas r             ${DIR_LOCAL_SRC_EXTENDED}/${ii}.jpg  -spacing 0.058823529x0.058823529mm -popas m             -clear             -push r -push m             -reslice-itk /home/pmajka/whole_amygdala/data/amy/26_histology_to_atlas_registration/05_coarse_fine_transf/tr_${ii}_Affine.txt             -spacing 0.001176471x0.001176471mm -resample-mm 0.002x0.002mm             -type uchar -o ${DIR_LOCAL_SRC_EXTENDED}/a${ii}.jpg
+ 1272          c2d ${DIR_LOCAL_SRC_EXTENDED}/a${ii}.jpg             -spacing 0.097777778x0.097777778mm             -type uchar -o ${DIR_LOCAL_SRC_EXTENDED}/a${ii}.nii.gz
+ 1273          WarpImageMultiTransform 2             ${DIR_LOCAL_SRC_EXTENDED}/a${ii}.nii.gz             ${DIR_LOCAL_SRC_EXTENDED}/b${ii}.nii.gz             -R ${DIR_LOCAL_SRC_EXTENDED}/a${ii}.nii.gz             /dev/shm/dt2/09_final_deformation/${ij}.nii.gz
+ 1274          c2d ${DIR_LOCAL_SRC_EXTENDED}/b${ii}.nii.gz             -region 2500x4600vox 1200x1200vox             -type uchar -o ${DIR_LOCAL_SRC_EXTENDED}/b${ij}.jpg
+ 1275          rm -rfv ${DIR_LOCAL_SRC_EXTENDED}/b${ii}.nii.gz ${DIR_LOCAL_SRC_EXTENDED}/a${ii}.nii.gz
+ 1276      done
+ 1277  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/data_integration_scheme
+ 1278  majke
+ 1279  make
+ 1280  make -B
+ 1281  pwd
+ 1282  pwd
+ 1283  ls -la
+ 1284  pwd
+ 1285  ls -la
+ 1286  ls -la
+ 1287  ls -la
+ 1288  pwd
+ 1289  make
+ 1290  make
+ 1291  make
+ 1292  cd
+ 1293  cd Downloads/
+ 1294  ll
+ 1295  ll
+ 1296  cd other/johnson_et_al_2012/
+ 1297  ll
+ 1298  c3d FA.nii.gz -type uchar -o FA.vtk
+ 1299  pwd
+ 1300  vncviewer localhost:1
+ 1301  locate latex
+ 1302  whereis latex
+ 1303  whereis ghostscript
+ 1304  whereis gs
+ 1305  cd 
+ 1306  cd possum/
+ 1307  ll
+ 1308  ll
+ 1309  cd analysis/02_02_NN2/
+ 1310  ll
+ 1311  cd 82_deformable_reconstruction_evaluation/
+ 1312  ll
+ 1313  cd 10_data_and_plots_myelin_final/
+ 1314  ll
+ 1315  make
+ 1316  cd ../21
+ 1317  cd ../21_description/
+ 1318  ll
+ 1319  make
+ 1320  svn up
+ 1321  cd
+ 1322  cd possum/
+ 1323  svn up
+ 1324  cd analysis/00_photo_pool/08_landmarks/
+ 1325  make
+ 1326  cd 
+ 1327  cd possum/scripts/
+ 1328  ll
+ 1329  ll
+ 1330  cd ../specimen_processing/
+ 1331  ll
+ 1332  vim process_02_02_NN2_deformable_registration_nissl_step_1.sh
+ 1333  pwd
+ 1334  ls -la
+ 1335  vim 02_02_NN2_deformable_registration_myelin.sh
+ 1336  vim 02_02_NN2_deformable_registration_nissl.sh
+ 1337  vim 02_02_NN2_deformable_registration_myelin.sh
+ 1338  pwd
+ 1339  ANTS -h
+ 1340  ANTS --help\
+ 1341  ANTS -h
+ 1342  ANTS -h | less
+ 1343  ANTS -h
+ 1344  ANTS -h
+ 1345  ANTS -h | grep subsam
+ 1346  cd
+ 1347  cd possum/data/
+ 1348  ll
+ 1349  cd ../specimen_processing/
+ 1350  ll
+ 1351  vim 02_02_NN2_deformable_registration_nissl.sh
+ 1352  vim 02_02_NN2_deformable_registration_myelin.sh 
+ 1353  itksnap 
+ 1354  cd /home/pmajka/Downloads/tk/DICOM/STD00001
+ 1355  kll
+ 1356  ll
+ 1357  dcm2niii
+ 1358  dcm2nii
+ 1359  /home/pmajka/Downloads/dcm2nii 
+ 1360  ll
+ 1361  /home/pmajka/Downloads/dcm2nii  .
+ 1362  /home/pmajka/Downloads/dcm2nii .
+ 1363  cd ../
+ 1364  ll
+ 1365  cd ..
+ 1366  kll
+ 1367  ll
+ 1368  /home/pmajka/Downloads/dcm2nii /home/pmajka/Downloads/tk/DICOM/STD00001
+ 1369  ll
+ 1370  ls -la
+ 1371  cdl
+ 1372  cd 
+ 1373  ll
+ 1374  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/o20131007_165032ZATOKIs005a002A.nii.gz -o ~/a.nii.gz
+ 1375  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/o20131007_165032ZATOKIs005a002A.nii.gz -o ~/vtk
+ 1376  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/o20131007_165032ZATOKIs005a002A.nii.gz -o ~/a.vtk
+ 1377  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/
+ 1378  ll /home/pmajka/Downloads/tk/DICOM/STD00001/
+ 1379  rm /home/pmajka/Downloads/tk/DICOM/STD00001/o20131007_165032ZATOKIs003a002.nii.gz
+ 1380  rm /home/pmajka/Downloads/tk/DICOM/STD00001/o20131007_165032ZATOKIs004a002.nii.gz
+ 1381  ll
+ 1382  ll /home/pmajka/Downloads/tk/DICOM/STD00001/
+ 1383  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/20131007_165032ZATOKIs003a002.nii.gz ~/a.nii.gz
+ 1384  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/20131007_165032ZATOKIs003a002.nii.gz ~/a.vtk
+ 1385  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/20131007_165032ZATOKIs003a002.nii.gz -resample-mm 0.3mm -type ~/a.vtk
+ 1386  c3d /home/pmajka/Downloads/tk/DICOM/STD00001/20131007_165032ZATOKIs003a002.nii.gz -resample-mm 0.3mm -o ~/a.vtk
+ 1387  ll
+ 1388  ls -la
+ 1389  ll
+ 1390  cd
+ 1391  ll
+ 1392  ll
+ 1393  ll
+ 1394  ll
+ 1395  screen -r
+ 1396  cd 
+ 1397  cd possum/
+ 1398  ll
+ 1399  ll
+ 1400  cd processing_supplement/
+ 1401  ll
+ 1402  cd ../specimen_processing/
+ 1403  ll
+ 1404  vim process_02_02_NN2_deformable_registration_myelin_all.sh
+ 1405  vim process_02_02_NN2_deformable_registration_myelin_step_1.sh
+ 1406  screen -r
+ 1407  ll
+ 1408  cd
+ 1409  ll
+ 1410  cd wjh
+ 1411  pwd
+ 1412  ls -la
+ 1413  cd whole_amygdala/
+ 1414  ll
+ 1415  pwd
+ 1416  ls -la
+ 1417  itksnap  o
+ 1418  itksnap  o.vtk 
+ 1419  rm o.vtk 
+ 1420  c3d ll
+ 1421  c3d oo.nii.gz -type uchr -o oo.vtk
+ 1422  ll
+ 1423  c3d oo.nii.gz -type uchar -o oo.vtk
+ 1424  c3d intermediate_output__0009.nii.gz -type uchar -o intermediate_output__0009.vtk
+ 1425  cd
+ 1426  cd whole_amygdala/
+ 1427  cd scripts/
+ 1428  ll
+ 1429  pwd
+ 1430  ls -la
+ 1431  cd ../sp[
+ 1432  cd ../specimen_processing/
+ 1433  ll
+ 1434  vim process_R603_histology.sh
+ 1435  pwd
+ 1436  ls -la
+ 1437  pwd
+ 1438  ls- la
+ 1439  pwd
+ 1440  ls -la
+ 1441  pwd
+ 1442  pwd
+ 1443  ls -la
+ 1444  vim process_R603_histology.sh
+ 1445  vim process_R601_all.sh
+ 1446  vim R603_preprocess.py
+ 1447  cd ../
+ 1448  ll
+ 1449  c3d intermediate_output__0009.nii.gz -resample-mm 0.2mm -o r.nii.gz
+ 1450  itksnap r.nii.gz 
+ 1451  c3d intermediate_output__0009.nii.gz -resample-mm 0.15mm -o r.nii.gz
+ 1452  itksnap r.nii.gz 
+ 1453  c3d intermediate_output__0009.nii.gz -resample-mm 0.1mm -o r.nii.gz
+ 1454  itksnap r.nii.gz 
+ 1455  pwd
+ 1456  ls -la
+ 1457  pwd
+ 1458  pwd
+ 1459  ls -la
+ 1460  pwed
+ 1461  ls -l
+ 1462  pwd
+ 1463  ls -la
+ 1464  pwd
+ 1465  ls -la
+ 1466  ls -lah
+ 1467  rm intermediate_output__0009.
+ 1468  rm intermediate_output__0009.vtk 
+ 1469  ll
+ 1470  ls -la
+ 1471  ls -lah
+ 1472  itksnap oo.
+ 1473  itksnap oo.vtk 
+ 1474  c3d oo.vtk -resample-mm 0.1mm -o a.nii.gz
+ 1475  is a.nii.gz 
+ 1476  c3d oo.vtk -resample-mm 0.11mm -o a.nii.gz
+ 1477  c3d oo.vtk -resample-mm 0.05mm -o a.nii.gz
+ 1478  c3d oo.vtk -resample-mm 0.11mm -o a.nii.gz
+ 1479  c3d oo.vtk -resample-mm 0.05mm -o a.nii.gz
+ 1480  is a.nii.gz 
+ 1481  pwd
+ 1482  ls -la
+ 1483  pwd
+ 1484  ls -la
+ 1485  pwd
+ 1486  pwd
+ 1487  ls -la
+ 1488  rm a.nii.gz 
+ 1489  ll
+ 1490  rm oo.vtk 
+ 1491  ll
+ 1492  rm r.nii.gz 
+ 1493  ll
+ 1494  rm prawa_amygdala.nii.gz 
+ 1495  is oo.nii.gz 
+ 1496  pwd
+ 1497  pwds
+ 1498  pwd
+ 1499  ls -la
+ 1500  pwd
+ 1501  ls -la
+ 1502  pwd
+ 1503  ls -la
+ 1504  pwd
+ 1505  cd
+ 1506  cd Downloads/
+ 1507  ll
+ 1508  c3d 20131007_165032ZATOKIs003a002.nii.gz -o a.vtk
+ 1509  cd
+ 1510  cd whole_amygdala/
+ 1511  ll
+ 1512  svn status
+ 1513  svn diff specimen_processing/R603_preprocess.py
+ 1514  ll
+ 1515  svn ci -m"After the final reconstruction of the amy1"
+ 1516  screen -r
+ 1517  fusermount -u -z internal
+ 1518  ll
+ 1519  cd internal/
+ 1520  ll
+ 1521  history
+ 1522  history | grep sshfs
+ 1523  ssh nicluster1 
+ 1524  sshfs nicluster1:/mnt/internal/projects/atlasing internal/
+ 1525  cd
+ 1526  sshfs nicluster1:/mnt/internal/projects/atlasing internal
+ 1527  cd internal/
+ 1528  ll
+ 1529  ssh 192.168.1.193
+ 1530  ssh 192.168.1.193
+ 1531  ssh 192.168.1.204
+ 1532  ssh 192.168.1.201
+ 1533  ssh 192.168.1.193
+ 1534  ssh nicluster1 
+ 1535  screen -r
+ 1536  cd
+ 1537  pp
+ 1538  ssh 3dbarservice@3dbar-service 
+ 1539  ssh neuroinf4 
+ 1540  cd
+ 1541  cd possum/
+ 1542  ll
+ 1543  svn up
+ 1544  cd 02_02_NN2/82_deformable_reconstruction_evaluation/21_description/tabelka_nissl.svg
+ 1545  cd analysis/02_02_NN2/82_deformable_reconstruction_evaluation/21_description/tabelka_nissl.svg
+ 1546  cd analysis/02_02_NN2/82_deformable_reconstruction_evaluation/21_description/
+ 1547  ake
+ 1548  make
+ 1549  cd
+ 1550  cd possum/
+ 1551  cd  analysis/00_photo_pool/
+ 1552  make
+ 1553  cd analysis/00_photo_pool/16_visualization_oblique/
+ 1554  cd
+ 1555  cd possum/
+ 1556  cd analysis/00_photo_pool/16_visualization_oblique/
+ 1557  make
+ 1558  ll
+ 1559  cd
+ 1560  cd whole_amygdala/
+ 1561  ll
+ 1562  ls -la
+ 1563  cd
+ 1564  pwsd
+ 1565  pwd
+ 1566  ls -la
+ 1567  cd
+ 1568  cd 
+ 1569  pd
+ 1570  p
+ 1571  ls -la
+ 1572  pwd
+ 1573  ls -la
+ 1574  cd
+ 1575  cd whole_amygdala/
+ 1576  ll
+ 1577  cd
+ 1578  cd possum/
+ 1579  ll
+ 1580  cd 
+ 1581  cd Dropbox/python_multiprocessing_tests/framework/`
+ 1582  ll
+ 1583  cd Dropbox/python_multiprocessing_tests/framework/
+ 1584  ll
+ 1585  pwd
+ 1586  ls -la
+ 1587  vim tests/minimum_deformation_template_test_1/
+ 1588  vim tests/minimum_deformation_template_test_1/
+ 1589  cd  tests/minimum_deformation_template_test_1/
+ 1590  ll
+ 1591  vim run_test3.sh
+ 1592  cd ../deformable_reconstruction_test_1/
+ 1593  ll
+ 1594  vim test3_sh
+ 1595  vim test2_.sh
+ 1596  bash -xe test2_.sh
+ 1597  pwd
+ 1598  pwd
+ 1599  ls- la
+ 1600  ls -la
+ 1601  pwd
+ 1602  pwd
+ 1603  ls- la
+ 1604  ls- la
+ 1605  ls- la
+ 1606  ls -la
+ 1607  pwd
+ 1608  pwd 
+ 1609  ls -la
+ 1610  pwd
+ 1611  pwd 
+ 1612  ls -la
+ 1613  cd
+ 1614  cd whole_amygdala/
+ 1615  ll
+ 1616  svn staus
+ 1617  svn status
+ 1618  rm amy_
+ 1619  rm amy_fine 
+ 1620  ls -la
+ 1621  pwd
+ 1622  ls -la
+ 1623  cd
+ 1624  cd whole_amygdala/
+ 1625  ll
+ 1626  ped
+ 1627  pwd
+ 1628  ls -la
+ 1629  wpd
+ 1630  pwd
+ 1631  ls -la
+ 1632  cd
+ 1633  pwd
+ 1634  ls -la
+ 1635  cd whole_amygdala/
+ 1636  svn status
+ 1637  svn copy http://svn.3dbar.org/svn/possum_scripts/branches/whole_rat_connectivity_izakiewicz/ http://svn.3dbar.org/svn/possum_scripts/tags/amy_1_finished
+ 1638  cd possum/
+ 1639  ll
+ 1640  screen -r
+ 1641  screen -r
+ 1642  cd possum/
+ 1643  svn uop
+ 1644  svn up
+ 1645  pwd 
+ 1646  ls -la
+ 1647  pwd
+ 1648  cd bin/
+ 1649  ll
+ 1650  ll
+ 1651  vim capture.sh 
+ 1652  ll
+ 1653  vim rotate.sh 
+ 1654  cd
+ 1655  cd 3dbrainatlases/
+ 1656  ll
+ 1657  vim Makefile
+ 1658  pwd
+ 1659  cd
+ 1660  cd 
+ 1661  bin 
+ 1662  cd bin
+ 1663  grep ssh *
+ 1664  ll
+ 1665  grep scp *
+ 1666  cd
+ 1667  cd 3dbrainatlases/
+ 1668  grep scp *
+ 1669  grep -r scp *
+ 1670  grep -r scp .
+ 1671  cd /home/pmajka/possum/data/OP3_Opos2_NN3-DTI4__E13_P4_2.16.756.5.5.100.707089.26092.1361192978.4362
+ 1672  ll
+ 1673  itksnap 
+ 1674  ssh 192.168.1.193
+ 1675  ll
+ 1676  ssh 192.168.1.193
+ 1677  ssh 192.168.1.193
+ 1678  WarpImageMultiTransform 
+ 1679  pd
+ 1680  pwd
+ 1681  cd po
+ 1682  cd possum/
+ 1683  source setenv.sh 
+ 1684  bash -xe specimen_processing/process_02_02_NN2_coregistration_with_uct.sh
+ 1685  CopyImageHeaderInformation 
+ 1686  bash -xe specimen_processing/process_02_02_NN2_coregistration_with_uct.sh
+ 1687  bash -xe specimen_processing/process_02_02_NN2_coregistration_with_uct.sh
+ 1688  bash -xe specimen_processing/process_02_02_NN2_coregistration_with_uct.sh
+ 1689  bash -xe specimen_processing/process_02_02_NN2_coregistration_with_uct.sh
+ 1690  bash -xe specimen_processing/process_02_02_NN2_coregistration_with_uct.sh
+ 1691  cd
+ 1692  cd 3dbrainatlases/
+ 1693  grep ssh *
+ 1694  grep -r ssh *
+ 1695  grep -r ssh .
+ 1696  ll
+ 1697  cd doc/
+ 1698  ll
+ 1699  cd api/
+ 1700  ll
+ 1701  cd ../
+ 1702  cd ../
+ 1703  ll
+ 1704  source setbarenv.sh 
+ 1705  make doc
+ 1706  ll
+ 1707  cd
+ 1708  cd possum/
+ 1709  source setenv.sh 
+ 1710  bash -xe process_02_02_NN2_final_results.sh
+ 1711  bash -xe specimen_processing/process_02_02_NN2_final_results.sh
+ 1712  cd possum/
+ 1713  ll
+ 1714  ll
+ 1715  cd specimen_processing/
+ 1716  ll
+ 1717  vim process_02_02_NN2_final_results.sh 
+ 1718  pwd
+ 1719  ls -la
+ 1720  vim process_02_02_NN2_final_prepare.sh
+ 1721  pwd
+ 1722  ls -la
+ 1723  vim process_02_02_NN2_coregistration_with_uct.sh
+ 1724  pwd
+ 1725  vim process_02_02_NN2_final_results.sh
+ 1726  vim process_02_02_NN2_coregistration_with_uct.sh
+ 1727  svndiff process_02_02_NN2_coregistration_with_uct.sh
+ 1728  svn diff process_02_02_NN2_coregistration_with_uct.sh
+ 1729  pwd
+ 1730  ls -la
+ 1731  vim process_02_02_NN2_final_results.sh 
+ 1732  vim process_02_02_NN2_final_results.sh 
+ 1733  cd
+ 1734  vim .bashrc 
+ 1735  cd possum/specimen_processing/
+ 1736  ll
+ 1737  vim process_02_02_NN2_coregistration_with_uct.sh
+ 1738  vim process_02_02_NN2_coregistration_with_uct.sh 
+ 1739  svn status
+ 1740  svn diff process_02_02_NN2_coregistration_with_uct.sh
+ 1741  svn status
+ 1742  svn diff process_02_02_NN2_final_results.sh
+ 1743  vim process_02_02_NN2_final_results.sh
+ 1744  bash -xe process_02_02_NN2_final_results.sh
+ 1745  cd ../
+ 1746  source setenv.sh 
+ 1747  bash -xe specimen_processing/process_02_02_NN2_final_results.sh
+ 1748  vim specimen_processing/process_02_02_NN2_final_results.sh
+ 1749  bash -xe specimen_processing/process_02_02_NN2_final_results.sh
+ 1750  vim specimen_processing/process_02_02_NN2_final_results.sh
+ 1751  bash -xe specimen_processing/process_02_02_NN2_final_results.sh
+ 1752  svn status
+ 1753  svn diff scripts/blockface_registration.py
+ 1754  svn status | grep sh
+ 1755  svn ci -m"ENCH: Transforming MRI48h to stereotaxic coordinates; Uploading the results to the server" specimen_processing/process_02_02_NN2_coregistration_with_uct.sh specimen_processing/process_02_02_NN2_final_results.sh
+ 1756  svn status | grep sh
+ 1757  vim blockface_registration_job_template_a.sh
+ 1758  pwd
+ 1759  cd /home/pmajka/possum/data/02_02_NN2/75_stereotaxic_coregistration
+ 1760  ll
+ 1761  ll
+ 1762  pwd 
+ 1763  ls -la 
+ 1764  pd 
+ 1765  pwd 
+ 1766  ls -la
+ 1767  is -o 02_02_NN2_mri48h_in_uct_space.nii.gz -m 02_02_NN2_nissl_deformed_in_uct_space.nii.gz
+ 1768  is -o 02_02_NN2_mri_in_uct_space.nii.gz -m 02_02_NN2_nissl_deformed_in_uct_space.nii.gz
+ 1769  cd 
+ 1770  cd possum/
+ 1771  ll
+ 1772  source setenv.sh 
+ 1773  bash -xe specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 1774  cd Dropbox/python_multiprocessing_tests/framework/
+ 1775  ll
+ 1776  python pos_slice_volume.py
+ 1777  python pos_slice_volume.py -h
+ 1778  python pos_slice_volume.py -h
+ 1779  python pos_slice_volume.py -h
+ 1780  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/
+ 1781  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 120 130 1 -o %04d.nii.gz -s 0 --shiftIndexes 1 
+ 1782  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 120 130 1 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1 
+ 1783  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1 
+ 1784  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  -h
+ 1785  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  -h
+ 1786  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 100 100
+ 1787  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 100 100
+ 1788  ipython
+ 1789  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 100 100
+ 1790  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 100 100
+ 1791  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 100 100
+ 1792  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 100 100
+ 1793  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 100 100
+ 1794  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 200 100 200 100
+ 1795  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  
+ 1796  python pos_slice_volume.py -i  /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin_deformed.nii.gz -r 20 160 10 -o ~/%04d.nii.gz -s 0 --shiftIndexes 1  --extractionROI 280 80 50 50
+ 1797  python pos_slice_volume.py -i  /home/pmajka/possum/data/02_02_NN2/72_multimodal_integration_linear_registration/02_02_NN2_nissl_rgb_lin_coreg.nii.gz -r 99 100 1 -o ~/%04d.nii.gz -s 2 --shiftIndexes 1  --extractionROI 200 250 50 50
+ 1798  python pos_slice_volume.py -i  /home/pmajka/possum/data/02_02_NN2/72_multimodal_integration_linear_registration/02_02_NN2_nissl_rgb_lin_coreg.nii.gz -r 99 100 1 -o ~/%04d.nii.gz -s 2 --shiftIndexes 1  --extractionROI 150 200 100 100
+ 1799  python pos_slice_volume.py -i  /home/pmajka/possum/data/02_02_NN2/72_multimodal_integration_linear_registration/02_02_NN2_nissl_rgb_lin_coreg.nii.gz -r 99 100 1 -o ~/%04d.nii.gz -s 2 --shiftIndexes 1  --extractionROI 200 250 100 100
+ 1800  python pos_slice_volume.py -i  /home/pmajka/possum/data/02_02_NN2/72_multimodal_integration_linear_registration/02_02_NN2_nissl_rgb_lin_coreg.nii.gz -r 99 100 1 -o ~/%04d.nii.gz -s 2 --shiftIndexes 1  --extractionROI 180 230 100 100
+ 1801  vim a.sh
+ 1802  python pos_slice_volume.py -i  /home/pmajka/possum/data/02_02_NN2/72_multimodal_integration_linear_registration/02_02_NN2_nissl_rgb_lin_coreg.nii.gz -r 99 100 1 -o ~/nissl.png -s 2 --shiftIndexes 1  --extractionROI 180 230 100 100
+ 1803  python pos_slice_volume.py -i  /home/pmajka/possum/data/02_02_NN2/72_multimodal_integration_linear_registration/02_02_NN2_nissl_rgb_lin_coreg.nii.gz -r 99 100 1 -o ~/nissl.png -s 2 --shiftIndexes 1  --extractionROI 180 230 100 100
+ 1804  vim a.sh
+ 1805  bash -xe a.
+ 1806  bash -xe a.sh 
+ 1807  vim a.sh
+ 1808  bash -xe a.sh 
+ 1809  vim a.sh
+ 1810  ll /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/mri.nii.gz
+ 1811  vim a.sh
+ 1812  ll /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz 
+ 1813  bash -xe a.sh 
+ 1814  pwd
+ 1815  ls -la
+ 1816  cd
+ 1817  ll
+ 1818  cd
+ 1819  cd possum/
+ 1820  ll
+ 1821  cd 
+ 1822  cd Dropbox/python_multiprocessing_tests/framework/
+ 1823  ll
+ 1824  vim a.sh 
+ 1825  bash -xe a.
+ 1826  bash -xe a.sh 
+ 1827  vim a.sh 
+ 1828  bash -xe a.sh 
+ 1829  ll
+ 1830  cd
+ 1831  CreateWarpedGridImage 
+ 1832  CreateWarpedGridImage 3 possum/data/02_02_NN2/74_deformable_multimodal_registration/02_02_NN2_nissl_to_mri_deformation_field.nii.gz 1 1 1 0.2 0.01
+ 1833  CreateWarpedGridImage 3 possum/data/02_02_NN2/74_deformable_multimodal_registration/02_02_NN2_nissl_to_mri_deformation_field.nii.gz o.nii.gz 1 1 1 0.2 0.01
+ 1834  CreateWarpedGridImage 3 possum/data/02_02_NN2/74_deformable_multimodal_registration/02_02_NN2_nissl_to_mri_deformation_field.nii.gz o.nii.gz 1x1x1 0.2 0.01
+ 1835  CreateWarpedGridImage 3 possum/data/02_02_NN2/74_deformable_multimodal_registration/02_02_NN2_nissl_to_mri_deformation_field.nii.gz o.nii.gz 1x1x1 0.2x0.2x0.2 0.01x0.01x0.1
+ 1836  CreateWarpedGridImage 3 possum/data/02_02_NN2/74_deformable_multimodal_registration/02_02_NN2_nissl_to_mri_deformation_field.nii.gz o.nii.gz 1x1x1 0.2x0.2x0.2 0.01x0.01x0.01
+ 1837  CreateWarpedGridImage 3 possum/data/02_02_NN2/74_deformable_multimodal_registration/02_02_NN2_nissl_to_mri_deformation_field.nii.gz o.nii.gz 1x1x1 0.02x0.02x0.02 0.01x0.01x0.01
+ 1838  cd possum/
+ 1839  ll
+ 1840  ll
+ 1841  cd
+ 1842  cd sp
+ 1843  ls -la
+ 1844  cd possum/specimen_processing/
+ 1845  ll
+ 1846  grep 72_multimodal_integration_linear_registration *
+ 1847  vim process_02_02_NN2_coregistration_with_uct.sh
+ 1848  grep 72_multimodal_integration_linear_registration *
+ 1849  vim process_02_02_NN2_coregistration_with_uct.sh
+ 1850  cd ../
+ 1851  svn revert specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 1852  cd
+ 1853  cd Dropbox/python_multiprocessing_tests/framework/
+ 1854  ll
+ 1855  vim pos_slice_volume.py
+ 1856  vim pos_slice_volume.py
+ 1857  cd
+ 1858  cd possum/
+ 1859  ll
+ 1860  cd specimen_processing/
+ 1861  ll
+ 1862  vim process_02_02_NN2_final_results.sh
+ 1863  svn status
+ 1864  grep 72*
+ 1865  grep 72* .
+ 1866  grep 71* .
+ 1867  grep 76* .
+ 1868  ll
+ 1869  grep 72_multimodal_integration_linear_registration* .
+ 1870  grep *72_multimodal_integration_linear_registration* .
+ 1871  grep 72_multimodal_integration_linear_registration* .
+ 1872  grep 72_multimodal_integration_linear_registration* 
+ 1873  grep *registration* 
+ 1874  grep *registration* .
+ 1875  ls -la
+ 1876  grep 02 *
+ 1877  grep 72 *
+ 1878  grep 72_ *
+ 1879  vim process_02_02_NN2_multimodal_prepare.sh 
+ 1880  vim a.
+ 1881  ll
+ 1882  vim process_02_02_NN2_multimodal_prepare.sh 
+ 1883  ipython
+ 1884  cd possum/
+ 1885  ll
+ 1886  cd analysis/00_photo_pool/
+ 1887  ll
+ 1888  svn up
+ 1889  ipython
+ 1890  ll
+ 1891  cd Dropbox/python_multiprocessing_tests/framework/
+ 1892  ll
+ 1893  pwd
+ 1894  ll
+ 1895  bash -xe a.sh
+ 1896  vim a.sg
+ 1897  vim a.sh
+ 1898  bash -xe a.sh
+ 1899  vim a.sh
+ 1900  bash -xe a.sh
+ 1901  vim a.sh
+ 1902  bash -xe a.sh
+ 1903  vim a.sh
+ 1904  bash -xe a.sh
+ 1905  vim a.sh
+ 1906  bash -xe a.sh
+ 1907  vim a.sh
+ 1908  bash -xe a.sh
+ 1909  vim a.sh
+ 1910  bash -xe a.sh
+ 1911  vim a.sh
+ 1912  bash -xe a.sh
+ 1913  vim a.sh
+ 1914  bash -xe a.sh
+ 1915  vim a.sh
+ 1916  bash -xe a.sh
+ 1917  vim a.sh
+ 1918  bash -xe a.sh
+ 1919  vim a.sh
+ 1920  bash -xe a.sh
+ 1921  vim a.sh
+ 1922  bash -xe a.sh
+ 1923  vim a.sh
+ 1924  bash -xe a.sh
+ 1925  vim a.sh
+ 1926  bash -xe a.sh
+ 1927  vim a.sh
+ 1928  bash -xe a.sh
+ 1929  c3d ~/o.nii.gz -type uchar -o ~/o.nii.gz
+ 1930  bash -xe a.sh
+ 1931  vim a.sh
+ 1932  bash -xe a.sh
+ 1933  vim pos_slice_volume.py
+ 1934  bash -xe a.sh
+ 1935  vim pos_slice_volume.py
+ 1936  bash -xe a.sh
+ 1937  vim pos_slice_volume.py
+ 1938  bash -xe a.sh
+ 1939  vim pos_slice_volume.py
+ 1940  vim pos_slice_volume.py
+ 1941  bash -xe a.sh
+ 1942  vim a.sh 
+ 1943  cp a.sh b.sh
+ 1944  vim b.sh
+ 1945  bash -xe a.sh 
+ 1946  bash -xe b.sh 
+ 1947  vim b.sh
+ 1948  bash -xe b.sh 
+ 1949  vim b.sh
+ 1950  bash -xe b.sh 
+ 1951  vim b.sh
+ 1952  bash -xe b.sh 
+ 1953  vim b.sh
+ 1954  bash -xe b.sh 
+ 1955  vim b.sh
+ 1956  bash -xe b.sh 
+ 1957  bash -xe b.sh 
+ 1958  vim b.sh
+ 1959  bash -xe b.sh 
+ 1960  vim b.sh
+ 1961  bash -xe b.sh 
+ 1962  vim b.sh
+ 1963  vim b.sh
+ 1964  bash -xe b.sh 
+ 1965  vim b.sh
+ 1966  bash -xe b.sh 
+ 1967  vim b.sh
+ 1968  bash -xe b.sh 
+ 1969  sudo su
+ 1970  cd possum/
+ 1971  ll
+ 1972  pwd
+ 1973  ls -la
+ 1974  cd
+ 1975  cd possum/
+ 1976  ll
+ 1977  pwd
+ 1978  ls -la
+ 1979  pwd
+ 1980  l s-la
+ 1981  ls -la
+ 1982  pwd
+ 1983  ls -l
+ 1984  cd
+ 1985  cd possum/data/
+ 1986  ll
+ 1987  pwd
+ 1988  ls -la
+ 1989  cd ../
+ 1990  ll
+ 1991  cd specimen_processing/
+ 1992  ll
+ 1993  history
+ 1994  cd ../
+ 1995  vim specimen_processing/process_02_02_NN2_final_results.sh
+ 1996  vim specimen_processing/process_02_02_NN2_multimodal_prepare.sh 
+ 1997  grep * 72_multimodal_integration_linear_registration
+ 1998  grep 72_multimodal_integration_linear_registration *
+ 1999  cd specimen_processing/
+ 2000  grep 72_multimodal_integration_linear_registration *
+ 2001  vim
+ 2002  vim process_02_02_NN2_coregistration_with_uct.sh
+ 2003  grep 72_multimodal_integration_linear_registration *
+ 2004  vim 
+ 2005  vim process_02_02_NN2_multimodal_prepare.sh
+ 2006  cd .../
+ 2007  cd ../
+ 2008  bash -xe specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 2009  cd ../
+ 2010  cd possum/
+ 2011  vim specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 2012  bash -xe specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 2013  vim specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 2014  bash -xe specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 2015  vim specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 2016  bash -xe specimen_processing/process_02_02_NN2_multimodal_prepare.sh
+ 2017  cd Dropbox/python_multiprocessing_tests/framework/
+ 2018  ll
+ 2019  ll
+ 2020  chmod +x pos_slice_volume.py
+ 2021  cd
+ 2022  pos_slice_volume.py 
+ 2023  cd ll
+ 2024  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/reconstruction_process
+ 2025  ll
+ 2026  bash -xe recreate_figures.sh 
+ 2027  vim recreate_figures.sh 
+ 2028  bash -xe recreate_figures.sh 
+ 2029  vim recreate_figures.sh 
+ 2030  bash -xe recreate_figures.sh 
+ 2031  vim recreate_figures.sh 
+ 2032  bash -xe recreate_figures.sh 
+ 2033  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/reconstruction_process
+ 2034  make 
+ 2035  make -B
+ 2036  ll
+ 2037  make -B
+ 2038  make 
+ 2039  make 
+ 2040  make -B
+ 2041  make -B
+ 2042  ll
+ 2043  ll
+ 2044  make -B
+ 2045  cd
+ 2046  cd Dropbox/python_multiprocessing_tests/framework/
+ 2047  ll
+ 2048  ll
+ 2049  vim pos_slice_volume.py
+ 2050  chomod +x Dropbox/python_multiprocessing_tests/framework/pos_slice_volume.py
+ 2051  chmod +x Dropbox/python_multiprocessing_tests/framework/pos_slice_volume.py
+ 2052  pos_slice_volume.py -h
+ 2053  pos_slice_volume.py -h
+ 2054  pwd
+ 2055  pos_slice_volume.py -h
+ 2056  ll
+ 2057  cd Dropbox/python_multiprocessing_tests/framework/
+ 2058  ll
+ 2059  pwd
+ 2060  cd ../doc/
+ 2061  ll
+ 2062  cd source/
+ 2063  ll
+ 2064  vim pos_slice_volume.rst
+ 2065  cd ../
+ 2066  ll
+ 2067  make
+ 2068  make html
+ 2069  pwd
+ 2070  ls -la
+ 2071  make html
+ 2072  cd ../
+ 2073  ll
+ 2074  cd framework/
+ 2075  ll
+ 2076  python pos_parameters.py
+ 2077  python pos_parameters.py
+ 2078  vim pos_pa
+ 2079  vim pos_parameters.py
+ 2080  cd ../../
+ 2081  ll;
+ 2082  cd python_multiprocessing_tests/
+ 2083  ll
+ 2084  cd doc/
+ 2085  make html
+ 2086  make html
+ 2087  ipython
+ 2088  pwd
+ 2089  ls -la
+ 2090  vncserver -kill :1
+ 2091  htop
+ 2092  gnome-panel
+ 2093  vncserver -kill :1
+ 2094  rm -rfv /home/pmajka/.vnc/neuroinf2:1.pid
+ 2095  htop
+ 2096  vncserver -geometry 1600x1200 -depth 24 :1
+ 2097  rm -rfv /tmp/.X1-lock
+ 2098  vncserver -geometry 1600x1200 -depth 24 :1
+ 2099  rm -rfv /tmp/.X11-unix/X1
+ 2100  vncserver -geometry 1600x1200 -depth 24 :1
+ 2101  cd /dev/sg
+ 2102  cd /dev/shm/
+ 2103  ll
+ 2104  ll
+ 2105  rm -rfv dt*
+ 2106  ll
+ 2107  rm -rfv deformation_field_visualizer_2013-10-14-13_05-37_13847/
+ 2108  ll
+ 2109  sudo su
+ 2110  cd Dropbox/python_multiprocessing_tests/framework/
+ 2111  ll
+ 2112  ll
+ 2113  vim pos_slice_volume.py
+ 2114  ll
+ 2115  vim set_orient.py 
+ 2116  vim itkSpatialOrientation.py
+ 2117  ll
+ 2118  vim itkSpatialOrientation.py
+ 2119  vim pos_itk_core.py
+ 2120  vim pos_slice_volume.py
+ 2121  pwd
+ 2122  ll
+ 2123  vim pos_wrapper
+ 2124  vim pos_wrapper_skel.py
+ 2125  ll
+ 2126  git status
+ 2127  sudo su
+ 2128  wpd
+ 2129  cd Dropbox/
+ 2130  ll
+ 2131  python plot_hier.py 
+ 2132  cd
+ 2133  cd 3dbrainatlases/
+ 2134  source setbarenv.sh 
+ 2135  cd
+ 2136  cd Dropbox/
+ 2137  python plot_hier.py 
+ 2138  python plot_hier.py > x.svg
+ 2139  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/structures_volumes
+ 2140  make
+ 2141  cd possum/
+ 2142  svn up
+ 2143  svn up
+ 2144  ll
+ 2145  cd analysis/00_photo_pool/
+ 2146  ll
+ 2147  cd 14_stereotaxic_cuts
+ 2148  ll
+ 2149  vim reproduce.sh
+ 2150  bash -xe reproduce.sh 
+ 2151  pwd
+ 2152  ls -la
+ 2153  vim Makefile 
+ 2154  maker
+ 2155  make
+ 2156  cd ../18_introduction_photos/
+ 2157  make
+ 2158  cd ../17_discusison_photos/
+ 2159  ll
+ 2160  make
+ 2161  cd ../14_stereotaxic_cuts/
+ 2162  ll
+ 2163  vim reproduce.sh
+ 2164  bash -xe reproduce.sh 
+ 2165  make
+ 2166  vim reproduce.sh
+ 2167  bash -xe reproduce.sh 
+ 2168  vim reproduce.sh
+ 2169  bash -xe reproduce.sh 
+ 2170  make
+ 2171  svn diff reproduce.sh 
+ 2172  make
+ 2173  bash -xe reproduce.sh 
+ 2174  make
+ 2175  make -B
+ 2176  svn status
+ 2177  svn ci -m"ENCH: Updating the figures."
+ 2178  cd Downloads/
+ 2179  ll
+ 2180  ll
+ 2181  is -m /home/pmajka/Downloads/minimum_deformation_template_test_1/05_iterations/0004/21_resliced/average.nii.gz -o /home/pmajka/Downloads/minimum_deformation_template_test_1/12_transf_f/sddm0004.nii.gz 
+ 2182  COR_SLICE_NO=253
+ 2183  cd /home/pmajka/Dropbox/atlas_mozgu_oposa/2013_09_17_possum_paper/figures/evaluation_of_the_coregistration
+ 2184  make
+ 2185  cd Dropbox/python_multiprocessing_tests/framework/
+ 2186  ll
+ 2187  git status
+ 2188  git status
+ 2189  pwd
+ 2190  ls -la
+ 2191  pwd
+ 2192  ls -la
+ 2193  pwd
+ 2194  ls -la
+ 2195  htop
+ 2196  sudo su
+ 2197  screen -r
+ 2198  ssh nicluster1
+ 2199  screen -r
+ 2200  record.sh 
+ 2201  record.sh 
+ 2202  wcd /home/pmajka/Downloads/mbisc_11_caf_dataset
+ 2203  cd /home/pmajka/Downloads/mbisc_11_caf_dataset
+ 2204  ll
+ 2205  cd
+ 2206  cd 3dbrainatlases/
+ 2207  source setbarenv.sh 
+ 2208  ./3dbar.sh 
+ 2209  ./batchinterface.sh 
+ 2210  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset Brain --exportToWindow --parallelProjection -a 22.760106237757 0 0
+ 2211  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow --parallelProjection -a 22.760106237757 0 0
+ 2212  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow --parallelProjection -a 67.239894 0 0 
+ 2213  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow --parallelProjection -a 67.239894 0 0 
+ 2214  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow --parallelProjection -a 22.760106237757 0 0
+ 2215  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow --parallelProjection -a 67.239894 0 0 
+ 2216  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow --parallelProjection -a 67.239894 0 0  -h
+ 2217  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow --parallelProjection -a 67.239894 0 0 --exportToVTKPolydata
+ 2218  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow -a 67.239894 0 0 --exportToVTKPolydata
+ 2219  ipython
+ 2220  ./batchinterface.sh /home/pmajka/Downloads/mbisc_11_caf_dataset/index.xml Brain --exportToWindow -a 67.239894 0 0 --exportToVTKPolydata
+ 2221  cd Dropbox/
+ 2222  ll
+ 2223  cd
+ 2224  cd Downloads/
+ 2225  ll
+ 2226  ll
+ 2227  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2228  vim Rendering_Core_Testing_Python_TransformPolyData.py
+ 2229  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2230  ipython
+ 2231  vim Rendering_Core_Testing_Python_TransformPolyData.py
+ 2232  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2233  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2234  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2235  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2236  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2237  vim Rendering_Core_Testing_Python_TransformPolyData.py
+ 2238  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2239  python Rendering_Core_Testing_Python_TransformPolyData.py 
+ 2240  vim Rendering_Core_Testing_Python_TransformPolyData.py
+ 2241  cd possum/
+ 2242  svn up
+ 2243  screen -r
+ 2244  cd /home/pmajka/Dropbox/python_multiprocessing_tests/framework/tests/deformable_reconstruction_test_1
+ 2245  ll
+ 2246  bash -xe test2.sh 
+ 2247  ll
+ 2248  vim test2.sh
+ 2249  screen -r
+ 2250  screen -r
+ 2251  cd /home/pmajka/Dropbox/python_multiprocessing_tests/framework/tests/deformable_reconstruction_test_1
+ 2252  cd ../../
+ 2253  git difftool deformable_histology_reconstruction.py
+ 2254  screen -r
+ 2255  itksnap /dev/shm/dt1/08_intermediate_results/intermediate_output__0000.nii.gz
+ 2256  itksnap /dev/shm/dt1/08_intermediate_results/intermediate_output__0000.nii.gz
+ 2257  screen -r
+ 2258  cd /home/pmajka/Dropbox/python_multiprocessing_tests/framework/tests/deformable_reconstruction_test_1
+ 2259  ll
+ 2260  bash -xe  test2.sh 
+ 2261  screen -r
+ 2262  cd Dropbox/
+ 2263  python streamSurface.py 
+ 2264  vim streamSurface.py 
+ 2265  vim streamSurface.py 
+ 2266  cd
+ 2267  c3d cc.nii.gz -o cc.vtk
+ 2268  python streamSurface.py 
+ 2269  vim streamSurface.py 
+ 2270  python streamSurface.py 
+ 2271  python streamSurface.py 
+ 2272  vim streamSurface.py 
+ 2273  vim streamSurface.py 
+ 2274  vim streamSurface.py 
+ 2275  cd possum/
+ 2276  svn up
+ 2277  c3d -create 256x256x256 1x1x1mm -o newimage.vtk
+ 2278  is newimage.vtk 
+ 2279  vim la`
+ 2280  vim laplace.py 
+ 2281  reset
+ 2282  c3d -create 64x64x64 1x1x1mm -o newimage.vtk
+ 2283  c3d -create 64x64x64 1x1x1mm -o newimage.nii.gz
+ 2284  rm newimage.vtk 
+ 2285  is newimage.nii.gz 
+ 2286  pwd
+ 2287  ll
+ 2288  vim laplace.py 
+ 2289  pyhton laplace.py 
+ 2290  python laplace.py 
+ 2291  vim laplace.py 
+ 2292  python laplace.py 
+ 2293  c3d newimage.nii.gz -replace 2 -1 -o newimage.nii.gz 
+ 2294  python laplace.py 
+ 2295  vim laplace.py 
+ 2296  python laplace.py 
+ 2297  vim laplace.py 
+ 2298  python laplace.py 
+ 2299  c3d cc.nii.gz cc.vtk 
+ 2300  c3d cc.nii.gz -o cc.vtk 
+ 2301  is newimage.nii.gz 
+ 2302  ll
+ 2303  vim streamSurface.py 
+ 2304  vim newimage.nii.gz 
+ 2305  vim laplace.py 
+ 2306  c3d -create 64x64x64 1x1x1mm -o newimage.nii.gz
+ 2307  is newimage.nii.gz 
+ 2308  c3d newimage.nii.gz -replace 2 -1 -o newimage.nii.gz 
+ 2309  vim laplace.py 
+ 2310  python laplace.py 
+ 2311  vim laplace.py 
+ 2312  python laplace.py 
+ 2313  vim laplace.py 
+ 2314  python laplace.py 
+ 2315  c3d cc.nii.gz -o cc.vtk 
+ 2316  python streamSurface.py 
+ 2317  vim streamSurface.py 
+ 2318  python streamSurface.py 
+ 2319  vim streamSurface.py 
+ 2320  python streamSurface.py 
+ 2321  vim streamSurface.py 
+ 2322  python streamSurface.py 
+ 2323  vim streamSurface.py 
+ 2324  python streamSurface.py 
+ 2325  vim streamSurface.py 
+ 2326  python streamSurface.py 
+ 2327  vim streamSurface.py 
+ 2328  ipython
+ 2329  c3d newimage.vtk newimage.nii.gz
+ 2330  cd possum/analysis/00_photo_pool/
+ 2331  make
+ 2332  ell
+ 2333  svn up
+ 2334  cd 18_introduction_photos/
+ 2335  ll
+ 2336  make
+ 2337  make -B
+ 2338  cd
+ 2339  PrintHeader cc.vtk 
+ 2340  is cc.vtk 
+ 2341  is cc.vtk 
+ 2342  PrintHeader cc.vtk 
+ 2343  is cc.vtk 
+ 2344  is cc.vtk 
+ 2345  sudo su
+ 2346  cd possum/data/02_02_NN2/00_src/18
+ 2347  cd possum/data/02_02_NN2/00_src/
+ 2348  ll
+ 2349  cd
+ 2350  cd possum/analysis/00_photo_pool/18_introduction_photos/
+ 2351  ll
+ 2352  make
+ 2353  make -B
+ 2354  vim Makefile 
+ 2355  make obrazek_opos.pdf 
+ 2356  make porownanie_mysz_opos.pdf 
+ 2357  svn up
+ 2358  ll
+ 2359  vim laplace.py 
+ 2360  is newimage.nii.gz 
+ 2361  c3d newimage.nii.gz -scale 100 -o newimage.nii.gz 
+ 2362  is newimage.nii.gz 
+ 2363  python laplace.py 
+ 2364  c3d cc.nii.gz -o cc.vtk 
+ 2365  python streamSurface.py 
+ 2366  vim streamSurface.py t
+ 2367  python streamSurface.py 
+ 2368  python streamSurface.py 
+ 2369  python streamSurface.py 
+ 2370  python streamSurface.py 
+ 2371  python streamSurface.py 
+ 2372  python streamSurface.py 
+ 2373  python streamSurface.py 
+ 2374  python streamSurface.py 
+ 2375  python streamSurface.py > x
+ 2376  vim x
+ 2377  gnuplot
+ 2378  python streamSurface.py >x
+ 2379  python streamSurface.py >x
+ 2380  python streamSurface.py >x
+ 2381  gnuplot
+ 2382  python streamSurface.py >x
+ 2383  gnuplot
+ 2384  python streamSurface.py >x
+ 2385  gnuplot
+ 2386  python streamSurface.py >x
+ 2387  gnuplot
+ 2388  python streamSurface.py >x
+ 2389  gnuplot
+ 2390  python streamSurface.py >x
+ 2391  gnuplot
+ 2392  python streamSurface.py >x
+ 2393  gnuplot
+ 2394  python streamSurface.py >x
+ 2395  gnuplot
+ 2396  sudo su
+ 2397  sudo su
+ 2398  gnuplot
+ 2399  gnuplot
+ 2400  python streamSurface.py >x
+ 2401  python streamSurface.py >x
+ 2402  gnuplot
+ 2403  python streamSurface.py >x
+ 2404  python streamSurface.py >x
+ 2405  python streamSurface.py >x
+ 2406  gnuplot
+ 2407  python streamSurface.py >x
+ 2408  python streamSurface.py > /dev/shm/x
+ 2409  gnuplot
+ 2410  python streamSurface.py >x
+ 2411  gnuplot
+ 2412  python streamSurface.py >x
+ 2413  gnuplot
+ 2414  python streamSurface.py >x
+ 2415  python streamSurface.py >x
+ 2416  gnuplot
+ 2417  python streamSurface.py >x
+ 2418  gnuplot
+ 2419  python streamSurface.py >x
+ 2420  gnuplot
+ 2421  python streamSurface.py >x
+ 2422  gnuplot
+ 2423  python streamSurface.py >x
+ 2424  gnuplot
+ 2425  python streamSurface.py >x
+ 2426  gnuplot
+ 2427  python streamSurface.py >x
+ 2428  gnuplot
+ 2429  vim streamSurface.py 
+ 2430  vim streamSurface.py 
+ 2431  python streamSurface.py 
+ 2432  vim streamSurface.py 
+ 2433  python streamSurface.py 
+ 2434  vim streamSurface.py 
+ 2435  python streamSurface.py 
+ 2436  vim streamSurface.py 
+ 2437  python streamSurface.py 
+ 2438  ll
+ 2439  pwd
+ 2440  vim Dropbox/administracja/laplace_7.py 
+ 2441  python streamSurface.py >x
+ 2442  gnuplot
+ 2443  python streamSurface.py >x
+ 2444  gnuplot
+ 2445  python streamSurface.py >x
+ 2446  gnuplot
+ 2447  python streamSurface.py >x
+ 2448  python streamSurface.py >x
+ 2449  python streamSurface.py >x
+ 2450  python streamSurface.py >x
+ 2451  python streamSurface.py >x
+ 2452  gnuplot
+ 2453  python streamSurface.py >x
+ 2454  python streamSurface.py >x
+ 2455  python streamSurface.py >x
+ 2456  gnuplot
+ 2457  python streamSurface.py >x
+ 2458  gnuplot
+ 2459  python streamSurface.py >x
+ 2460  gnuplot
+ 2461  python streamSurface.py >x
+ 2462  python streamSurface.py >x
+ 2463  python streamSurface.py >x
+ 2464  gnuplot
+ 2465  python streamSurface.py >x
+ 2466  gnuplot
+ 2467  python streamSurface.py >x
+ 2468  gnuplot
+ 2469  python streamSurface.py >x
+ 2470  gnuplot
+ 2471  python streamSurface.py >x
+ 2472  gnuplot
+ 2473  python streamSurface.py >x
+ 2474  gnuplot
+ 2475  python streamSurface.py >x
+ 2476  gnuplot
+ 2477  python streamSurface.py >x
+ 2478  gnuplot
+ 2479  python streamSurface.py >x
+ 2480  gnuplot
+ 2481  python streamSurface.py >x
+ 2482  gnuplot
+ 2483  python streamSurface.py >x
+ 2484  gnuplot
+ 2485  python streamSurface.py >x
+ 2486  gnuplot
+ 2487  python streamSurface.py >x
+ 2488  gnuplot
+ 2489  python streamSurface.py >x
+ 2490  gnuplot
+ 2491  python streamSurface.py >x
+ 2492  gnuplot
+ 2493  vim x
+ 2494  gnuplot
+ 2495  vim x
+ 2496  gnuplot
+ 2497  python streamSurface.py >x
+ 2498  gnuplot
+ 2499  python streamSurface.py >x
+ 2500  gnuplot
+ 2501  python streamSurface.py >x
+ 2502  gnuplot
+ 2503  c3d newimage.nii.gz -replace 2 -1 -scale 100 -o newimage.nii.gz 
+ 2504  python laplace.py 
+ 2505  python streamSurface.py 
+ 2506  c3d cc.nii.gz -o cc.vtk 
+ 2507  python streamSurface.py 
+ 2508  python streamSurface.py  > x
+ 2509  gnuplot
+ 2510  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 
+ 2511  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -type uchar -o 6.vtk
+ 2512  is 6.vtk 
+ 2513  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1vox -erode 1 1vox  -type uchar -o 6.vtk 
+ 2514  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -erode 1 1x1x1vox  -type uchar -o 6.vtk 
+ 2515  is 6.vtk 
+ 2516  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -erode 1 1x1x1vox -scale -1 -add  -type uchar -o 6.vtk 
+ 2517  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -dup -erode 1 1x1x1vox -scale -1 -add  -type uchar -o 6.vtk 
+ 2518  is 6.vtk 
+ 2519  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -o 66.vtk  -dup -erode 1 1x1x1vox -scale -1 -add  -type uchar -o 6.vtk 
+ 2520  is 6.vtk 
+ 2521  is 66.vtk 
+ 2522  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -o 66.vtk  -dup -erode 1 1x1x1vox -scale -1 -add  -o 6.vtk 
+ 2523  is 6.vtk 
+ 2524  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -o 66.vtk  -dup -erode 1 1x1x1vox  -o 6.vtk 
+ 2525  is 6.vtk 
+ 2526  is 6.vtk 
+ 2527  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -o 66.vtk  -dup -erode 0 1x1x1vox  -o 6.vtk 
+ 2528  is 6.vtk 
+ 2529  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 1 1x1x1vox -o 66.vtk  -dup -dilate 0 1x1x1vox  -o 6.vtk 
+ 2530  is 6.vtk 
+ 2531  is -m 6.vtk -s 66.vtk 
+ 2532  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 0 1x1x1vox -o 66.vtk  -dup -dilate 1 1x1x1vox  -o 6.vtk 
+ 2533  is -m 6.vtk -s 66.vtk 
+ 2534  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 0 1x1x1vox -o 66.vtk  -dup -dilate 1 1x1x1vox -add -shift -1  -o 6.vtk 
+ 2535  is -m 6.vtk -s 66.vtk 
+ 2536  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 0 1x1x1vox -o 66.vtk  -dup -dilate 1 1x1x1vox -scale -1 -add   -o 6.vtk
+ 2537  is -m 6.vtk -s 66.vtk 
+ 2538  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 0 1x1x1vox -o 66.vtk  -dup -dilate 1 1x1x1vox -scale -1 -add -replace -1 1  -o 6.vtk
+ 2539  is -m 6.vtk -s 66.vtk 
+ 2540  is 6.vtk 
+ 2541  is -m 6.vtk -s 6.vtk 
+ 2542  c3d 6s.vtk -replace 2 -1 -scale 100 -o 6ss.vtk
+ 2543  vim laplace.py 
+ 2544  c3d 6s.vtk -replace 2 -1 -scale 100 -o 6ss.nii.gz
+ 2545  vim laplace.py 
+ 2546  python laplace.py 
+ 2547  vim laplace.py 
+ 2548  python laplace.py 
+ 2549  c3d 6cc.nii.gz -o 6cc.vtk
+ 2550  ll
+ 2551  vim streamSurface.py
+ 2552  vim sl
+ 2553  vim streamSurface.py 
+ 2554  vim streamSurface.py 
+ 2555  vim streamSurface.py 
+ 2556  vim streamSurface.py 
+ 2557  history > h
+ 2558  c3d 66.vtk -spacing 1x1x1mm 6cc.vtk -times -o 6ccc.vtk
+ 2559  history > h
+ 2560  vim streamSurface.py 
+ 2561  vim streamSurface.py 
+ 2562  vim streamSurface.py 
+ 2563  history > h
+ 2564  vim streamSurface.py 
+ 2565  vim streamSurface.py 
+ 2566  vim streamSurface.py 
+ 2567  python streamSurface.py > x
+ 2568  gnuplot
+ 2569  vim streamSurface.py 
+ 2570  cp streamSurface.py ~/Dropbox/streamSurface_1.py 
+ 2571  vim streamSurface.py 
+ 2572  cp streamSurface.py ~/Dropbox/streamSurface_2.py 
+ 2573  python streamSurface.py > x
+ 2574  vim x
+ 2575  gnuplot
+ 2576  vim streamSurface.py 
+ 2577  python streamSurface.py > x
+ 2578  gnuplot
+ 2579  vim streamSurface.py 
+ 2580  python streamSurface.py > x
+ 2581  vim streamSurface.py 
+ 2582  svn diff scripts/blockface_registration.py
+ 2583  ipython
+ 2584  cp streamSurface.py ~/Dropbox/streamSurface_3.py 
+ 2585  vim streamSurface.py 
+ 2586  vim streamSurface.py 
+ 2587  vim streamSurface.py 
+ 2588  vim streamSurface.py 
+ 2589  cp streamSurface.py ~/Dropbox/streamSurface_3.py 
+ 2590  cp streamSurface.py ~/Dropbox/streamSurface_3.py 
+ 2591  vim streamSurface.py 
+ 2592  vim streamSurface.py 
+ 2593  vim streamSurface.py 
+ 2594  cd 3dbrainatlases/
+ 2595  source setbarenv.sh 
+ 2596  ipython
+ 2597  cd 3dbrainatlases/
+ 2598  ll
+ 2599  source setbarenv.sh 
+ 2600  cd bin/parsers/mbisc_11/
+ 2601  ll
+ 2602  vim user_data.py
+ 2603  cd
+ 2604  cd 3dbrainatlases/
+ 2605  make mbisc_11 
+ 2606  vim bin/parsers//mbisc_11/__init__.py
+ 2607  make mbisc_11 
+ 2608  vim diff_mbisc_11.txt
+ 2609  vim bin/parsers//mbisc_11/user_data.py
+ 2610  make mbisc_11 
+ 2611  vim diff_mbisc_11.txt
+ 2612  vim bin/sql/MANUAL 
+ 2613  cd
+ 2614  cd 3dbrainatlases/
+ 2615  SVN STATUS
+ 2616  svn status
+ 2617  svn revert bin/parsers/mbisc_11/__init__.py
+ 2618  svn ci -m"Updating metadata for the marmoset parser."
+ 2619  svn up
+ 2620  svn ci -m"Updating metadata for the marmoset parser."
+ 2621  svn cleanup
+ 2622  svn ci -m"Updating metadata for the marmoset parser."
+ 2623  svn revert /home/pmajka/3dbrainatlases/doc/sphinx/source/README.rst
+ 2624  svn ci -m"Updating metadata for the marmoset parser."
+ 2625  vim streamSurface.py 
+ 2626  vim streamSurface.py 
+ 2627  vimdiff streamSurface.py ~/Dropbox/streamSurface_3.py 
+ 2628  cp ~/Dropbox/streamSurface_3.py  streamSurface.py
+ 2629  vim streamSurface.py 
+ 2630  PrintHeader dd.vtk 
+ 2631  c3d dd.vtk -clip 0 100 -o dd.vtk 
+ 2632  c3d dd.vtk -clip 01 100 -o dd.vtk 
+ 2633  c3d dd.vtk -clip 0.1 100 -o dd.vtk 
+ 2634  vim streamSurface.py 
+ 2635  python streamSurface.py > x
+ 2636  vim x
+ 2637  gnuplot
+ 2638  PrintHeader dd.vtk 
+ 2639  vim streamSurface.py 
+ 2640  cp streamSurface.py ~/Dropbox/streamSurface_4.py 
+ 2641  vim streamSurface.py 
+ 2642  vncserver -geometry 1600x1200 -depth 24 :1
+ 2643  vncviewer localhost:1
+ 2644  pwd
+ 2645  vncviewer localhost:1
+ 2646  vim Str
+ 2647  vim streamSurface.py 
+ 2648  vncviewer localhost:1
+ 2649  vncviewer localhost:1
+ 2650  cd possum/
+ 2651  svn up
+ 2652  cd 
+ 2653  cd possum/analysis/00_photo_pool/18_introduction_photos/
+ 2654  make
+ 2655  ll
+ 2656  cd ../
+ 2657  ll
+ 2658  cd 06_stereotaxy_with_uct
+ 2659  ll
+ 2660  vim reproduce.sh
+ 2661  bash -xe reproduce.sh 
+ 2662  make
+ 2663  inkscape establishing_stereotaxic_coordiates_pl_red.svg
+ 2664  make
+ 2665  inkscape establishing_stereotaxic_coordiates_pl_red.svg
+ 2666  make
+ 2667  cd ../
+ 2668  ll
+ 2669  cd 18_introduction_photos
+ 2670  make
+ 2671  make _B
+ 2672  make -B
+ 2673  vim streamSurface.py 
+ 2674  ipython
+ 2675  vim streamSurface.py 
+ 2676  vim streamSurface.py 
+ 2677  vim streamSurface.py 
+ 2678  vim streamSurface.py 
+ 2679  vim streamSurface.py 
+ 2680  iyp
+ 2681  ipython
+ 2682  ipython
+ 2683  vim streamSurface.py 
+ 2684  vim streamSurface.py 
+ 2685  vim streamSurface.py 
+ 2686  ipython
+ 2687  vim streamSurface.py 
+ 2688  ipython
+ 2689  ipython
+ 2690  vim streamSurface.py 
+ 2691  ipython
+ 2692  ipython
+ 2693  vim streamSurface.py 
+ 2694  python streamSurface.py 
+ 2695  vim streamSurface.py 
+ 2696  python streamSurface.py 
+ 2697  vim streamSurface.py 
+ 2698  python streamSurface.py 
+ 2699  vim streamSurface.py 
+ 2700  vim streamSurface.py 
+ 2701  python streamSurface.py 
+ 2702  vim streamSurface.py 
+ 2703  python streamSurface.py 
+ 2704  vim streamSurface.py 
+ 2705  vim streamSurface.py 
+ 2706  python streamSurface.py 
+ 2707  vim streamSurface.py 
+ 2708  python streamSurface.py 
+ 2709  vim a.py
+ 2710  python a.py 
+ 2711  ipython
+ 2712  man tar
+ 2713  man tar
+ 2714  pwd
+ 2715  ls -la
+ 2716  cd possum/
+ 2717  ll
+ 2718  cd processing_supplement/
+ 2719  ll
+ 2720  cd ../specimen_processing/
+ 2721  ll
+ 2722  vim process_02_02_NN2_deformable_registration_myelin_all.sh
+ 2723  vim process_02_02_NN2_deformable_registration_myelin_step_2.sh
+ 2724  cd Dropbox/python_multiprocessing_tests/framework/
+ 2725  ll
+ 2726  gitk
+ 2727  grep TODO *
+ 2728  vim pos_wrapper
+ 2729  vim pos_wrappers.py
+ 2730  vim streamSurface.py 
+ 2731  vim streamSurface.py 
+ 2732  vim streamSurface.py 
+ 2733  python streamSurface.py > x
+ 2734  vim streamSurface.py 
+ 2735  vim streamSurface.py 
+ 2736  python streamSurface.py > x
+ 2737  vim streamSurface.py 
+ 2738  vim streamSurface.py 
+ 2739  screen -r
+ 2740  cd /home/pmajka/Dropbox/python_multiprocessing_tests/framework/tests/deformable_reconstruction_test_1
+ 2741  ll
+ 2742  pwd
+ 2743  vim test2.sh
+ 2744  bash -xe test2.sh &> ~/file.txt
+ 2745  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2746  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2747  vim test2.sh 
+ 2748  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2749  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh &> ~/file.txt
+ 2750  cd /home/pmajka/possum/analysis/00_photo_pool/18_introduction_photos
+ 2751  make
+ 2752  cd possum/analysis/00_photo_pool/18_introduction_photos/
+ 2753  svn status
+ 2754  svn add multiscale_imaging.png obrazowanie_wieloskalowe.svg 
+ 2755  svn ci -m"Updating the figures."
+ 2756  make
+ 2757  cd /home/pmajka/possum/analysis/00_photo_pool/18_introduction_photos
+ 2758  make 
+ 2759  pwd
+ 2760  ls -la
+ 2761  svn staus
+ 2762  svn status
+ 2763  svn ci -m"Updating the figures."
+ 2764  c3d /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz ~/ss.vtk
+ 2765  c3d /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -o ~/ss.vtk
+ 2766  c3d /home/pmajka/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -o ~/sss.vtk
+ 2767  c3d /home/pmajka/Dropbox/python_multiprocessing_tests/framework/
+ 2768  cd /home/pmajka/Dropbox/python_multiprocessing_tests/framework/
+ 2769  python pos_strct.py 
+ 2770  vim pos_strct.py 
+ 2771  python pos_strct.py 
+ 2772  vim pos_strct.py 
+ 2773  ll /home/pmajka/ss.vtk
+ 2774  ll /home/pmajka/sss.vtk
+ 2775  cd Dropbox/python_multiprocessing_tests/framework/
+ 2776  ll
+ 2777  vim pos_strct.py 
+ 2778  python pos_strct.py 
+ 2779  vim pos_strct.py 
+ 2780  sudo su
+ 2781  make
+ 2782  svn up
+ 2783  make
+ 2784  cd Dropbox/python_multiprocessing_tests/framework/
+ 2785  ll
+ 2786  python pos_strct.py 
+ 2787  vim pos_strct.py 
+ 2788  python pos_strct.py 
+ 2789  vim pos_strct.py 
+ 2790  python pos_strct.py 
+ 2791  vim pos_strct.py 
+ 2792  python pos_strct.py 
+ 2793  vim pos_strct.py 
+ 2794  python pos_strct.py 
+ 2795  vim pos_strct.py 
+ 2796  cd Dropbox/python_multiprocessing_tests/framework/
+ 2797  ll
+ 2798  vim pos_strct.py 
+ 2799  cd Dropbox/python_multiprocessing_tests/framework/
+ 2800  ll
+ 2801  python pos_strct.py 
+ 2802  vim pos_strct.py 
+ 2803  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -shift 199 -type uchar -o 02_02_NN2_mri.nii.gz
+ 2804  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -shift -199 -type uchar -o 02_02_NN2_segmentacja_mri.nii.gz
+ 2805  cd Dropbox/python_multiprocessing_tests/framework/
+ 2806  ll
+ 2807  cd tests/deformable_reconstruction_test_1/
+ 2808  ll
+ 2809  vim test2_.sh 
+ 2810  vim test2.sh 
+ 2811  pwd
+ 2812  vim ../../pos_wrapper_skel.py
+ 2813  vim test2.sh
+ 2814  vim /dev/shm/dt1/05_iterations/0000/1383123983.78
+ 2815  vim /dev/shm/dt1/05_iterations/0000/1383123984.75
+ 2816  vim test2.sh 
+ 2817  git difftool test2.sh
+ 2818  ll
+ 2819  cd ../../
+ 2820  git status
+ 2821  vim pos_wrapper_skel.py
+ 2822  git status
+ 2823  git checkout master 
+ 2824  git add doc/source/conf.py
+ 2825  git add ../../doc/source/conf.py
+ 2826  git status
+ 2827  git add ../doc/source/conf.py
+ 2828  git commit -m"DOC: Updating sphinx configuration - functions are listed in order of apperance."
+ 2829  git checkout master 
+ 2830  git add ../doc/source/index.rst
+ 2831  git commit -m"DOC: Updating sphinx configuration - functions are listed in order of apperance."
+ 2832  git checkout master 
+ 2833  git status
+ 2834  git difftool deformable_histology_reconstruction.py
+ 2835  git difftool pos_wrapper_skel.py
+ 2836  git add pos_wrappers.py pos_wrapper_skel.py deformable_histology_reconstruction.py
+ 2837  git commit -m"ENCH: Making the workflow execution more straeamlined, systematic and structured."
+ 2838  gitk
+ 2839  git checkout master 
+ 2840  git status
+ 2841  gitk 
+ 2842  git status
+ 2843  git checkout deve_preprocessing_for_sequential_alignment 
+ 2844  ll
+ 2845  vim tests/deformable_reconstruction_test_1/test2.sh
+ 2846  vim tests/deformable_reconstruction_test_1/test2.sh
+ 2847  vim draw_glyphs_2d.py 
+ 2848  git status
+ 2849  vim draw_glyphs_2d.py 
+ 2850  git status
+ 2851  vim pos_wrappers.py
+ 2852  vim pos_wrapper_skel.py
+ 2853  vim draw_glyphs_2d.py 
+ 2854  git status
+ 2855  git difftool pos_wrappers.py
+ 2856  git difftool pos_wrappers.py
+ 2857  git diff pos_wrappers.py
+ 2858  git difftool pos_wrappers.py
+ 2859  vim ~/.gitconfig
+ 2860  diffmerge
+ 2861  git difftool pos_wrappers.py
+ 2862  git status
+ 2863  git difftool pos_wrappers.py
+ 2864  git difftool pos_wrapper_skel.py
+ 2865  git commit pos_wrapper_skel.py pos_wrappers.py -m"ENCH: Tuning up the workflow execution settings."
+ 2866  git status
+ 2867  git difftool draw_glyphs_2d.py
+ 2868  git status
+ 2869  git commit draw_glyphs_2d.py -m"ENCH: Tuning up the workflow execution settings."
+ 2870  git status
+ 2871  git checkout master 
+ 2872  vim tests/deformable_reconstruction_test_1/test2.sh
+ 2873  git checkout deve_preprocessing_for_sequential_alignment 
+ 2874  vim framework/tests/deformable_reconstruction_test_1/test2.sh
+ 2875  git status
+ 2876  vim tests/deformable_reconstruction_test_1/test2.sh
+ 2877  git status
+ 2878  git checkout master 
+ 2879  git merge --no-ff deve_preprocessing_for_sequential_alignment 
+ 2880  gitk 
+ 2881   git branch -d deve_preprocessing_for_sequential_alignment 
+ 2882  gitk 
+ 2883  git branch -b develop
+ 2884  git checkout -b develop
+ 2885  git checkout master 
+ 2886  gitk
+ 2887  git tag -a 0.15 -m"Pretty stable. Slowly switching to itk with some features."
+ 2888  gitk
+ 2889  git checkout develop 
+ 2890  git checkout -b devel-deformable-reconstruction-spatial-consistency
+ 2891  gitk 
+ 2892  git status
+ 2893  vim deformable_histology_reconstruction.py 
+ 2894  git status
+ 2895  git status
+ 2896  git status
+ 2897  git status
+ 2898  git status
+ 2899  git status
+ 2900  pqs
+ 2901  pqs
+ 2902  git status
+ 2903  git status
+ 2904  git status
+ 2905  vim shuffle.py
+ 2906  git status
+ 2907  gik
+ 2908  gitk
+ 2909  pwd
+ 2910  gitk
+ 2911  gitk
+ 2912  pwd
+ 2913  ls -la
+ 2914  ls -la
+ 2915  python pos_strct.py
+ 2916  vim pos_strct.py 
+ 2917  python pos_strct.py
+ 2918  vim pos_strct.py 
+ 2919  python pos_strct.py
+ 2920  vim pos_strct.py 
+ 2921  python pos_strct.py
+ 2922  man parallel
+ 2923  pwd
+ 2924  ls -la
+ 2925  rm -rfv deformable_reconstruction_workflow_2013-10-30-10_06-16_27221.tgz
+ 2926  ll
+ 2927  ll
+ 2928  vncviewer localhost:1
+ 2929  cd 3dbrainatlases/
+ 2930  cd
+ 2931  cd possum/
+ 2932  source setenv.sh 
+ 2933  cd possum/
+ 2934  cd
+ 2935  cd Dropbox/python_multiprocessing_tests/framework/tests/deformable_reconstruction_test_1/
+ 2936  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2937  rm -rfv /dev/shm/dt1/;
+ 2938  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2939  rm -rfv /dev/shm/dt1/;
+ 2940  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2941  rm -rfv /dev/shm/dt1/;
+ 2942  c3d /home/pmajka/Downloads/other/marmoset_atlas/images/oo.nii.gz -spacing 1x1x1 -type uchar -o /home/pmajka/Downloads/other/marmoset_atlas/images/ooo.nii.gz
+ 2943  c3d /home/pmajka/Downloads/other/marmoset_atlas/images/oo.nii.gz -spacing 1x1x1mm -type uchar -o /home/pmajka/Downloads/other/marmoset_atlas/images/ooo.nii.gz
+ 2944  is /home/pmajka/Downloads/other/marmoset_atlas/images/ooo.nii.gz
+ 2945  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2946  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh 
+ 2947  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh &> ~/file.txt
+ 2948  bash -xe test2.sh &> ~/file.txt
+ 2949  bash -xe test2.sh &> ~/file.txt
+ 2950  vim test2.sh 
+ 2951  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh &> ~/file.txt
+ 2952  vim test2.sh 
+ 2953  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh &> ~/file.txt
+ 2954  vim test2.sh 
+ 2955  vim test2.sh 
+ 2956  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh &> ~/file.txt
+ 2957  vim test2.sh 
+ 2958  rm -rfv /dev/shm/dt1/ ; bash -xe test2.sh &> ~/file.txt
+ 2959  pwd
+ 2960  ls -la
+ 2961  cd Dropbox/python_multiprocessing_tests/framework/
+ 2962  ll
+ 2963  ll
+ 2964  git difftool draw_glyphs_2d.py
+ 2965  cd Dropbox/python_multiprocessing_tests/framework/
+ 2966  cd tests/deformable_reconstruction_test_1/
+ 2967  ll
+ 2968  bash -xe test2.sh 
+ 2969  bash -xe test2.sh 
+ 2970  screen -r
+ 2971  cd Dropbox/python_multiprocessing_tests/framework/
+ 2972  ll
+ 2973  cd tests/deformable_reconstruction_test_1/
+ 2974  ll
+ 2975  vim test2.sh 
+ 2976  vim draw_glyphs_configuration.cfg 
+ 2977  bash -xe test2.sh 
+ 2978  bash -xe test2.sh 
+ 2979  bash -xe test2.sh 
+ 2980  bash -xe test2.sh 
+ 2981  bash -xe test2.sh 
+ 2982  vim ../../deformable_histology_reconstruction.py
+ 2983  rm -rfv /dev/shm/dt1/
+ 2984  bash -xe test2.sh 
+ 2985  geeqie /dev/shm/dt1/15_deformation_analysis/
+ 2986  ll /dev/shm/deformation_field_visualizer_2013-10-30-21_26-54_26813/01_image/image.vtk
+ 2987  vim ../../deformable_histology_reconstruction.py 
+ 2988  vim ../../deformable_histology_reconstruction.py 
+ 2989  bash -xe test2.sh 
+ 2990   python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0000.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0000.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0000.png         --configuration draw_glyphs_configuration.cfg
+ 2991  /dev/shm/dt1/11_rescaled_source/0000.nii.gz
+ 2992  ll /dev/shm/dt1/11_rescaled_source/0000.nii.gz
+ 2993  vim ../../deformable_histology_reconstruction.py 
+ 2994   python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0000.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0000.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0000.png         --configuration draw_glyphs_configuration.cfg
+ 2995  bash -xe test2.sh 
+ 2996  vim ../../deformable_histology_reconstruction.py 
+ 2997  bash -xe test2.sh 
+ 2998  vim ../../deformable_histology_reconstruction.py 
+ 2999  vim /home/pmajka/Dropbox/python_multiprocessing_tests/framework/pos_deformable_wrappers.py
+ 3000  bash -xe test2.sh 
+ 3001  vim /home/pmajka/Dropbox/python_multiprocessing_tests/framework/pos_deformable_wrappers.py
+ 3002  bash -xe test2.sh 
+ 3003  vim /home/pmajka/Dropbox/python_multiprocessing_tests/framework/pos_deformable_wrappers.py
+ 3004  bash -xe test2.sh 
+ 3005  vim /home/pmajka/Dropbox/python_multiprocessing_tests/framework/pos_deformable_wrappers.py
+ 3006  ll
+ 3007  vim draw_glyphs_configuration.cfg 
+ 3008  vim test2.sh 
+ 3009  bash -xe test2.sh 
+ 3010  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3011  vim draw_glyphs_configuration.cfg 
+ 3012  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3013  vim draw_glyphs_configuration.cfg 
+ 3014  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3015  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3016  vim draw_glyphs_configuration.cfg 
+ 3017  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3018  vim draw_glyphs_configuration.cfg 
+ 3019  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3020  vim draw_glyphs_configuration.cfg 
+ 3021  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3022  vim draw_glyphs_configuration.cfg 
+ 3023  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3024  vim draw_glyphs_configuration.cfg 
+ 3025  vim draw_glyphs_configuration.cfg 
+ 3026  python ../../draw_glyphs_2d.py         --warpImage /dev/shm/dt1/10_rescaled_deformation/0005.nii.gz         --sliceImage /dev/shm/dt1/11_rescaled_source/0005.nii.gz         --screenshot /dev/shm/dt1/15_deformation_analysis/0005.png         --configuration draw_glyphs_configuration.cfg
+ 3027  vim ../../draw_glyphs_2d.py 
+ 3028  vim ../../deformable_histology_reconstruction.py 
+ 3029  vim ../../pos_deformable_wrappers
+ 3030  vim ../../pos_deformable_wrappers.py
+ 3031  ll
+ 3032  vim test2.sh 
+ 3033  bash -xe test2.sh 
+ 3034  vim test2.sh 
+ 3035  bash -xe test2.sh 
+ 3036  vim test2.sh 
+ 3037  bash -xe test2.sh 
+ 3038  vim draw_glyphs_configuration.cfg 
+ 3039  git difftool  draw_glyphs_configuration.cfg 
+ 3040  vim draw_glyphs_configuration.cfg 
+ 3041  bash -xe test2.sh 
+ 3042  ll
+ 3043  cd ../../../
+ 3044  ll
+ 3045  cd framework/
+ 3046  git status
+ 3047  git difftool deformable_histology_reconstruction.py
+ 3048  git difftool draw_glyphs_2d.py
+ 3049  git status
+ 3050  git difftool pos_deformable_wrappers
+ 3051  git difftool pos_deformable_wrappers.py
+ 3052  git difftool pos_wrappers.py
+ 3053  git commit -m"ENCH: Removing spacing from glyph drawing/ Adding spacing to deformable reconstruction." deformable_histology_reconstruction.py draw_glyphs_2d.py pos_deformable_wrappers.py pos_wrappers.py
+ 3054  git commit -m"ENCH: Removing spacing from glyph drawing/ Adding spacing to deformable reconstruction." tests/deformable_reconstruction_test_1/draw_glyphs_configuration.cfg tests/deformable_reconstruction_test_1/test2.sh
+ 3055  cd tests/deformable_reconstruction_test_1/
+ 3056  ll
+ 3057  git mv test2.sh deformable_reconstruction_marmoset.sh
+ 3058  git mv draw_glyphs_configuration.cfg deformable_reconstruction_marmoset_glyphs.cfg
+ 3059  ll
+ 3060  vim deformable_reconstruction_marmoset.sh 
+ 3061  cd ../../
+ 3062  ll
+ 3063  git status
+ 3064  git commit -m"ENCH: Removing spacing from glyph drawing/ Adding spacing to deformable reconstruction."
+ 3065  gitk
+ 3066  grep TODO *
+ 3067  git checkout develop
+ 3068  git status
+ 3069  git add tests/deformable_reconstruction_test_1/deformable_reconstruction_marmoset.sh
+ 3070  git commit -m"ENCH: Removing spacing from glyph drawing/ Adding spacing to deformable reconstruction."
+ 3071  git status
+ 3072  git checkout devel
+ 3073  git checkout develop 
+ 3074  git status
+ 3075  git merge devel-deformable-reconstruction-spatial-consistency  --no-ff
+ 3076  gitk
+ 3077  git branch -d devel-deformable-reconstruction-spatial-consistency
+ 3078  git status
+ 3079  git checkout production-rendering-artworks
+ 3080  ll
+ 3081  gitk
+ 3082  git checkout develop 
+ 3083  ll
+ 3084  git status
+ 3085  git difftool .gitignorei
+ 3086  git difftool .gitignore
+ 3087  git commit .gitignore
+ 3088  gitk
+ 3089  pwd
+ 3090  ls -la
+ 3091  pwd
+ 3092  ls -la
+ 3093  cd
+ 3094  cd possum/
+ 3095  svn status
+ 3096  svn up
+ 3097  cd analysis/00_photo_pool/
+ 3098  ll
+ 3099  svn status
+ 3100  cd 06_stereotaxy_with_uct/
+ 3101  ll
+ 3102  svn status
+ 3103  svn ci -m"Updating the figures."
+ 3104  svn status
+ 3105  geeqie .
+ 3106  ll
+ 3107  svn status
+ 3108  svn add establishing_stereotaxic_refrence_system_pl.png establishing_stereotaxic_coordiates_pl_red.svg establishing_stereotaxic_refrence_system_pl_red.svg
+ 3109  svn ci -m"Updating the figures."
+ 3110  make
+ 3111  vim Makefile 
+ 3112  vim reproduce.sh 
+ 3113  ll
+ 3114  svn up
+ 3115  make
+ 3116  svn status
+ 3117  svn status
+ 3118  cd
+ 3119  cd possum/
+ 3120  svn up
+ 3121  cd
+ 3122  cd Dropbox/python_multiprocessing_tests/framework/
+ 3123  ll
+ 3124  cd tests/deformable_reconstruction_test_1/
+ 3125  ll
+ 3126  bash -xe deformable_reconstruction_marmoset.sh 
+ 3127  vim deformable_reconstruction_marmoset.sh 
+ 3128  bash -xe deformable_reconstruction_marmoset.sh 
+ 3129  vim deformable_reconstruction_marmoset.sh 
+ 3130  bash -xe deformable_reconstruction_marmoset.sh 
+ 3131  vim deformable_reconstruction_marmoset.sh 
+ 3132  ll ../../deformable_histology_reconstruction.py
+ 3133  python ../../deformable_histology_reconstruction.py
+ 3134  python ../../deformable_histology_reconstruction.py -h
+ 3135  bash -xe deformable_reconstruction_marmoset.sh 
+ 3136  vim deformable_reconstruction_marmoset.sh 
+ 3137  bash -xe deformable_reconstruction_marmoset.sh 
+ 3138  c
+ 3139  cd
+ 3140  history
+ 3141  histpry
+ 3142  history | grep c3d
+ 3143  c3d ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_segmentacja_mri.nii.gz -thresh 6 6 1 0 -smooth 2vox -thresh 0.5 1 1 0 -dilate 0 1x1x1vox -o 66.vtk  -dup -dilate 1 1x1x1vox -scale -1 -add -replace -1 1  -o 6.vtk
+ 3144  ImageMath 
+ 3145  ImageMath | grep crop
+ 3146  ImageMath | grep Crpop
+ 3147  ImageMath | grep Crop
+ 3148  python cp ~/Dropbox/administracja/throw.py .
+ 3149  cp ~/Dropbox/administracja/throw.py .
+ 3150  vim throw.py 
+ 3151  cd Dropbox/python_multiprocessing_tests/framework/
+ 3152  ll
+ 3153  cd tests/deformable_reconstruction_test_1/
+ 3154  ll
+ 3155  bash deformable_reconstruction_marmoset.sh 
+ 3156  python laplace.py 
+ 3157  c3d cc2.nii.gz -o cc2.vtk 
+ 3158  python throw.py 
+ 3159  vim throw.py 
+ 3160  python throw.py 
+ 3161  python throw.py 
+ 3162  python throw.py 
+ 3163  vim throw.py 
+ 3164  screen -r
+ 3165  cd Downloads/eval_deform_eval/
+ 3166  bash -xe gs1.sh 
+ 3167  bash -xe gs1.sh 
+ 3168  bash -xe gs1.sh 
+ 3169  bash -xe gs1.sh 
+ 3170  ll
+ 3171  python ~/Dropbox/python_multiprocessing_tests/framework/pos_slice_volume.py -h
+ 3172  python ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py =h
+ 3173  python ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -h
+ 3174  python ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -i 100/05_warped_slices/%04d.nii.gz --stackingOptions 0 199 1  --orientationCode ras -o 100/v.nii.gz
+ 3175  python ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -i 100/05_warped_slices/%04d.nii.gz --stackingOptions 0 199 1  --orientationCode ras -o 100/v.nii.gz --permutation 2 0 1 --setSpacing 1 4 1
+ 3176  python ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -i 100/05_warped_slices/%04d.nii.gz --stackingOptions 0 199 1  --orientationCode ras -o 100/v.nii.gz --permutation 0 2 1 --setSpacing 1 4 1
+ 3177  bash -xe gs1.sh 
+ 3178  bash -xe gs1.sh 
+ 3179  pwd
+ 3180  bash -xe gs1.sh 
+ 3181  vim /dev/shm/dt2/05_iterations/0000/1383430016.88
+ 3182  history | grep src.nii.gz
+ 3183  cd /home/pmajka/Downloads/eval_deform_eval/results/75_1_3_no-outline_3
+ 3184  gnuplot
+ 3185  ll
+ 3186  cd Dropbox/python_multiprocessing_tests/framework/
+ 3187  ll
+ 3188  vim pos_deformable_wrappers.py
+ 3189  vim pos_mdt_
+ 3190  vim pos_mdt_wrappers.py 
+ 3191  cd
+ 3192  cd Downloads/
+ 3193  ll
+ 3194  cd eval_deform_eval/
+ 3195  ll
+ 3196  c3d GRE.nii.gz -spacing 1x4x1mm -type uchar -o GRE_Resampled.nii.gz 
+ 3197  is -m GRE_Resampled.nii.gz -o /dev/shm/dt2/09_final_deformation/
+ 3198  ls /dev/shm/dt2/09_final_deformation/
+ 3199  ls /dev/shm/dt2/08_intermediate_results/
+ 3200  is -m GRE_Resampled.nii.gz -o /dev/shm/dt2/09_final_deformation/intermediate_output__0003.nii.gz
+ 3201  PrintHeader intermediate_output__0003.nii.gz
+ 3202  PrintHeader /dev/shm/dt2/09_final_deformation/intermediate_output__000
+ 3203  is -m GRE_Resampled.nii.gz -o /dev/shm/dt2/08_final_deformation/intermediate_output__0004.nii.gz
+ 3204  ll /dev/shm/dt2/08_final_deformation/intermediate_output__0004.nii.gz
+ 3205  is -o /dev/shm/dt2/08_intermediate_results/intermediate_output__0004.nii.gz  -m GRE_Resampled.nii.gz 
+ 3206  history
+ 3207  ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -h
+ 3208  ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -i GRE.nii.gz -o GRE_Resampled.nii.gz --orientationCode RAS --resample 1 0.25 1 --setSpacing 1 4 1 --setType uchar  --permutation 1 0 2 --flipAxes 0 0 1
+ 3209  ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -i GRE.nii.gz -o GRE_Resampled.nii.gz --orientationCode RAS --resample 1 0.25 1 --setSpacing 1 1 1 --setType uchar  --permutation 1 0 2 --flipAxes 0 0 1
+ 3210  ~/Dropbox/python_multiprocessing_tests/framework/pos_stack_reorient.py -i GRE.nii.gz -o GRE_Resampled.nii.gz --orientationCode RAS --resample 1 0.25 1 --setSpacing 1 1 1 --setType uchar  --permutation 1 0 2 --flipAxes 0 0 0
+ 3211  c3d  GRE_Resampled.nii.gz /dev/shm/dt2/08_final_deformation/intermediate_output__0004.nii.gz -msq
+ 3212  c3d  GRE_Resampled.nii.gz /dev/shm/dt2/08_intermediate_results/intermediate_output__0004.nii.gz -msq
+ 3213  c3d  GRE_Resampled.nii.gz /dev/shm/dt2/08_intermediate_results/intermediate_output__0000.nii.gz -msq
+ 3214  is -m GRE_Resampled.nii.gz -o /dev/shm/dt2/08_intermediate_results/intermediate_output__0000.nii.gz 
+ 3215  is -m /dev/shm/dt2/08_intermediate_results/intermediate_output__0004.nii.gz -o /dev/shm/dt2/08_intermediate_results/intermediate_output__0000.nii.gz
+ 3216  c3d  GRE_Resampled.nii.gz /dev/shm/dt2/08_intermediate_results/intermediate_output__0000.nii.gz -m1
+ 3217  c3d  GRE_Resampled.nii.gz /dev/shm/dt2/08_intermediate_results/intermediate_output__0000.nii.gz -mi
+ 3218  c3d  GRE_Resampled.nii.gz /dev/shm/dt2/08_intermediate_results/intermediate_output__0004.nii.gz -mi
+ 3219  c3d  100/v.nii.gz  /dev/shm/dt2/08_intermediate_results/intermediate_output__0004.nii.gz -mi
+ 3220  c3d  GRE_Resampled.nii.gz 100/v.nii.gz -mi
+ 3221  history | grep v.nii.gz
+ 3222  vim gs1.sh 
+ 3223  history | grep slice
+ 3224  vim gs1.sh 
+ 3225  history | grep src.nii.gz
+ 3226  vim gs1.sh 
+ 3227  bash -xe gs1.sh 
+ 3228  vim gs1.sh 
+ 3229  bash -xe gs1.sh 
+ 3230  vim gs1.sh 
+ 3231  ll 100/01_grayscale_slices/0000.png
+ 3232  bash -xe gs1.sh 
+ 3233  vim gs1.sh 
+ 3234  vim gs1.sh 
+ 3235  bash -xe gs1.sh 
+ 3236  math 2+2
+ 3237  math 1/4
+ 3238  math 1./4.
+ 3239  math 0.25 * 800
+ 3240  math "0.25 * 800"
+ 3241  math "0.25*800"
+ 3242  math 0.25*800
+ 3243  math 25*800
+ 3244  math 25*800/100
+ 3245  math 25*800/100
+ 3246  math int(25*800/100)
+ 3247  man bc
+ 3248  math 25*800/100
+ 3249  printf %d `math 25*800/100`
+ 3250  printf "%d `math 25*800/100`"
+ 3251  printf "%d" `math 25*800/100`
+ 3252  printf "%f" `math 25*800/100`
+ 3253  printf "%1.0f" `math 25*800/100`
+ 3254  printf "%1.0f " `math 25*800/100`
+ 3255  awk
+ 3256  awk "{25*800}"
+ 3257  awk '{print 25*800}'
+ 3258  echo 1 | awk '{print 25*800}'
+ 3259  echo 1 | awk '{print 25*800/100}'
+ 3260  echo 1 | awk '{print 25.*800./100.}'
+ 3261  echo 1 | awk '{print 25.*800./75.}'
+ 3262  echo 1 | awk '{print int(25.*800./75.})'
+ 3263  echo 1 | awk '{print 25*800/75)'
+ 3264  echo 1 | awk '{print 25*800/75}'
+ 3265  echo 1 | awk '{print int(25*800/75})
+ 3266  echo 1 | awk '{print int(25*800/75)}'
+ 3267  echo 1 | awk "{print int(25*800/75)}"
+ 3268  bash -xe gs1.sh 
+ 3269  rm -rfv /dev/shm/dt2/
+ 3270  bash -xe gs1.sh 
+ 3271  rm -rfv /dev/shm/dt2/
+ 3272  rm -rfv 100/
+ 3273  bash -xe gs1.sh 
+ 3274  bash -xe gs1.sh 
+ 3275  bash -xe gs1.sh 
+ 3276  bash -xe gs1.sh 
+ 3277  bash -xe gs1.sh 
+ 3278  ll
+ 3279  c3d 75/00_src/src.nii.gz results/75_1_3_no-outline_3/intermediate_output__0009.nii.gz -msq
+ 3280  c3d 75/00_src/src.nii.gz results/75_1_3_no-outline_3/intermediate_output__0000.nii.gz -msq
+ 3281  c3d 75/00_src/src.nii.gz 75/07_warped_grayscale_volume/warped_grayscale_volume.nii.gz -msq
+ 3282  c3d 75/00_src/src.nii.gz 75/07_warped_grayscale_volume/warped_grayscale_volume.nii.gz -MI
+ 3283  c3d 75/00_src/src.nii.gz 75/07_warped_grayscale_volume/warped_grayscale_volume.nii.gz -mi
+ 3284  c3d 75/00_src/src.nii.gz results/75_1_3_no-outline_3/intermediate_output__0000.nii.gz -mi
+ 3285  c3d 75/00_src/src.nii.gz results/75_1_3_no-outline_3/intermediate_output__0009.nii.gz -mi
+ 3286  c3d 75/00_src/src.nii.gz results/75_1_3_no-outline_3/intermediate_output__0009.nii.gz -mi -msq -cc -nmi
+ 3287  echo "c3d 75/00_src/src.nii.gz results/75_1_3_no-outline_3/intermediate_output__0009.nii.gz -mi -msq -cc -nmi " >c
+ 3288  vim c 
+ 3289  c3d 75/00_src/src.nii.gz results/75_1_3_no-outline_3/intermediate_output__0009.nii.gz -mi -cc -nmi
+ 3290  vim c 
+ 3291  bash -xe c
+ 3292  vim c 
+ 3293  bash -xe c
+ 3294  vim c 
+ 3295  bash -xe c
+ 3296  vim c 
+ 3297  bash -xe c
+ 3298  vim c 
+ 3299  bash -xe c
+ 3300  vim c 
+ 3301  bash -xe c
+ 3302  vim c 
+ 3303  rm c
+ 3304  bash -xe gs1.sh 
+ 3305  bash -xe gs1.sh 
+ 3306  bash -xe gs1.sh 
+ 3307  bash -xe gs1.sh 
+ 3308  c3d 75/00_src/src.nii.gz 75/07_warped_grayscale_volume/warped_grayscale_volume.nii.gz -msq | cut -f3 -d" "
+ 3309  bash -xe gs1.sh 
+ 3310  bash -xe gs1.sh 
+ 3311  bash -xe gs1.sh 
+ 3312  bash -xe gs1.sh 
+ 3313  c2d -mcs 75/04_deformation_fields/0026.nii.gz -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt -scale 0.025 -voxel-integral
+ 3314  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas z -popas y -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt -scale 0.025 -voxel-integral
+ 3315  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas z -popas y -clear -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt -scale 0.025 -voxel-integral
+ 3316  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas  -popas y -clear -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt -scale 0.025 -voxel-integral
+ 3317  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas x  -popas y -clear -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt -scale 0.025 -voxel-integral
+ 3318  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas x -popas y -clear -push x -scale 0.025 -dup -times -popas xx -push y -scale 0.025 -dup -times -popas yy -push xx -push yy -times -sqrt -voxel-integral
+ 3319  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas x  -popas y -clear -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt -scale 0.025 -voxel-integral
+ 3320  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas x  -popas y -clear -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt  -voxel-integral
+ 3321  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas x -popas y -clear -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt  -voxel-integral
+ 3322  c2d -mcs 75/04_deformation_fields/0026.nii.gz -popas x -popas y -clear -push x -dup -times -popas xx -push y -dup -times -popas yy -push xx -push yy -times -sqrt -scale 0.025  -voxel-integral
+ 3323  bash -xe gs1.sh 
+ 3324  bash -xe gs1.sh 
+ 3325  vim gs1.sh 
+ 3326  vim gs1.sh 
+ 3327  for i in 1 2 3 4 5 6; do gs1.sh $i; done;
+ 3328  ll
+ 3329  for i in 1 2 3 4 5 6; do bash -xe gs1.sh $i; done;
+ 3330  vim gs1.sh 
+ 3331  cp gs1.sh gsr.sh
+ 3332  vim gs1.sh 
+ 3333  ll
+ 3334  rm gsr.sh 
+ 3335  ll
+ 3336  mv watershed_segmentation.txt eval_job.txt
+ 3337  cd
+ 3338  cd possum/
+ 3339  source setenv.sh 
+ 3340  cd
+ 3341  cd Downloads/eval_deform_eval/
+ 3342  ll
+ 3343  torque_job_gen.py eval_job.txt -s > j
+ 3344  vim j 
+ 3345  pd
+ 3346  ssh -X nicluster1
+ 3347  cd Dropbox/python_multiprocessing_tests/framework/
+ 3348  cd tests/deformable_reconstruction_test_1/
+ 3349  ll
+ 3350  vim test2.sh 
+ 3351  ll
+ 3352  git status
+ 3353  gitk
+ 3354  ll
+ 3355  vim test2.sh
+ 3356  vim draw_glyphs_configuration.cfg 
+ 3357  git checkout develop 
+ 3358  ll
+ 3359  git checkout production-deformable_method_evaluation
+ 3360  git checkout master 
+ 3361  git branch -d production-deformable_method_evaluation 
+ 3362  git checkout develop 
+ 3363  git checkout -b production-deformable_method_evaluation
+ 3364  ll
+ 3365  vim test2_.sh 
+ 3366  bash -xe test2_.sh 
+ 3367  vim test2_.sh 
+ 3368  vim test2_.sh 
+ 3369  bash -xe test2_.sh 
+ 3370  bash -xe test2_.sh & > ~/Downloads/eval_deform_eval/x
+ 3371  rm -rfv /dev/shm/dt2/
+ 3372  bash -xe test2_.sh 
+ 3373  vim /dev/shm/dt2/1383429961.09
+ 3374  ll
+ 3375  vim test2_.sh
+ 3376  bash -xe test2_.sh 
+ 3377  vim test2_.sh
+ 3378  bash -xe test2_.sh 
+ 3379  history
+ 3380  vim test2_.sh
+ 3381  pwd
+ 3382  pwd
+ 3383  rm -rfv /dev/shm/dt2/
+ 3384  history | grep slice
+ 3385  history | grep src.nii.gz
+ 3386  cd ../../
+ 3387  ll
+ 3388  pos_slice_volume.py -h
+ 3389  PrintHeader /home/pmajka/Downloads/eval_deform_eval/100/00_src/src.nii.gz 
+ 3390  ll /dev/shm/dt2/08_intermediate_results/intermediate_output__0006.nii.gz 
+ 3391  PrintHeader /dev/shm/dt2/08_intermediate_results/intermediate_output__0006.nii.gz 
+ 3392  PrintHeader /home/pmajka/Downloads/eval_deform_eval/100/07_warped_grayscale_volume/warped_grayscale_volume.nii.gz 
+ 3393  cd
+ 3394  cd Dropbox/python_multiprocessing_tests/framework/
+ 3395  ll
+ 3396  cd
+ 3397  cd Downloads/eval_deform_eval/
+ 3398  ll
+ 3399  vim gs1.sh 
+ 3400  bash -xe gs1.sh 
+ 3401  vim gs1.sh 
+ 3402  vim gs1.sh 
+ 3403  vim gs1.sh 
+ 3404  bash -xe gs1.sh 
+ 3405  vim gs1.sh 
+ 3406  cd
+ 3407  cd Dropbox/python_multiprocessing_tests/framework/
+ 3408  ll
+ 3409  git status
+ 3410  cd
+ 3411  cd Downloads/eval_deform_eval/
+ 3412  ll
+ 3413  cd results/
+ 3414  ll
+ 3415  cat */similarity.tzt
+ 3416  cat */similarity.txt
+ 3417  cat */similarity.txt > s
+ 3418  vim s
+ 3419  vim s
+ 3420  gnuplot
+ 3421  vim s
+ 3422  gnuplot
+ 3423  cd
+ 3424  cd possum/
+ 3425  ll
+ 3426  source setenv.sh 
+ 3427  cd job_templates/
+ 3428  ll
+ 3429  cp watershed_segmentation.txt ~/Downloads/eval_deform_eval/
+ 3430  screen -r
+ 3431  cd
+ 3432  cd possum/
+ 3433  svn up
+ 3434  screen -r
+ 3435  screen -r
+ 3436  cd po
+ 3437  vim scripts/torque_job_gen.py 
+ 3438  screen -r
+ 3439  cd /mnt/nicluster/pmajka/InsightToolkit-4.4.2
+ 3440  ll
+ 3441  cd ../InsightToolkit-4.4.2-build/
+ 3442  ccmake ../InsightToolkit-4.4.2/
+ 3443  screen -r
+ 3444  screen -r
+ 3445  ll
+ 3446  cd ../../
+ 3447  l
+ 3448  cd pmajka/
+ 3449  ll
+ 3450  vim .bashrc 
+ 3451  pd
+ 3452  pwd
+ 3453  ls -la
+ 3454  screen -r
+ 3455  ll
+ 3456  cd
+ 3457  cd Downloads/eval_deform_eval/
+ 3458  ll
+ 3459  gnuplot
+ 3460  screen -r
+ 3461  screen -r
+ 3462  screen -r
+ 3463  screen -r
+ 3464  cd possum
+ 3465  svn pup
+ 3466  svn ip
+ 3467  svn uo
+ 3468  svn up
+ 3469  screen -r
+ 3470  cd Dropbox/python_multiprocessing_tests/framework/
+ 3471  git status
+ 3472  pwd
+ 3473  ls -la
+ 3474  pwd
+ 3475  ls -la
+ 3476  ll
+ 3477  cd Downloads/a/
+ 3478  ll
+ 3479  cd framework/
+ 3480  ll
+ 3481  python pos_shuffle_volume.py -h
+ 3482  python pos_shuffle_volume.py 
+ 3483  python pos_shuffle_volume.py ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/nissl_deformed.nii.gz ~/n.nii.gz
+ 3484  gitk
+ 3485  gitk
+ 3486  python pos_shuffle_volume.py 
+ 3487  python pos_shuffle_volume.py -h
+ 3488  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3489  ls pos_itk_core.py
+ 3490  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3491  pwd
+ 3492  cd 3dbrainatlases/
+ 3493  svn status
+ 3494  svn status
+ 3495  rm .pdf 
+ 3496  ll
+ 3497  ls -la
+ 3498  pwd
+ 3499  lpwd
+ 3500  ls -la
+ 3501  pwd
+ 3502  ls -la
+ 3503  pwd
+ 3504  ls -la
+ 3505  svn stauts
+ 3506  svn status
+ 3507  cdw
+ 3508  cd 
+ 3509  cd git3dbar/
+ 3510  ll
+ 3511  git svn rebase
+ 3512  git push origin 
+ 3513  pwd
+ 3514  ls -la
+ 3515  vim Makefile.paczuszka 
+ 3516  su mczerwinski
+ 3517  ssh mczerwinski@janek2 
+ 3518  ssh mczerwinski@janek2 
+ 3519  cd /home/pmajka/Downloads/a/framework
+ 3520  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3521  ipython
+ 3522  ll
+ 3523  ipython
+ 3524  ipython
+ 3525  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3526  pwd
+ 3527  cd ../doc/
+ 3528  ll
+ 3529  make html
+ 3530  firefox build/html/index.html 
+ 3531  ssh janek
+ 3532  ssh janek2
+ 3533  ssh neuroinf4 
+ 3534  ssh janek2 
+ 3535  ssh janek2 
+ 3536  ssh janek2 
+ 3537  su
+ 3538  sudo su
+ 3539  getent passwd 
+ 3540  ssh janek2 
+ 3541  ll
+ 3542  cd ../
+ 3543  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3544  cd framework/
+ 3545  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3546  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3547  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3548  git status
+ 3549  vim ../.git/config 
+ 3550  vimdiff ../.git/config ~/Dropbox/python_multiprocessing_tests/.git/config 
+ 3551  git status
+ 3552  git status
+ 3553  ll
+ 3554  cp pos_shuffle_volume.py ~
+ 3555  cp pos_slice_volume.py ~
+ 3556  git status
+ 3557  git checkout pos_shuffle_volume.py pos_slice_volume.py
+ 3558  git status
+ 3559  git checkout origin/devel-volume-shufller 
+ 3560  git status
+ 3561  git checkout devel-volume-shufller
+ 3562  git status
+ 3563  cp ~/pos_shuffle_volume.py .
+ 3564  cp ~/pos_slice_volume.py .
+ 3565  ll
+ 3566  git status
+ 3567  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3568  git commit -m"Working checkpoint of the volume reordering script." pos_slice_volume.py pos_shuffle_volume.py
+ 3569  gitk
+ 3570  gitk
+ 3571  ssh janek2 
+ 3572  ssh -X janek2 
+ 3573  ssh -X janek2 
+ 3574  ssh -X janek2 
+ 3575  csshAll.sh 
+ 3576  cssh nicluster
+ 3577  ssh nicluster2 
+ 3578  ssh nicluster1
+ 3579  screen -r
+ 3580  cd
+ 3581  cd Downloads/
+ 3582  ll
+ 3583  ll
+ 3584  sudo su
+ 3585  ll
+ 3586  pwd
+ 3587  ls -la
+ 3588  screen -r
+ 3589  mkdir sfg
+ 3590  cd sfg/
+ 3591  git clone ~/Dropbox/python_multiprocessing_tests/
+ 3592  ll
+ 3593  cd python_multiprocessing_tests/ll
+ 3594  cd python_multiprocessing_tests/
+ 3595  ll
+ 3596  cd doc/
+ 3597  ll
+ 3598  cd ../framework/
+ 3599  ll
+ 3600  git checkout origin/devel-volume-shufller
+ 3601  ll
+ 3602  vim pos_shuffle_volume.py 
+ 3603  cd Dropbox/python_multiprocessing_tests/framework/
+ 3604  ll
+ 3605  gitk
+ 3606  git
+ 3607  git status
+ 3608  ll
+ 3609  pwd
+ 3610  cd Downloads/a/
+ 3611  ll
+ 3612  cd framework/
+ 3613  l
+ 3614  ll
+ 3615  man git-svn 
+ 3616  pwd
+ 3617  ls -la
+ 3618  cd ../
+ 3619  firefox doc/build/html/index.html 
+ 3620  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3621  cd framework/
+ 3622  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3623  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3624  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -o ~/app.nii.gz
+ 3625  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -o ~/app.nii.gz
+ 3626  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -o ~/app.nii.gz
+ 3627  is ~/app.nii.gz 
+ 3628  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3629  is ~/app.nii.gz 
+ 3630  pwd
+ 3631  git commit -m"Working checkpoint of the volume reordering script." pos_slice_volume.py pos_shuffle_volume.py
+ 3632  gitk
+ 3633  ll
+ 3634  rm \\
+ 3635  ll
+ 3636  pwd
+ 3637  ls -la
+ 3638  git commit -m"Working checkpoint of the volume reordering script." pos_slice_volume.py pos_shuffle_volume.py
+ 3639  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz
+ 3640  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz > x
+ 3641  vim x
+ 3642  ipython
+ 3643  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3644  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3645  ll
+ 3646  git stattus
+ 3647  git status
+ 3648  git add x
+ 3649  git commit -m"Working checkpoint of the volume reordering script." .
+ 3650  gitk
+ 3651  git push origin/devel-volume-shufller
+ 3652  git push origin
+ 3653  cd Downloads/
+ 3654  ll
+ 3655  ll
+ 3656  ls -la
+ 3657  ls -la
+ 3658  mkdir a
+ 3659  cd a
+ 3660  ll
+ 3661  git clone ~/Dropbox/python_multiprocessing_tests/framework .
+ 3662  git clone ~/Dropbox/python_multiprocessing_tests/ .
+ 3663  ll
+ 3664  cd framework/
+ 3665  ll
+ 3666  git status
+ 3667  git branch -a
+ 3668  git checkout remotes/origin/devel-volume-shufller
+ 3669  git status
+ 3670  ll
+ 3671  ll
+ 3672  vim pos_itk_core.py 
+ 3673  ll
+ 3674  vim pos_shuffle_volume.py 
+ 3675  vim pos_shuffle_volume.py 
+ 3676  screen -r
+ 3677  screen -r
+ 3678  vncviewer localhost:1
+ 3679  screen -r
+ 3680  screen -r
+ 3681  screen -r
+ 3682  screen -r
+ 3683  cd Downloads/a/framework/
+ 3684  ll
+ 3685  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3686  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3687  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3688  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3689  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3690  ipython
+ 3691  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3692  pwd
+ 3693  pwd
+ 3694  ls -la
+ 3695  pwd
+ 3696  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3697  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3698  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3699  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3700  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3701  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3702  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3703  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3704  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3705  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3706  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3707  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz -h
+ 3708  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz 
+ 3709  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz > x
+ 3710  ll
+ 3711  vim x 
+ 3712  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz -h
+ 3713  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --loglevel=INFO
+ 3714  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --loglevel=INFO
+ 3715  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -o ~/app.nii.gz --loglevel=INFO
+ 3716  is ~/app.nii.gz 
+ 3717  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 1 --loglevel=INFO
+ 3718  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 1 -o ~/app.nii.gz --loglevel=INFO
+ 3719  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 1  --loglevel=INFO
+ 3720  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 1 -o ~/app.nii.gz --loglevel=INFO
+ 3721  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz -mapping x --loglevel=INFO
+ 3722  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO
+ 3723  cd ../
+ 3724  cd doc/
+ 3725  make html
+ 3726  make html
+ 3727  firefox build/html/index.html 
+ 3728  firefox build/html/index.html 
+ 3729  make html
+ 3730  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO
+ 3731  cd ../framework/
+ 3732  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO
+ 3733  git commit -m"Working checkpoint of the volume reordering script." .
+ 3734  gitk
+ 3735  gitk
+ 3736  vim x
+ 3737  pwd
+ 3738  ls -la
+ 3739  vim x 
+ 3740  pwd
+ 3741  git commit -m"Working checkpoint of the volume reordering script." .
+ 3742  ll
+ 3743  git commit -m"Working checkpoint of the volume reordering script." .
+ 3744  gitk
+ 3745  git push origin
+ 3746  pwd
+ 3747  ls -la
+ 3748  git commit -m"Working checkpoint of the volume reordering script." .
+ 3749  git push origin
+ 3750  git commit -m"Working checkpoint of the volume reordering script." .
+ 3751  ll
+ 3752  cd tests/
+ 3753  ll
+ 3754  mkdir -p test_pos_reorder_volume
+ 3755  cd test_pos_reorder_volume/
+ 3756  ll
+ 3757  pwd
+ 3758  girt log
+ 3759  git log
+ 3760  cd ../../
+ 3761  ll
+ 3762  [Bpython pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO -h
+ 3763  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO -h
+ 3764  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO -h
+ 3765  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO -h
+ 3766  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x --loglevel=INFO -h
+ 3767  ll
+ 3768  cp x x_invalid_to_short
+ 3769  vim x_invalid_to_short 
+ 3770  git add x_invalid_to_short
+ 3771  git commit -m"Working checkpoint of the volume reordering script." .
+ 3772  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x_invalid_to_short --loglevel=INFO 
+ 3773  vim x_invalid_to_short 
+ 3774  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x_invalid_to_short --loglevel=INFO 
+ 3775  git checkout x_invalid_to_short
+ 3776  vim x_invalid_to_short 
+ 3777  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x_invalid_to_short --loglevel=INFO 
+ 3778  vim x_invalid_to_short 
+ 3779  git checkout x_invalid_to_short
+ 3780  vim x_invalid_to_short 
+ 3781  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x_invalid_to_short --loglevel=INFO 
+ 3782  git checkout x_invalid_to_short
+ 3783  vim x_invalid_to_short 
+ 3784  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x_invalid_to_short --loglevel=INFO 
+ 3785  vim x_invalid_to_short 
+ 3786  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/02_02_NN2_mri.nii.gz -s 0 -o ~/app.nii.gz --mapping x_invalid_to_short --loglevel=INFO 
+ 3787  ll
+ 3788  git checkout x_invalid_to_short
+ 3789  c3d -create 100x100x100 0x0x0 -type -uchar -o test_image.nii.gz
+ 3790  c3d -create 100x100x100 0x0x0mm -type -uchar -o test_image.nii.gz
+ 3791  c3d -create 64x64x64 1x1x1mm -type -uchar -o test_image.nii.gz
+ 3792  ll
+ 3793  ll
+ 3794  c3d -create 64x64x64 1x1x1mm -type uchar -o test_image.nii.gz
+ 3795  ll
+ 3796  c3d -create 64x64x64 1x1x1mm -coordinate-map-voxel -type uchar -o test_image.nii.gz
+ 3797  c3d -create 64x64x64 1x1x1mm -cmv -type uchar -o test_image.nii.gz
+ 3798  c3d -create 64x64x64 1x1x1mm -coordinate-map-physical -type uchar -o test_image.nii.gz
+ 3799  ll
+ 3800  mv tests/test_pos_reorder_volume/test_image.nii.gz
+ 3801  mv test_image.nii.gz tests/test_pos_reorder_volume/test_image.nii.gz
+ 3802  ll
+ 3803  python pos_shuffle_volume.py -i test_image.nii. -s 0 -o ~/app.nii.gz --mapping x_invalid_to_short --loglevel=INFO 
+ 3804  python pos_shuffle_volume.py -i tests/test_pos_reorder_volume/test_image.nii.gz -s 0 -o ~/app.nii.gz --loglevel=INFO 
+ 3805  python pos_shuffle_volume.py -i tests/test_pos_reorder_volume/test_image.nii.gz -s 0 -o ~/app.nii.gz --loglevel=INFO 
+ 3806  python pos_shuffle_volume.py -i tests/test_pos_reorder_volume/test_image.nii.gz -s 0 -o ~/app.nii.gz --loglevel=CRITICAL > x
+ 3807  vim x
+ 3808  ll
+ 3809  cp x invalid_mapping_to_short_end
+ 3810  cp x invalid_mapping_to_short_begin
+ 3811  cp x invalid_mapping_to_short_middle
+ 3812  cp x invalid_mapping_to_long
+ 3813  cp x invalid_mapping_to_not_uniqe
+ 3814  ll
+ 3815  cp x valid_mapping
+ 3816  ll
+ 3817  rm x_invalid_to_short 
+ 3818  rm x
+ 3819  ll
+ 3820  git rm x
+ 3821  git status
+ 3822  git rm x_invalid_to_short
+ 3823  ll
+ 3824  mv invalid_mapping_to_* tests/test_pos_reorder_volume/
+ 3825  mv valid* tests/test_pos_reorder_volume/
+ 3826  ll
+ 3827  git status
+ 3828  git commit 
+ 3829  git status
+ 3830  pwd
+ 3831  ls -la
+ 3832  ll
+ 3833  cd tests/test_pos_reorder_volume/
+ 3834  ll
+ 3835  python pos_shuffle_volume.py -i tests/test_pos_reorder_volume/test_image.nii.gz -s 0 -o ~/app.nii.gz --loglevel=CRITICAL > x
+ 3836  pos_shuffle_volume.py -i tests/test_pos_reorder_volume/test_image.nii.gz -s 0 -o ~/app.nii.gz --loglevel=CRITICAL > x
+ 3837  chmod +x ../../pos_reorder_volume.py 
+ 3838  cd ../../
+ 3839  ll
+ 3840  ll
+ 3841  cd Dropbox/
+ 3842  l
+ 3843  ll
+ 3844  cd
+ 3845  cd Downloads/a/
+ 3846  ll
+ 3847  cd framework/
+ 3848  git pull
+ 3849  ll
+ 3850  python pos_shuffle_volume.py -i ~/Dropbox/Photos/oposy_skrawki/02_02_NN2/myelin.nii.gz -o ~/app.nii.gz --mapping x
+ 3851  vim pos_shuffle_volume.py 
+ 3852  ll
+ 3853  cd tests/
+ 3854  ll
+ 3855  git add test_pos_reorder_volume/
+ 3856  git stattus
+ 3857  git status
+ 3858  cd ../
+ 3859  ll
+ 3860  git add pos_shuffle_volume.py
+ 3861  git commit -m"Working checkpoint of the volume reordering script." .
+ 3862  git mv pos_shuffle_volume.py pos_reorder_volume.py
+ 3863  git status
+ 3864  git commit -m"Finishing the volume reorient script. Only tests left." .
+ 3865  git commit -m"Finishing the volume reorient script. Only tests left." .
+ 3866  ll
+ 3867  gitk 
+ 3868  ll
+ 3869  vim pos_test_extract_slice_sequential_alignment.py 
+ 3870  cd tests/test_pos_reorder_volume/
+ 3871  ll
+ 3872  vim invalid_mapping_to_long
+ 3873  vim invalid_mapping_to_not_uniqe
+ 3874  vim invalid_mapping_to_short_begin
+ 3875  vim invalid_mapping_to_short_end
+ 3876  vim invalid_mapping_to_short_middle
+ 3877  git status
+ 3878  git add Makefile
+ 3879  git add Makefile
+ 3880  ll
+ 3881  git status
+ 3882  git add .
+ 3883  ll
+ 3884  git statsu
+ 3885  git status
+ 3886  cd ../../
+ 3887  ll
+ 3888  git add .
+ 3889  git status
+ 3890  git commit -m"Finishing the volume reorient script. Even the test seem to be done." .
+ 3891  girk
+ 3892  gitk
+ 3893  cd ../
+ 3894  ll
+ 3895  cd ../
+ 3896  ll
+ 3897  cd a/
+ 3898  ll
+ 3899  cd framework/
+ 3900  ll
+ 3901  vim pos_reorder_volume.py 
+ 3902  git commit -m"Finishing the volume reorient script. Even the test seem to be done." .
+ 3903  git push origin
+ 3904  ll
+ 3905  grep TODO *
+ 3906  vim pos_stack_reorient.py 
+ 3907  pwd
+ 3908  ls -la
+ 3909  git status
+ 3910  git checkout devel
+ 3911  ll
+ 3912  git checkout develop 
+ 3913  git status
+ 3914  ll
+ 3915  vim pos_mask_similarity.py 
+ 3916  ll
+ 3917  git checkout -b devel-testing-mdt-script
+ 3918  cd tests/
+ 3919  ll
+ 3920  mkdir test-mdt-accuracy
+ 3921  cd test-mdt-accuracy/
+ 3922  ll
+ 3923  convert -size 512x512 xc:black -fill white -stroke none -draw "rectangle 20,10 80,50"  draw_rect.png
+ 3924  convert -size 256x256 xc:black -fill white -stroke none -draw "rectangle 20,10 80,50"  draw_rect.png
+ 3925  convert -size 256x256 xc:black -fill white -stroke none -draw "rectangle 80,64 128,128"  draw_rect.png
+ 3926  convert -size 256x256 xc:black -fill white -stroke none -draw "rectangle 64,64 128,128"  draw_rect.png
+ 3927  convert -size 256x256 xc:black -fill white -stroke none -draw "rectangle 64,64 128,92"  draw_rect.png
+ 3928  convert -size 256x256 xc:black -fill white -stroke none -draw "rectangle 64,64 128,192"  draw_rect.png
+ 3929  convert -size 256x256 xc:black -fill white -stroke none -draw "rectangle 64,64 192,128"  draw_rect.png
+ 3930  pwd
+ 3931  cd Downloads/a/framework/
+ 3932  ll
+ 3933  cd tests/test_pos_reorder_volume/
+ 3934  ll
+ 3935  rm x
+ 3936  ll
+ 3937  git rm x
+ 3938  ll
+ 3939  git status
+ 3940  vim Makefile
+ 3941  ll
+ 3942  vim Makefile 
+ 3943  make
+ 3944  make -i
+ 3945  ll
+ 3946  vim Makefile 
+ 3947  make -i
+ 3948  vim Makefile 
+ 3949  make -i
+ 3950  vim Makefile 
+ 3951  clear
+ 3952  make -i
+ 3953  pwd
+ 3954  ls -la
+ 3955  ll
+ 3956  cd ../../
+ 3957  ll
+ 3958  cd ../
+ 3959  ll
+ 3960  cd framework/
+ 3961  ll
+ 3962  git status
+ 3963  git status
+ 3964  git add tests/test-mdt-accuracy/
+ 3965  git status
+ 3966  git commit -m"Starting testing of the mdt workflow."
+ 3967  git status
+ 3968  git push origin 
+ 3969  pwd
+ 3970  ls -la
+ 3971  screen -r
+ 3972  ssh nicluster1 
+ 3973  ssh nicluster1 -X
+ 3974  screen -r
+ 3975  cd Downloads/a/
+ 3976  ll
+ 3977  git status
+ 3978  git push origin
+ 3979  screen -r
+ 3980  d Downloads/a
+ 3981  ll
+ 3982  cd Downloads/a/
+ 3983  ll
+ 3984  cd framework/tests/test-mdt-accuracy/
+ 3985  ll
+ 3986  geeqie draw_rect.png 
+ 3987  history
+ 3988  history > h
