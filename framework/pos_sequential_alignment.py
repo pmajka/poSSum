@@ -1,35 +1,26 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
+
 import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
 
-from deformable_histology_iterations import deformable_reconstruction_iteration
 import pos_wrappers
 import pos_parameters
 
 from pos_deformable_wrappers import preprocess_slice_volume,\
                   visualize_wrap_field, convert_slice_image,\
                   convert_slice_image_grayscale
+
 from pos_wrapper_skel import output_volume_workflow
 
-class deformable_reconstruction_workflow(output_volume_workflow):
+class sequential_alignment(output_volume_workflow):
     """
-    A framework for performing deformable reconstruction of histological volumes
-    based on histological slices. The framework combines:
-       * Advanced Normalization Tools (ANTS, http://www.picsl.upenn.edu/ANTS/)
-       * ImageMagick (http://www.imagemagick.org/script/index.php)
-       * Insight Segmentation and Registration Toolkit (ITK, http://www.itk.org/)
-       * ITKSnap and Convert3d (http://www.itksnap.org/)
-       * Visualization Toolkit (VTK, http://www.vtk.org/)
-       * and a number of homemade software
-
-    in order to generate smooth and acurate volumetric reconstructions from 2d
-    slices.
-
+    Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
     """
     _f = { \
-         # Initial grayscale slices
+         # Source images - these are _supposed_ to be RGB images in niftii
+         # format.
         'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
         'init_slice_mask' : pos_parameters.filename('init_slice_mask', work_dir = '01_init_slices', str_template = '????.png'),
         'init_slice_naming' : pos_parameters.filename('init_slice_naming', work_dir = '01_init_slices', str_template = '%04d.nii.gz'),
@@ -535,6 +526,6 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         return parser
 
 if __name__ == '__main__':
-    options, args = deformable_reconstruction_workflow.parseArgs()
-    d = deformable_reconstruction_workflow(options, args)
+    options, args = sequential_alignment.parseArgs()
+    d = sequential_alignment(options, args)
     d.launch()
