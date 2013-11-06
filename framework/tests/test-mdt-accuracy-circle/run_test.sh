@@ -3,7 +3,7 @@ set -x
 WORK_DIR=/dev/shm/mdt_test_circle/
 
 mu=128
-sigma=8
+sigma=4
 n=100
 image_size=256
 
