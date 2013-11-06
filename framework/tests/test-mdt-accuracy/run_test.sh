@@ -1,9 +1,9 @@
-set -xe
+set -x
 
 WORK_DIR=/dev/shm/mdt_test_rectangle/
 
 mu=64
-sigma=8
+sigma=4
 n=100
 image_size=256
 
@@ -46,4 +46,4 @@ cp -rfv ${WORK_DIR}/05_iterations/0009/21_resliced/average.nii.gz test_average.n
 diff reference_sddm.nii.gz test_sddm.nii.gz > sddm_diff.txt
 diff reference_average.nii.gz test_average.nii.gz > average_diff.txt
 
-rm -vf *.nii.gz
+rm -vf ????.nii.gz
