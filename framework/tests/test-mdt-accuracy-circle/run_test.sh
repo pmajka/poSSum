@@ -1,8 +1,8 @@
 set -x
 
-WORK_DIR=/dev/shm/mdt_test_rectangle/
+WORK_DIR=/dev/shm/mdt_test_circle/
 
-mu=64
+mu=128
 sigma=8
 n=100
 image_size=256
@@ -16,7 +16,7 @@ samples = np.random.normal(mu, sigma, size=n)
 
 for i in range(n):
     v=samples[i]
-    print "convert -size ${image_size}x${image_size} xc:black -fill white -stroke none -draw \"rectangle %d,64 192,192\" img_%03d.png; c2d img_%03d.png -o %04d.nii.gz" %(v, i, i, i)
+    print "convert -size ${image_size}x${image_size} xc:black -draw \"fill none stroke white stroke-linecap round stroke-width %0d line 128,128 128,128.0001\" img_%03d.png; c2d img_%03d.png -o %04d.nii.gz" %(v, i, i, i)
 END
 }
 
