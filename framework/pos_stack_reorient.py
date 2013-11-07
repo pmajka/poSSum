@@ -24,15 +24,15 @@ Summary
 
 All supported features in one invocation (an example) ::
 
-    $pos_stack_reorient.py -i input_file.nii.gz
-        RAS code           --orientationCode ras
-      string, see -h       --interpolation NearestNeighbor
-   [float float float]     --resample 0.5 0.5 0.5
-   permutation of 0 1 2    --permutation 2 1 0
-      [0-1 0-1 0-1]        --flipAxes 1 0 1
-          bool             --flipAroundOrigin
-   [float float float]     --setSpacing 0.05 0.05 0.05
-   [float float float]     --setOrigin 0 0 0
+    $pos_stack_reorient.py -i input_file.nii.gz \
+        RAS code           --orientationCode ras \
+      string, see -h       --interpolation NearestNeighbor \
+   [float float float]     --resample 0.5 0.5 0.5 \
+   permutation of 0 1 2    --permutation 2 1 0 \
+      [0-1 0-1 0-1]        --flipAxes 1 0 1 \
+          bool             --flipAroundOrigin \
+   [float float float]     --setSpacing 0.05 0.05 0.05 \
+   [float float float]     --setOrigin 0 0 0 \
                            --setType uchar
 
 Details - volume stacking
@@ -42,8 +42,8 @@ Some precise examples of using the volume stacking and reorienting script.  In
 order to stack a series of slices onto a volume, the following command has to
 be invoked::
 
-    $pos_stack_reorient.py -i prefix_%04d.png
-                           --stackingOptions 0 100 1
+    $pos_stack_reorient.py -i prefix_%04d.png \
+                           --stackingOptions 0 100 1 \
                            -o output.nii.gz
 
 And that's it. The command above will stack a series of images (assuming that
@@ -61,7 +61,6 @@ as the input filetype.
 
 """
 import itk
-
 import pos_wrapper_skel
 import pos_itk_core
 
@@ -73,9 +72,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
     The purpose of this class is to:
         * Stack individual 2D slices into volumes
             (either single- or multichannel)
-
         or
-
         * Load volumes (again: either single- or multichannel)
 
         and then:
@@ -310,43 +307,90 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
 
     @classmethod
     def _getCommandLineParser(cls):
-        """
-        #TODO: Provide some extended documentation here.
-        """
+        __output_vol_command_line_args_help = {}
+        __output_vol_command_line_args_help['inputFile'] =\
+"""Input volume filename (if no stackingOptions are provided) or input naming
+scheme (stackingOptions) are provided."""
+        __output_vol_command_line_args_help['outputFile'] =\
+"""Output volume filename."""
+        __output_vol_command_line_args_help['orientationCode'] =\
+"""Set the orientation of the image using one of 48 canonical orientations. The
+orientation describes the mapping from the voxel coordinate system (i,j,k) to
+the physical coordinate system (x,y,z). In the voxel coordinate system, i runs
+along columns of voxels, j runs along rows of voxels, and k runs along slices
+of voxels. It is assumed (by the NIFTI convention) that the axes of the
+physical coordinate system run as follows: x from (L)eft to (R)ight, y from
+(P)osterior to (A)nterior, z from (I)nferior to (S)uperior.  (the explanation
+is copied from Convert3D documentation:
+http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation)"""
+        __output_vol_command_line_args_help['setSpacing'] =\
+"""Sets the voxel spacing of the image.  A vector of three positive values is
+required (e.g. '0.5 0.5 0.5'). The spacing is assumed to be provided in
+milimeters. The defaults spacing is 1x1x1mm."""
+        __output_vol_command_line_args_help['setOrigin'] =\
+"""Set the origin of the image --  the center of the voxel (0,0,0) in the image.
+Should be specified in millimeters. Default: 0,0,0."""
+        __output_vol_command_line_args_help['setType'] =\
+"""Specifies the pixel type for the output image.  Data type for output volume's
+voxels. The allowed values are: char | uchar | short | ushort | int | uint |
+float | double. The default type, unlike in Convert3d is char."""
+        __output_vol_command_line_args_help['interpolation'] =\
+"""Specifies the interpolation method for resampling the output volume.
+Allowed options: NearestNeighbor|Linear. Default: linear"""
+        __output_vol_command_line_args_help['permutation'] =\
+"""Apply axes permutation. Permutation has to be provided as sequence of 3
+integers separated by space. Identity (0,1,2) permutation is a default one."""
+        __output_vol_command_line_args_help['resample'] =\
+"""Requests additional resampling of the output volume. The resampling is applied
+_before_ settting the output spacing. The resampling settings are provided as
+three positive float values corresponding to the resampling factor (e.g. 0.25
+1.0 0.75). Watch out when combining this whith other parameters like setting
+spacing. By default there is no resampling."""
+        __output_vol_command_line_args_help['setFlip'] =\
+"""Select axes to flip. Selection has to be provided as sequence of three
+numbers. E.g. \'0 0 1\' will flip the z axis."""
+        __output_vol_command_line_args_help['flipAroundOrigin'] =\
+"""Determines of the flipping will be performed around origin. False by default."""
+        __output_vol_command_line_args_help['stackingOptions'] =\
+"""Image stacking options: first slice, last slice, slice increment. Three integers are required."""
+
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
-        parser.add_option('--outputFile', '-o', dest='outputFile', type='str',
-                default=None, help='Output volume filename.')
-        parser.add_option('--inputFile', '-i', dest='inputFile', type='str',
-                default=None, help='Input volume filename (if no stackingOptions are provided) or input naming scheme (stackingOptions) are provided.')
-        parser.add_option('--orientationCode', dest='orientationCode', type='str',
-                default=None, help='Anatomical orientation code in RAS mode.')
-        parser.add_option('--stackingOptions', dest='stackingOptions', type='int',
-                default=None, help='Image stacking options: first slice, last slice, slice increment. Three integers are required.', nargs=3)
+        parser.add_option('--outputFile', '-o', dest='outputFile',
+            type='str', default=None,
+            help=__output_vol_command_line_args_help['outputFile'])
+        parser.add_option('--inputFile', '-i', dest='inputFile',
+            type='str', default=None,
+            help=__output_vol_command_line_args_help['inputFile'])
+        parser.add_option('--stackingOptions', dest='stackingOptions',
+            type='int', default=None, nargs=3,
+            help=__output_vol_command_line_args_help['stackingOptions'])
 
         parser.add_option('--interpolation', default='linear',
             type='str', dest='interpolation',
-            help='Resampling interpolation method. Allowed options: NearestNeighbor|Linear. Default: linear')
+            help=__output_vol_command_line_args_help['interpolation'])
         parser.add_option('--resample', default=None,
             type='float', nargs=3, dest='resample',
-            help='Resampling vector. Provide three floats from 0 to 1.')
+            help=__output_vol_command_line_args_help['resample'])
         parser.add_option('--permutation', default=[0,1,2],
             type='int', nargs=3, dest='permutation',
-            help='Apply axes permutation. Permutation has to be provided as sequence of 3 integers separated by space. Identity (0,1,2) permutation is a default one.')
+            help=__output_vol_command_line_args_help['permutation'])
         parser.add_option('--flipAxes', default=[0,0,0],
             type='int', nargs=3, dest='flipAxes',
-            help='Select axes to flip. Selection has to be provided as sequence of three numbers. E.g. \'0 0 1\' will flip the z axis.')
+            help=__output_vol_command_line_args_help['setFlip'])
         parser.add_option('--flipAroundOrigin', default=False,
             dest='flipAroundOrigin', action='store_const', const=True,
-            help='Flip around origin.')
+            help=__output_vol_command_line_args_help['flipAroundOrigin'])
         parser.add_option('--setSpacing',
             dest='setSpacing', type='float', nargs=3, default=None,
-            help='Set spacing values. The dpacing has to be provided as three floats.')
+            help=__output_vol_command_line_args_help['setSpacing'])
         parser.add_option('--setOrigin', dest='setOrigin', type='float',
             nargs=3, default=None,
-            help='Set origin values instead of voxel location. Origin has to be provided as three floats.')
+            help=__output_vol_command_line_args_help['setOrigin'])
         parser.add_option('--setType', dest='setType', type='str', default=None,
-            help='Allowed values: uchar | ushort | float | double')
+            help=__output_vol_command_line_args_help['setType'])
+        parser.add_option('--orientationCode', dest='orientationCode', type='str',
+            default=None, help=__output_vol_command_line_args_help['orientationCode'])
 
         return parser
 
