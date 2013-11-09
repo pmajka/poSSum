@@ -127,9 +127,12 @@ from pos_parameters import filename_parameter, list_parameter, string_parameter,
 
 class alignment_preprocessor_wrapper(generic_wrapper):
     """
-    #TODO: Document this wrapper!
+    A wrapper for the `pos_slice_preprocess.py` script. Since the script itself
+    provides an extensive documentation, the detailed description of command
+    line options is skipped in the wrapper's documentation.
     """
-    _template = """pos_test_extract_slice_sequential_alignment.py \
+
+    _template = """pos_slice_preprocess.py \
                   --inputFilename {input_image} \
                   {grayscele_output_image} {color_output_image} \
                   {registration_roi} {registration_resize} \
