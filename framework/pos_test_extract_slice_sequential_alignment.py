@@ -2,7 +2,117 @@
 # -*- coding: utf-8 -*
 
 """
+Slice preprocessing script
+**************************
+
+:author: Piotr Majka <pmajka@nencki.gov.pl>
+:revision: $Rev$
+:date: $LastChangedDate$
+
+`pos_slice_preprocess`, a section preprocessing script.
+
+This file is part of Multimodal Atlas of Monodelphis Domestica.
+(c) Piotr Majka 2011-2013. Restricted, damnit!
+
+Syntax
+======
+
+.. highlight:: bash
+
+Summary
+-------
+
+All supported features in one invocation (an example) ::
+
+    $pos_slice_preprocess.py \
+        [required]      --inputFilename <filename> \
+                        --grayscaleOutputImage <filename> \
+                        --colorOutputImage <filename>\
+     [ox, oy, sx, sy]   --registrationROI 10 20 30 30 \
+                        --registrationResize 0.5 \
+     [red, green, blue] --registrationColorChannel red \
+                        --medianFilterRadius 2 2 \
+                        --invertSourceImage \
+                        --invertMultichannelImage
+
+Details
+-------
+
+This script performs several operations on the section's image in order to
+prepare it to the coregistration process. It provides a flexible set of
+processing options to shape the slice image.
+
+The script requires only one input parameter - the slice image to process
+(provided via `--inputFilename` command line option). It has to be in one of
+the formats from the list below:
+
+    1) Three channel, 8-bit per channel RGB image. A 8-bit PNG image would be a
+       good example here.
+    2) Single channel 8-bit (0-255) image, for instance a 8-bit grayscale TIFF
+       file.
+    3) When a grayscale image in Nifti format is provided, it can be of any
+       data type recognized by itk.
+
+Providing images not matching the specification above will surely lead to a lot
+of error end even more confusion. So please be carefull and examine type of
+your image before supplying it to the script.
+
+
+Output image type
+-----------------
+
+Depending on the provided output settings, the script produces:
+
+    1) RGB: three channel 8-bit integer images in niftii format.
+    2) Grayscale: single channel float image in niftii format.
+
+The output images carry information about their spacing and origin thus are
+fully suitable for registration procedures.
+
+
+Simple usage example
+--------------------
+
+The folloving invocation takes an rgb input image and produces two output
+files: grayscale (by default, the blue channel is extracted) and rgb image,
+both in nifti format. No additional processing is performed ::
+
+    $pos_slice_preprocess.py \
+        [required]      --inputFilename <filename> \
+                        --grayscaleOutputImage <filename> \
+                        --colorOutputImage <filename>
+
+
+Trim and rescale and image
+--------------------------
+
+The example below the script takes an image scales it down and extracts a
+square from the whole image and outputs only color image::
+
+    $pos_slice_preprocess.py \
+        [required]      --inputFilename <filename> \
+                        --grayscaleOutputImage <filename> \
+                        --registrationColorChannel blue \
+                        --registrationResize 0.5 \
+                        --registrationROI 200 200 100 100
+
+Smooth and invert images
+------------------------
+
+Now some more complicated processing example. The code below takes an rgb image
+for input, extracts default color channel and applies smoothing and inverts the
+images. Both grayscale and rgb images are outputes. Note, however, that only
+grayscale image is smoothed by the median filter.
+
+    $pos_slice_preprocess.py \
+        [required]      --inputFilename <filename> \
+                        --grayscaleOutputImage <filename> \
+                        --colorOutputImage <filename>\
+                        --medianFilterRadius 2 2 \
+                        --invertSourceImage \
+                        --invertMultichannelImage
 """
+
 import logging
 from optparse import OptionParser, OptionGroup
 
@@ -146,16 +256,8 @@ def collapse_pseudo_3d_image(input_image, input_type,
 
 class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
     """
-    Assumptions:
-        1) RGB: three channel integer (0-255) image.
-        2) Grayscale: single channel 8-bit (0-255) image.
-        3) Other single component: any.
-        Providing images not matching provided.
-
-    Output image types:
-        1) RGB: three channel 8-bit integer images.
-        2) Grayscale: single channel float image.
     """
+
     _rgb_out_type = itk.Image.RGBUC2
     _rgb_out_component_type = itk.Image.UC2
     _grayscale_out_type = itk.Image.F2
@@ -167,8 +269,6 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             self._logger.error("The input image (-i ...) is an obligatory option!")
 
     def launch_filter(self):
-        """
-        """
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
@@ -213,8 +313,24 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
 
+    def _get_crop_settings(self):
+        """
+        """
+        try :
+            crop_index = self.options.registrationROI[0:2]
+        except:
+            crop_index = None
+
+        try:
+            crop_size = self.options.registrationROI[2:4]
+        except:
+            crop_size = None
+
+        return crop_index, crop_size
+
     def _process_multichannel_image(self):
         """
+        Execute slice preparation pipeline on a multichannel image.
         """
 
         if self.options.colorOutputImage:
@@ -320,24 +436,11 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             writer.SetFileName(self.options.grayscaleOutputImage)
             writer.Update()
 
-    def _get_crop_settings(self):
-        """
-        """
-        try :
-            crop_index = self.options.registrationROI[0:2]
-        except:
-            crop_index = None
-
-        try:
-            crop_size = self.options.registrationROI[2:4]
-        except:
-            crop_size = None
-
-        return crop_index, crop_size
-
     def _process_grayscale_image(self):
         """
+        Execute slice processing workflow on a grayscale image.
         """
+
         if self.options.colorOutputImage:
             self._logger.debug("Extracting rgb(grayscale) image.")
 
@@ -408,7 +511,6 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
     @staticmethod
     def parseArgs():
-        #TODO: Provide usage information.
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--inputFilename', '-i', dest='inputFilename', type='str',
