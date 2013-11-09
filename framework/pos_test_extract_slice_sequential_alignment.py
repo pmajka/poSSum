@@ -3,13 +3,41 @@
 
 """
 """
-import sys, os
-import datetime, logging
+import logging
 from optparse import OptionParser, OptionGroup
 
 import itk
 import pos_common
-from pos_itk_core import get_image_region, autodetect_file_type, types_reduced_dimensions, resample_image_filter
+import pos_wrapper_skel
+from pos_itk_core import get_image_region, autodetect_file_type,\
+        types_reduced_dimensions, resample_image_filter
+
+from pos_wrappers import generic_wrapper
+from pos_parameters import filename_parameter, list_parameter, string_parameter, boolean_parameter
+
+class alignment_preprocessor_wrapper(generic_wrapper):
+    """
+    #TODO: Document this wrapper!
+    """
+    _template = """pos_test_extract_slice_sequential_alignment.py \
+                  --inputFilename {input_image} \
+                  {grayscele_output_image} {color_output_image} \
+                  {registration_roi} {registration_resize} \
+                  {registration_color} \
+                  {median_filter_radius} \
+                  {invert_grayscale} {invert_multichannel}"""
+
+    _parameters = {
+        'input_image' : filename_parameter('input_image', None),
+        'grayscele_output_image' : filename_parameter('-g', None, str_template="{_name} {_value}"),
+        'color_output_image' : filename_parameter('-r', None, str_template="{_name} {_value}"),
+        'registration_roi' : list_parameter('--registrationROI', None, str_template="{_name} {value}"),
+        'registration_resize' : list_parameter('--registrationResize', None, str_template="{_name} {value}"),
+        'registration_color' : string_parameter('--registrationColorChannel', None, str_template="{_name} {value}"),
+        'median_filter_radius' : list_parameter('--medianFilterRadius', None, str_template="{_name} {value}"),
+        'invert_grayscale' : list_parameter('--invertSourceImage', False),
+        'invert_multichannel' : list_parameter('--invertMultichannelImage', False)}
+
 
 def prepare_single_channel(input_image,
                            scale_factor=None, crop_index=None, crop_size=None,
@@ -116,8 +144,7 @@ def collapse_pseudo_3d_image(input_image, input_type,
         return input_image, input_typee
 
 
-#TODO make this script compatibile with the generic_workflow class
-class prepare_slice_for_seq_alignment(object):
+class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
     """
     Assumptions:
         1) RGB: three channel integer (0-255) image.
@@ -133,51 +160,23 @@ class prepare_slice_for_seq_alignment(object):
     _rgb_out_component_type = itk.Image.UC2
     _grayscale_out_type = itk.Image.F2
 
-    def __init__(self, optionsDict, args):
-        """
-        """
-        # Store filter configuration withing the class instance
-        if type(optionsDict) != type({}):
-            self.options = eval(str(optionsDict))
-        else:
-            self.options = optionsDict
-
-        self._args = args
-
-        # Yes, we need logging even in so simple script.
-        self._initializeLogging()
-
-        # Check, if all the provided parameters are valid and mutually
-        # consistent.
-        self._validate_options()
-
-    def _initializeLogging(self):
-        pos_common.setup_logging(self.options['logFilename'],
-                      self.options['loglevel'])
-
-        logging.debug("Logging module initialized. Saving to: %s, Loglevel: %s",
-                      self.options['logFilename'], self.options['loglevel'])
-
-        # Assign the the string that will identify all messages from this
-        # script
-        self._logger = logging.getLogger(self.__class__.__name__)
-
-        self._logger.info("%s workflow options:", self.__class__.__name__)
-        for k,v in self.options.items():
-            self._logger.info("%s : %s", k, v)
-
     def _validate_options(self):
-        assert self.options['inputFilename'] is not None , \
-            self._logger.error("The input image is a required option!")
+        super(self.__class__, self)._initializeOptions()
+
+        assert self.options.inputFilename is not None , \
+            self._logger.error("The input image (-i ...) is an obligatory option!")
 
     def launch_filter(self):
         """
         """
+        # Execute the parents before-execution activities
+        super(self.__class__, self)._pre_launch()
+
         # Determine the filetype and then load the image to be processed.
-        self._logger.debug("Reading volume file %s", self.options['inputFilename'])
-        self._input_type = autodetect_file_type(self.options['inputFilename'])
+        self._logger.debug("Reading volume file %s", self.options.inputFilename)
+        self._input_type = autodetect_file_type(self.options.inputFilename)
         reader = itk.ImageFileReader[self._input_type].New()
-        reader.SetFileName(self.options['inputFilename'])
+        reader.SetFileName(self.options.inputFilename)
         reader.Update()
 
         # Read number of the components of the image.
@@ -198,6 +197,7 @@ class prepare_slice_for_seq_alignment(object):
         # Just determine number of dimensions of the image. Should be always
         # two as we have just collapsed 3D images. Check it by an assertion:
         self._image_dim = len(self._collapsed.GetSpacing())
+
         assert (self._image_dim == 2), "Number of dimensions should be 2!"
         self._logger.debug("Determined image dimensionality: %d", self._image_dim)
 
@@ -210,11 +210,14 @@ class prepare_slice_for_seq_alignment(object):
         else:
             self._process_grayscale_image()
 
+        # Run parent's post execution activities
+        super(self.__class__, self)._post_launch()
+
     def _process_multichannel_image(self):
         """
         """
 
-        if self.options['colorOutputImage']:
+        if self.options.colorOutputImage:
             # Just initialize an array holding processed individual channels.
             processed_components = []
 
@@ -236,11 +239,11 @@ class prepare_slice_for_seq_alignment(object):
                 crop_index_s, crop_size_s = self._get_crop_settings()
                 processed_channel = prepare_single_channel(
                     extract_filter.GetOutput(),
-                    scale_factor = self.options['registrationResize'],
+                    scale_factor = self.options.registrationResize,
                     crop_index = crop_index_s,
                     crop_size = crop_size_s,
                     median_radius = None,
-                    invert = self.options['invertMultichannelImage'])
+                    invert = self.options.invertMultichannelImage)
 
                 # Cast the processed channel to approperiate type (the type
                 # based on which multicomponent image will be created)
@@ -264,13 +267,13 @@ class prepare_slice_for_seq_alignment(object):
 
             # Write the processed multichannel image.
             self._logger.debug("Writing the rgb(rgb) image to: %s.",
-                            self.options['colorOutputImage'])
+                            self.options.colorOutputImage)
             writer = itk.ImageFileWriter[self._rgb_out_type].New(
-                compose, FileName=self.options['colorOutputImage'])
+                compose, FileName=self.options.colorOutputImage)
             writer.Update()
 
-        if self.options['grayscaleOutputImage']:
-            # --- Now extract a grayscale image from the provided multichannel
+        if self.options.grayscaleOutputImage:
+            # Now extract a grayscale image from the provided multichannel
             # image. The channel to extract is a specific color provided via
             # command line options.
             self._logger.debug("Extracting grayscale image from rgb slice.")
@@ -282,7 +285,7 @@ class prepare_slice_for_seq_alignment(object):
 
             # Extract a specific color channel based on which grayscale image will
             # be prepared.
-            registration_channel = self.options['registrationColorChannel']
+            registration_channel = self.options.registrationColorChannel
             self._logger.debug("Extract color channel: %s.",
                                registration_channel)
             extract_filter = itk.VectorIndexSelectionCastImageFilter[\
@@ -303,28 +306,30 @@ class prepare_slice_for_seq_alignment(object):
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                     caster.GetOutput(),
-                    scale_factor = self.options['registrationResize'],
+                    scale_factor = self.options.registrationResize,
                     crop_index = crop_index_s,
                     crop_size = crop_size_s,
-                    median_radius = self.options['medianFilterRadius'],
-                    invert = self.options['invertSourceImage'])
+                    median_radius = self.options.medianFilterRadius,
+                    invert = self.options.invertSourceImage)
 
             # Write the grayscale(rgb) image to file.
             self._logger.debug("Writing the grayscale image to %s.",
-                            self.options['grayscaleOutputImage'])
+                            self.options.grayscaleOutputImage)
             writer = itk.ImageFileWriter[self._grayscale_out_type].New()
             writer.SetInput(processed_channel)
-            writer.SetFileName(self.options['grayscaleOutputImage'])
+            writer.SetFileName(self.options.grayscaleOutputImage)
             writer.Update()
 
     def _get_crop_settings(self):
+        """
+        """
         try :
-            crop_index = self.options['registrationROI'][0:2]
+            crop_index = self.options.registrationROI[0:2]
         except:
             crop_index = None
 
         try:
-            crop_size = self.options['registrationROI'][2:4]
+            crop_size = self.options.registrationROI[2:4]
         except:
             crop_size = None
 
@@ -333,7 +338,7 @@ class prepare_slice_for_seq_alignment(object):
     def _process_grayscale_image(self):
         """
         """
-        if self.options['colorOutputImage']:
+        if self.options.colorOutputImage:
             self._logger.debug("Extracting rgb(grayscale) image.")
 
             # The rgb(grayscale) image is created by simply cloning the grayscale
@@ -349,11 +354,11 @@ class prepare_slice_for_seq_alignment(object):
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                 caster.GetOutput(),
-                scale_factor = self.options['registrationResize'],
+                scale_factor = self.options.registrationResize,
                 crop_index = crop_index_s,
                 crop_size = crop_size_s,
                 median_radius = None,
-                invert = self.options['invertMultichannelImage'])
+                invert = self.options.invertMultichannelImage)
 
             # Finally the multichannel image can be composed from individual
             # grayscale channel(s) prepared in the previous step.
@@ -366,23 +371,23 @@ class prepare_slice_for_seq_alignment(object):
                     Input3=processed_channel)
 
             self._logger.debug("Writing the rgb(grayscale) image to %s.",
-                            self.options['colorOutputImage'])
+                            self.options.colorOutputImage)
             writer = itk.ImageFileWriter[self._rgb_out_type].New(
-                compose_filter, FileName=self.options['colorOutputImage'])
+                compose_filter, FileName=self.options.colorOutputImage)
             writer.Update()
 
         # Now, let's extraxct the processed grayscale image (only if such
         # option is requested).
-        if self.options['grayscaleOutputImage']:
+        if self.options.grayscaleOutputImage:
             self._logger.debug("Extracting grayscale(grayscale) image.")
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                     self._collapsed,
-                    scale_factor = self.options['registrationResize'],
+                    scale_factor = self.options.registrationResize,
                     crop_index = crop_index_s,
                     crop_size = crop_size_s,
-                    median_radius = self.options['medianFilterRadius'],
-                    invert = self.options['invertSourceImage'])
+                    median_radius = self.options.medianFilterRadius,
+                    invert = self.options.invertSourceImage)
 
             # Cast the processed grayscale image to the grayscale image output type
             # as we want to keep the code flexible (it is possible that the output
@@ -395,19 +400,20 @@ class prepare_slice_for_seq_alignment(object):
 
             # Finally we write the processed grayscale image to a file.
             self._logger.debug("Writing the grayscale(grayscale) image to %s.",
-                            self.options['grayscaleOutputImage'])
+                            self.options.grayscaleOutputImage)
             writer = itk.ImageFileWriter[self._grayscale_out_type].New(caster,\
-                        FileName=self.options['grayscaleOutputImage'])
+                        FileName=self.options.grayscaleOutputImage)
             writer.Update()
 
 
     @staticmethod
     def parseArgs():
-        usage = "python [options]"
-        parser = OptionParser(usage = usage)
+        #TODO: Provide usage information.
+        parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--inputFilename', '-i', dest='inputFilename', type='str',
                 default=None, help='File for preparation.')
+
         parser.add_option('--grayscaleOutputImage', '-g',
                         dest='grayscaleOutputImage', type='str', default=None,
                         help='Name of the output grayscale image.')
@@ -416,7 +422,7 @@ class prepare_slice_for_seq_alignment(object):
                         help='Name of the output multichannel image.')
 
         parser.add_option('--registrationROI', default=None,
-                            type='int', dest='registrationROI',  nargs=4,
+                            type='int', dest='registrationROI', nargs=4,
                             help='ROI of the input image used for registration (ox, oy, sx, sy).')
         parser.add_option('--registrationResize', default=None,
                             type='float', dest='registrationResize',
@@ -426,6 +432,7 @@ class prepare_slice_for_seq_alignment(object):
                             help='In rgb images - color channel on which \
                             registration will be performed. Has no meaning for \
                             grayscale input images. Possible values: r/red, g/green, b/blue.')
+
         parser.add_option('--medianFilterRadius', default=None,
                 dest='medianFilterRadius', type='int', nargs=2,
                 help='Median filter radius in voxels e.g. 2 2')
@@ -436,16 +443,7 @@ class prepare_slice_for_seq_alignment(object):
                 dest='invertMultichannelImage',  action='store_const', const=True,
                 help='Invert source image: both, grayscale and multichannel, before registration')
 
-        logging_settings = OptionGroup(parser, 'Logging options')
-        logging_settings.add_option('--loglevel', dest='loglevel', type='str',
-                default='INFO', help='Severity of the messages to report: CRITICAL | ERROR | WARNING | INFO | DEBUG')
-        logging_settings.add_option('--logFilename', dest='logFilename',
-                default=None, action='store', type='str',
-                help='If defined, puts the log into given file instead of printing it to stderr.')
-
-        parser.add_option_group(logging_settings)
         (options, args) = parser.parse_args()
-
         return (options, args)
 
 

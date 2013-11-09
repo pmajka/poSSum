@@ -14,77 +14,40 @@ from pos_deformable_wrappers import preprocess_slice_volume,\
 
 from pos_wrapper_skel import output_volume_workflow
 
+
+
 class sequential_alignment(output_volume_workflow):
     """
     Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
     """
-    _f = { \
-         # Source images - these are _supposed_ to be RGB images in niftii
-         # format.
-        'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_slice_mask' : pos_parameters.filename('init_slice_mask', work_dir = '01_init_slices', str_template = '????.png'),
-        'init_slice_naming' : pos_parameters.filename('init_slice_naming', work_dir = '01_init_slices', str_template = '%04d.nii.gz'),
-        # Initial outline mask
-        'init_outline' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_outline_mask' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '????.png'),
-        'init_outline_naming' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.nii.gz'),
-        # Initial custom outlier mask
-        'init_custom' : pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_custom_mask' : pos_parameters.filename('init_custom_mask', work_dir = '04_custom_slices', str_template = '????.png'),
-        'init_custom_naming' : pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '%04d.nii.gz'),
-        # Iteration
-        'iteration'  : pos_parameters.filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
-        'iteration_out_naming' : pos_parameters.filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
-        'iteration_transform'  : pos_parameters.filename('iteration_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}Warp.nii.gz'),
-        'iteration_resliced'   : pos_parameters.filename('iteration_resliced' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/'),
-        'iteration_resliced_slice' : pos_parameters.filename('iteration_resliced_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/{idx:04d}.nii.gz'),
-        'iteration_resliced_outline'   : pos_parameters.filename('iteration_resliced_outline' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/'),
-        'iteration_resliced_outline_slice' : pos_parameters.filename('iteration_resliced_outline_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/{idx:04d}.nii.gz'),
-        'iteration_resliced_custom'   : pos_parameters.filename('iteration_resliced_custom' , work_dir = '05_iterations', str_template  = '{iter:04d}/24_resliced_custom/'),
-        'iteration_resliced_custom_slice' : pos_parameters.filename('iteration_resliced_custom_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/24_resliced_custom/{idx:04d}.nii.gz'),
-        'inter_res'  : pos_parameters.filename('inter_res',  work_dir = '08_intermediate_results', str_template = ''),
-        'inter_res_gray_vol'   : pos_parameters.filename('inter_res_gray_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_{iter:04d}.nii.gz'),
-        'inter_res_outline_vol'   : pos_parameters.filename('inter_res_outline_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_outline_{iter:04d}.nii.gz'),
-        'inter_res_custom_vol'   : pos_parameters.filename('inter_res_custom_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_cmask_{iter:04d}.nii.gz'),
-        'final_deformations'   : pos_parameters.filename('final_deformations',   work_dir = '09_final_deformation', str_template = '{idx:04d}.nii.gz'),
-        'rescaled_deformations': pos_parameters.filename('rescaled_deformations',   work_dir = '10_rescaled_deformation', str_template = '{idx:04d}.nii.gz'),
-        'rescaled_source': pos_parameters.filename('rescaled_source',   work_dir = '11_rescaled_source', str_template = '{idx:04d}.nii.gz'),
-        'iteration_stack_mask' : pos_parameters.filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/%04d.nii.gz'),
-        'iteration_stack_outline' : pos_parameters.filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/%04d.nii.gz'),
-        'iteration_stack_cmask' : pos_parameters.filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/%04d.nii.gz'),
-        # Analysis
-        'warp_field_visualization' : pos_parameters.filename('warp_field_visualization', work_dir = '15_deformation_analysis', str_template = '{idx:04d}.png')
-        }
+
+    _f = {
+        'src_gray' : pos_parameters.filename('src_gray', work_dir = '00_source_gray', str_template='{idx:04d}.nii.gz'),
+        'src_color' : pos_parameters.filename('src_color', work_dir = '01_source_color', str_template='{idx:04d}.nii.gz'),
+        'part_transf' : pos_parameters.filename('part_transf', work_dir = '02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_Affine'),
+        'comp_transf' : pos_parameters.filename('comp_transf', work_dir = '02_transforms', str_template='ct_m{mIdx:04d}_f{fIdx:04d}_Affine'),
+        'resliced_gray' : pos_parameters.filename('resliced_gray', work_dir = '04_gray_resliced', str_template='{idx:04d}.nii.gz'),
+        'resliced_color' : pos_parameters.filename('resliced_color', work_dir = '05_color_resliced', str_template='{idx:04d}.nii.gz'),
+        'out_volume_gray' : pos_parameters.filename('out_volume_gray', work_dir = '06_output_volumes', str_template='{fname}_gray.nii.gz'),
+        'out_volume_color' : pos_parameters.filename('out_volume_color', work_dir = '06_output_volumes', str_template='{fname}_color.nii.gz'),
+        'transform_plot' : pos_parameters.filename('transform_plot', work_dir = '06_output_volumes', str_template='{fname}.png'),
+         }
+
 
     _usage = ""
 
     def __init__(self, options, args):
         super(self.__class__, self).__init__(options, args)
 
-        # Handling situation when no volume is provided
-        if not any([self.options.inputVolume, \
-                   self.options.outlineVolume, \
-                   self.options.maskedVolume]):
-            print >> sys.stderr, "No input volumes provided. Exiting."
-            sys.exit(1)
+        #TODO: Provide input slice path and filename template a as comman line input
+        # parameter
 
-        # Process each type of the input volume. Currently there are three types
-        # of input volumes supported: The input grayscale volume (the actual
-        # imaege to be registared), the outline volume (volume pointing wihch
-        # part of the image belongs to the slice and which part not).
-        # The third type of the volume is a volume for outlier removal (so
-        # called masked volume).
-        if self.options.inputVolume:
-            self.options.inputVolumeWeight = float(self.options.inputVolume[0])
-            self.options.inputVolume = self.options.inputVolume[1]
+        # Define the input slice range
+        self.options.slice_range = \
+            range(self.options.sliceRange[0], self.options.sliceRange[1]+1)
 
-        if self.options.outlineVolume:
-            self.options.outlineVolumeWeight = float(self.options.outlineVolume[0])
-            self.options.outlineVolume = self.options.outlineVolume[1]
-
-        if self.options.maskedVolume:
-            self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])
-            self.options.maskedVolume = self.options.maskedVolume[1]
+    def _generate_source_slices(self):
+        pass
 
     def _get_prepare_volume_command_template(self):
         """

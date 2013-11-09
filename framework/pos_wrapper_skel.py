@@ -428,6 +428,8 @@ the linear interpolation is set. The other allowed values are: NearestNeighbor
 
 class enclosed_workflow(generic_workflow):
     """
+    A base for workflows not utilizing temporary direcotries.
+
     This workflow is deditacted for pipelines that don't use
     working directories and which do not store temponary data aduring processing.
     It has disabled some features regarding jobdirs, parallel execution,

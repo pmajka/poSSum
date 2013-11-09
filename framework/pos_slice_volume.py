@@ -317,7 +317,6 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
                             help='ROI of the input image used for registration (ox, oy, sx, sy).')
 
         (options, args) = parser.parse_args()
-
         return (options, args)
 
 if __name__ == '__main__':
