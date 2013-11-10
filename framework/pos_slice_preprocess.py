@@ -113,11 +113,7 @@ grayscale image is smoothed by the median filter.
                         --invertMultichannelImage
 """
 
-import logging
-from optparse import OptionParser, OptionGroup
-
 import itk
-import pos_common
 import pos_wrapper_skel
 from pos_itk_core import get_image_region, autodetect_file_type,\
         types_reduced_dimensions, resample_image_filter
@@ -125,11 +121,20 @@ from pos_itk_core import get_image_region, autodetect_file_type,\
 from pos_wrappers import generic_wrapper
 from pos_parameters import filename_parameter, list_parameter, string_parameter, boolean_parameter
 
+
 class alignment_preprocessor_wrapper(generic_wrapper):
     """
     A wrapper for the `pos_slice_preprocess.py` script. Since the script itself
     provides an extensive documentation, the detailed description of command
     line options is skipped in the wrapper's documentation.
+
+    .. note::
+        Use the following syntax when setting boolean parameters::
+
+            >>> boolean_parameter = [None, True][int(value)]
+
+        Yes, it is tricky and yes, is should be chenged.
+
 
     >>> alignment_preprocessor_wrapper
     <class '__main__.alignment_preprocessor_wrapper'>
@@ -229,14 +234,14 @@ class alignment_preprocessor_wrapper(generic_wrapper):
 
     _parameters = {
         'input_image' : filename_parameter('input_image', None),
-        'grayscele_output_image' : filename_parameter('-g', None, str_template="{_name} {_value}"),
-        'color_output_image' : filename_parameter('-r', None, str_template="{_name} {_value}"),
-        'registration_roi' : list_parameter('--registrationROI', None, str_template="{_name} {_list}"),
-        'registration_resize' : list_parameter('--registrationResize', None, str_template="{_name} {_list}"),
-        'registration_color' : string_parameter('--registrationColorChannel', None, str_template="{_name} {_value}"),
-        'median_filter_radius' : list_parameter('--medianFilterRadius', None, str_template="{_name} {_list}"),
-        'invert_grayscale' : boolean_parameter('--invertSourceImage', False, str_template="{_name}"),
-        'invert_multichannel' : boolean_parameter('--invertMultichannelImage', False, str_template="{_name}")}
+        'grayscele_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
+        'color_output_image': filename_parameter('-r', None, str_template="{_name} {_value}"),
+        'registration_roi': list_parameter('--registrationROI', None, str_template="{_name} {_list}"),
+        'registration_resize': list_parameter('--registrationResize', None, str_template="{_name} {_list}"),
+        'registration_color': string_parameter('--registrationColorChannel', None, str_template="{_name} {_value}"),
+        'median_filter_radius': list_parameter('--medianFilterRadius', None, str_template="{_name} {_list}"),
+        'invert_grayscale': boolean_parameter('--invertSourceImage', False, str_template="{_name}"),
+        'invert_multichannel': boolean_parameter('--invertMultichannelImage', False, str_template="{_name}")}
 
 
 def prepare_single_channel(input_image,
@@ -254,7 +259,8 @@ def prepare_single_channel(input_image,
     if crop_index and crop_size:
         bounding_box = get_image_region(image_dim, crop_index, crop_size)
 
-        crop_filter = itk.RegionOfInterestImageFilter[input_image, input_image].New()
+        crop_filter = \
+            itk.RegionOfInterestImageFilter[input_image, input_image].New()
         crop_filter.SetInput(input_image)
         crop_filter.SetRegionOfInterest(bounding_box)
         crop_filter.Update()
@@ -271,7 +277,8 @@ def prepare_single_channel(input_image,
         max_filter = itk.MinimumMaximumImageFilter[input_image].New()
         max_filter.SetInput(last_res)
 
-        invert_filter = itk.InvertIntensityImageFilter[input_image, input_image].New()
+        invert_filter = \
+            itk.InvertIntensityImageFilter[input_image, input_image].New()
         invert_filter.SetInput(last_res)
 
         if invert_max:
@@ -283,7 +290,7 @@ def prepare_single_channel(input_image,
         last_res = invert_filter.GetOutput()
 
     # Handle median filtering
-    if median_radius :
+    if median_radius:
         median = itk.MedianImageFilter[input_image, input_image].New()
         median.SetInput(last_res)
         median.SetRadius(median_radius)
@@ -293,11 +300,12 @@ def prepare_single_channel(input_image,
 
     # Handle image rescaling
     if (scale_factor is not None) and (int(scale_factor) != 1):
-        last_res  = resample_image_filter(last_res, scale_factor)
+        last_res = resample_image_filter(last_res, scale_factor)
 
     # Handle results rescaling
     if all([rescale_min, rescale_max]):
-        rescaler = itk.RescaleIntensityImageFilter[input_image, input_image].New()
+        rescaler = \
+            itk.RescaleIntensityImageFilter[input_image, input_image].New()
         rescaler.SetInput(last_res)
         rescaler.SetOutputMinimum(rescale_min)
         rescaler.SetOutputMaximum(rescale_max)
@@ -329,7 +337,8 @@ def collapse_pseudo_3d_image(input_image, input_type,
         collapsed_img_type = types_reduced_dimensions[input_type]
 
         # Initialize and set up image slicing filter
-        extract_slice = itk.ExtractImageFilter[input_type, collapsed_img_type].New()
+        extract_slice = \
+            itk.ExtractImageFilter[input_type, collapsed_img_type].New()
         extract_slice.SetExtractionRegion(region)
         extract_slice.SetInput(input_image)
         extract_slice.SetDirectionCollapseToIdentity()
@@ -341,7 +350,7 @@ def collapse_pseudo_3d_image(input_image, input_type,
     else:
         # Just pass the initial images and input types
         result = input_image
-        return input_image, input_typee
+        return input_image, input_type
 
 
 class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
@@ -355,7 +364,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
     def _validate_options(self):
         super(self.__class__, self)._initializeOptions()
 
-        assert self.options.inputFilename is not None , \
+        assert self.options.inputFilename is not None, \
             self._logger.error("The input image (-i ...) is an obligatory option!")
 
     def launch_filter(self):
@@ -371,7 +380,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
         # Read number of the components of the image.
         self._numbers_of_components =\
-                reader.GetOutput().GetNumberOfComponentsPerPixel()
+            reader.GetOutput().GetNumberOfComponentsPerPixel()
         self._logger.info("Determined number of components: %d",
                           self._numbers_of_components)
 
@@ -382,7 +391,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
         # image also updates the input image type.
         self._logger.debug("Collapsing the input image")
         self._collapsed, self._input_type = \
-                collapse_pseudo_3d_image(reader.GetOutput(), self._input_type)
+            collapse_pseudo_3d_image(reader.GetOutput(), self._input_type)
 
         # Just determine number of dimensions of the image. Should be always
         # two as we have just collapsed 3D images. Check it by an assertion:
@@ -405,8 +414,9 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
     def _get_crop_settings(self):
         """
+        #TODO: Provide some expanation here
         """
-        try :
+        try:
             crop_index = self.options.registrationROI[0:2]
         except:
             crop_index = None
@@ -437,19 +447,19 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
                 # Extract individual component from the multichannel image
                 self._logger.debug("Extracting component: %s.", i)
                 extract_filter = itk.VectorIndexSelectionCastImageFilter[
-                            self._collapsed, self._rgb_out_component_type].New(
-                            Input = self._collapsed,
-                            Index = i)
+                    self._collapsed, self._rgb_out_component_type].New(
+                        Input=self._collapsed,
+                        Index=i)
 
                 # Process the extracted components.
                 crop_index_s, crop_size_s = self._get_crop_settings()
                 processed_channel = prepare_single_channel(
                     extract_filter.GetOutput(),
-                    scale_factor = self.options.registrationResize,
-                    crop_index = crop_index_s,
-                    crop_size = crop_size_s,
-                    median_radius = None,
-                    invert = self.options.invertMultichannelImage)
+                    scale_factor=self.options.registrationResize,
+                    crop_index=crop_index_s,
+                    crop_size=crop_size_s,
+                    median_radius=None,
+                    invert=self.options.invertMultichannelImage)
 
                 # Cast the processed channel to approperiate type (the type
                 # based on which multicomponent image will be created)
@@ -467,9 +477,9 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             compose = itk.ComposeImageFilter[
                 self._rgb_out_component_type,
                 self._input_type].New(
-                    Input1 = processed_components[0],
-                    Input2 = processed_components[1],
-                    Input3 = processed_components[2])
+                    Input1=processed_components[0],
+                    Input2=processed_components[1],
+                    Input3=processed_components[2])
 
             # Write the processed multichannel image.
             self._logger.debug("Writing the rgb(rgb) image to: %s.",
@@ -485,24 +495,25 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             self._logger.debug("Extracting grayscale image from rgb slice.")
 
             # A simple dictionary mapping string provided via command line to a
-            # specific image channel (image channel is provided as string while the
-            # filter requires an integer)
-            str_to_num_map = {'r':0, 'g':1, 'b':2, 'red':0, 'green':1, 'blue': 2}
+            # specific image channel (image channel is provided as string while
+            # the filter requires an integer)
+            str_to_num_map = {'r': 0, 'g': 1, 'b': 2,
+                              'red': 0, 'green': 1, 'blue': 2}
 
-            # Extract a specific color channel based on which grayscale image will
-            # be prepared.
+            # Extract a specific color channel based on which grayscale image
+            # will be prepared.
             registration_channel = self.options.registrationColorChannel
             self._logger.debug("Extract color channel: %s.",
                                registration_channel)
-            extract_filter = itk.VectorIndexSelectionCastImageFilter[\
+            extract_filter = itk.VectorIndexSelectionCastImageFilter[
                 self._input_type, self._rgb_out_component_type].New(
-                Input = self._collapsed,
-                Index = str_to_num_map[registration_channel])
+                    Input=self._collapsed,
+                    Index=str_to_num_map[registration_channel])
             extract_filter.Update()
 
-            # A casting is required before processing the extracted color channel
-            # as the extracted image type may be different than the grayscale
-            # working type.
+            # A casting is required before processing the extracted color
+            # channel as the extracted image type may be different than the
+            # grayscale working type.
             caster = itk.CastImageFilter[
                 self._rgb_out_component_type,
                 self._grayscale_out_type].New(extract_filter)
@@ -512,11 +523,11 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                     caster.GetOutput(),
-                    scale_factor = self.options.registrationResize,
-                    crop_index = crop_index_s,
-                    crop_size = crop_size_s,
-                    median_radius = self.options.medianFilterRadius,
-                    invert = self.options.invertSourceImage)
+                    scale_factor=self.options.registrationResize,
+                    crop_index=crop_index_s,
+                    crop_size=crop_size_s,
+                    median_radius=self.options.medianFilterRadius,
+                    invert=self.options.invertSourceImage)
 
             # Write the grayscale(rgb) image to file.
             self._logger.debug("Writing the grayscale image to %s.",
@@ -534,11 +545,11 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
         if self.options.colorOutputImage:
             self._logger.debug("Extracting rgb(grayscale) image.")
 
-            # The rgb(grayscale) image is created by simply cloning the grayscale
-            # channel three times. However, before composing, the source image has
-            # to be casted to the float type.
+            # The rgb(grayscale) image is created by simply cloning the
+            # grayscale channel three times. However, before composing, the
+            # source image has to be casted to the float type.
             self._logger.debug("Casting the image from %s, to %s",
-                        str(self._input_type), str(self._rgb_out_component_type))
+                str(self._input_type), str(self._rgb_out_component_type))
             caster = itk.CastImageFilter[self._input_type,
                                          self._rgb_out_component_type].New()
             caster.SetInput(self._collapsed)
@@ -547,11 +558,11 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                 caster.GetOutput(),
-                scale_factor = self.options.registrationResize,
-                crop_index = crop_index_s,
-                crop_size = crop_size_s,
-                median_radius = None,
-                invert = self.options.invertMultichannelImage)
+                scale_factor=self.options.registrationResize,
+                crop_index=crop_index_s,
+                crop_size=crop_size_s,
+                median_radius=None,
+                invert=self.options.invertMultichannelImage)
 
             # Finally the multichannel image can be composed from individual
             # grayscale channel(s) prepared in the previous step.
@@ -576,15 +587,15 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                     self._collapsed,
-                    scale_factor = self.options.registrationResize,
-                    crop_index = crop_index_s,
-                    crop_size = crop_size_s,
-                    median_radius = self.options.medianFilterRadius,
-                    invert = self.options.invertSourceImage)
+                    scale_factor=self.options.registrationResize,
+                    crop_index=crop_index_s,
+                    crop_size=crop_size_s,
+                    median_radius=self.options.medianFilterRadius,
+                    invert=self.options.invertSourceImage)
 
-            # Cast the processed grayscale image to the grayscale image output type
-            # as we want to keep the code flexible (it is possible that the output
-            # type is different than grayscale writer type)
+            # Cast the processed grayscale image to the grayscale image output
+            # type as we want to keep the code flexible (it is possible that
+            # the output type is different than grayscale writer type)
             self._logger.debug("Casting the image from %s, to %s",
                         str(self._input_type), str(self._grayscale_out_type))
             caster = itk.CastImageFilter[
@@ -594,46 +605,46 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             # Finally we write the processed grayscale image to a file.
             self._logger.debug("Writing the grayscale(grayscale) image to %s.",
                             self.options.grayscaleOutputImage)
-            writer = itk.ImageFileWriter[self._grayscale_out_type].New(caster,\
+            writer = itk.ImageFileWriter[self._grayscale_out_type].New(caster,
                         FileName=self.options.grayscaleOutputImage)
             writer.Update()
-
 
     @staticmethod
     def parseArgs():
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
-        parser.add_option('--inputFilename', '-i', dest='inputFilename', type='str',
-                default=None, help='File for preparation.')
+        parser.add_option('--inputFilename', '-i', dest='inputFilename',
+            type='str', default=None,
+            help='File for preparation.')
 
         parser.add_option('--grayscaleOutputImage', '-g',
-                        dest='grayscaleOutputImage', type='str', default=None,
-                        help='Name of the output grayscale image.')
+            dest='grayscaleOutputImage', type='str', default=None,
+            help='Name of the output grayscale image.')
         parser.add_option('--colorOutputImage', '-r',
-                        dest='colorOutputImage', type='str', default=None,
-                        help='Name of the output multichannel image.')
+            dest='colorOutputImage', type='str', default=None,
+            help='Name of the output multichannel image.')
 
-        parser.add_option('--registrationROI', default=None,
-                            type='int', dest='registrationROI', nargs=4,
-                            help='ROI of the input image used for registration (ox, oy, sx, sy).')
-        parser.add_option('--registrationResize', default=None,
-                            type='float', dest='registrationResize',
-                            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
-        parser.add_option('--registrationColorChannel', default='blue',
-                            type='str', dest='registrationColorChannel',
-                            help='In rgb images - color channel on which \
-                            registration will be performed. Has no meaning for \
-                            grayscale input images. Possible values: r/red, g/green, b/blue.')
+        parser.add_option('--registrationROI', dest='registrationROI',
+            default=None, type='int', nargs=4,
+            help='ROI of the input image used for registration (ox, oy, sx, sy).')
+        parser.add_option('--registrationResize', dest='registrationResize',
+            default=None, type='float',
+            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
+        parser.add_option('--registrationColorChannel',
+            dest='registrationColorChannel', default='blue', type='str',
+            help='In rgb images - color channel on which \
+            registration will be performed. Has no meaning for \
+            grayscale input images. Possible values: r/red, g/green, b/blue.')
 
-        parser.add_option('--medianFilterRadius', default=None,
-                dest='medianFilterRadius', type='int', nargs=2,
-                help='Median filter radius in voxels e.g. 2 2')
-        parser.add_option('--invertSourceImage', default=False,
-                dest='invertSourceImage',  action='store_const', const=True,
-                help='Invert source image: both, grayscale and multichannel, before registration')
-        parser.add_option('--invertMultichannelImage', default=False,
-                dest='invertMultichannelImage',  action='store_const', const=True,
-                help='Invert source image: both, grayscale and multichannel, before registration')
+        parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
+            default=None, type='int', nargs=2,
+            help='Median filter radius in voxels e.g. 2 2')
+        parser.add_option('--invertSourceImage', dest='invertSourceImage',
+            default=False, action='store_const', const=True,
+            help='Invert source image: both, grayscale and multichannel, before registration')
+        parser.add_option('--invertMultichannelImage', dest='invertMultichannelImage',
+            default=False, action='store_const', const=True,
+            help='Invert source image: both, grayscale and multichannel, before registration')
 
         (options, args) = parser.parse_args()
         return (options, args)
