@@ -1,6 +1,5 @@
 import copy
 import subprocess as sub
-import shlex
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
                 ants_transformation_parameter, vector_parameter, list_parameter, \
                 switch_parameter, ants_regularization_parameter, boolean_parameter
@@ -636,6 +635,127 @@ class stack_and_reorient_wrapper(generic_wrapper):
         'interpolation': string_parameter('interpolation', None, str_template='--{_name} {_value}'),
         'resample': list_parameter('resample', [], str_template='--{_name} {_list}')
     }
+
+
+class alignment_preprocessor_wrapper(generic_wrapper):
+    """
+    A wrapper for the `pos_slice_preprocess.py` script. Since the script itself
+    provides an extensive documentation, the detailed description of command
+    line options is skipped in the wrapper's documentation.
+
+    .. note::
+        Use the following syntax when setting boolean parameters::
+
+            >>> boolean_parameter = [None, True][int(0)]
+
+        Yes, it is tricky and yes, is should be chenged.
+
+
+    >>> alignment_preprocessor_wrapper
+    <class '__main__.alignment_preprocessor_wrapper'>
+
+    >>> alignment_preprocessor_wrapper() #doctest: +ELLIPSIS
+    <__main__.alignment_preprocessor_wrapper object at 0x...>
+
+    >>> print alignment_preprocessor_wrapper() #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename
+
+    >>> print alignment_preprocessor_wrapper(input_image="input.nii.gz",
+    ... grayscele_output_image="grayscale.nii.gz",
+    ... color_output_image="color.nii.gz") #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename input.nii.gz -g grayscale.nii.gz -r color.nii.gz
+
+    >>> p=alignment_preprocessor_wrapper(input_image="i.nii.gz",
+    ... grayscele_output_image="g.nii.gz",
+    ... color_output_image="c.nii.gz")
+    >>> p #doctest: +ELLIPSIS
+    <__main__.alignment_preprocessor_wrapper object at 0x...>
+
+    Checking default parameteres values:
+
+    >>> print alignment_preprocessor_wrapper._parameters['input_image']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['grayscele_output_image']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['color_output_image']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['registration_roi']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['registration_resize']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['registration_color']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['median_filter_radius']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['invert_grayscale']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['invert_multichannel']
+    <BLANKLINE>
+
+    Checking robustness of the parameters dictionary:
+
+    >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
+    Traceback (most recent call last):
+    KeyError: 'parameter_that_does_not_exist'
+
+    >>> print p.updateParameters({"median_filter_radius" : [2,2]}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --medianFilterRadius 2 2
+
+    >>> print p.updateParameters({"median_filter_radius" : [2,2],
+    ... 'invert_grayscale':True,
+    ... 'invert_multichannel':True,
+    ... 'registration_color': 'green'}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel green --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
+
+    >>> print p.updateParameters({"median_filter_radius" : [2,2],
+    ... 'invert_grayscale':False,
+    ... 'invert_multichannel':False,
+    ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
+
+    >>> print p.updateParameters({"median_filter_radius" : None,
+    ... 'invert_grayscale':None,
+    ... 'invert_multichannel': None,
+    ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red
+
+    >>> print p.updateParameters({"median_filter_radius" : 2})
+    Traceback (most recent call last):
+    TypeError: argument 2 to map() must support iteration
+
+    >>> print p.updateParameters({"median_filter_radius" : None,
+    ... 'invert_grayscale' : None,
+    ... 'invert_multichannel' : None,
+    ... 'registration_color': None}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz
+    """
+
+    _template = """pos_slice_preprocess.py \
+                  --inputFilename {input_image} \
+                  {grayscele_output_image} {color_output_image} \
+                  {registration_roi} {registration_resize} \
+                  {registration_color} \
+                  {median_filter_radius} \
+                  {invert_grayscale} {invert_multichannel}"""
+
+    _parameters = {
+        'input_image' : filename_parameter('input_image', None),
+        'grayscele_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
+        'color_output_image': filename_parameter('-r', None, str_template="{_name} {_value}"),
+        'registration_roi': list_parameter('--registrationROI', None, str_template="{_name} {_list}"),
+        'registration_resize': list_parameter('--registrationResize', None, str_template="{_name} {_list}"),
+        'registration_color': string_parameter('--registrationColorChannel', None, str_template="{_name} {_value}"),
+        'median_filter_radius': list_parameter('--medianFilterRadius', None, str_template="{_name} {_list}"),
+        'invert_grayscale': switch_parameter('invertSourceImage', False, str_template="--{_name}"),
+        'invert_multichannel': switch_parameter('invertMultichannelImage', False, str_template="--{_name}")}
 
 
 if __name__ == '__main__':
