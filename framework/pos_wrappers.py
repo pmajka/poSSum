@@ -646,7 +646,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     .. note::
         Use the following syntax when setting boolean parameters::
 
-            >>> boolean_parameter = [None, True][int(0)]
+            >>> boolean_parameter = [None, True][int(value)] #doctest: +SKIP
 
         Yes, it is tricky and yes, is should be chenged.
 
