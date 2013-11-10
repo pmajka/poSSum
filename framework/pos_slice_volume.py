@@ -37,7 +37,6 @@ Details
 This module provide a script for extracting slices from given input volume in a
 flexible way. Check the examples below.
 
-
 The script requires only one input parameter - the image to slice:
 `inputFileName` which is supposed to be a valid three dimensional image
 supported by itk. The simplest invocation is::
