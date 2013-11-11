@@ -1,4 +1,5 @@
 #!/bin/bash
+set -xe 
 
 # Image downloaded from the BrainMaps.org website: 
 # http://brainmaps.org/ajax-viewer.php?datid=42&sname=459
