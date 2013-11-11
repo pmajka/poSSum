@@ -20,6 +20,7 @@ Contents:
    pos_wrappers
    pos_itk_core
    pos_stack_reorient
+   pos_slice_preprocess
 
    pos_palette
 
