@@ -24,15 +24,15 @@ Summary
 
 All supported features in one invocation (an example) ::
 
-    $pos_slice_preprocess.py \
-        [required]      --inputFilename <filename> \
-                        --grayscaleOutputImage <filename> \
-                        --colorOutputImage <filename>\
-     [ox, oy, sx, sy]   --registrationROI 10 20 30 30 \
-                        --registrationResize 0.5 \
-     [red, green, blue] --registrationColorChannel red \
-                        --medianFilterRadius 2 2 \
-                        --invertSourceImage \
+    $pos_slice_preprocess.py
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
+                        --colorOutputImage <filename>
+     [ox, oy, sx, sy]   --registrationROI 10 20 30 30
+                        --registrationResize 0.5
+     [red, green, blue] --registrationColorChannel red
+                        --medianFilterRadius 2 2
+                        --invertSourceImage
                         --invertMultichannelImage
 
 Details
@@ -77,9 +77,9 @@ The folloving invocation takes an rgb input image and produces two output
 files: grayscale (by default, the blue channel is extracted) and rgb image,
 both in nifti format. No additional processing is performed ::
 
-    $pos_slice_preprocess.py \
-        [required]      --inputFilename <filename> \
-                        --grayscaleOutputImage <filename> \
+    $pos_slice_preprocess.py
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
                         --colorOutputImage <filename>
 
 
@@ -89,11 +89,11 @@ Trim and rescale and image
 The example below the script takes an image scales it down and extracts a
 square from the whole image and outputs only color image::
 
-    $pos_slice_preprocess.py \
-        [required]      --inputFilename <filename> \
-                        --grayscaleOutputImage <filename> \
-                        --registrationColorChannel blue \
-                        --registrationResize 0.5 \
+    $pos_slice_preprocess.py
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
+                        --registrationColorChannel blue
+                        --registrationResize 0.5
                         --registrationROI 200 200 100 100
 
 Smooth and invert images
@@ -102,14 +102,14 @@ Smooth and invert images
 Now some more complicated processing example. The code below takes an rgb image
 for input, extracts default color channel and applies smoothing and inverts the
 images. Both grayscale and rgb images are outputes. Note, however, that only
-grayscale image is smoothed by the median filter.
+grayscale image is smoothed by the median filter::
 
-    $pos_slice_preprocess.py \
-        [required]      --inputFilename <filename> \
-                        --grayscaleOutputImage <filename> \
-                        --colorOutputImage <filename>\
-                        --medianFilterRadius 2 2 \
-                        --invertSourceImage \
+    $pos_slice_preprocess.py
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
+                        --colorOutputImage <filename>
+                        --medianFilterRadius 2 2
+                        --invertSourceImage
                         --invertMultichannelImage
 """
 
