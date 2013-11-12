@@ -5,23 +5,17 @@ import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
 
+from pos_wrapper_skel
 import pos_wrappers
 import pos_parameters
 
-from pos_deformable_wrappers import preprocess_slice_volume,\
-                  visualize_wrap_field, convert_slice_image,\
-                  convert_slice_image_grayscale
-
-from pos_wrapper_skel import output_volume_workflow
-
-
-
-class sequential_alignment(output_volume_workflow):
+class sequential_alignment(pos_wrapper_skel.output_volume_workflow):
     """
     Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
     """
 
     _f = {
+        'raw_image' : pos_parameters.filename('raw_image', work_dir = None, str_template = '{idx:04d}.nii.gz'),
         'src_gray' : pos_parameters.filename('src_gray', work_dir = '00_source_gray', str_template='{idx:04d}.nii.gz'),
         'src_color' : pos_parameters.filename('src_color', work_dir = '01_source_color', str_template='{idx:04d}.nii.gz'),
         'part_transf' : pos_parameters.filename('part_transf', work_dir = '02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_Affine'),
@@ -33,7 +27,6 @@ class sequential_alignment(output_volume_workflow):
         'transform_plot' : pos_parameters.filename('transform_plot', work_dir = '06_output_volumes', str_template='{fname}.png'),
          }
 
-
     _usage = ""
 
     def __init__(self, options, args):
@@ -42,451 +35,71 @@ class sequential_alignment(output_volume_workflow):
         #TODO: Provide input slice path and filename template a as comman line input
         # parameter
 
+        #TODO: Update the 'raw_image' workdir
+
         # Define the input slice range
+        # XXX: Input slice range is assumed to be: <first_slice> <last_slice>
         self.options.slice_range = \
             range(self.options.sliceRange[0], self.options.sliceRange[1]+1)
 
-    def _generate_source_slices(self):
-        pass
-
-    def _get_prepare_volume_command_template(self):
-        """
-        :return: template for processing the input volumes.
-
-        The templte has to be customized to process a particular type of volume.
-        """
-        preprocess_slices = preprocess_slice_volume(\
-                input_image = self.options.inputVolume,
-                output_naming = self.f['init_slice_naming'](), \
-                slicing_plane = self.options.slicingPlane,\
-                start_slice = self.options.startSlice, \
-                end_slice = self.options.endSlice + 1, \
-                shift_indexes = self.options.shiftIndexes, \
-                output_dir = self.f['init_slice'].base_dir)
-
-        return preprocess_slices
-
-    def prepare_slices(self):
-        """
-        Split provided input volumes into slices. The proceure requires the
-        prvided volumes to be in grayscale mode (it's gonna work also with rgb
-        volumes but the further registration process will collapse).
-
-        Volumes are sectioned separately. If the swich for given volume is
-        provided, the sections `startSlice` to `endSlice` are extracted. The
-        process is repeated separately for each volume (grayscale, outline,
-        custom mask volume, segmentation volume, etc...)
-        """
-
-        # Handle inputVolume (grayscale volume, aka THE registereg image volume)
-        if self.options.inputVolume:
-            preprocess_grayscale_slices = \
-                    self._get_prepare_volume_command_template()
-
-            preprocess_grayscale_slices.updateParameters({
-                'input_image' : self.options.inputVolume,
-                'output_naming' : self.f['init_slice_naming'](), \
-                'output_dir' : self.f['init_slice'].base_dir})
-            preprocess_grayscale_slices()
-
-        # Handle the outline volume. This volume is a binary volume (it can
-        # contain only 0 and 1 values).
-        if self.options.outlineVolume:
-            prepare_outline_volume = \
-                    self._get_prepare_volume_command_template()
-
-            prepare_outline_volume.updateParameters({
-                'input_image' : self.options.outlineVolume,
-                'output_naming' : self.f['init_outline_naming'](),
-                'output_dir' : self.f['init_outline_naming'].base_dir})
-            prepare_outline_volume()
-
-        # Handling custom mask volume. This volume is a mask volume which means
-        # that it is a binary volume and contains only 0 and 1 values.
-        if self.options.maskedVolume:
-            prepare_masked_volume = \
-                    self._get_prepare_volume_command_template()
-
-            prepare_masked_volume.updateParameters({
-                'input_image' : self.options.maskedVolume,
-                'output_naming' : self.f['init_custom_naming'](),
-                'output_dir' : self.f['init_custom_naming'].base_dir,
-                'leave_overflows': True})
-
-            prepare_masked_volume()
+        # Override default raw_images directory (which, in fact, is just a
+        # stub) with the directory with actual images.
+        self.f['raw_images'].override_dir = self.options.inputVolume
 
     def launch(self):
-        """
-        Launch the deformable registration process.
-        """
-
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
-        # Preprocessing the input sliced can be supressed by issuing a command
-        # line parameter
-        if not self.options.skipSlicePreprocess:
-            self.prepare_slices()
-
-        # If 'startFromIteration' switch is enabled,
-        # the reconstruction starts from a given iteration
-        # instead of starting from the beginning - iteration 0
-        for iteration in range(self.options.startFromIteration,\
-                               self.options.iterations):
-
-            print >> sys.stderr, "-------------------------------------------------"
-            print >> sys.stderr, "Staring iteration: %d of %d" \
-                                        % (iteration +1, self.options.iterations)
-            print >> sys.stderr, "-------------------------------------------------"
-
-            self.current_iteration = iteration
-
-            # Make hard copy of the setting dictionaries. Hard copy is made as
-            # it is passed to the 'deformable_reconstruction_iteration' class
-            # and is is customized within this class. Because of that reason a
-            # hard copy has to be made.
-            step_options = copy.deepcopy(self.options)
-            step_args = copy.deepcopy(self.args)
-
-            step_options.workdir = os.path.join(self.f['iteration'](iter=iteration))
-            single_step = deformable_reconstruction_iteration(step_options, step_args)
-            single_step.parent_process = self
-
-            # Settings for the first iteration has to be tweaked up a little as
-            # they use slightly different image sources. Iteration 'zero' uses
-            # the source images (images that were not processed at all) while
-            # images for all the other iterations are processed by the previous
-            # iterations.
-            if iteration == 0:
-                single_step.f['src_slice'].override_dir = self.f['init_slice'].base_dir
-                single_step.f['outline'].override_dir = self.f['init_outline'].base_dir
-                single_step.f['cmask'].override_dir = self.f['init_custom'].base_dir
-            else:
-                single_step.f['src_slice'].override_dir = self.f['iteration_resliced'](iter=iteration-1)
-                single_step.f['outline'].override_dir = self.f['iteration_resliced_outline'](iter=iteration-1)
-                single_step.f['cmask'].override_dir = self.f['iteration_resliced_custom'](iter=iteration-1)
-
-            # Do registration if proper switches are provided
-            # (there is a possibility to run the reconstruction process without
-            # actually calculationg the transfomations.
-            if not self.options.skipTransformations:
-                single_step()
-
-            # Generate volume holding the intermediate results
-            # and prepare images for the next iteration
-            self._reslice()
-            self._stack_intermediate()
-
-        # At the end of the processing the calculated deformation fields can be
-        # composed togeather to form the final deformation field.
-
-        if self.options.stackFinalDeformation:
-            self._generate_final_transforms()
-            self._visualize_warps()
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
 
-    def _visualize_warps(self):
-        """
-        """
-        start, end, eps, iteration = self._get_edges()
-        commands = []
+    def _generate_source_slices(self):
 
-        for i in range(start, end +1):
-            command = visualize_wrap_field(
-                warp_image = self.f['rescaled_deformations'](idx=i),
-                slice_image = self.f['rescaled_source'](idx=i),
-                screenshot_filename = self.f['warp_field_visualization'](idx=i),
-                configuration_filename = self.options.glyphConfiguration)
-            commands.append(copy.deepcopy(command))
-
-        self.execute(commands, parallel=False)
-
-    def _get_edges(self):
-        """
-        Convenience function for returning frequently used numbers
-        """
-        return (self.options.startSlice,
-                self.options.endSlice,
-                self.options.neighbourhood,
-                self.current_iteration)
-
-    def _reslice(self):
-        """
-        Launch reslicing for each type of the input volume. If the volume of the
-        given type is provided, it will be reslided, otherwise it is not
-        resliced. Simple.
-        """
-        if self.options.inputVolume:
-            self._reslice_input_volume()
-
-        if self.options.outlineVolume:
-            self._reslice_outline()
-
-        if self.options.maskedVolume:
-            self._reslice_custom_masks()
-
-    def _get_reslice_command(self, slice_number, slice_type, output_slice_type, method = pos_wrappers.ants_reslice):
-        """
-        Helper for generating reslicing command for different slices, reslicing
-        with different types, etc.
-
-        :return: Command for reslicing given slice according to provided
-                 parameters
-        """
-
-        start, end, eps, iteration = self._get_edges()
-
-        i = slice_number # Just an alias
-
-        # Define a list of deformation fields file
-        deformable_list = map(lambda j: self.f['iteration_transform'](idx=i,iter=j), range(iteration+1))
-        moving_image = self.f[slice_type](idx=i)
-
-        # Use 'ants_reslice' when a regular reslicing is done. A regular
-        # reslicing occur after each iteration.
-        if method == pos_wrappers.ants_reslice:
-            command = method(
-                    dimension = 2,
-                    moving_image = moving_image,
-                    output_image = self.f[output_slice_type](idx=i,iter=iteration),
-                    reference_image = moving_image,
-                    deformable_list = deformable_list,
-                    affine_list = [])
-            return command
-
-        # Use 'ants_compose_multi_transform' for composing individual
-        # deformation fields into a single deformation fiels.
-        if method == pos_wrappers.ants_compose_multi_transform:
-            command = method(
-                    dimension = 2,
-                    output_image = self.f[output_slice_type](idx=i,iter=iteration),
-                    reference_image = moving_image,
-                    deformable_list = deformable_list,
-                    affine_list = [])
-            return command
-
-    def _reslice_input_volume(self):
-        start, end, eps, iteration = self._get_edges()
-
-        commands = []
-        for i in range(start, end +1):
-            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice')
-            command.updateParameters({'useBspline':True, 'useNN':None})
-            commands.append(copy.deepcopy(command))
-
-        self.execute(commands)
-
-    def _reslice_outline(self):
-        start, end, eps, iteration = self._get_edges()
-
-        commands = []
-        for i in range(start, end +1):
-            command = self._get_reslice_command(i, 'init_outline', 'iteration_resliced_outline_slice')
-            command.updateParameters({'useNN':None, 'useBspline':None})
-            commands.append(copy.deepcopy(command))
-
-        self.execute(commands)
-
-    def _reslice_custom_masks(self):
-        start, end, eps, iteration = self._get_edges()
-
-        commands = []
-        for i in range(start, end +1):
-            command = self._get_reslice_command(i, 'init_custom', 'iteration_resliced_custom_slice')
-            command.updateParameters({'useBspline':None, 'useNN':True})
-            commands.append(copy.deepcopy(command))
-
-        self.execute(commands)
-
-    def _generate_final_transforms(self):
-        """
-        Compose the individual deformation fields calculated in each iteration
-        into a single deformation field that can be analysed. In other words,
-        this procedure just sums up all the individual deformation filelds.
-        """
-
-        # As usually, get the slice range:
-        start, end, eps, iteration = self._get_edges()
-
-        # For each slice, compose all the separated deformation fields:
-        commands = []
-        for i in range(start, end +1):
-            command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice',
-                                                method = pos_wrappers.ants_compose_multi_transform)
-            command.updateParameters({\
-                    'output_image': self.f['final_deformations'](idx=i)
-                    })
-            commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-        # The deformation fileds are scaled so that spacing is 1x1mm We have to
-        # rescale them, in terms of values as well as well as in terms of
-        # spacing.
-
-        # Extract the spacing.
-        norm_spacing = float(self.options.planeSpacing)
-
-        commands = []
-        for i in range(start, end +1):
-            command = convert_slice_image(
-                input_image = self.f['final_deformations'](idx=i),
-                output_image = self.f['rescaled_deformations'](idx=i),
-                scaling = norm_spacing,
-                spacing = [norm_spacing, norm_spacing])
-            commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-        # Ok, now we prepare rescaled source images (we have to change the
-        # spacing as, again, the spacing used in computations is ... 1x1mm
-        commands = []
-        for i in range(start, end +1):
-            command = convert_slice_image_grayscale(
-                input_image = self.f['init_slice'](idx=i),
-                output_image = self.f['rescaled_source'](idx=i),
-                spacing = [norm_spacing, norm_spacing])
-            commands.append(copy.deepcopy(command))
-        self.execute(commands)
-
-
-    def _get_stack_intermediate_command(self):
-        """
-        Helper function for stakcing resliced slices from intermediate stages of
-        processing.
-        """
-        iteration = self.current_iteration
-
-        stack_grayscale =  pos_wrappers.stack_and_reorient_wrapper(
-                stack_mask = self.f['iteration_stack_mask'](iter=iteration),
-                slice_start = self.options.startSlice,
-                slice_end = self.options.endSlice,
-                slice_step = 1,
-                permutation_order = self.options.outputVolumePermutationOrder,
-                orientation_code = self.options.outputVolumeOrientationCode,
-                output_type = self.options.outputVolumeScalarType,
-                spacing = self.options.outputVolumeSpacing,
-                origin = self.options.outputVolumeOrigin,
-                interpolation = self.options.setInterpolation,
-                resample = self.options.outputVolumeResample)
-
-        return stack_grayscale
-
-    def _stack_intermediate(self):
-        iteration = self.current_iteration
-
-        commands = []
-
-        if self.options.inputVolume:
-            stack_input_volume = self._get_stack_intermediate_command()
-            stack_input_volume.updateParameters({
-                'stack_mask' : self.f['iteration_stack_mask'](iter=iteration),
-                'output_volume_fn': self.f['inter_res_gray_vol'](\
-                                    iter=iteration,
-                                    output_naming=self.options.outputNaming)
-                                    })
-            stack_input_volume()
-
-        if self.options.outlineVolume:
-            stack_outline_volume = self._get_stack_intermediate_command()
-            stack_outline_volume.updateParameters({
-                'stack_mask' : self.f['iteration_stack_outline'](iter=iteration),
-                'output_volume_fn': self.f['inter_res_outline_vol'](\
-                                    iter=iteration,
-                                    output_naming=self.options.outputNaming)
-                                    })
-            stack_outline_volume()
-
-        if self.options.maskedVolume:
-            stack_masked_volume = self._get_stack_intermediate_command()
-            stack_masked_volume.updateParameters({
-                'stack_mask' : self.f['iteration_stack_cmask'](iter=iteration),
-                'output_volume_fn': self.f['inter_res_custom_vol'](\
-                                    iter=iteration,
-                                    output_naming=self.options.outputNaming)
-                                    })
-            stack_masked_volume()
+        for slice_number in self.options.slice_range:
+            pos_wrappers.alignment_preprocessor_wrapper(
+               intput_image = self.f['raw_image'](idx=slice_number),
+               grayscele_output_image = self.f['src_gray'](idx=slice_number),
+               color_output_image = self.f['src_color'](idx=slice_number),
+               registration_roi = self.options.registrationROI,
+               registration_resize = self.options.registrationResize,
+               registration_color = self.options.registrationColor,
+               median_filter_radius = self.options.medianFilterRadius,
+               invert_grayscale = self.options.invertGrayscale,
+               invert_multichannel = self.options.invertMultichannel)
 
     @classmethod
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
 
-        parser.add_option('--slicingPlane', default=1,
-                type='int', dest='slicingPlane',
-                help='Index of the slicing plane. Default: 1. Allowed values: 0,1,2')
-        parser.add_option('--startSlice', default=0,
-                type='int', dest='startSlice',
-                help='Index of the first slice of the stack')
-        parser.add_option('--endSlice', default=None,
-                type='int', dest='endSlice',
-                help='Index of the last slice of the stack')
-        parser.add_option('--shiftIndexes', default=None,
-                type='int', dest='shiftIndexes',
-                help='Shift indexes of the sliced by provided number.')
-        parser.add_option('--neighbourhood', default=1, type='int',
-                dest='neighbourhood',  help='Neighbourhood radius to which given slices will be aligned.')
-        parser.add_option('--iterations', default=10,
-                type='int', dest='iterations',
-                help='Number of iterations')
-        parser.add_option('--startFromIteration', default=0,
-                type='int', dest='startFromIteration',
-                help='Iteration number from which the calculations will start.')
-        parser.add_option('--inputVolume','-i', default=None,
-                type='str', dest='inputVolume', nargs = 2,
-                help='Input volume which undergoes smooth nonlinear reconstruction.')
-        parser.add_option('--outlineVolume','-o', default=None,
-                type='str', dest='outlineVolume', nargs = 2,
-                help='Outline label driving the registration')
-        parser.add_option('--maskedVolume','-m', default=None,
-                type='str', dest='maskedVolume', nargs = 2,
-                help='Custom slice mask for driving the registration')
-        parser.add_option('--maskedVolumeFile', default=None,
-                type='str', dest='maskedVolumeFile',
-                help='File determining fixed and moving slices for custom registration.')
-        parser.add_option('--registerSubset', default=None, type='str',
-                dest='registerSubset',  help='registerSubset')
-        parser.add_option('--outputNaming', default="_", type='str',
-                dest='outputNaming', help="Ouput naming scheme for all the results")
-        parser.add_option('--skipTransformations', default=False,
-                dest='skipTransformations', action='store_const', const=True,
-                help='Skip transformations.')
-        parser.add_option('--skipSlicePreprocess', default=False,
-                dest='skipSlicePreprocess', action='store_const', const=True,
-                help='Skip slice preprocessing.')
-        parser.add_option('--stackFinalDeformation', default=False, const=True,
-                dest='stackFinalDeformation', action='store_const',
-                help='Stack filnal deformation fileld.')
-        parser.add_option('--glyphConfiguration', default=None, type=str,
-                dest='glyphConfiguration', action='store',
-                help='Stack filnal deformation fileld.')
+        parser.add_option('--sliceRange', default=None,
+            type='int', dest='sliceRange', nargs = 2,
+            help='Slice range. Requires two integers.')
+        parser.add_option('--inputImageDir', default=None,
+            type='str', dest='inputImageDir',
+            help='
 
-        regSettings = \
-                OptionGroup(parser, 'Registration setttings.')
+        parser.add_option('--registrationROI', dest='registrationROI',
+            default=None, type='int', nargs=4,
+            help='ROI of the input image used for registration (ox, oy, sx, sy).')
+        parser.add_option('--registrationResize', dest='registrationResize',
+            default=None, type='float',
+            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
+        parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
+            default=None, type='int', nargs=2,
+            help='Median filter radius in voxels e.g. 2 2')
+        parser.add_option('--invertGrayscale', dest='invertGrayscale',
+            default=False, action='store_const', const=True,
+            help='Invert source image: both, grayscale and multichannel, before registration')
+        parser.add_option('--invertMultichannel', dest='invertMultichannel',
+            default=False, action='store_const', const=True,
+            help='Invert source image: both, grayscale and multichannel, before registration')
 
-        regSettings.add_option('--antsImageMetric', default='CC',
-                type='str', dest='antsImageMetric',
-                help='ANTS image to image metric. See ANTS documentation.')
-        regSettings.add_option('--antsImageMetricOpt', default=8,
-                type='int', dest='antsImageMetricOpt',
-                help='Parameter of ANTS i2i metric.')
-        regSettings.add_option('--antsTransformation', default=0.15, type='float',
-                dest='antsTransformation', help='Tranformations gradient step.'),
-        regSettings.add_option('--antsRegularizationType', default='Gauss',
-                type='str', dest='antsRegularizationType',
-                help='Ants regulatization type.')
-        regSettings.add_option('--antsRegularization', default=[3.0,1.0],
-                type='float', nargs = 2, dest='antsRegularization',
-                help='Ants regulatization.')
-        regSettings.add_option('--antsIterations', default="1000x1000x1000x1000x1000",
-                type='str', dest='antsIterations',
-                help='Number of deformable registration iterations.')
-        regSettings.add_option('--planeSpacing', default=1.,
-                type='float', dest='planeSpacing',
-                help='In plane pixel size. Assuming isotropic pixel size.')
-
-        parser.add_option_group(regSettings)
-
+        # -----------------------------------------------------------
         return parser
+
+    def launch(self):
+        pass
 
 if __name__ == '__main__':
     options, args = sequential_alignment.parseArgs()
