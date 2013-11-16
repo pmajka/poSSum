@@ -36,31 +36,40 @@ class sequential_alignment(output_volume_workflow):
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
 
-        #TODO: Provide input slice path and filename template a as comman line input
-        # parameter
-        # Define the input slice range
-        # XXX: Input slice range is assumed to be: <first_slice> <last_slice>
-        # TODO: Check validity of the input slices.
         self.options.slice_range = \
             range(self.options.sliceRange[0], self.options.sliceRange[1]+1)
 
+
     def _overrideDefaults(self):
-        #TODO: Validate if all the input file exist.
-        #TODO add is_file in pos_common module
         self.f['raw_image'].override_dir = self.options.inputImageDir
 
     def launch(self):
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
+        # Before launching the registration process check, if the intput
+        # directory and all the input images exist.
+        self._inspect_input_images()
+
         # Prepare the input slices
         self._generate_source_slices()
+
+        # Generate transforms
+        self._calculate_transforms()
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
 
-    def _generate_source_slices(self):
+    def _inspect_input_images(self):
+        """
+        Iterate over all the input filenames and verify if they exeist!
+        #TODO: Verify if the input directory exists
+        #TODO: Validate if all the input file exist.
+        #TODO add is_file in pos_common module
+        """
+        pass
 
+    def _generate_source_slices(self):
         commands = []
         for slice_number in self.options.slice_range:
             command = pos_wrappers.alignment_preprocessor_wrapper(
@@ -73,17 +82,84 @@ class sequential_alignment(output_volume_workflow):
                median_filter_radius = self.options.medianFilterRadius,
                invert_grayscale = self.options.invertGrayscale,
                invert_multichannel = self.options.invertMultichannel)
-
             commands.append(copy.deepcopy(command))
         self.execute(commands)
+
+    def _calculate_transforms(self):
+        """
+        """
+        # The two loops below have to stay separated
+
+        # Calculate partial transforms;
+        for moving_slice_index in self.options.slice_range:
+            self._calculate_individual_partial_transform(moving_slice_index)
+
+        # Calculate composite transforms
+        for moving_slice_index in self.options.slice_range:
+            self._calculate_individual_composed_transform(moving_slice_index)
+
+    def _get_partial_transform(self, moving_slice_index):
+        i = moving_slice_index
+        s, e, r = tuple(self.options.sliceRange)
+
+        ret_dict= []
+        if i==r:
+            j=i
+            ret_dict.append((i, j))
+        if i > r:
+            j = i-1
+            ret_dict.append((i, j))
+        if i < r:
+            j = i+1
+            ret_dict.append((i, j))
+        return ret_dict
+
+    def _calculate_individual_partial_transform(self, moving_slice_index):
+        #XXX TODO: Here's the place where you stopped!
+        transforms_chain = self._get_partial_transform(moving_slice_index)
+        moving_slice_index, fixed_slice_index = transforms_chain[0]
+
+        similarity_metric = self.options.antsImageMetric
+        metric_parameter = self.options.antsImageMetricOpt
+        affine_iterations = [10000,10000,10000,10000,10000]
+        output_naming = self.f['part_transf'](mIdx=moving_slice_index, fIdx=fixed_slice_index)
+        use_rigid_transformation = self.options.useRigidAffine
+        affine_metric_type = self.options.antsImageMetric
+
+        metrics  = []
+        metric = pos_wrappers.ants_intensity_meric(
+                    fixed_image  = self.f['src_gray'](idx=fixed_slice_index),
+                    moving_image = self.f['src_gray'](idx=moving_slice_index),
+                    metric = similarity_metric,
+                    weight = 1.0,
+                    parameter = metric_parameter)
+        metrics.append(copy.deepcopy(metric))
+
+        registration = pos_wrappers.ants_registration(
+            dimension = 2,
+            outputNaming = output_naming,
+            iterations = [0],
+            affineIterations = affine_iterations,
+            continueAffine = None,
+            rigidAffine = use_rigid_transformation,
+            imageMetrics = metrics,
+            histogramMatching = True,
+            miOption = [metric_parameter, 16000],
+            affineMetricType = affine_metric_type)
+
+        print registration
+        #commands.append(copy.deepcopy(registration))
+
+    def _calculate_individual_composed_transform(self, moving_slice_index):
+        pass
 
     @classmethod
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
 
         parser.add_option('--sliceRange', default=None,
-            type='int', dest='sliceRange', nargs = 2,
-            help='Slice range. Requires two integers. REQUIRED')
+            type='int', dest='sliceRange', nargs = 3,
+            help='Slice range: start, stop, reference. Requires three integers. REQUIRED')
         parser.add_option('--inputImageDir', default=None,
             type='str', dest='inputImageDir',
             help='')
@@ -109,7 +185,18 @@ class sequential_alignment(output_volume_workflow):
             default=None, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
 
-        # -----------------------------------------------------------
+        registrationOptions = OptionGroup(parser, 'Registration options')
+        registrationOptions.add_option('--antsImageMetric', default='MI',
+                            type='str', dest='antsImageMetric',
+                            help='ANTS image to image metric. See ANTS documentation.')
+        registrationOptions.add_option('--antsImageMetricOpt', default=32,
+                            type='int', dest='antsImageMetricOpt',
+                            help='Parameter of ANTS i2i metric.')
+        registrationOptions.add_option('--useRigidAffine', default=False,
+                dest='useRigidAffine', action='store_const', const=True,
+                help='Use rigid affine transformation.')
+        parser.add_option_group(registrationOptions)
+
         return parser
 
 if __name__ == '__main__':
