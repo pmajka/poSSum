@@ -750,10 +750,10 @@ class alignment_preprocessor_wrapper(generic_wrapper):
         'input_image' : filename_parameter('input_image', None),
         'grayscele_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
         'color_output_image': filename_parameter('-r', None, str_template="{_name} {_value}"),
-        'registration_roi': list_parameter('--registrationROI', None, str_template="{_name} {_list}"),
-        'registration_resize': list_parameter('--registrationResize', None, str_template="{_name} {_list}"),
-        'registration_color': string_parameter('--registrationColorChannel', None, str_template="{_name} {_value}"),
-        'median_filter_radius': list_parameter('--medianFilterRadius', None, str_template="{_name} {_list}"),
+        'registration_roi': list_parameter('registrationROI', None, str_template="--{_name} {_list}"),
+        'registration_resize': list_parameter('registrationResize', None, str_template="--{_name} {_list}"),
+        'registration_color': string_parameter('registrationColorChannel', None, str_template="--{_name} {_value}"),
+        'median_filter_radius': list_parameter('medianFilterRadius', None, str_template="--{_name} {_list}"),
         'invert_grayscale': switch_parameter('invertSourceImage', False, str_template="--{_name}"),
         'invert_multichannel': switch_parameter('invertMultichannelImage', False, str_template="--{_name}")}
 

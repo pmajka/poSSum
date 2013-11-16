@@ -242,7 +242,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
         assert self.options.inputFilename is not None, \
             self._logger.error("The input image (-i ...) is an obligatory option!")
 
-    def launch_filter(self):
+    def launch(self):
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
@@ -486,6 +486,9 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
     @staticmethod
     def parseArgs():
+        """
+        #TODO: Extend the documentation here!
+        """
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--inputFilename', '-i', dest='inputFilename',
@@ -528,4 +531,4 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 if __name__ == '__main__':
     options, args = prepare_slice_for_seq_alignment.parseArgs()
     filter = prepare_slice_for_seq_alignment(options, args)
-    filter.launch_filter()
+    filter.launch()
