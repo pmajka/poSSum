@@ -15,7 +15,6 @@ from pos_deformable_wrappers import preprocess_slice_volume,\
 from pos_wrapper_skel import output_volume_workflow
 
 
-
 class sequential_alignment(output_volume_workflow):
     """
     Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
