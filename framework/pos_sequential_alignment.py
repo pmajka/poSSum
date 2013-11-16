@@ -45,11 +45,9 @@ class sequential_alignment(output_volume_workflow):
             range(self.options.sliceRange[0], self.options.sliceRange[1]+1)
 
     def _overrideDefaults(self):
-        #TODO: Check if given directory exists! Validate of all the input file
-        # exists.
-        #TODO: This should be moved to the override_paths section of the script.
-        self.f['raw_image'].override_dir = self.options.inputImageDir
+        #TODO: Validate if all the input file exist.
         #TODO add is_file in pos_common module
+        self.f['raw_image'].override_dir = self.options.inputImageDir
 
     def launch(self):
         # Execute the parents before-execution activities
@@ -75,7 +73,7 @@ class sequential_alignment(output_volume_workflow):
                median_filter_radius = self.options.medianFilterRadius,
                invert_grayscale = self.options.invertGrayscale,
                invert_multichannel = self.options.invertMultichannel)
-            print command
+
             commands.append(copy.deepcopy(command))
         self.execute(commands)
 
