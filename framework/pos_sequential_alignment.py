@@ -49,18 +49,6 @@ class sequential_alignment(output_volume_workflow):
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
-        # Verify if all the files are availabe:
-        # All images have to be ailable. If the case is different, the workflow
-        # will not proceed.
-        for slice_index in self.options.slice_range:
-            slice_filename = self.f['raw_image'](idx=slice_index)
-
-            self._logger.debug("Checking for image: %s.", slice_filename)
-            if not os.path.isfile(slice_filename):
-                self._logger.error("File does not exist: %s. Exiting",
-                                   slice_filename)
-                sys.exit(1)
-
         # Before launching the registration process check, if the intput
         # directory and all the input images exist.
         self._inspect_input_images()
@@ -76,12 +64,18 @@ class sequential_alignment(output_volume_workflow):
 
     def _inspect_input_images(self):
         """
-        Iterate over all the input filenames and verify if they exeist!
-        #TODO: Verify if the input directory exists
-        #TODO: Validate if all the input file exist.
-        #TODO add is_file in pos_common module
         """
-        pass
+        # Verify if all the files are availabe:
+        # All images have to be ailable. If the case is different, the workflow
+        # will not proceed.
+        for slice_index in self.options.slice_range:
+            slice_filename = self.f['raw_image'](idx=slice_index)
+
+            self._logger.debug("Checking for image: %s.", slice_filename)
+            if not os.path.isfile(slice_filename):
+                self._logger.error("File does not exist: %s. Exiting",
+                                   slice_filename)
+                sys.exit(1)
 
     def _generate_source_slices(self):
         commands = []
