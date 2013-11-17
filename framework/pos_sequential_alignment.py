@@ -179,7 +179,6 @@ class sequential_alignment(output_volume_workflow):
     def _calculate_individual_composed_transform(self, moving_slice_index):
         """
         """
-
         transformation_chain = \
             self._get_transformation_chain(moving_slice_index)
 
