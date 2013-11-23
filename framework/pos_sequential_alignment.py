@@ -8,6 +8,20 @@ import copy
 import pos_wrappers
 import pos_parameters
 from pos_wrapper_skel import output_volume_workflow
+from pos_common import flatten
+
+"""
+python pos_sequential_alignment.py
+    --sliceRange 50 70 60
+    --inputImageDir /home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides
+    --invertMultichannel --loglevel=DEBUG
+    -d /dev/shm/x
+    --outputVolumeSpacing 0.1 0.1 0.06
+    --skipTransformations
+    --skipSourceSlicesGeneration
+    --skipReslice
+    --skipOutputVolumes
+"""
 
 class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
     """
@@ -87,6 +101,14 @@ class sequential_alignment(output_volume_workflow):
 
     _usage = ""
 
+    # Define the magic numbers:
+    #__AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
+    __AFFINE_ITERATIONS = [10000, 10000, 0,0,0]
+    __DEFORMABLE_ITERATIONS = [0]
+    __IMAGE_DIMENSION = 2
+    __HISTOGRAM_MATCHING = True
+    __MI_SAMPLES = 16000
+
     def __init__(self, options, args):
         super(self.__class__, self).__init__(options, args)
 
@@ -111,7 +133,7 @@ class sequential_alignment(output_volume_workflow):
 
         # Before launching the registration process check, if the intput
         # directory and all the input images exist.
-        self._inspect_input_images()
+        # self._inspect_input_images()
 
         # Prepare the input slices. Both, grayscale and rgb slices are prepared
         # simltaneously by a single routine. Slices preparation may be
@@ -199,9 +221,13 @@ class sequential_alignment(output_volume_workflow):
         #TODO: The transformation will be provided.
 
         # Calculate partial transforms - get partial transformation chain;
+        #[item for sublist in l for item in sublist]
         partial_transformation_pairs = \
             map(lambda idx: self._get_slice_pair(idx),
                             self.options.slice_range)
+
+        partial_transformation_pairs =\
+                list(flatten(partial_transformation_pairs))
 
         commands = map(lambda x: self._get_partial_transform(*x),
                                  partial_transformation_pairs)
@@ -217,16 +243,22 @@ class sequential_alignment(output_volume_workflow):
         i = moving_slice_index
         s, e, r = tuple(self.options.sliceRange)
 
+        retDict = []
+        eps=1
+
         if i == r:
             j = i
-            retval = (i, j)
+            retDict.append((i, j))
         if i > r:
-            j = i - 1
-            retval = (i, j)
+            for j in list(range(i - eps, i)):
+                if j <= e and i != j and j >= r:
+                    retDict.append((i, j))
         if i < r:
-            j = i + 1
-            retval = (i, j)
-        return retval
+            for j in list(range(i, i + eps + 1)):
+                if j >= s and i != j and j <= r:
+                    retDict.append((i, j))
+
+        return retDict
 
     def _get_partial_transform(self, moving_slice_index, fixed_slice_index):
         """
@@ -239,7 +271,6 @@ class sequential_alignment(output_volume_workflow):
         :param fixed_slice_index: fixed slice index
         :type fixed_slice_index: int
         """
-        #TODO: Extract the constant values and make them a class atributes.
 
         # Define the registration settings: image-to-image metric and its
         # parameter, number of iterations, output naming, type of the affine
@@ -247,7 +278,7 @@ class sequential_alignment(output_volume_workflow):
         similarity_metric = self.options.antsImageMetric
         affine_metric_type = self.options.antsImageMetric
         metric_parameter = self.options.antsImageMetricOpt
-        affine_iterations = [10000, 10000, 10000, 10000, 10000] #TODO: Get rid of this
+        affine_iterations = self.__AFFINE_ITERATIONS
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
                                               fIdx=fixed_slice_index)
         use_rigid_transformation = self.options.useRigidAffine
@@ -265,15 +296,15 @@ class sequential_alignment(output_volume_workflow):
         # Define the registration framework for 2D images,
         # without the deformable registration step, etc.
         registration = pos_wrappers.ants_registration(
-            dimension = 2, #TODO: Get rid of this
+            dimension = self.__IMAGE_DIMENSION,
             outputNaming = output_naming,
-            iterations = [0], #TODO: Get rid of this
+            iterations = self.__DEFORMABLE_ITERATIONS,
             affineIterations = affine_iterations,
             continueAffine = None,
             rigidAffine = use_rigid_transformation,
             imageMetrics = metrics,
-            histogramMatching = True, #TODO: Get rid of this
-            miOption = [metric_parameter, 16000],
+            histogramMatching = self.__HISTOGRAM_MATCHING,
+            miOption = [metric_parameter, self.__MI_SAMPLES],
             affineMetricType = affine_metric_type)
 
         # Return the registration command.
