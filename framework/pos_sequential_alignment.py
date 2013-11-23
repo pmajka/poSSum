@@ -66,6 +66,7 @@ class sequential_alignment(output_volume_workflow):
     Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
     """
     # TODO: Allow for overriding the output volumes filenames
+    # TODO: Verify if the provided image to image metric is allowed.
     # TODO: Generate output filenames based on the provided parameters
 
     _f = {
@@ -112,22 +113,27 @@ class sequential_alignment(output_volume_workflow):
         # directory and all the input images exist.
         self._inspect_input_images()
 
-        # Prepare the input slices
-        # Source slices preparation is not performed when it is switched off by
-        # the command line parameters. In such case just report that fact and
-        # then return.
+        # Prepare the input slices. Both, grayscale and rgb slices are prepared
+        # simltaneously by a single routine. Slices preparation may be
+        # disabled, switched off by providing approperiate command line
+        # parameter. In that's the case, this step will be skipped.
         if self.options.skipSourceSlicesGeneration is not True:
             self._generate_source_slices()
 
-        # Generate transforms
+        # Generate transforms. This step may be switched off by providing
+        # aproperiate command line parameter.
         if self.options.skipTransformations is not True:
             self._calculate_transforms()
 
-        # Reslice all the images:
+        # Reslice the input slices according to the generated transforms.
+        # This step may be skipped by providing approperiate command line
+        # parameter.
         if self.options.skipReslice is not True:
             self._reslice()
 
-        # Stack both grayscale as well as the rgb slices:
+        # Stack both grayscale as well as the rgb slices into a volume.
+        # This step may be skipped by providing approperiate command line
+        # parameter.
         if self.options.skipOutputVolumes is not True:
             self.stack_output_volumes()
 
@@ -137,7 +143,8 @@ class sequential_alignment(output_volume_workflow):
     def _inspect_input_images(self):
         """
         Verify if all the files are availabe: All images have to be ailable. If
-        the case is different, the workflow will not proceed.
+        the case is different, the workflow will not proceed and the user will
+        be asked to supply the missing images.
         """
 
         # Iterate over all filenames and check if the file exists.
@@ -152,16 +159,16 @@ class sequential_alignment(output_volume_workflow):
 
     def _generate_source_slices(self):
         """
-
         Generate source slices for the registration purposes. Both grayscale
         and multichannel images are generates by this routine.
-
         """
 
-        # The array collecting all the partial commands.
+        # The array collecting all the individual command into a commands
+        # batch.
         commands = []
 
         for slice_number in self.options.slice_range:
+
             command = pos_wrappers.alignment_preprocessor_wrapper(
                input_image = self.f['raw_image'](idx=slice_number),
                grayscele_output_image = self.f['src_gray'](idx=slice_number),
@@ -174,11 +181,23 @@ class sequential_alignment(output_volume_workflow):
                invert_multichannel = self.options.invertMultichannel)
             commands.append(copy.deepcopy(command))
 
+        # Execute the commands in a batch.
         self.execute(commands)
 
     def _calculate_transforms(self):
         """
+        This rutine calculates the affine (or rigid transformations) for the
+        sequential alignment. This step consists of two stages. The first stage
+        calculates a partial transformation while the second stage composes the
+        partial transformation into the composite transformations.
+
+        The partial transformation 'connects' two consecutive slices and the
+        composite trasformation binds given moving slice with the reference
+        slice.
         """
+        #TODO: Provide debugging infromation on the paris of slices for which
+        #TODO: The transformation will be provided.
+
         # Calculate partial transforms - get partial transformation chain;
         partial_transformation_pairs = \
             map(lambda idx: self._get_slice_pair(idx),
@@ -191,7 +210,7 @@ class sequential_alignment(output_volume_workflow):
         # Calculate composite transforms
         commands = []
         for moving_slice_index in self.options.slice_range:
-            commands.append(self._calculate_individual_composed_transform(moving_slice_index))
+            commands.append(self._calculate_composite(moving_slice_index))
         self.execute(commands)
 
     def _get_slice_pair(self, moving_slice_index):
@@ -211,15 +230,29 @@ class sequential_alignment(output_volume_workflow):
 
     def _get_partial_transform(self, moving_slice_index, fixed_slice_index):
         """
+        Get a single partial transform which registers given moving slice into
+        a fixed slice.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+
+        :param fixed_slice_index: fixed slice index
+        :type fixed_slice_index: int
         """
+        #TODO: Extract the constant values and make them a class atributes.
+
+        # Define the registration settings: image-to-image metric and its
+        # parameter, number of iterations, output naming, type of the affine
+        # transformation.
         similarity_metric = self.options.antsImageMetric
+        affine_metric_type = self.options.antsImageMetric
         metric_parameter = self.options.antsImageMetricOpt
-        affine_iterations = [10000, 10000, 10000, 10000, 10000]
+        affine_iterations = [10000, 10000, 10000, 10000, 10000] #TODO: Get rid of this
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
                                               fIdx=fixed_slice_index)
         use_rigid_transformation = self.options.useRigidAffine
-        affine_metric_type = self.options.antsImageMetric
 
+        # Define the image-to-image metric.
         metrics = []
         metric = pos_wrappers.ants_intensity_meric(
             fixed_image=self.f['src_gray'](idx=fixed_slice_index),
@@ -229,18 +262,21 @@ class sequential_alignment(output_volume_workflow):
             parameter=metric_parameter)
         metrics.append(copy.deepcopy(metric))
 
+        # Define the registration framework for 2D images,
+        # without the deformable registration step, etc.
         registration = pos_wrappers.ants_registration(
-            dimension = 2,
+            dimension = 2, #TODO: Get rid of this
             outputNaming = output_naming,
-            iterations = [0],
+            iterations = [0], #TODO: Get rid of this
             affineIterations = affine_iterations,
             continueAffine = None,
             rigidAffine = use_rigid_transformation,
             imageMetrics = metrics,
-            histogramMatching = True,
+            histogramMatching = True, #TODO: Get rid of this
             miOption = [metric_parameter, 16000],
             affineMetricType = affine_metric_type)
 
+        # Return the registration command.
         return copy.deepcopy(registration)
 
     def _get_transformation_chain(self, moving_slice_index):
@@ -257,10 +293,12 @@ class sequential_alignment(output_volume_workflow):
         if i < r:
             for j in range(i, r):
                 retDict.append((j, j + 1))
-        print moving_slice_index, retDict
+
+        # TODO: Report the produced transformation chain.
+        #print moving_slice_index, retDict
         return retDict
 
-    def _calculate_individual_composed_transform(self, moving_slice_index):
+    def _calculate_composite(self, moving_slice_index):
         """
         """
         transformation_chain = \
@@ -281,7 +319,6 @@ class sequential_alignment(output_volume_workflow):
             output_image = composite_transform_filename,
             deformable_list = [],
             affine_list = partial_transformations)
-           #reference_image = self.f['src_gray'](idx=r_slice),
 
         return copy.deepcopy(command)
 
@@ -430,10 +467,10 @@ class sequential_alignment(output_volume_workflow):
         registrationOptions = OptionGroup(parser, 'Registration options')
         registrationOptions.add_option('--antsImageMetric', default='MI',
                             type='str', dest='antsImageMetric',
-                            help='ANTS image to image metric. See ANTS documentation.')
+                                       help='ANTS affine image to image metric. Three values are allowed: CC, MI, MSQ.')
         registrationOptions.add_option('--antsImageMetricOpt', default=32,
                             type='int', dest='antsImageMetricOpt',
-                            help='Parameter of ANTS i2i metric.')
+                            help='Parameter of ANTS i2i metric. Makes a sense only when provided metric can be customized.')
         registrationOptions.add_option('--useRigidAffine', default=False,
                 dest='useRigidAffine', action='store_const', const=True,
                 help='Use rigid affine transformation.')
