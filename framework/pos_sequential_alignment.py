@@ -4,6 +4,7 @@
 import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
+import networkx as nx
 
 import pos_wrappers
 import pos_parameters
@@ -102,8 +103,7 @@ class sequential_alignment(output_volume_workflow):
     _usage = ""
 
     # Define the magic numbers:
-    #__AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
-    __AFFINE_ITERATIONS = [10000, 10000, 0,0,0]
+    __AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
     __DEFORMABLE_ITERATIONS = [0]
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
@@ -131,6 +131,7 @@ class sequential_alignment(output_volume_workflow):
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
+
         # Before launching the registration process check, if the intput
         # directory and all the input images exist.
         # self._inspect_input_images()
@@ -139,8 +140,8 @@ class sequential_alignment(output_volume_workflow):
         # simltaneously by a single routine. Slices preparation may be
         # disabled, switched off by providing approperiate command line
         # parameter. In that's the case, this step will be skipped.
-        if self.options.skipSourceSlicesGeneration is not True:
-            self._generate_source_slices()
+        #if self.options.skipSourceSlicesGeneration is not True:
+        #    self._generate_source_slices()
 
         # Generate transforms. This step may be switched off by providing
         # aproperiate command line parameter.
@@ -161,6 +162,60 @@ class sequential_alignment(output_volume_workflow):
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
+
+#   def _calculate_similarity(self):
+
+#      #commands = []
+#      #for moving_slice_index in self.options.slice_range:
+#      #    tpair = list(flatten(self._get_slice_pair(moving_slice_index)))
+#      #    for mdx, fdx in tpair:
+#      #        f = self.f['src_gray'](idx=fdx)
+#      #        m = self.f['src_gray'](idx=mdx)
+#      #        t = self.f['part_transf'](mIdx=mdx,fIdx=fdx)
+#      #        c = "c2d %s %s -reslice-itk %s %s -mmi | cut -f3 -d' ' > /home/pmajka/f%d_m%d.txt" % (f, m, t, f, fdx,mdx)
+#      #        #print f,m
+#      #        os.system(c)
+
+#      #conns = []
+#      #eps=0.0
+#      #for moving_slice_index in self.options.slice_range:
+#      #    tpair = list(flatten(self._get_slice_pair(moving_slice_index)))
+#      #    for mdx, fdx in tpair:
+#      #        fn = '/home/pmajka/f%d_m%d.txt' % (fdx, mdx)
+#      #        v=float(open(fn).readlines()[0])
+#      #        w = (1.0 + v) * abs(mdx-fdx) * (1.0 + eps)**(abs(mdx-fdx))
+#      #        #w = 1.# (1.0 + v) * abs(mdx-fdx) * (1.0 + eps)**(abs(mdx-fdx))
+#      #        print fdx, mdx, v, w
+#      #        conns.append((fdx, mdx, w))
+
+#      #self.G=nx.DiGraph()
+#      #self.G.add_weighted_edges_from(conns)
+
+#   def _get_transformation_chain(self, moving_slice_index):
+#       i = moving_slice_index
+#       s, e, r = tuple(self.options.sliceRange)
+
+#       x=nx.all_pairs_dijkstra_path(self.G)
+#       y=nx.all_pairs_dijkstra_path_length(self.G)
+
+#       #print x[60][moving_slice_index]
+#       #print nx.shortest_path(G,60,moving_slice_index)
+#       #path = list(reversed(nx.shortest_path(self.G, r, i)))
+#       path = list(reversed(x[r][i]))
+#       chain = []
+#       if i == r:
+#           chain.append((r, r))
+
+#       for step in range(len(path)-1):
+#           chain.append((path[step],path[step+1]))
+#       print y[r][i]
+#       print chain
+#       return chain
+
+#       #import matplotlib.pyplot as plt
+#       #nx.draw_spectral(G)
+#       #plt.savefig("edge_colormap.png") # save as png
+#       #plt.show() # display
 
     def _inspect_input_images(self):
         """
@@ -185,6 +240,8 @@ class sequential_alignment(output_volume_workflow):
         and multichannel images are generates by this routine.
         """
 
+        self._logger.info("Performing source slice generation.")
+
         # The array collecting all the individual command into a commands
         # batch.
         commands = []
@@ -206,6 +263,8 @@ class sequential_alignment(output_volume_workflow):
         # Execute the commands in a batch.
         self.execute(commands)
 
+        self._logger.info("Source slice generation is completed.")
+
     def _calculate_transforms(self):
         """
         This rutine calculates the affine (or rigid transformations) for the
@@ -217,23 +276,25 @@ class sequential_alignment(output_volume_workflow):
         composite trasformation binds given moving slice with the reference
         slice.
         """
-        #TODO: Provide debugging infromation on the paris of slices for which
-        #TODO: The transformation will be provided.
 
         # Calculate partial transforms - get partial transformation chain;
-        #[item for sublist in l for item in sublist]
         partial_transformation_pairs = \
             map(lambda idx: self._get_slice_pair(idx),
                             self.options.slice_range)
 
+        # Flatten the slices pairs
         partial_transformation_pairs =\
                 list(flatten(partial_transformation_pairs))
 
+        # Calculate affine transformation for each slices pair
         commands = map(lambda x: self._get_partial_transform(*x),
                                  partial_transformation_pairs)
         self.execute(commands)
 
-        # Calculate composite transforms
+        # In case of expanding to the graph based approach
+        #self._calculate_similarity()
+
+        # Finally, calculate composite transforms
         commands = []
         for moving_slice_index in self.options.slice_range:
             commands.append(self._calculate_composite(moving_slice_index))
@@ -244,17 +305,17 @@ class sequential_alignment(output_volume_workflow):
         s, e, r = tuple(self.options.sliceRange)
 
         retDict = []
-        eps=1
+        epsilon = 1  # In case of expanding to graph based approach
 
         if i == r:
             j = i
             retDict.append((i, j))
         if i > r:
-            for j in list(range(i - eps, i)):
+            for j in list(range(i - epsilon, i)):
                 if j <= e and i != j and j >= r:
                     retDict.append((i, j))
         if i < r:
-            for j in list(range(i, i + eps + 1)):
+            for j in list(range(i, i + epsilon + 1)):
                 if j >= s and i != j and j <= r:
                     retDict.append((i, j))
 
@@ -311,6 +372,10 @@ class sequential_alignment(output_volume_workflow):
         return copy.deepcopy(registration)
 
     def _get_transformation_chain(self, moving_slice_index):
+        """
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+        """
         i = moving_slice_index
         s, e, r = tuple(self.options.sliceRange)
 
