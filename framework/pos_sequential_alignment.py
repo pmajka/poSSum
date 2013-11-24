@@ -51,7 +51,6 @@ class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
         'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', False, str_template=' -scale -1 -shift 255 -type uchar'),
     }
 
-
 class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
     """
     A special instance of reslice grayscale image dedicated for the sequential
@@ -74,7 +73,6 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
         'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
         'output_image': pos_parameters.filename_parameter('output_image', None),
     }
-
 
 class sequential_alignment(output_volume_workflow):
     """
@@ -108,6 +106,8 @@ class sequential_alignment(output_volume_workflow):
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
     __MI_SAMPLES = 16000
+    __ALIGNMENT_EPSILON = 1
+    __VOL_STACK_SLICE_SPACING = 1
 
     def __init__(self, options, args):
         super(self.__class__, self).__init__(options, args)
@@ -130,7 +130,6 @@ class sequential_alignment(output_volume_workflow):
     def launch(self):
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
-
 
         # Before launching the registration process check, if the intput
         # directory and all the input images exist.
@@ -158,7 +157,7 @@ class sequential_alignment(output_volume_workflow):
         # This step may be skipped by providing approperiate command line
         # parameter.
         if self.options.skipOutputVolumes is not True:
-            self.stack_output_volumes()
+            self._stack_output_images()
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
@@ -221,7 +220,12 @@ class sequential_alignment(output_volume_workflow):
         The partial transformation 'connects' two consecutive slices and the
         composite trasformation binds given moving slice with the reference
         slice.
+
+        Note that this routine does not apply the calculated transformations to
+        the source images. This is done in further steps of processing.
         """
+
+        self._logger.info("Generating transformations.")
 
         # Calculate partial transforms - get partial transformation chain;
         partial_transformation_pairs = \
@@ -237,21 +241,29 @@ class sequential_alignment(output_volume_workflow):
                                  partial_transformation_pairs)
         self.execute(commands)
 
-        # In case of expanding to the graph based approach
-        #self._calculate_similarity()
-
         # Finally, calculate composite transforms
         commands = []
         for moving_slice_index in self.options.slice_range:
             commands.append(self._calculate_composite(moving_slice_index))
         self.execute(commands)
 
+        self._logger.info("Done with transformations.")
+
     def _get_slice_pair(self, moving_slice_index):
+        """
+        Returns pairs of slices between which partial transformations will be
+        calculated.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+        """
+
+        # Just convenient aliases
         i = moving_slice_index
         s, e, r = tuple(self.options.sliceRange)
 
         retDict = []
-        epsilon = 1  # In case of expanding to graph based approach
+        epsilon = self.__ALIGNMENT_EPSILON
 
         if i == r:
             j = i
@@ -277,6 +289,8 @@ class sequential_alignment(output_volume_workflow):
 
         :param fixed_slice_index: fixed slice index
         :type fixed_slice_index: int
+
+        :return: Registration command.
         """
 
         # Define the registration settings: image-to-image metric and its
@@ -321,7 +335,13 @@ class sequential_alignment(output_volume_workflow):
         """
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
+
+        :return: chain of partial transformations connecting
+                 given moving slice with the reference image
+        :rtype: array
         """
+
+        # Define some convenient aliases
         i = moving_slice_index
         s, e, r = tuple(self.options.sliceRange)
 
@@ -336,12 +356,16 @@ class sequential_alignment(output_volume_workflow):
             for j in range(i, r):
                 retDict.append((j, j + 1))
 
-        # TODO: Report the produced transformation chain.
-        #print moving_slice_index, retDict
         return retDict
 
     def _calculate_composite(self, moving_slice_index):
         """
+        Composes individual partial transformations into composite
+        transformation registering provided moving slice to the reference
+        image.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
         """
         transformation_chain = \
             self._get_transformation_chain(moving_slice_index)
@@ -353,11 +377,13 @@ class sequential_alignment(output_volume_workflow):
             partial_transformations.append(
                 self.f['part_transf'](mIdx=m_slice, fIdx=r_slice))
 
+        # Define the output transformation filename
         composite_transform_filename = \
             self.f['comp_transf'](mIdx=moving_slice_index, fIdx=r_slice)
 
+        # Initialize and define the composite transformation wrapper
         command = pos_wrappers.ants_compose_multi_transform(
-            dimension = 2,
+            dimension = self.__IMAGE_DIMENSION,
             output_image = composite_transform_filename,
             deformable_list = [],
             affine_list = partial_transformations)
@@ -365,31 +391,51 @@ class sequential_alignment(output_volume_workflow):
         return copy.deepcopy(command)
 
     def _reslice(self):
+        """
+        Reslice input images according to composed transformations. Both,
+        grayscale and multichannel images are resliced.
+        """
+
+        # Reslicing grayscale images.  Reslicing multichannel images. Collect
+        # all reslicing commands into an array and then execute the batch.
+        self._logger.info("Reslicing grayscale images.")
         commands = []
         for slice_index in self.options.slice_range:
             commands.append(self._resliceGrayscale(slice_index))
         self.execute(commands)
 
+        # Reslicing multichannel images. Again, collect all reslicing commands
+        # into an array and then execute the batch.
+        self._logger.info("Reslicing multichannel images.")
         commands = []
         for slice_index in self.options.slice_range:
             commands.append(self._resliceColor(slice_index))
         self.execute(commands)
 
-    def _resliceGrayscale(self, sliceNumber):
-        moving_image_filename = self.f['src_gray'](idx=sliceNumber)
-        resliced_image_filename = self.f['resliced_gray'](idx=sliceNumber)
+        # Yeap, it's done.
+        self._logger.info("Finished reslicing.")
+
+    def _resliceGrayscale(self, slice_number):
+        """
+        Reslice grayscale images.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+        """
+
+        # Define all the filenames required by the reslice command
+        moving_image_filename = self.f['src_gray'](idx=slice_number)
+        resliced_image_filename = self.f['resliced_gray'](idx=slice_number)
         reference_image_filename = self.f['src_gray'](
             idx=self.options.slice_range[2])
         transformation_file = self.f['comp_transf'](
-            mIdx=sliceNumber, fIdx=self.options.sliceRange[2])
+            mIdx=slice_number, fIdx=self.options.sliceRange[2])
 
-        if self.options.outputVolumeROI:
-            region_origin_roi = self.options.outputVolumeROI[0:2]
-            region_size_roi = self.options.outputVolumeROI[2:4]
-        else:
-            region_origin_roi = None
-            region_size_roi = None
+        # Get output volume region of interest (if such region is defined)
+        region_origin_roi, region_size_roi =\
+            self._get_output_volume_roi()
 
+        # And finally initialize and customize reslice command.
         command = command_warp_grayscale_image(
             reference_image = reference_image_filename,
             moving_image = moving_image_filename,
@@ -399,21 +445,27 @@ class sequential_alignment(output_volume_workflow):
             region_size = region_size_roi)
         return copy.deepcopy(command)
 
-    def _resliceColor(self, sliceNumber):
-        moving_image_filename = self.f['src_color'](idx=sliceNumber)
-        resliced_image_filename = self.f['resliced_color'](idx=sliceNumber)
+    def _resliceColor(self, slice_number):
+        """
+        Reslice multichannel images.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+        """
+
+        # Define all the filenames required by the reslice command
+        moving_image_filename = self.f['src_color'](idx=slice_number)
+        resliced_image_filename = self.f['resliced_color'](idx=slice_number)
         reference_image_filename = self.f['src_gray'](
             idx=self.options.slice_range[2])
         transformation_file = self.f['comp_transf'](
-            mIdx=sliceNumber, fIdx=self.options.sliceRange[2])
+            mIdx=slice_number, fIdx=self.options.sliceRange[2])
 
-        if self.options.outputVolumeROI:
-            region_origin_roi = self.options.outputVolumeROI[0:2]
-            region_size_roi = self.options.outputVolumeROI[2:4]
-        else:
-            region_origin_roi = None
-            region_size_roi = None
+        # Get output volume region of interest (if such region is defined)
+        region_origin_roi, region_size_roi =\
+            self._get_output_volume_roi()
 
+        # And finally initialize and customize reslice command.
         command = command_warp_rgb_slice(
             reference_image = reference_image_filename,
             moving_image = moving_image_filename,
@@ -424,7 +476,32 @@ class sequential_alignment(output_volume_workflow):
             inversion_flag = self.options.invertMultichannel)
         return copy.deepcopy(command)
 
+    def _get_output_volume_roi(self):
+        """
+        Define output images stack origin and and size according to the
+        providing command line arguments. If provided, the resliced images are
+        cropped before stacking into volumes. Note that when the slices are
+        cropped their origin is preserved. That should be taken into
+        consideration when origin of the stacked volume if provided.
+
+        When the output ROI is not defined, nothing special will happen.
+        Resliced images will not be cropped in any way.
+        """
+
+        # Define output ROI based on provided command line arguments, if such
+        # arguments are provided.
+        if self.options.outputVolumeROI:
+            region_origin_roi = self.options.outputVolumeROI[0:2]
+            region_size_roi = self.options.outputVolumeROI[2:4]
+        else:
+            region_origin_roi = None
+            region_size_roi = None
+
+        return region_origin_roi, region_size_roi
+
     def _get_generic_stack_slice_wrapper(self, mask_type, ouput_filename_type):
+        """
+        """
         start, stop, reference = self.options.sliceRange
         output_filename = self.f[ouput_filename_type](fname='output_volume')
 
@@ -432,7 +509,7 @@ class sequential_alignment(output_volume_workflow):
             stack_mask = self.f[mask_type](),
             slice_start = start,
             slice_end = stop,
-            slice_step = 1,
+            slice_step = self.__VOL_STACK_SLICE_SPACING,
             output_volume_fn = output_filename,
             permutation_order = self.options.outputVolumePermutationOrder,
             orientation_code = self.options.outputVolumeOrientationCode,
@@ -443,7 +520,9 @@ class sequential_alignment(output_volume_workflow):
             resample = self.options.outputVolumeResample)
         return copy.deepcopy(command)
 
-    def stack_output_volumes(self):
+    def _stack_output_images(self):
+        """
+        """
         command = self._get_generic_stack_slice_wrapper('resliced_gray_mask','out_volume_gray')
         self.execute(command)
 
