@@ -110,6 +110,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
     def _validate_options(self):
         assert self.options.inputFile,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
+        #TODO: An output filename is required!!! Provide an assertion
 
     def launch(self):
         # Ok, if the image stacking is enabled, create the input volume

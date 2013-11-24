@@ -134,14 +134,14 @@ class sequential_alignment(output_volume_workflow):
 
         # Before launching the registration process check, if the intput
         # directory and all the input images exist.
-        # self._inspect_input_images()
+        self._inspect_input_images()
 
         # Prepare the input slices. Both, grayscale and rgb slices are prepared
         # simltaneously by a single routine. Slices preparation may be
         # disabled, switched off by providing approperiate command line
         # parameter. In that's the case, this step will be skipped.
-        #if self.options.skipSourceSlicesGeneration is not True:
-        #    self._generate_source_slices()
+        if self.options.skipSourceSlicesGeneration is not True:
+            self._generate_source_slices()
 
         # Generate transforms. This step may be switched off by providing
         # aproperiate command line parameter.
@@ -162,60 +162,6 @@ class sequential_alignment(output_volume_workflow):
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
-
-#   def _calculate_similarity(self):
-
-#      #commands = []
-#      #for moving_slice_index in self.options.slice_range:
-#      #    tpair = list(flatten(self._get_slice_pair(moving_slice_index)))
-#      #    for mdx, fdx in tpair:
-#      #        f = self.f['src_gray'](idx=fdx)
-#      #        m = self.f['src_gray'](idx=mdx)
-#      #        t = self.f['part_transf'](mIdx=mdx,fIdx=fdx)
-#      #        c = "c2d %s %s -reslice-itk %s %s -mmi | cut -f3 -d' ' > /home/pmajka/f%d_m%d.txt" % (f, m, t, f, fdx,mdx)
-#      #        #print f,m
-#      #        os.system(c)
-
-#      #conns = []
-#      #eps=0.0
-#      #for moving_slice_index in self.options.slice_range:
-#      #    tpair = list(flatten(self._get_slice_pair(moving_slice_index)))
-#      #    for mdx, fdx in tpair:
-#      #        fn = '/home/pmajka/f%d_m%d.txt' % (fdx, mdx)
-#      #        v=float(open(fn).readlines()[0])
-#      #        w = (1.0 + v) * abs(mdx-fdx) * (1.0 + eps)**(abs(mdx-fdx))
-#      #        #w = 1.# (1.0 + v) * abs(mdx-fdx) * (1.0 + eps)**(abs(mdx-fdx))
-#      #        print fdx, mdx, v, w
-#      #        conns.append((fdx, mdx, w))
-
-#      #self.G=nx.DiGraph()
-#      #self.G.add_weighted_edges_from(conns)
-
-#   def _get_transformation_chain(self, moving_slice_index):
-#       i = moving_slice_index
-#       s, e, r = tuple(self.options.sliceRange)
-
-#       x=nx.all_pairs_dijkstra_path(self.G)
-#       y=nx.all_pairs_dijkstra_path_length(self.G)
-
-#       #print x[60][moving_slice_index]
-#       #print nx.shortest_path(G,60,moving_slice_index)
-#       #path = list(reversed(nx.shortest_path(self.G, r, i)))
-#       path = list(reversed(x[r][i]))
-#       chain = []
-#       if i == r:
-#           chain.append((r, r))
-
-#       for step in range(len(path)-1):
-#           chain.append((path[step],path[step+1]))
-#       print y[r][i]
-#       print chain
-#       return chain
-
-#       #import matplotlib.pyplot as plt
-#       #nx.draw_spectral(G)
-#       #plt.savefig("edge_colormap.png") # save as png
-#       #plt.show() # display
 
     def _inspect_input_images(self):
         """

@@ -608,7 +608,8 @@ class stack_and_reorient_wrapper(generic_wrapper):
               - the parameters: `slice_start` `slice_end` `slice_step` has to
               go togeather.
     """
-
+    # TODO: Provide doctest with a reasonable coverage
+    # TODO: In particular test out all of the exeptions and assertions
     _template = """pos_stack_reorient.py \
             -i {stack_mask} \
             -o {output_volume_fn} \

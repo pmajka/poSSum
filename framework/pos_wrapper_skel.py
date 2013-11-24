@@ -13,6 +13,8 @@ from optparse import OptionParser, OptionGroup
 import pos_common
 import pos_wrappers
 
+#TODO: Implement generation of a simple report!
+
 class generic_workflow(object):
     """
     A generic command-line workflow class. Workflow should be understood as a

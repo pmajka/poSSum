@@ -98,3 +98,14 @@ def which(program):
                 return exe_file
 
     return None
+
+def flatten(lst):
+    """
+    TODO: Provide some doctests here!
+    """
+    for x in lst:
+        if isinstance(x, list):
+            for x in flatten(x):
+                yield x
+        else:
+                yield x
