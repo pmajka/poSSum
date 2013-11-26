@@ -12,6 +12,8 @@ from pos_wrapper_skel import output_volume_workflow
 from pos_common import flatten
 
 """
+Note that the input files are required to be niftii files!!
+
 python pos_sequential_alignment.py
     --sliceRange 50 70 60
     --inputImageDir /home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides
@@ -51,6 +53,7 @@ class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
         'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', False, str_template=' -scale -1 -shift 255 -type uchar'),
     }
 
+
 class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
     """
     A special instance of reslice grayscale image dedicated for the sequential
@@ -74,13 +77,11 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
         'output_image': pos_parameters.filename_parameter('output_image', None),
     }
 
+
 class sequential_alignment(output_volume_workflow):
     """
     Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
     """
-    # TODO: Allow for overriding the output volumes filenames
-    # TODO: Verify if the provided image to image metric is allowed.
-    # TODO: Generate output filenames based on the provided parameters
 
     _f = {
         'raw_image' : pos_parameters.filename('raw_image', work_dir = '00_override_this', str_template = '{idx:04d}.nii.gz'),
@@ -101,7 +102,8 @@ class sequential_alignment(output_volume_workflow):
     _usage = ""
 
     # Define the magic numbers:
-    __AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
+    #__AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
+    __AFFINE_ITERATIONS = [10000,0,0,0,0,0]
     __DEFORMABLE_ITERATIONS = [0]
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
@@ -115,17 +117,61 @@ class sequential_alignment(output_volume_workflow):
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
 
+        # Yes, it is extremely important to provide the slicing range.
+        assert self.options.sliceRange, \
+            self._logger.error("Slice range parameters (`--sliceRange`) are required. Please provide the slice range. ")
+
         # Define slices' range. All slices within given range will be
         # processed. Make sure that all images are available.
         self.options.slice_range = \
             range(self.options.sliceRange[0], self.options.sliceRange[1] + 1)
 
+        # Validate, if an input images directory is provided,
+        # Obviously, we need to load the images in order to process them.
+        assert self.options.inputImageDir, \
+            self._logger.error("No input images directory is provided. Please provide the input images directory (--inputImageDir)")
+
+        # Verify, if the provided image-to-image metric is provided.
+        assert self.options.antsImageMetric.lower() in ['mi','cc','msq'], \
+            self._logger.error("Provided image-to-image metric name is invalid. Three image-to-image metrics are allowed: MSQ, MI, CC.")
+
     def _overrideDefaults(self):
+        # At the very beginning override the default dummy input images
+        # directory by the actual images directory.
         self.f['raw_image'].override_dir = self.options.inputImageDir
 
-        #TODO: Override output transformation directory if required
-        #TODO: Override the output volumes path if required by the command line parameters
-        # whole filename, not only path or only filename.
+        # Overriding the transformations directory
+        # It might be usefull i.e. when one wants to save the transformation
+        # to a different directory than the default one.
+        # Note that directory names for two file types has to be switched.
+        if self.options.transformationsDirectory is not False:
+            self.f['part_naming'].override_dir = \
+                self.options.transformationsDirectory
+            self.f['part_transf'].override_dir = \
+                self.options.transformationsDirectory
+            self.f['comp_transf'].override_dir = \
+                self.options.transformationsDirectory
+
+        # The output volumes directory may be overriden as well
+        # Note that the the output volumes directory stores also
+        # transformation analyses plots.
+        if self.options.outputVolumesDirectory is not False:
+            self.f['out_volume_gray'].override_dir = \
+                self.options.outputVolumesDirectory
+            self.f['out_volume_color'].override_dir = \
+                self.options.outputVolumesDirectory
+            self.f['transform_plot'].override_dir = \
+                self.options.outputVolumesDirectory
+
+        # Apart from just setting the custom output volumes directory, one can
+        # also customize even the output filename of both, grayscale and
+        # multichannel volumes! That a variety of options!
+        if self.options.grayscaleVolumeFilename:
+            self.f['out_volume_gray'].override_fname = \
+                self.options.grayscaleVolumeFilename
+        if self.options.multichannelVolumeFilename:
+            self.f['out_volume_color'].override_fname = \
+                self.options.multichannelVolumeFilename
 
     def launch(self):
         # Execute the parents before-execution activities
@@ -447,7 +493,7 @@ class sequential_alignment(output_volume_workflow):
 
     def _resliceColor(self, slice_number):
         """
-        Reslice multichannel images.
+        Reslice multichannel image stack.
 
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
@@ -474,6 +520,8 @@ class sequential_alignment(output_volume_workflow):
             region_origin = region_origin_roi,
             region_size = region_size_roi,
             inversion_flag = self.options.invertMultichannel)
+
+        # Return the created command line parser.
         return copy.deepcopy(command)
 
     def _get_output_volume_roi(self):
@@ -501,10 +549,26 @@ class sequential_alignment(output_volume_workflow):
 
     def _get_generic_stack_slice_wrapper(self, mask_type, ouput_filename_type):
         """
+        Return generic command wrapper suitable either for stacking grayscale
+        images or multichannel images. Aproperiate command line wrapper is returned
+        depending on provided `mask_type` and `output_filename_type`.
+        The command line wrapper is prepared mostly based on the command line
+        parameters which are common between both images stacks thus so there is
+        no need to parametrize them individually.
+
+        :param mask_type: mask type determining which images stack will be
+                          converted into a volume.
+        :type mask_type: str
+
+        :param ouput_filename_type: output filename naming scheme.
+        :type ouput_filename_type: str
         """
+
+        # Assign some usefull aliases.
         start, stop, reference = self.options.sliceRange
         output_filename = self.f[ouput_filename_type](fname='output_volume')
 
+        # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
             stack_mask = self.f[mask_type](),
             slice_start = start,
@@ -518,16 +582,23 @@ class sequential_alignment(output_volume_workflow):
             origin = self.options.outputVolumeOrigin,
             interpolation = self.options.setInterpolation,
             resample = self.options.outputVolumeResample)
+
+        # Return the created parser.
         return copy.deepcopy(command)
 
     def _stack_output_images(self):
         """
+        Execute stacking images based on grayscale and multichannel images.
         """
-        command = self._get_generic_stack_slice_wrapper('resliced_gray_mask','out_volume_gray')
+
+        command = self._get_generic_stack_slice_wrapper(\
+                    'resliced_gray_mask','out_volume_gray')
         self.execute(command)
 
-        command = self._get_generic_stack_slice_wrapper('resliced_color_mask','out_volume_color')
+        command = self._get_generic_stack_slice_wrapper(\
+                    'resliced_color_mask','out_volume_color')
         self.execute(command)
+
 
     @classmethod
     def _getCommandLineParser(cls):
@@ -569,6 +640,12 @@ class sequential_alignment(output_volume_workflow):
         generalOptions.add_option('--outputVolumesDirectory', default=False,
                 dest='outputVolumesDirectory', type="str",
                 help='Directory to which registration results will be sored.')
+        generalOptions.add_option('--grayscaleVolumeFilename', default=False,
+                dest='grayscaleVolumeFilename', type='str',
+                help='Filename for the output grayscale volume')
+        generalOptions.add_option('--multichannelVolumeFilename', default=False,
+                dest='multichannelVolumeFilename', type='str',
+                help='Filename for the output multichannel volume.')
         generalOptions.add_option('--transformationsDirectory', default=False,
                 dest='transformationsDirectory', type="str",
                 help='Use provided transformation directory instead of the default one.')
