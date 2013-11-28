@@ -28,6 +28,8 @@ python pos_sequential_alignment.py
 
 class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
     """
+    #TODO: Provide provide doctests and eventually move to a separated module
+    # dedicated to linear reconstruction workflow.
     A special instance of reslice rgb.
     """
 
@@ -58,6 +60,7 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
     """
     A special instance of reslice grayscale image dedicated for the sequential
     alignment script.
+    #TODO: Provide doctests
     """
 
     _template = "c{dimension}d -verbose \
@@ -136,6 +139,8 @@ class sequential_alignment(output_volume_workflow):
             self._logger.error("Provided image-to-image metric name is invalid. Three image-to-image metrics are allowed: MSQ, MI, CC.")
 
     def _overrideDefaults(self):
+        super(self.__class__, self)._overrideDefaults()
+
         # At the very beginning override the default dummy input images
         # directory by the actual images directory.
         self.f['raw_image'].override_dir = self.options.inputImageDir
@@ -611,6 +616,8 @@ class sequential_alignment(output_volume_workflow):
             type='str', dest='inputImageDir',
             help='')
 
+        #TODO: Separate these blocks of command line parameters into groups
+        # and TODO provide documentation.
         parser.add_option('--registrationROI', dest='registrationROI',
             default=None, type='int', nargs=4,
             help='ROI of the input image used for registration (ox, oy, sx, sy).')
