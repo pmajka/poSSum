@@ -14,6 +14,10 @@ from pos_common import flatten
 """
 Note that the input files are required to be niftii files!!
 
+# XXX TODO NOTE: Have in mind that the script accepts only
+# rgb uchar images in niftii format. All images have to be converted to this
+# format before processing.
+
 python pos_sequential_alignment.py
     --sliceRange 50 70 60
     --inputImageDir /home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides
@@ -31,6 +35,7 @@ class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
     #TODO: Provide provide doctests and eventually move to a separated module
     # dedicated to linear reconstruction workflow.
     A special instance of reslice rgb.
+    # TODO: Merge with similar script in pariwise registration script.
     """
 
     _template = "c{dimension}d -verbose \
@@ -61,6 +66,7 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
     A special instance of reslice grayscale image dedicated for the sequential
     alignment script.
     #TODO: Provide doctests
+    # TODO: Merge with similar wrapper in pariwise registration script.
     """
 
     _template = "c{dimension}d -verbose \
@@ -105,8 +111,8 @@ class sequential_alignment(output_volume_workflow):
     _usage = ""
 
     # Define the magic numbers:
-    #__AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
-    __AFFINE_ITERATIONS = [10000,0,0,0,0,0]
+    __AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
+    #__AFFINE_ITERATIONS = [10000,0,0,0,0,0]
     __DEFORMABLE_ITERATIONS = [0]
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
@@ -290,7 +296,7 @@ class sequential_alignment(output_volume_workflow):
         # Calculate affine transformation for each slices pair
         commands = map(lambda x: self._get_partial_transform(*x),
                                  partial_transformation_pairs)
-        self.execute(commands)
+        #self.execute(commands)
 
         # Finally, calculate composite transforms
         commands = []
@@ -353,7 +359,10 @@ class sequential_alignment(output_volume_workflow):
         affine_iterations = self.__AFFINE_ITERATIONS
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
                                               fIdx=fixed_slice_index)
-        use_rigid_transformation = self.options.useRigidAffine
+        # TODO: correct all true / false switches!
+        # TODO: Even better: introduce a ANTS boolean parameter
+        # which converts boolean value to ants bool string
+        use_rigid_transformation = str(self.options.useRigidAffine).lower()
 
         # Define the image-to-image metric.
         metrics = []
@@ -375,7 +384,7 @@ class sequential_alignment(output_volume_workflow):
             continueAffine = None,
             rigidAffine = use_rigid_transformation,
             imageMetrics = metrics,
-            histogramMatching = self.__HISTOGRAM_MATCHING,
+            histogramMatching = str(self.__HISTOGRAM_MATCHING).lower(),
             miOption = [metric_parameter, self.__MI_SAMPLES],
             affineMetricType = affine_metric_type)
 
