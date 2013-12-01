@@ -17,6 +17,7 @@ Note that the input files are required to be niftii files!!
 # XXX TODO NOTE: Have in mind that the script accepts only
 # rgb uchar images in niftii format. All images have to be converted to this
 # format before processing.
+#TODO: Provide switch for interpolation during reslicing!
 
 python pos_sequential_alignment.py
     --sliceRange 50 70 60
@@ -296,7 +297,7 @@ class sequential_alignment(output_volume_workflow):
         # Calculate affine transformation for each slices pair
         commands = map(lambda x: self._get_partial_transform(*x),
                                  partial_transformation_pairs)
-        #self.execute(commands)
+        self.execute(commands)
 
         # Finally, calculate composite transforms
         commands = []
