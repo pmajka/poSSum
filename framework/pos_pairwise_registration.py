@@ -22,8 +22,7 @@
 #                                                                             #
 ###############################################################################
 
-import os, sys, glob
-import datetime, logging
+import os, sys
 import csv
 import copy
 from optparse import OptionParser, OptionGroup
@@ -71,6 +70,9 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
     alignment script.
     #TODO: Provide doctests
     # TODO: Merge with similar wrapper in pariwise registration script.
+    # TODO: Implement output volume filename generation based on provided
+    # TODO: Provide logging information.
+    # parameters
     """
 
     _template = "c{dimension}d -verbose {background} {interpolation}\
@@ -303,6 +305,8 @@ class pairwiseRegistration(output_volume_workflow):
                     self.options.fixedSlicesRange[1] + 1)
 
     def launch(self):
+        # Simple as it looks: load the fixed slice to moving slice assignment.
+        # This step cannot be skipped for obvious reasons.
         self._load_slice_assignment()
 
         # After proving that the mappings are correct, the script verifies if
@@ -312,11 +316,13 @@ class pairwiseRegistration(output_volume_workflow):
         if self.options.dryRun is False:
             self._inspect_input_images()
 
+        # The slice preprocessing may be skipped if required.
         if self.options.skipPreprocessing is not True:
-            self._generates_source_slices()
+            self._generate_fixed_slices()
+            self._generate_moving_slices()
 
         if self.options.skipTranasformGeneration is not True:
-            self._calculateTransforms()
+            self._calculate_transforms()
 
         self._reslice()
 
@@ -324,11 +330,9 @@ class pairwiseRegistration(output_volume_workflow):
             self._stack_output_images()
 
         if self.options.additionalMovingImagesDirectory is not None:
-            self._loadAdditionalStacksResliceSettings()
-
-    def _generates_source_slices(self):
-        self._generate_fixed_slices()
-        self._generate_moving_slices()
+            self._load_additional_stacks_settings()
+            self._reslice_additional_stack()
+            self._stack_additional_image_stacks()
 
     def _get_generic_source_slice_preparation_wrapper(self):
         """
@@ -369,7 +373,6 @@ class pairwiseRegistration(output_volume_workflow):
         self.execute(commands)
         self._logger.info("Generating fixed slices. Done.")
 
-
     def _generate_moving_slices(self):
         """
         Generation of fixed as well as moving slices should be implemented in a
@@ -399,7 +402,7 @@ class pairwiseRegistration(output_volume_workflow):
         self.execute(commands)
         self._logger.info("Generating moving slices. Done.")
 
-    def _calculateTransforms(self):
+    def _calculate_transforms(self):
         commands = []
         for moving_slice, fixed_slice in self._slice_assignment.items():
             transform_command = self._calculate_single_transform(moving_slice, fixed_slice)
@@ -461,7 +464,7 @@ class pairwiseRegistration(output_volume_workflow):
             self._logger.info("Reslicing grayscale images.")
             commands = []
             for slice_index in self.options.movingSlicesRange:
-                commands.append(self._resliceGrayscale(slice_index))
+                commands.append(self._reslice_grayscale(slice_index))
             self.execute(commands)
         else:
             self._logger.info("Reslicing grayscale images is TURNED OFF.")
@@ -472,7 +475,7 @@ class pairwiseRegistration(output_volume_workflow):
             self._logger.info("Reslicing multichannel images.")
             commands = []
             for slice_index in self.options.movingSlicesRange:
-                commands.append(self._resliceColor(slice_index))
+                commands.append(self._reslice_multichannel(slice_index))
             self.execute(commands)
         else:
             self._logger.info("Reslicing multichannel images is TURNED OFF.")
@@ -538,14 +541,14 @@ class pairwiseRegistration(output_volume_workflow):
             region_size = region_size_roi)
         return copy.deepcopy(command)
 
-
-    def _resliceGrayscale(self, slice_number):
+    def _reslice_grayscale(self, slice_number):
         """
         Reslice grayscale images.
 
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
         """
+
         command = self._get_reslice_wrapper(
             wrapper_type=command_warp_grayscale_image,
             moving_filename_generator=self.f['moving_color'],
@@ -554,15 +557,17 @@ class pairwiseRegistration(output_volume_workflow):
         command.updateParameters({
             'background' : self.options.resliceBackgorund,
             'interpolation' : self.options.resliceInterpolation})
+
         return copy.deepcopy(command)
 
-    def _resliceColor(self, slice_number):
+    def _reslice_multichannel(self, slice_number):
         """
         Reslice grayscale images.
 
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
         """
+
         command = self._get_reslice_wrapper(
             wrapper_type=command_warp_rgb_slice,
             moving_filename_generator=self.f['moving_color'],
@@ -571,9 +576,10 @@ class pairwiseRegistration(output_volume_workflow):
         command.updateParameters({
             'background' : self.options.resliceBackgorund,
             'interpolation' : self.options.resliceInterpolation})
+
         return copy.deepcopy(command)
 
-    def _get_generic_stack_slice_wrapper(self, mask_type, ouput_filename_type):
+    def _get_generic_stack_slice_wrapper(self, mask_type, output_filename):
         """
         Return generic command wrapper suitable either for stacking grayscale
         images or multichannel images. Aproperiate command line wrapper is returned
@@ -586,14 +592,14 @@ class pairwiseRegistration(output_volume_workflow):
                           converted into a volume.
         :type mask_type: str
 
-        :param ouput_filename_type: output filename naming scheme.
-        :type ouput_filename_type: str
+        :param output_filename: output filename itself.
+        :type output_filename: str
         """
 
-        # Assign some usefull aliases.
+        # Assign some usefull aliases. The processing regards only slices that
+        # are withing the moving slices index.
         start = self.options.movingSlicesRange[0]
         stop = self.options.movingSlicesRange[-1]
-        output_filename = ouput_filename_type
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
@@ -610,7 +616,7 @@ class pairwiseRegistration(output_volume_workflow):
             interpolation = self.options.setInterpolation,
             resample = self.options.outputVolumeResample)
 
-        # Return the created parser.
+        # Return the created wrapper.
         return copy.deepcopy(command)
 
     def _stack_output_images(self):
@@ -628,65 +634,110 @@ class pairwiseRegistration(output_volume_workflow):
             self.f['out_volume_color'](fname='output_volume'))
         self.execute(command)
 
-    def _loadAdditionalStacksResliceSettings(self):
-        self._additionalStacksSettings = []
+    def _load_additional_stacks_settings(self):
+        """
+        Loads settings for parsing additional image stacks. Such settings may
+        be provided by the user in order to process more than one stack (more
+        than only the moving stack) of images using the transfomations obtained
+        for the moving stack.
+
+        Additional stack settings are optional.
+
+        # TODO: How to correctly provide command line parameters related to
+        # procedding additional image stacks.
+        # TODO: Validate the provided properties (e.g. length of all the
+        # 'additional' command line parameters).
+        """
+
+        # Array holding parameters of the adddtional images stacks
+        self._additional_stacks_settings = []
         self._add_stacks_inputs = []
 
-        fields = ['additionalMovingImagesDirectory', \
-                'additionalInvertMultichannel', 'additionalGrayscaleVolume', \
+        # List of command line parameters (`add_stack_fields`) which are
+        # translated to given dictionary keys (`add_stack_key`).
+        add_stack_fields = ['additionalMovingImagesDirectory', \
+                'additionalInvertMultichannel', \
                 'additionalMultichannelVolume', 'additionalInterpolation', \
                 'additionalInterpolationBackground']
-
-        keys = ['imgDir',  'invertMc', 'grayVolName', 'rgbVolName',\
+        add_stack_keys = ['imgDir',  'invert_rgb', 'rgbVolName',\
                 'interpolation', 'background']
 
-        # Number of additional stacks: len(self._additionalStacksSettings)
-        for stackIdx in range(len(self.options.additionalMovingImagesDirectory)):
-            newStack = {}
-            for field, key in zip(fields, keys):
-                newStack[key] = getattr(self.options,field)[stackIdx]
-            self._additionalStacksSettings.append(newStack)
-
-        print self._additionalStacksSettings
+        # Iterate over all additional images stacks and copy information from
+        # command line into an array.
+        for stack_index in range(len(self.options.additionalMovingImagesDirectory)):
+            # The dictionary below will hold all parameters related do a given
+            # stack. Then the dictionary will be appended to an array.
+            new_stack = {}
+            for field, key in zip(add_stack_fields, add_stack_keys):
+                new_stack[key] = getattr(self.options, field)[stack_index]
+            self._additional_stacks_settings.append(new_stack)
 
         # This is really cool: prepare a decicated file object for each
-        # additional stack:
-        for stackIdx in range(len(self._additionalStacksSettings)):
-            self._add_stacks_inputs.append(pos_parameters.filename(
-            'add_stack_%02d' % stackIdx, str_template='{idx:04d}.nii.gz'))
-            self._add_stacks_inputs[-1].override_dir = \
-                self.options.additionalMovingImagesDirectory[stackIdx]
+        # additional stack: Iterate over all additional image stacks and create
+        # an array of `filename` object holding a file generator of slices
+        # belonging to the given stack.
+        for stack_index in range(len(self._additional_stacks_settings)):
+            # Create and append a filename object:
+            self._add_stacks_inputs.append(
+                pos_parameters.filename('add_stack_%02d' % stack_index,
+                                        str_template='{idx:04d}.nii.gz'))
+            # Since the initial filename object has a wrong (or empty)
+            # directory name, the directory name has to be overriden with the
+            # proper directory name. Note that the slices names are forced
+            self._add_stacks_inputs[stack_index].override_dir = \
+                self.options.additionalMovingImagesDirectory[stack_index]
 
-        self._AdditionalReslice()
-
-    def _AdditionalReslice(self):
+    def _reslice_additional_stack(self):
+        """
+        """
         commands = []
-        for stackIdx in range(len(self._additionalStacksSettings)):
+
+        for stack_index in range(len(self._additional_stacks_settings)):
             for sliceNumber in self.options.movingSlicesRange :
-                commands.append(self._resliceAdditionalMultichannel(sliceNumber, stackIdx))
+                commands.append(
+                    self._reslice_additional_multichannel(
+                    sliceNumber, stack_index))
+
         self.execute(commands)
 
-        self._stack_additional_image_stacks()
+    def _reslice_additional_multichannel(self, slice_index, stack_index):
+        """
+        :param slice_index: Index of the processed moving slice. Note: moving
+        slice index.
+        :type slice_index: int
 
-    def _resliceAdditionalMultichannel(self, sliceNumber, stackIdx):
-        stackSettings = self._additionalStacksSettings[stackIdx]
+        :param stack_index: Index of the processed additional stack. Note that
+        indexing of the additional stacks starts from zreo.
+        :type stack_index: int
 
+        :return: #TODO:
+        """
+        # Just a pretty alia
+        stackSettings = self._additional_stacks_settings[stack_index]
+
+        # Generate a generic reslice wrapper and then customize it
         command = self._get_reslice_wrapper(
             wrapper_type=command_warp_rgb_slice,
-            moving_filename_generator=self._add_stacks_inputs[stackIdx],
-            resliced_type=self.f['resliced_add_color'](stack_id=stackIdx,idx=sliceNumber),
-            slice_number=sliceNumber)
+            moving_filename_generator=self._add_stacks_inputs[stack_index],
+            resliced_type=self.f['resliced_add_color'](stack_id=stack_index,idx=slice_index),
+            slice_number=slice_index)
+
+        # Note that, in oposition to the moving stack, additional image stacks
+        # are to be processed with different settings for each additional
+        # images stack.
+        # TODO: Remove the stupid [False,True][xxx] syntax
         command.updateParameters({
             'interpolation' : stackSettings['interpolation'],
-            'inversion_flag' : [False,True][int(stackSettings['invertMc'])],
+            'inversion_flag' : [False,True][int(stackSettings['invert_rgb'])],
             'background' : stackSettings['background']})
         return copy.deepcopy(command)
 
     def _stack_additional_image_stacks(self):
-        for stackIdx in range(len(self._additionalStacksSettings)):
+        for stackIdx in range(len(self._additional_stacks_settings)):
             command = self._get_generic_stack_slice_wrapper(\
                 self.f['resliced_add_color_mask'](stack_id=stackIdx),
-                self.f['out_volume_color_add'](stack_id=stackIdx,fname='output_volume'))
+                self.f['out_volume_color_add'](\
+                    stack_id=stackIdx,fname='output_volume'))
             self.execute(command)
 
     @classmethod
@@ -789,9 +840,6 @@ class pairwiseRegistration(output_volume_workflow):
                 action='append', help='')
         additionalStackReslice.add_option('--additionalInvertMultichannel', default=None,
                 dest='additionalInvertMultichannel', type='int',
-                action='append', help='')
-        additionalStackReslice.add_option('--additionalGrayscaleVolume', default=None,
-                dest='additionalGrayscaleVolume', type='str',
                 action='append', help='')
         additionalStackReslice.add_option('--additionalMultichannelVolume', default=None,
                 dest='additionalMultichannelVolume', type='str',
