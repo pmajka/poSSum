@@ -44,7 +44,7 @@ python pos_sequential_alignment.py
     --sliceRange 50 70 60
     --inputImageDir /home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides
     --invertMultichannel --loglevel=DEBUG
-    -d /dev/shm/x
+    -process /dev/shm/x
     --outputVolumeSpacing 0.1 0.1 0.06
     --skipTransformations
     --skipSourceSlicesGeneration
@@ -84,9 +84,6 @@ class sequential_alignment(output_volume_workflow):
     __MI_SAMPLES = 16000
     __ALIGNMENT_EPSILON = 1
     __VOL_STACK_SLICE_SPACING = 1
-
-    def __init__(self, options, args):
-        super(self.__class__, self).__init__(options, args)
 
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
@@ -193,6 +190,7 @@ class sequential_alignment(output_volume_workflow):
         the case is different, the workflow will not proceed and the user will
         be asked to supply the missing images.
         """
+        self._logger.debug("Inspecting if all the input images are available.")
 
         # Iterate over all filenames and check if the file exists.
         for slice_index in self.options.slice_range:
@@ -216,8 +214,9 @@ class sequential_alignment(output_volume_workflow):
         # batch.
         commands = []
 
+        # Iterate over all the slices and prepare aproperiate slice preparation
+        # commands.
         for slice_number in self.options.slice_range:
-
             command = pos_wrappers.alignment_preprocessor_wrapper(
                input_image = self.f['raw_image'](idx=slice_number),
                grayscele_output_image = self.f['src_gray'](idx=slice_number),
@@ -286,6 +285,8 @@ class sequential_alignment(output_volume_workflow):
         i = moving_slice_index
         s, e, r = tuple(self.options.sliceRange)
 
+        # Array holding pairs of transformations between which the
+        # transformations will be calculated.
         retDict = []
         epsilon = self.__ALIGNMENT_EPSILON
 
@@ -601,7 +602,6 @@ class sequential_alignment(output_volume_workflow):
             type='str', dest='inputImageDir',
             help='')
 
-
         workflow_options = OptionGroup(parser, 'Pipeline options.')
 
         workflow_options.add_option('--outputVolumesDirectory', default=False,
@@ -674,5 +674,5 @@ class sequential_alignment(output_volume_workflow):
 
 if __name__ == '__main__':
     options, args = sequential_alignment.parseArgs()
-    d = sequential_alignment(options, args)
-    d.launch()
+    process = sequential_alignment(options, args)
+    process.launch()
