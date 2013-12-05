@@ -429,7 +429,7 @@ class sequential_alignment(output_volume_workflow):
         self._logger.info("Reslicing grayscale images.")
         commands = []
         for slice_index in self.options.slice_range:
-            commands.append(self._resliceGrayscale(slice_index))
+            commands.append(self._reslice_grayscale(slice_index))
         self.execute(commands)
 
         # Reslicing multichannel images. Again, collect all reslicing commands
@@ -437,13 +437,13 @@ class sequential_alignment(output_volume_workflow):
         self._logger.info("Reslicing multichannel images.")
         commands = []
         for slice_index in self.options.slice_range:
-            commands.append(self._resliceColor(slice_index))
+            commands.append(self._reslice_color(slice_index))
         self.execute(commands)
 
         # Yeap, it's done.
         self._logger.info("Finished reslicing.")
 
-    def _resliceGrayscale(self, slice_number):
+    def _reslice_grayscale(self, slice_number):
         """
         Reslice grayscale images.
 
@@ -475,7 +475,7 @@ class sequential_alignment(output_volume_workflow):
             region_size = region_size_roi)
         return copy.deepcopy(command)
 
-    def _resliceColor(self, slice_number):
+    def _reslice_color(self, slice_number):
         """
         Reslice multichannel image stack.
 
