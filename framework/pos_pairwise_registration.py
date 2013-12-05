@@ -35,6 +35,10 @@ class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
     # dedicated to linear reconstruction workflow.
     A special instance of reslice rgb.
     # TODO: Merge with similar script in pariwise registration script.
+    #TODO: Provide provide doctests and eventually move to a separated module
+    # dedicated to linear reconstruction workflow.
+    A special instance of reslice rgb.
+    # TODO: Merge with similar script in pariwise registration script.
     # TODO: Allowed interpolation switch values:
     # Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc
     """
@@ -73,6 +77,10 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
     # TODO: Implement output volume filename generation based on provided
     # TODO: Provide logging information.
     # parameters
+    A special instance of reslice grayscale image dedicated for the sequential
+    alignment script.
+    #TODO: Provide doctests
+    # TODO: Merge with similar wrapper in pariwise registration script.
     """
 
     _template = "c{dimension}d -verbose {background} {interpolation}\

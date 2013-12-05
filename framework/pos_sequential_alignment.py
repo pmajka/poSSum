@@ -37,9 +37,15 @@ class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
     # dedicated to linear reconstruction workflow.
     A special instance of reslice rgb.
     # TODO: Merge with similar script in pariwise registration script.
+    #TODO: Provide provide doctests and eventually move to a separated module
+    # dedicated to linear reconstruction workflow.
+    A special instance of reslice rgb.
+    # TODO: Merge with similar script in pariwise registration script.
+    # TODO: Allowed interpolation switch values:
+    # Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc
     """
 
-    _template = "c{dimension}d -verbose \
+    _template = "c{dimension}d -verbose {background} {interpolation}\
        {reference_image} -as ref -clear \
        -mcs {moving_image}\
        -as b \
@@ -52,6 +58,8 @@ class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
 
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 2),
+        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
+        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
         'reference_image': pos_parameters.filename_parameter('reference_image', None),
         'moving_image': pos_parameters.filename_parameter('moving_image', None),
         'transformation': pos_parameters.filename_parameter('transformation', None),
@@ -68,9 +76,16 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
     alignment script.
     #TODO: Provide doctests
     # TODO: Merge with similar wrapper in pariwise registration script.
+    # TODO: Implement output volume filename generation based on provided
+    # TODO: Provide logging information.
+    # parameters
+    A special instance of reslice grayscale image dedicated for the sequential
+    alignment script.
+    #TODO: Provide doctests
+    # TODO: Merge with similar wrapper in pariwise registration script.
     """
 
-    _template = "c{dimension}d -verbose \
+    _template = "c{dimension}d -verbose {background} {interpolation}\
         {reference_image} -as ref -clear \
         {moving_image} -as moving \
         -push ref -push moving -reslice-itk {transformation} \
@@ -79,6 +94,8 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
 
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 2),
+        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
+        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
         'reference_image': pos_parameters.filename_parameter('reference_image', None),
         'moving_image': pos_parameters.filename_parameter('moving_image', None),
         'transformation': pos_parameters.filename_parameter('transformation', None),
@@ -86,7 +103,6 @@ class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
         'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
         'output_image': pos_parameters.filename_parameter('output_image', None),
     }
-
 
 class sequential_alignment(output_volume_workflow):
     """
@@ -113,7 +129,6 @@ class sequential_alignment(output_volume_workflow):
 
     # Define the magic numbers:
     __AFFINE_ITERATIONS = [10000, 10000, 10000, 10000, 10000]
-    #__AFFINE_ITERATIONS = [10000,0,0,0,0,0]
     __DEFORMABLE_ITERATIONS = [0]
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
@@ -190,8 +205,11 @@ class sequential_alignment(output_volume_workflow):
         super(self.__class__, self)._pre_launch()
 
         # Before launching the registration process check, if the intput
-        # directory and all the input images exist.
-        self._inspect_input_images()
+        # directory and all the input images exist. Note that the input image
+        # inspection is performed in case of performing the actual
+        # computations. In case of trial runs, no validation if performed.
+        if self.options.dryRun is not True:
+            self._inspect_input_images()
 
         # Prepare the input slices. Both, grayscale and rgb slices are prepared
         # simltaneously by a single routine. Slices preparation may be
@@ -259,7 +277,6 @@ class sequential_alignment(output_volume_workflow):
                registration_resize = self.options.registrationResize,
                registration_color = self.options.registrationColor,
                median_filter_radius = self.options.medianFilterRadius,
-               invert_grayscale = self.options.invertGrayscale,
                invert_multichannel = self.options.invertMultichannel)
             commands.append(copy.deepcopy(command))
 
@@ -502,6 +519,8 @@ class sequential_alignment(output_volume_workflow):
             moving_image = moving_image_filename,
             transformation = transformation_file,
             output_image = resliced_image_filename,
+            background = self.options.resliceBackgorund,
+            interpolation = self.options.resliceInterpolation,
             region_origin = region_origin_roi,
             region_size = region_size_roi)
         return copy.deepcopy(command)
@@ -534,6 +553,8 @@ class sequential_alignment(output_volume_workflow):
             output_image = resliced_image_filename,
             region_origin = region_origin_roi,
             region_size = region_size_roi,
+            background = self.options.resliceBackgorund,
+            interpolation = self.options.resliceInterpolation,
             inversion_flag = self.options.invertMultichannel)
 
         # Return the created command line parser.
@@ -604,16 +625,21 @@ class sequential_alignment(output_volume_workflow):
     def _stack_output_images(self):
         """
         Execute stacking images based on grayscale and multichannel images.
+        Both resliced image stacks are turned into volumetric files by this
+        method.
         """
 
+        self._logger.info("Reslicing the grayscale image stack.")
         command = self._get_generic_stack_slice_wrapper(\
                     'resliced_gray_mask','out_volume_gray')
         self.execute(command)
 
+        self._logger.info("Reslicing the multichannel image stack.")
         command = self._get_generic_stack_slice_wrapper(\
                     'resliced_color_mask','out_volume_color')
         self.execute(command)
 
+        self._logger.info("Reslicing is done.")
 
     @classmethod
     def _getCommandLineParser(cls):
@@ -625,6 +651,13 @@ class sequential_alignment(output_volume_workflow):
         parser.add_option('--inputImageDir', default=None,
             type='str', dest='inputImageDir',
             help='')
+        # TODO: Make this switch's name somehow better!
+        parser.add_option('--resliceBackgorund', default=None,
+            type='float', dest='resliceBackgorund',
+            help='Background color')
+        parser.add_option('--resliceInterpolation',
+            dest='resliceInterpolation', default=None, type='str',
+            help='Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc')
 
         generalOptions = OptionGroup(parser, 'General workflow options.')
 
@@ -668,9 +701,6 @@ class sequential_alignment(output_volume_workflow):
         registrationOptions.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        registrationOptions.add_option('--invertGrayscale', dest='invertGrayscale',
-            default=None, action='store_const', const=True,
-            help='Invert source image: both, grayscale and multichannel, before registration')
         registrationOptions.add_option('--invertMultichannel', dest='invertMultichannel',
             default=None, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
