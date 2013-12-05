@@ -600,74 +600,74 @@ class sequential_alignment(output_volume_workflow):
         parser.add_option('--inputImageDir', default=None,
             type='str', dest='inputImageDir',
             help='')
-        # TODO: Make this switch's name somehow better!
-        parser.add_option('--resliceBackgorund', default=None,
+
+
+        workflow_options = OptionGroup(parser, 'Pipeline options.')
+
+        workflow_options.add_option('--outputVolumesDirectory', default=False,
+            dest='outputVolumesDirectory', type="str",
+            help='Directory to which registration results will be sored.')
+        workflow_options.add_option('--grayscaleVolumeFilename', default=False,
+            dest='grayscaleVolumeFilename', type='str',
+            help='Filename for the output grayscale volume')
+        workflow_options.add_option('--multichannelVolumeFilename', default=False,
+            dest='multichannelVolumeFilename', type='str',
+            help='Filename for the output multichannel volume.')
+        workflow_options.add_option('--transformationsDirectory', default=False,
+            dest='transformationsDirectory', type="str",
+            help='Use provided transformation directory instead of the default one.')
+        workflow_options.add_option('--skipTransformations', default=False,
+            dest='skipTransformations', action='store_const', const=True,
+            help='Supress transformation calculation')
+        workflow_options.add_option('--skipSourceSlicesGeneration', default=False,
+            dest='skipSourceSlicesGeneration', action='store_const', const=True,
+            help='Supress generation source slices')
+        workflow_options.add_option('--skipReslice', default=False,
+            dest='skipReslice', action='store_const', const=True,
+            help='Supress generating grayscale volume')
+        workflow_options.add_option('--skipOutputVolumes', default=False,
+            dest='skipOutputVolumes', action='store_const', const=True,
+            help='Supress generating color volume')
+        workflow_options.add_option('--resliceBackgorund', default=None,
             type='float', dest='resliceBackgorund',
             help='Background color')
-        parser.add_option('--resliceInterpolation',
+        workflow_options.add_option('--resliceInterpolation',
             dest='resliceInterpolation', default=None, type='str',
             help='Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc')
 
-        generalOptions = OptionGroup(parser, 'General workflow options.')
-
-        generalOptions.add_option('--outputVolumesDirectory', default=False,
-            dest='outputVolumesDirectory', type="str",
-            help='Directory to which registration results will be sored.')
-        generalOptions.add_option('--grayscaleVolumeFilename', default=False,
-            dest='grayscaleVolumeFilename', type='str',
-            help='Filename for the output grayscale volume')
-        generalOptions.add_option('--multichannelVolumeFilename', default=False,
-            dest='multichannelVolumeFilename', type='str',
-            help='Filename for the output multichannel volume.')
-        generalOptions.add_option('--transformationsDirectory', default=False,
-            dest='transformationsDirectory', type="str",
-            help='Use provided transformation directory instead of the default one.')
-        generalOptions.add_option('--skipTransformations', default=False,
-            dest='skipTransformations', action='store_const', const=True,
-            help='Supress transformation calculation')
-        generalOptions.add_option('--skipSourceSlicesGeneration', default=False,
-            dest='skipSourceSlicesGeneration', action='store_const', const=True,
-            help='Supress generation source slices')
-        generalOptions.add_option('--skipReslice', default=False,
-            dest='skipReslice', action='store_const', const=True,
-            help='Supress generating grayscale volume')
-        generalOptions.add_option('--skipOutputVolumes', default=False,
-            dest='skipOutputVolumes', action='store_const', const=True,
-            help='Supress generating color volume')
-
-        registrationOptions = OptionGroup(parser, 'Options driving the registration process.')
-        registrationOptions.add_option('--registrationROI', dest='registrationROI',
+        registration_options = OptionGroup(parser, 'Options driving the registration process.')
+        registration_options.add_option('--registrationROI', dest='registrationROI',
             default=None, type='int', nargs=4,
             help='ROI of the input image used for registration (ox, oy, sx, sy).')
-        registrationOptions.add_option('--registrationResize', dest='registrationResize',
+        registration_options.add_option('--registrationResize', dest='registrationResize',
             default=None, type='float',
             help='Scaling factor for the source image used for registration. Float between 0 and 1.')
-        registrationOptions.add_option('--registrationColor',
+        registration_options.add_option('--registrationColor',
             dest='registrationColor', default='blue', type='str',
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
-        registrationOptions.add_option('--medianFilterRadius', dest='medianFilterRadius',
+        registration_options.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        registrationOptions.add_option('--invertMultichannel', dest='invertMultichannel',
+        registration_options.add_option('--invertMultichannel', dest='invertMultichannel',
             default=None, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
-        registrationOptions.add_option('--outputVolumeROI', default=None,
+        registration_options.add_option('--outputVolumeROI', default=None,
             type='int', dest='outputVolumeROI',  nargs=4,
             help='ROI of the output volume - in respect to registration ROI.')
-        registrationOptions.add_option('--antsImageMetric', default='MI',
+        registration_options.add_option('--antsImageMetric', default='MI',
             type='str', dest='antsImageMetric',
             help='ANTS affine image to image metric. Three values are allowed: CC, MI, MSQ.')
-        registrationOptions.add_option('--antsImageMetricOpt', default=32,
+        registration_options.add_option('--antsImageMetricOpt', default=32,
             type='int', dest='antsImageMetricOpt',
             help='Parameter of ANTS i2i metric. Makes a sense only when provided metric can be customized.')
-        registrationOptions.add_option('--useRigidAffine', default=False,
+        registration_options.add_option('--useRigidAffine', default=False,
             dest='useRigidAffine', action='store_const', const=True,
             help='Use rigid affine transformation.')
 
-        parser.add_option_group(registrationOptions)
-        parser.add_option_group(generalOptions)
+        parser.add_option_group(registration_options)
+        parser.add_option_group(workflow_options)
 
         return parser
 
