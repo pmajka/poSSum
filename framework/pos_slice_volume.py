@@ -11,7 +11,8 @@ Volume slicing script
 
 `pos_slice_volume`, a volume slicing module.
 
-This file is part of Multimodal Atlas of Monodelphis Domestica.
+This file is part of imaging data integration framework,
+a private property of Piotr Majka
 (c) Piotr Majka 2011-2013. Restricted, damnit!
 
 Syntax

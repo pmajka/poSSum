@@ -21,37 +21,56 @@
 #    http://www.gnu.org/licenses/.                                            #
 #                                                                             #
 ###############################################################################
-
 import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
-import networkx as nx
 
-import pos_wrappers
-import pos_parameters
 from pos_wrapper_skel import output_volume_workflow
+import pos_parameters
+import pos_wrappers
+import pos_reslice_wrappers
 from pos_common import flatten
 
 """
-Note that the input files are required to be niftii files!!
 
-# XXX TODO NOTE: Have in mind that the script accepts only
-# rgb uchar images in niftii format. All images have to be converted to this
-# format before processing.
-#TODO: Provide switch for interpolation during reslicing!
+Sequential alignment workflow
+*****************************
 
-python pos_sequential_alignment.py
-    --sliceRange 50 70 60
-    --inputImageDir /home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides
-    --invertMultichannel --loglevel=DEBUG
-    -process /dev/shm/x
-    --outputVolumeSpacing 0.1 0.1 0.06
-    --skipTransformations
-    --skipSourceSlicesGeneration
-    --skipReslice
-    --skipOutputVolumes
+:author: Piotr Majka <pmajka@nencki.gov.pl>
+:revision: $Rev$
+:date: $LastChangedDate$
+
+`pos_sequential_alignment` -- a sequential alignment script.
+
+This file is part of imaging data integration framework,
+a private property of Piotr Majka
+(c) Piotr Majka 2011-2013. Restricted, damnit!
+
+Syntax
+======
+
+.. highlight:: bash
+
+Summary
+-------
+
+A minimum working example of the sequential alignment script ::
+    $python pos_sequential_alignment.py \
+    [start stop ref] --sliceRange 50 70 60
+    [directory]      --inputImageDir <directory_name>
+
+Assumptions according the input images
+--------------------------------------
+
+All the input images are expected to be in one of the formats described below:
+
+    1) Three channel, 8-bit per channel RGB image. A 8-bit PNG image would be a
+       good example here.
+    2) Single channel 8-bit (0-255) image, for instance a 8-bit grayscale TIFF
+       file.
+
+Obviously, the spacing as well as the image origin and directions does matter.
 """
-from pos_pairwise_registration import command_warp_rgb_slice, command_warp_grayscale_image
 
 class sequential_alignment(output_volume_workflow):
     """
@@ -496,7 +515,7 @@ class sequential_alignment(output_volume_workflow):
             self._get_output_volume_roi()
 
         # And finally initialize and customize reslice command.
-        command = command_warp_rgb_slice(
+        command = pos_reslice_wrappers.command_warp_rgb_slice(
             reference_image = reference_image_filename,
             moving_image = moving_image_filename,
             transformation = transformation_file,
@@ -579,12 +598,12 @@ class sequential_alignment(output_volume_workflow):
         method.
         """
 
-        self._logger.info("Reslicing the grayscale image stack.")
+        self._logger.info("Stacking the grayscale image stack.")
         command = self._get_generic_stack_slice_wrapper(\
                     'resliced_gray_mask','out_volume_gray')
         self.execute(command)
 
-        self._logger.info("Reslicing the multichannel image stack.")
+        self._logger.info("Stacking the multichannel image stack.")
         command = self._get_generic_stack_slice_wrapper(\
                     'resliced_color_mask','out_volume_color')
         self.execute(command)
@@ -670,7 +689,6 @@ class sequential_alignment(output_volume_workflow):
         parser.add_option_group(workflow_options)
 
         return parser
-
 
 if __name__ == '__main__':
     options, args = sequential_alignment.parseArgs()
