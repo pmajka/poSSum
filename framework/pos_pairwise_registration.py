@@ -21,87 +21,13 @@
 #    http://www.gnu.org/licenses/.                                            #
 #                                                                             #
 ###############################################################################
-
 import os, sys
 import csv
 import copy
 from optparse import OptionParser, OptionGroup
 from pos_wrapper_skel import output_volume_workflow
 import pos_wrappers, pos_parameters
-
-class command_warp_rgb_slice(pos_wrappers.generic_wrapper):
-    """
-    #TODO: Provide provide doctests and eventually move to a separated module
-    # dedicated to linear reconstruction workflow.
-    A special instance of reslice rgb.
-    # TODO: Merge with similar script in pariwise registration script.
-    #TODO: Provide provide doctests and eventually move to a separated module
-    # dedicated to linear reconstruction workflow.
-    A special instance of reslice rgb.
-    # TODO: Merge with similar script in pariwise registration script.
-    # TODO: Allowed interpolation switch values:
-    # Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc
-    """
-
-    _template = "c{dimension}d -verbose {background} {interpolation}\
-       {reference_image} -as ref -clear \
-       -mcs {moving_image}\
-       -as b \
-       -pop -as g \
-       -pop -as r \
-       -push ref -push r -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rr -clear \
-       -push ref -push g -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rg -clear \
-       -push ref -push b -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rb -clear \
-       -push rr -push rg -push rb -omc 3 {output_image}"
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
-        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
-        'reference_image': pos_parameters.filename_parameter('reference_image', None),
-        'moving_image': pos_parameters.filename_parameter('moving_image', None),
-        'transformation': pos_parameters.filename_parameter('transformation', None),
-        'output_image': pos_parameters.filename_parameter('output_image', None),
-        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
-        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
-        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', False, str_template=' -scale -1 -shift 255 -type uchar'),
-    }
-
-
-class command_warp_grayscale_image(pos_wrappers.generic_wrapper):
-    """
-    A special instance of reslice grayscale image dedicated for the sequential
-    alignment script.
-    #TODO: Provide doctests
-    # TODO: Merge with similar wrapper in pariwise registration script.
-    # TODO: Implement output volume filename generation based on provided
-    # TODO: Provide logging information.
-    # parameters
-    A special instance of reslice grayscale image dedicated for the sequential
-    alignment script.
-    #TODO: Provide doctests
-    # TODO: Merge with similar wrapper in pariwise registration script.
-    """
-
-    _template = "c{dimension}d -verbose {background} {interpolation}\
-        {reference_image} -as ref -clear \
-        {moving_image} -as moving \
-        -push ref -push moving -reslice-itk {transformation} \
-        {region_origin} {region_size} \
-        -type uchar -o {output_image}"
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
-        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
-        'reference_image': pos_parameters.filename_parameter('reference_image', None),
-        'moving_image': pos_parameters.filename_parameter('moving_image', None),
-        'transformation': pos_parameters.filename_parameter('transformation', None),
-        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
-        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
-        'output_image': pos_parameters.filename_parameter('output_image', None),
-    }
-
+import pos_reslice_wrappers
 
 class pairwiseRegistration(output_volume_workflow):
     """
@@ -558,7 +484,7 @@ class pairwiseRegistration(output_volume_workflow):
         """
 
         command = self._get_reslice_wrapper(
-            wrapper_type=command_warp_grayscale_image,
+            wrapper_type=pos_reslice_wrappers.command_warp_grayscale_image,
             moving_filename_generator=self.f['moving_color'],
             resliced_type=self.f['resliced_gray'](idx=sliceNumber),
             slice_number=slice_number)
@@ -577,7 +503,7 @@ class pairwiseRegistration(output_volume_workflow):
         """
 
         command = self._get_reslice_wrapper(
-            wrapper_type=command_warp_rgb_slice,
+            wrapper_type=pos_reslice_wrappers.command_warp_rgb_slice,
             moving_filename_generator=self.f['moving_color'],
             resliced_type=self.f['resliced_color'](idx=sliceNumber),
             slice_number=slice_number)
@@ -725,7 +651,7 @@ class pairwiseRegistration(output_volume_workflow):
 
         # Generate a generic reslice wrapper and then customize it
         command = self._get_reslice_wrapper(
-            wrapper_type=command_warp_rgb_slice,
+            wrapper_type=pos_reslice_wrappers.command_warp_rgb_slice,
             moving_filename_generator=self._add_stacks_inputs[stack_index],
             resliced_type=self.f['resliced_add_color'](stack_id=stack_index,idx=slice_index),
             slice_number=slice_index)
