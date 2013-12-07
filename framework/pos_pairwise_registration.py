@@ -190,8 +190,6 @@ class pairwiseRegistration(output_volume_workflow):
                 self._slice_assignment = \
                     dict(map(lambda (x, y): (int(x), int(y)), list(reader)))
 
-        # TODO: Provide debug report of the slice assignment.
-
         # At this point we do have: fixed and moving slice ranges and fixed to
         # moving slice assignment. Below, all of these are verified, if they
         # are correct. Iterate over all moving slices and check whether there
@@ -199,9 +197,14 @@ class pairwiseRegistration(output_volume_workflow):
         for slice_index in self.options.movingSlicesRange:
             fixed_slice_index = self._slice_assignment.get(slice_index)
             if fixed_slice_index is None:
-                self._logger.error("No fixed slice index defined for the moving slice %d.",
-                                   slice_index)
+                self._logger.error(
+                    "No fixed slice index defined for the moving slice %d.",
+                    slice_index)
                 sys.exit(1)
+            else:
+                self._logger.debug(
+                "Fixed slice %d is assigned to the moving slice %d.",
+                fixed_slice_index, slice_index)
 
         self._logger.debug("Mappings and slices' ranges passed the validation.")
 
