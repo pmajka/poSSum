@@ -29,14 +29,71 @@ from pos_wrapper_skel import output_volume_workflow
 import pos_wrappers, pos_parameters
 import pos_reslice_wrappers
 
+"""
+# TODO: How to correctly provide command line parameters related to
+# procedding additional image stacks.
+
+
+
+Providing information on slices to process
+------------------------------------------
+
+There are two ways of defining the moving slice image. Either 1) it can go from
+the source movins slices that were used for the registration purposes or 2) the
+moving images can go from the additional images stack. This is solved by
+passing the whole `filename` parameter.
+
+Ok, what is going on here? In the workflow there are two types of ranges: the
+moving slices range and the fixed slices range. In general they do not
+necessarily overlap thus in general they are two different ranges. The
+corespondence between ranges is established according to the
+`imagePairsAssignmentFile` file supplied via the command line. If neither
+moving slices range nor fixes slices range are provided, the approperiate
+ranges are copied from the general slice range. When provided, the custom
+slices ranges override the default slice range value.
+
+
+
+How to process additional image stacks
+--------------------------------------
+
+First of all: additional stack settings are optional while the primary image
+stacks are obligatory.
+
+Second of all: The additional image stack should comprise only three channel,
+8bit RGB images. The workflow will not work for any other type of images. Period.
+
+This workflow supports a very nice functionality of handling more than one
+image stack to process. While the transformations are caluclated based on a
+single image stack (let's call it a primary image stack), the transformation
+may be applied to other image stacks (reffered as the additional image stacks).
+Obviously, the additional image stacks are optional.
+
+
+
+Setting the properties of the resliced images
+---------------------------------------------
+
+Define output images stack origin and and size according to the
+providing command line arguments. If provided, the resliced images are
+cropped before stacking into volumes. Note that when the slices are
+cropped their origin is preserved. That should be taken into
+consideration when origin of the stacked volume if provided.
+
+When the output ROI is not defined, nothing special will happen.
+Resliced images will not be cropped in any way.
+
+
+"""
+
 class pairwiseRegistration(output_volume_workflow):
     """
     Pairwise slice to slice registration script.
     """
 
     _f = {
-        'fixed_raw_image' : pos_parameters.filename('fixed_raw_image', work_dir = '00_override_this', str_template = '{idx:04d}.nii.gz'),
-        'moving_raw_image' : pos_parameters.filename('moving_raw_image', work_dir = '00_override_this', str_template = '{idx:04d}.nii.gz'),
+        'fixed_raw_image' : pos_parameters.filename('fixed_raw_image', work_dir = '99_override_this', str_template = '{idx:04d}.nii.gz'),
+        'moving_raw_image' : pos_parameters.filename('moving_raw_image', work_dir = '99_override_this', str_template = '{idx:04d}.nii.gz'),
 
         'moving_gray' : pos_parameters.filename('src_gray', work_dir = '00_moving_gray', str_template='{idx:04d}.nii.gz'),
         'moving_color' : pos_parameters.filename('src_color', work_dir = '01_moving_color', str_template='{idx:04d}.nii.gz'),
@@ -46,20 +103,20 @@ class pairwiseRegistration(output_volume_workflow):
         'additional_color' : pos_parameters.filename('additional_color', work_dir = '05_additional_color', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
 
         'transf_naming' : pos_parameters.filename('transf_naming', work_dir = '11_transforms', str_template='tr_m{mIdx:04d}_'),
-        'transf_file' : pos_parameters.filename('transf_file', work_dir = '12_transforms', str_template='tr_m{mIdx:04d}_Affine.txt'),
+        'transf_file' : pos_parameters.filename('transf_file', work_dir = '11_transforms', str_template='tr_m{mIdx:04d}_Affine.txt'),
 
         'resliced_gray' : pos_parameters.filename('resliced_gray', work_dir = '21_gray_resliced', str_template='{idx:04d}.nii.gz'),
-        'resliced_gray_mask' : pos_parameters.filename('resliced_gray_mask', work_dir = '22_gray_resliced', str_template='%04d.nii.gz'),
+        'resliced_gray_mask' : pos_parameters.filename('resliced_gray_mask', work_dir = '21_gray_resliced', str_template='%04d.nii.gz'),
         'resliced_color' : pos_parameters.filename('resliced_color', work_dir = '23_resliced_color', str_template='{idx:04d}.nii.gz'),
-        'resliced_color_mask' : pos_parameters.filename('resliced_color_mask', work_dir = '24_resliced_color_mask', str_template='%04d.nii.gz'),
+        'resliced_color_mask' : pos_parameters.filename('resliced_color_mask', work_dir = '23_resliced_color', str_template='%04d.nii.gz'),
         'resliced_add_gray' : pos_parameters.filename('resliced_add_gray', work_dir = '25_resliced_add_gray', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
-        'resliced_add_gray_mask' : pos_parameters.filename('resliced_add_gray_mask', work_dir = '26_resliced_add_gray_mask', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
+        'resliced_add_gray_mask' : pos_parameters.filename('resliced_add_gray_mask', work_dir = '25_resliced_add_gray', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
         'resliced_add_color' : pos_parameters.filename('resliced_add_color', work_dir = '27_resliced_add_color', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
-        'resliced_add_color_mask' : pos_parameters.filename('resliced_add_color_mask', work_dir = '28_resliced_add_color_mask', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
+        'resliced_add_color_mask' : pos_parameters.filename('resliced_add_color_mask', work_dir = '27_resliced_add_color', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
 
         'out_volume_gray' : pos_parameters.filename('out_volume_gray', work_dir = '31_output_volumes', str_template='{fname}_gray.nii.gz'),
-        'out_volume_color' : pos_parameters.filename('out_volume_color', work_dir = '32_output_volumes', str_template='{fname}_color.nii.gz'),
-        'out_volume_color_add' : pos_parameters.filename('out_volume_color_add', work_dir = '34_output_volumes', str_template='additional_stack_{stack_id:02d}_{fname}_color.nii.gz')
+        'out_volume_color' : pos_parameters.filename('out_volume_color', work_dir = '31_output_volumes', str_template='{fname}_color.nii.gz'),
+        'out_volume_color_add' : pos_parameters.filename('out_volume_color_add', work_dir = '31_output_volumes', str_template='additional_stack_{stack_id:02d}_{fname}_color.nii.gz')
          }
 
     # Define the magic numbers:
@@ -255,14 +312,28 @@ class pairwiseRegistration(output_volume_workflow):
             self._generate_fixed_slices()
             self._generate_moving_slices()
 
+        # Generate transforms. This step may be switched off by providing
+        # aproperiate command line parameter.
         if self.options.skipTranasformGeneration is not True:
             self._calculate_transforms()
 
+        # Reslice the input slices according to the generated transforms.
+        # This step may be skipped by providing approperiate command line
+        # parameter.
         self._reslice()
 
+        # Stack both grayscale as well as the rgb slices into a volume.
+        # This step may be skipped by providing approperiate command line
+        # parameter.
         if self.options.skipOutputVolumes is not True:
             self._stack_output_images()
 
+        # This workflow supports a very nice functionality of handling more
+        # than one image stack to process. While the transformations are
+        # caluclated based on a single image stack (let's call it a primary
+        # image stack), the transformation may be applied to other image stacks
+        # (reffered as the additional image stacks). Obviously, the additional
+        # image stacks are optional.
         if self.options.additionalMovingImagesDirectory is not None:
             self._load_additional_stacks_settings()
             self._reslice_additional_stack()
@@ -486,7 +557,7 @@ class pairwiseRegistration(output_volume_workflow):
         command = self._get_reslice_wrapper(
             wrapper_type=pos_reslice_wrappers.command_warp_grayscale_image,
             moving_filename_generator=self.f['moving_color'],
-            resliced_type=self.f['resliced_gray'](idx=sliceNumber),
+            resliced_type=self.f['resliced_gray'](idx=slice_number),
             slice_number=slice_number)
         command.updateParameters({
             'background' : self.options.resliceBackgorund,
@@ -505,11 +576,12 @@ class pairwiseRegistration(output_volume_workflow):
         command = self._get_reslice_wrapper(
             wrapper_type=pos_reslice_wrappers.command_warp_rgb_slice,
             moving_filename_generator=self.f['moving_color'],
-            resliced_type=self.f['resliced_color'](idx=sliceNumber),
+            resliced_type=self.f['resliced_color'](idx=slice_number),
             slice_number=slice_number)
         command.updateParameters({
             'background' : self.options.resliceBackgorund,
-            'interpolation' : self.options.resliceInterpolation})
+            'interpolation' : self.options.resliceInterpolation,
+            'inversion_flag' : self.options.invertMultichannel})
 
         return copy.deepcopy(command)
 
@@ -577,8 +649,6 @@ class pairwiseRegistration(output_volume_workflow):
 
         Additional stack settings are optional.
 
-        # TODO: How to correctly provide command line parameters related to
-        # procedding additional image stacks.
         # TODO: Validate the provided properties (e.g. length of all the
         # 'additional' command line parameters).
         """
@@ -623,6 +693,7 @@ class pairwiseRegistration(output_volume_workflow):
 
     def _reslice_additional_stack(self):
         """
+        Reslice the additional images stacks.
         """
         commands = []
 
@@ -646,7 +717,7 @@ class pairwiseRegistration(output_volume_workflow):
 
         :return: #TODO:
         """
-        # Just a pretty alia
+        # Just a pretty alias
         stackSettings = self._additional_stacks_settings[stack_index]
 
         # Generate a generic reslice wrapper and then customize it
@@ -709,22 +780,17 @@ class pairwiseRegistration(output_volume_workflow):
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
-        # TODO: Make this switch's name somehow better!
         parser.add_option('--resliceInterpolation',
             dest='resliceInterpolation', default=None, type='str',
             help='Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc')
-        # TODO: Make this switch's name somehow better!
         parser.add_option('--resliceBackgorund', default=None,
             type='float', dest='resliceBackgorund',
             help='Background color')
         parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        parser.add_option('--invertGrayscale', dest='invertGrayscale',
-            default=None, action='store_const', const=True,
-            help='Invert source image: both, grayscale and multichannel, before registration')
         parser.add_option('--invertMultichannel', dest='invertMultichannel',
-            default=None, action='store_const', const=True,
+            default=False, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
         parser.add_option('--outputVolumeROI', default=None,
             type='int', dest='outputVolumeROI',  nargs=4,
