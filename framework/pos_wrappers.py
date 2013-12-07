@@ -741,7 +741,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
 
     _template = """pos_slice_preprocess.py \
                   --inputFilename {input_image} \
-                  {grayscele_output_image} {color_output_image} \
+                  {grayscale_output_image} {color_output_image} \
                   {registration_roi} {registration_resize} \
                   {registration_color} \
                   {median_filter_radius} \
@@ -749,7 +749,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
 
     _parameters = {
         'input_image' : filename_parameter('input_image', None),
-        'grayscele_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
+        'grayscale_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
         'color_output_image': filename_parameter('-r', None, str_template="{_name} {_value}"),
         'registration_roi': list_parameter('registrationROI', None, str_template="--{_name} {_list}"),
         'registration_resize': value_parameter('registrationResize', None, str_template="--{_name} {_value}"),
