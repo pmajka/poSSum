@@ -21,3 +21,4 @@ Non obvious prerequirements
 
        sudo easy_install -U config
 
+  2. sudo easy_install xlrd xlwt

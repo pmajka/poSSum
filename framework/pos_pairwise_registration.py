@@ -30,10 +30,6 @@ import pos_wrappers, pos_parameters
 import pos_reslice_wrappers
 
 """
-# TODO: How to correctly provide command line parameters related to
-# procedding additional image stacks.
-
-
 
 Providing information on slices to process
 ------------------------------------------
@@ -68,6 +64,47 @@ image stack to process. While the transformations are caluclated based on a
 single image stack (let's call it a primary image stack), the transformation
 may be applied to other image stacks (reffered as the additional image stacks).
 Obviously, the additional image stacks are optional.
+
+
+
+Providing additional image stacks
+---------------------------------
+
+Information on additional image stacks is provided using several command line
+arguments, namely: `--additionalMovingImagesDirectory`,
+`--additionalInvertMultichannel`, `--additionalMultichannelVolume`,
+`--additionalInterpolation`, `--additionalInterpolationBackground`. For every
+additional image stacks all of the command arguments have to be provided.
+Skipping any of the parametrers will cause the workflow to collapse.
+
+The parameters have the following meaning:
+
+    1. `--additionalInvertMultichannel`: directory containing the input images
+    comprising the image stack. The input images have to provided as three
+    channel, 8bit per channel RGB images. The names should comply the
+    "%04d.nii.gz" format and the indexes of the slices have to be the same as
+    the indexed of the primary moving stack.
+
+    2. `--additionalInvertMultichannel`: Determines of the input images are
+    inverted ofr the purpose of reslicing. Only two values are allowed: Either "1" or "0".
+
+    3. `--additionalMultichannelVolume`: Filename of the output rgb volume. The
+    parameters is no less obligatory than all the other parameters. Output
+    volumes of additional image stacks are created in the same directory as the
+    volumes of the regular image stacks.
+
+    4. `--additionalInterpolation`: Determines the interpolation method to
+    apply during reslicing of the given stack. The allowed values are the same
+    as those for interpolation of the primary image stacks.
+
+    5. `--additionalInterpolationBackground`: Default background color to be
+    used during reslicing of the image stack (a value for the individual
+    channels).
+
+Only when all the parameters describing single additional image stack are
+provided, the setting of the another stack could be specified. On other words:
+one have to specify a block of parameteter for the one image stack before
+specifying description of the another one.
 
 
 
@@ -431,7 +468,7 @@ class pairwiseRegistration(output_volume_workflow):
         output_naming = self.f['transf_naming'](mIdx=moving_slice_index,
                                                 fIdx=fixed_slice_index)
         use_rigid_transformation = str(self.options.useRigidAffine).lower()
-        #TODO: Use enchandes ants boolean parameter wrapper
+        #TODO: Use enchanced ants boolean parameter wrapper
 
         # Define the image-to-image metric.
         metrics = []

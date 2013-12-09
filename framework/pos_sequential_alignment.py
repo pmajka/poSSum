@@ -571,7 +571,12 @@ class sequential_alignment(output_volume_workflow):
 
         # Assign some usefull aliases.
         start, stop, reference = self.options.sliceRange
-        output_filename = self.f[ouput_filename_type](fname='output_volume')
+
+        # Define the output volume filename. If no custom colume name is
+        # provided, the filename is based on the provided processing
+        # parameters. In the other case the provided custom filename is used.
+        filename_prefix = self._get_parameter_based_output_prefix()
+        output_filename = self.f[ouput_filename_type](fname=filename_prefix)
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
@@ -609,6 +614,23 @@ class sequential_alignment(output_volume_workflow):
         self.execute(command)
 
         self._logger.info("Reslicing is done.")
+
+    def _get_parameter_based_output_prefix(self):
+        """
+        Generate filename prefix base on the provided processing parameters.
+        The filename prefix is used when no other naming scheme is provided.
+        """
+
+        filename_prefix = "out_"
+        filename_prefix+= "ROI-" % "x".join(map(str, self.option.registrationROI))
+        filename_prefix+= "_Resize-%s" % "x".join(map(str, self.option.registrationResize))
+        filename_prefix+= "_Color-%s" % self.options.registrationColor
+        filename_prefix+= "_Median-%s" % "x".join(map(str, self.option.medianFilterRadius))
+        filename_prefix+= "_Metric-%d" % self.option.antsImageMetric
+        filename_prefix+= "_MetricOpt-%d" % self.options.antsImageMetricOpt
+        filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
+
+        return filename_prefix
 
     @classmethod
     def _getCommandLineParser(cls):
