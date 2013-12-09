@@ -604,12 +604,92 @@ class stack_and_reorient_wrapper(generic_wrapper):
     flipping input volumes. For more details please check manual for
     `pos_stack_reorient.py` script.
 
+    .. note:: There are two obligatory parameters: `stack_mask` and
+              `output_volume_fn`.
+
     .. note:: Please be careful when stacking the input volume as `slice_start`
               - the parameters: `slice_start` `slice_end` `slice_step` has to
               go togeather.
+
+    >>> stack_and_reorient_wrapper
+    <class '__main__.stack_and_reorient_wrapper'>
+
+    >>> stack_and_reorient_wrapper() #doctest: +ELLIPSIS
+    <__main__.stack_and_reorient_wrapper object at 0x...>
+
+    >>> print stack_and_reorient_wrapper._parameters['stack_mask']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['slice_start']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['slice_end']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['slice_step']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['output_volume_fn']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['permutation_order']
+    0 1 2
+
+    >>> print stack_and_reorient_wrapper._parameters['orientation_code']
+    RAS
+
+    >>> print stack_and_reorient_wrapper._parameters['output_type']
+    uchar
+
+    >>> print stack_and_reorient_wrapper._parameters['spacing']
+    1.0 1.0 1.0
+
+    >>> print stack_and_reorient_wrapper._parameters['origin']
+    0 0 0
+
+    >>> print stack_and_reorient_wrapper._parameters['interpolation']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['resample']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper() #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i -o --permutation 0 1 2 \
+        --orientationCode RAS --setType uchar \
+        --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+
+    >>> p=stack_and_reorient_wrapper()
+    >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
+    Traceback (most recent call last):
+    KeyError: 'parameter_that_does_not_exist'
+
+    >>> print p.updateParameters({"stack_mask":"%04d.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o --permutation 0 1 2 \
+        --orientationCode RAS --setType uchar --setSpacing 1.0 1.0 1.0 \
+        --setOrigin 0 0 0
+
+    >>> print p.updateParameters({"slice_start":"%04d.nii.gz",
+    ... "slice_end" : 20, "slice_start" : 1, "slice_step":1}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o --slice_start 1 20 1 \
+        --permutation 0 1 2  --orientationCode RAS  --setType uchar \
+        --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+
+    >>> print p.updateParameters({"output_volume_fn": "output.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o output.nii.gz \
+      --slice_start 1 20 1 --permutation 0 1 2 --orientationCode RAS \
+      --setType uchar --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+
+    >>> print p.updateParameters({"output_type": "ushort",
+    ... "spacing" : [0.5, 0.5, 0.5], "origin" : [1, 1, 1],
+    ... "interpolation" : "Cubic",
+    ... "permutation_order" : [2, 1, 0], "resample": [0.5, 2.0, 3.0],
+    ... "orientation_code" : "RAS"}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o output.nii.gz --slice_start 1 20 1\
+      --permutation 2 1 0 --orientationCode RAS --setType ushort\
+      --setSpacing 0.5 0.5 0.5 --setOrigin 1 1 1 --interpolation Cubic\
+      --resample 0.5 2.0 3.0
     """
-    # TODO: Provide doctest with a reasonable coverage
-    # TODO: In particular test out all of the exeptions and assertions
+
     _template = """pos_stack_reorient.py \
             -i {stack_mask} \
             -o {output_volume_fn} \
@@ -624,11 +704,11 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
     _parameters = {
         'stack_mask': filename_parameter('stack_mask', None),
-        'slice_start': value_parameter('stackingOptions', None, str_template='--{_name} {_value}'),
+        'slice_start': value_parameter('slice_start', None, str_template='--{_name} {_value}'),
         'slice_end': value_parameter('slice_end', None),
         'slice_step': value_parameter('slice_end', None),
         'output_volume_fn': filename_parameter('output_volume_fn', None),
-        'permutation_order': list_parameter('permutation_order', [0, 2, 1], str_template='{_list}'),
+        'permutation_order': list_parameter('permutation_order', [0, 1, 2], str_template='{_list}'),
         'orientation_code': string_parameter('orientation_code', 'RAS'),
         'output_type': string_parameter('output_type', 'uchar'),
         'spacing': list_parameter('spacing', [1., 1., 1.], str_template='{_list}'),
@@ -662,12 +742,12 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     pos_slice_preprocess.py --inputFilename
 
     >>> print alignment_preprocessor_wrapper(input_image="input.nii.gz",
-    ... grayscele_output_image="grayscale.nii.gz",
+    ... grayscale_output_image="grayscale.nii.gz",
     ... color_output_image="color.nii.gz") #doctest: +NORMALIZE_WHITESPACE
     pos_slice_preprocess.py --inputFilename input.nii.gz -g grayscale.nii.gz -r color.nii.gz
 
     >>> p=alignment_preprocessor_wrapper(input_image="i.nii.gz",
-    ... grayscele_output_image="g.nii.gz",
+    ... grayscale_output_image="g.nii.gz",
     ... color_output_image="c.nii.gz")
     >>> p #doctest: +ELLIPSIS
     <__main__.alignment_preprocessor_wrapper object at 0x...>
@@ -677,7 +757,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     >>> print alignment_preprocessor_wrapper._parameters['input_image']
     <BLANKLINE>
 
-    >>> print alignment_preprocessor_wrapper._parameters['grayscele_output_image']
+    >>> print alignment_preprocessor_wrapper._parameters['grayscale_output_image']
     <BLANKLINE>
 
     >>> print alignment_preprocessor_wrapper._parameters['color_output_image']
