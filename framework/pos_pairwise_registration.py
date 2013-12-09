@@ -27,9 +27,25 @@ import copy
 from optparse import OptionParser, OptionGroup
 from pos_wrapper_skel import output_volume_workflow
 import pos_wrappers, pos_parameters
-import pos_reslice_wrappers
 
 """
+Pos pairwise alignment script
+*****************************
+
+:author: Piotr Majka <pmajka@nencki.gov.pl>
+:revision: $Rev$
+:date: $LastChangedDate$
+
+`pos_pairwise_registration` -- a pairwise registration script.
+
+This file is part of imaging data integration framework,
+a private property of Piotr Majka
+(c) Piotr Majka 2011-2013. Restricted, damnit!
+
+Syntax
+======
+
+.. highlight:: bash
 
 Providing information on slices to process
 ------------------------------------------
@@ -595,7 +611,7 @@ class pairwiseRegistration(output_volume_workflow):
         """
 
         command = self._get_reslice_wrapper(
-            wrapper_type=pos_reslice_wrappers.command_warp_grayscale_image,
+            wrapper_type=pos_wrappers.command_warp_grayscale_image,
             moving_filename_generator=self.f['moving_color'],
             resliced_type=self.f['resliced_gray'](idx=slice_number),
             slice_number=slice_number)
@@ -614,7 +630,7 @@ class pairwiseRegistration(output_volume_workflow):
         """
 
         command = self._get_reslice_wrapper(
-            wrapper_type=pos_reslice_wrappers.command_warp_rgb_slice,
+            wrapper_type=pos_wrappers.command_warp_rgb_slice,
             moving_filename_generator=self.f['moving_color'],
             resliced_type=self.f['resliced_color'](idx=slice_number),
             slice_number=slice_number)
@@ -762,7 +778,7 @@ class pairwiseRegistration(output_volume_workflow):
 
         # Generate a generic reslice wrapper and then customize it
         command = self._get_reslice_wrapper(
-            wrapper_type=pos_reslice_wrappers.command_warp_rgb_slice,
+            wrapper_type=pos_wrappers.command_warp_rgb_slice,
             moving_filename_generator=self._add_stacks_inputs[stack_index],
             resliced_type=self.f['resliced_add_color'](stack_id=stack_index,idx=slice_index),
             slice_number=slice_index)

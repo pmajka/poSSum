@@ -289,7 +289,11 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
     def _get_crop_settings(self):
         """
-        #TODO: Provide some expanation here
+        Determine if output image cropping is enabled. The output image
+        cropping is determined by the `registrationROI` command line option. The
+        first two integers determine the origin of the subregion to be cropped
+        while the two last integers denote the size of the output region. The
+        easiest way to determine subregion settings is just to try it :)
         """
         try:
             crop_index = self.options.registrationROI[0:2]
@@ -486,14 +490,11 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
     @staticmethod
     def parseArgs():
-        """
-        #TODO: Extend the documentation here!
-        """
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--inputFilename', '-i', dest='inputFilename',
             type='str', default=None,
-            help='File for preparation.')
+            help='Input filename. See the detailed workflow description for the detailed criteria on the ptoper input file type.')
 
         parser.add_option('--grayscaleOutputImage', '-g',
             dest='grayscaleOutputImage', type='str', default=None,

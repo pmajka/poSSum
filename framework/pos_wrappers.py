@@ -3,6 +3,7 @@ import subprocess as sub
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
                 ants_transformation_parameter, vector_parameter, list_parameter, \
                 switch_parameter, ants_regularization_parameter, boolean_parameter
+import pos_parameters
 
 
 class generic_wrapper(object):
@@ -837,6 +838,187 @@ class alignment_preprocessor_wrapper(generic_wrapper):
         'median_filter_radius': list_parameter('medianFilterRadius', None, str_template="--{_name} {_list}"),
         'invert_grayscale': switch_parameter('invertSourceImage', False, str_template="--{_name}"),
         'invert_multichannel': switch_parameter('invertMultichannelImage', False, str_template="--{_name}")}
+
+class command_warp_rgb_slice(generic_wrapper):
+    """
+    A flexible RGB image affine reslice wrapper. The wrapper is designed to
+    work solely with the 8bit, three channel (RGB) images. Since the input
+    image type is fixed, the output image type is the same as the input image
+    type.
+
+    :param dimension: (optional) Dimension of the transformation (2 or 3)
+    :type dimension: int
+
+    :param background: (optional) default background color applied during image reslicing.
+    :type background: float
+
+    :param interpolation: (optional) Image intrerplation method. The allowed values are:
+        Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc.
+        Please consult the Convert3D online documentation for the details of
+        the image interpolation methods:
+        http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation
+    :type interpolation: str
+
+    :param reference_image: (required) Filename of the reference image used ruring the
+        resampling process. The prefereble type of the image if of course Niftii
+        format.
+    :type reference_image: str
+
+    :param moving_image: (required) Image to be resliced.
+    :type moving_image: str
+
+    :param transformation: (required) Affine transformation to be applied. ITKv3 affine
+        transformation file (a human readable text file) is required. Other types
+        of transformations are not well supproted.
+    :type transformation: str
+
+    :param region_origin: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the origin (in voxels) of
+        the region to extract.
+    :type region_origin: (int, int)
+
+    :param region_size: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the size (in voxels) of
+        the region to extract.
+    :type region_size: (int, int)
+
+    :param inversion_flag: (optional) True / False. Inverts the image after
+        reslicing. Note that this option requires the image type that exactly meets
+        the script specification - three channel, 8bit RGB image. Will not work for
+        any other type of the image.
+    :type inversion_flag: bool
+
+    Doctests
+    --------
+
+    # TODO: More doctests (esspecialy those with exeptions)
+
+    >>> command_warp_rgb_slice
+    <class '__main__.command_warp_rgb_slice'>
+
+    >>> command_warp_rgb_slice() #doctest: +ELLIPSIS
+    <__main__.command_warp_rgb_slice object at 0x...>
+
+    >>> print command_warp_rgb_slice() #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -as ref -clear \
+        -mcs -as b -pop -as g -pop -as r \
+        -push ref -push r -reslice-itk -as rr -type uchar -clear \
+        -push ref -push g -reslice-itk -as rg -type uchar -clear \
+        -push ref -push b -reslice-itk -as rb -type uchar -clear \
+        -push rr -push rg -push rb -omc 3
+
+    >>> print command_warp_rgb_slice(moving_image='moving.nii.gz',
+    ... reference_image='reference.nii.gz',
+    ... output_image='output.nii.gz',
+    ... transformation='transformation.txt') #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose reference.nii.gz -as ref -clear \
+        -mcs moving.nii.gz -as b -pop -as g -pop -as r \
+        -push ref -push r -reslice-itk transformation.txt -as rr -type uchar -clear \
+        -push ref -push g -reslice-itk transformation.txt -as rg -type uchar -clear \
+        -push ref -push b -reslice-itk transformation.txt -as rb -type uchar -clear \
+        -push rr -push rg -push rb -omc 3 output.nii.gz
+
+    >>> print command_warp_rgb_slice(moving_image='moving.nii.gz',
+    ... reference_image='reference.nii.gz', output_image='output.nii.gz',
+    ... transformation='transformation.txt', background=255,
+    ... region_origin=[20,20], region_size=[100,100],
+    ... inversion_flag=True) #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -background 255 reference.nii.gz -as ref -clear \
+        -mcs moving.nii.gz -as b -pop -as g -pop -as r \
+        -push ref -push r -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -scale -1 -shift 255 -type uchar -as rr -type uchar -clear \
+        -push ref -push g -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -scale -1 -shift 255 -type uchar -as rg -type uchar -clear \
+        -push ref -push b -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -scale -1 -shift 255 -type uchar -as rb -type uchar -clear \
+        -push rr -push rg -push rb -omc 3 output.nii.gz
+    """
+
+    _template = "c{dimension}d -verbose {background} {interpolation}\
+       {reference_image} -as ref -clear \
+       -mcs {moving_image}\
+       -as b \
+       -pop -as g \
+       -pop -as r \
+       -push ref -push r -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rr -type uchar -clear \
+       -push ref -push g -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rg -type uchar -clear \
+       -push ref -push b -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rb -type uchar -clear \
+       -push rr -push rg -push rb -omc 3 {output_image}"
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
+        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
+        'reference_image': pos_parameters.filename_parameter('reference_image', None),
+        'moving_image': pos_parameters.filename_parameter('moving_image', None),
+        'transformation': pos_parameters.filename_parameter('transformation', None),
+        'output_image': pos_parameters.filename_parameter('output_image', None),
+        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', False, str_template=' -scale -1 -shift 255 -type uchar'),
+    }
+
+
+class command_warp_grayscale_image(generic_wrapper):
+    """
+    A special instance of reslice grayscale image dedicated for the sequential
+    alignment script.
+
+    :param dimension: (optional) Dimension of the transformation (2 or 3)
+    :type dimension: int
+
+    :param background: (optional) default background color applied during image reslicing.
+    :type background: float
+
+    :param interpolation: (optional) Image intrerplation method. The allowed values are:
+        Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc.
+        Please consult the Convert3D online documentation for the details of
+        the image interpolation methods:
+        http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation
+    :type interpolation: str
+
+    :param reference_image: (required) Filename of the reference image used ruring the
+        resampling process. The prefereble type of the image if of course Niftii
+        format.
+    :type reference_image: str
+
+    :param moving_image: (required) Image to be resliced.
+    :type moving_image: str
+
+    :param transformation: (required) Affine transformation to be applied. ITKv3 affine
+        transformation file (a human readable text file) is required. Other types
+        of transformations are not well supproted.
+    :type transformation: str
+
+    :param region_origin: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the origin (in voxels) of
+        the region to extract.
+    :type region_origin: (int, int)
+
+    :param region_size: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the size (in voxels) of
+        the region to extract.
+    :type region_size: (int, int)
+    """
+
+    _template = "c{dimension}d -verbose {background} {interpolation}\
+        {reference_image} -as ref -clear \
+        {moving_image} -as moving \
+        -push ref -push moving -reslice-itk {transformation} \
+        {region_origin} {region_size} \
+        -type uchar -o {output_image}"
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
+        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
+        'reference_image': pos_parameters.filename_parameter('reference_image', None),
+        'moving_image': pos_parameters.filename_parameter('moving_image', None),
+        'transformation': pos_parameters.filename_parameter('transformation', None),
+        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'output_image': pos_parameters.filename_parameter('output_image', None),
+    }
 
 
 if __name__ == '__main__':

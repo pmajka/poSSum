@@ -25,11 +25,10 @@ import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
 
+from pos_common import flatten
 from pos_wrapper_skel import output_volume_workflow
 import pos_parameters
 import pos_wrappers
-import pos_reslice_wrappers
-from pos_common import flatten
 
 """
 
@@ -515,7 +514,7 @@ class sequential_alignment(output_volume_workflow):
             self._get_output_volume_roi()
 
         # And finally initialize and customize reslice command.
-        command = pos_reslice_wrappers.command_warp_rgb_slice(
+        command = pos_wrappers.command_warp_rgb_slice(
             reference_image = reference_image_filename,
             moving_image = moving_image_filename,
             transformation = transformation_file,
