@@ -137,6 +137,27 @@ When the output ROI is not defined, nothing special will happen.
 Resliced images will not be cropped in any way.
 
 
+An example of pretty complicated usage
+--------------------------------------
+
+Here is a pretty comprehensive example of a pairwise registration script.
+Utilizes typical options:
+
+pos_pairwise_registration.py \
+        --fixedImagesDir fixed_images_directory/ \
+        --movingImagesDir moving_images_directory/ \
+        --movingSlicesRange 10 20  \
+        --fixedSlicesRange 10 20   \
+        --registrationColorChannelMovingImage blue  \
+        --registrationColorChannelFixedImage green  \
+        --resliceBackgorund 255  \
+        --medianFilterRadius 4 4 \
+        --outputVolumesDirectory output_volumes_directory/ \
+        --useRigidAffine \
+        --loglevel DEBUG \
+        --outputVolumeSpacing 0.02 0.02 0.06 \
+        --dryRun
+
 """
 
 class pairwiseRegistration(output_volume_workflow):
@@ -736,6 +757,14 @@ class pairwiseRegistration(output_volume_workflow):
         add_stack_keys = ['imgDir',  'invert_rgb', 'rgbVolName',\
                 'interpolation', 'background']
 
+        # Validation if all the additional image stacks are properly defined.
+        # The validation is performed in a two steps. First step is pretty
+        # simple - length of all command-line based arrays for additional image
+        # stack has to be equal.
+        lenghts = map(lambda x: len(getattr(self.options,x)), add_stack_fields)
+        if len(set(lenghts)) != 1:
+            self._logger.error("Provided additional stack information is invalid.")
+
         # Iterate over all additional images stacks and copy information from
         # command line into an array.
         for stack_index in range(len(self.options.additionalMovingImagesDirectory)):
@@ -828,16 +857,26 @@ class pairwiseRegistration(output_volume_workflow):
         """
 
         filename_prefix = "out_"
-        filename_prefix+= "_FixedResize-%s" % str(self.option.fixedImageResize)
-        filename_prefix+= "_MovingResize-%s" % str(self.option.movingImageResize)
-        filename_prefix+= "_fixedColor-%s" % str(self.option.registrationColorChannelFixedImage)
-        filename_prefix+= "_movingColor-%s" % str(self.option.registrationColorChannelMovingImage)
-        filename_prefix+= "_Median-%s" % "x".join(map(str, self.option.medianFilterRadius))
-        filename_prefix+= "_Metric-%d" % self.option.antsImageMetric
+
+        filename_prefix+= "_FixedResize-%s" % str(self.options.fixedImageResize)
+        filename_prefix+= "_MovingResize-%s" % str(self.options.movingImageResize)
+        filename_prefix+= "_fixedColor-%s" % str(self.options.registrationColorChannelFixedImage)
+        filename_prefix+= "_movingColor-%s" % str(self.options.registrationColorChannelMovingImage)
+
+        try:
+            filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+        except:
+            filename_prefix+= "_Median-None"
+
+        filename_prefix+= "_Metric-%s" % self.options.antsImageMetric
         filename_prefix+= "_MetricOpt-%d" % self.options.antsImageMetricOpt
         filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
-        filename_prefix+= "_Median-%s" % "x".join(map(str, self.option.medianFilterRadius))
-        filename_prefix+= "_outputROI-%s" % "x".join(map(str, self.option.outputVolumeROI))
+        filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+
+        try:
+            filename_prefix+= "ROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
+        except:
+            filename_prefix+= "ROI-None"
 
         return filename_prefix
 
@@ -886,7 +925,7 @@ class pairwiseRegistration(output_volume_workflow):
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
         parser.add_option('--invertMultichannel', dest='invertMultichannel',
-            default=False, action='store_const', const=True,
+            default=None, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
         parser.add_option('--outputVolumeROI', default=None,
             type='int', dest='outputVolumeROI',  nargs=4,
