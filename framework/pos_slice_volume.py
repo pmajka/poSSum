@@ -11,7 +11,8 @@ Volume slicing script
 
 `pos_slice_volume`, a volume slicing module.
 
-This file is part of Multimodal Atlas of Monodelphis Domestica.
+This file is part of imaging data integration framework,
+a private property of Piotr Majka
 (c) Piotr Majka 2011-2013. Restricted, damnit!
 
 Syntax
@@ -36,7 +37,6 @@ Details
 
 This module provide a script for extracting slices from given input volume in a
 flexible way. Check the examples below.
-
 
 The script requires only one input parameter - the image to slice:
 `inputFileName` which is supposed to be a valid three dimensional image
@@ -317,7 +317,6 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
                             help='ROI of the input image used for registration (ox, oy, sx, sy).')
 
         (options, args) = parser.parse_args()
-
         return (options, args)
 
 if __name__ == '__main__':

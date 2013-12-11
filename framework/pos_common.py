@@ -98,3 +98,25 @@ def which(program):
                 return exe_file
 
     return None
+
+def flatten(lst):
+    """
+    >>> list(flatten([10,11,[20,21]]))
+    [10, 11, 20, 21]
+
+    >>> list(flatten([10,11,["a", "b"]]))
+    [10, 11, 'a', 'b']
+
+    >>> list(flatten([10,11,["a", []]]))
+    [10, 11, 'a']
+    """
+    for x in lst:
+        if isinstance(x, list):
+            for x in flatten(x):
+                yield x
+        else:
+                yield x
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

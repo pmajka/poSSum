@@ -1,9 +1,9 @@
 import copy
 import subprocess as sub
-import shlex
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
                 ants_transformation_parameter, vector_parameter, list_parameter, \
                 switch_parameter, ants_regularization_parameter, boolean_parameter
+import pos_parameters
 
 
 class generic_wrapper(object):
@@ -605,9 +605,90 @@ class stack_and_reorient_wrapper(generic_wrapper):
     flipping input volumes. For more details please check manual for
     `pos_stack_reorient.py` script.
 
+    .. note:: There are two obligatory parameters: `stack_mask` and
+              `output_volume_fn`.
+
     .. note:: Please be careful when stacking the input volume as `slice_start`
               - the parameters: `slice_start` `slice_end` `slice_step` has to
               go togeather.
+
+    >>> stack_and_reorient_wrapper
+    <class '__main__.stack_and_reorient_wrapper'>
+
+    >>> stack_and_reorient_wrapper() #doctest: +ELLIPSIS
+    <__main__.stack_and_reorient_wrapper object at 0x...>
+
+    >>> print stack_and_reorient_wrapper._parameters['stack_mask']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['slice_start']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['slice_end']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['slice_step']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['output_volume_fn']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['permutation_order']
+    0 1 2
+
+    >>> print stack_and_reorient_wrapper._parameters['orientation_code']
+    RAS
+
+    >>> print stack_and_reorient_wrapper._parameters['output_type']
+    uchar
+
+    >>> print stack_and_reorient_wrapper._parameters['spacing']
+    1.0 1.0 1.0
+
+    >>> print stack_and_reorient_wrapper._parameters['origin']
+    0 0 0
+
+    >>> print stack_and_reorient_wrapper._parameters['interpolation']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper._parameters['resample']
+    <BLANKLINE>
+
+    >>> print stack_and_reorient_wrapper() #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i -o --permutation 0 1 2 \
+        --orientationCode RAS --setType uchar \
+        --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+
+    >>> p=stack_and_reorient_wrapper()
+    >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
+    Traceback (most recent call last):
+    KeyError: 'parameter_that_does_not_exist'
+
+    >>> print p.updateParameters({"stack_mask":"%04d.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o --permutation 0 1 2 \
+        --orientationCode RAS --setType uchar --setSpacing 1.0 1.0 1.0 \
+        --setOrigin 0 0 0
+
+    >>> print p.updateParameters({"slice_start":"%04d.nii.gz",
+    ... "slice_end" : 20, "slice_start" : 1, "slice_step":1}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o --stackingOptions 1 20 1 \
+        --permutation 0 1 2  --orientationCode RAS  --setType uchar \
+        --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+
+    >>> print p.updateParameters({"output_volume_fn": "output.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o output.nii.gz \
+      --stackingOptions 1 20 1 --permutation 0 1 2 --orientationCode RAS \
+      --setType uchar --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+
+    >>> print p.updateParameters({"output_type": "ushort",
+    ... "spacing" : [0.5, 0.5, 0.5], "origin" : [1, 1, 1],
+    ... "interpolation" : "Cubic",
+    ... "permutation_order" : [2, 1, 0], "resample": [0.5, 2.0, 3.0],
+    ... "orientation_code" : "RAS"}) #doctest: +NORMALIZE_WHITESPACE
+    pos_stack_reorient.py -i %04d.nii.gz -o output.nii.gz --stackingOptions 1 20 1\
+      --permutation 2 1 0 --orientationCode RAS --setType ushort\
+      --setSpacing 0.5 0.5 0.5 --setOrigin 1 1 1 --interpolation Cubic\
+      --resample 0.5 2.0 3.0
     """
 
     _template = """pos_stack_reorient.py \
@@ -628,13 +709,315 @@ class stack_and_reorient_wrapper(generic_wrapper):
         'slice_end': value_parameter('slice_end', None),
         'slice_step': value_parameter('slice_end', None),
         'output_volume_fn': filename_parameter('output_volume_fn', None),
-        'permutation_order': list_parameter('permutation_order', [0, 2, 1], str_template='{_list}'),
+        'permutation_order': list_parameter('permutation_order', [0, 1, 2], str_template='{_list}'),
         'orientation_code': string_parameter('orientation_code', 'RAS'),
         'output_type': string_parameter('output_type', 'uchar'),
         'spacing': list_parameter('spacing', [1., 1., 1.], str_template='{_list}'),
         'origin': list_parameter('origin', [0, 0, 0], str_template='{_list}'),
         'interpolation': string_parameter('interpolation', None, str_template='--{_name} {_value}'),
         'resample': list_parameter('resample', [], str_template='--{_name} {_list}')
+    }
+
+
+class alignment_preprocessor_wrapper(generic_wrapper):
+    """
+    A wrapper for the `pos_slice_preprocess.py` script. Since the script itself
+    provides an extensive documentation, the detailed description of command
+    line options is skipped in the wrapper's documentation.
+
+    .. note::
+        Use the following syntax when setting boolean parameters::
+
+            >>> boolean_parameter = [None, True][int(value)] #doctest: +SKIP
+
+        Yes, it is tricky and yes, is should be chenged.
+
+
+    >>> alignment_preprocessor_wrapper
+    <class '__main__.alignment_preprocessor_wrapper'>
+
+    >>> alignment_preprocessor_wrapper() #doctest: +ELLIPSIS
+    <__main__.alignment_preprocessor_wrapper object at 0x...>
+
+    >>> print alignment_preprocessor_wrapper() #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename
+
+    >>> print alignment_preprocessor_wrapper(input_image="input.nii.gz",
+    ... grayscale_output_image="grayscale.nii.gz",
+    ... color_output_image="color.nii.gz") #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename input.nii.gz -g grayscale.nii.gz -r color.nii.gz
+
+    >>> p=alignment_preprocessor_wrapper(input_image="i.nii.gz",
+    ... grayscale_output_image="g.nii.gz",
+    ... color_output_image="c.nii.gz")
+    >>> p #doctest: +ELLIPSIS
+    <__main__.alignment_preprocessor_wrapper object at 0x...>
+
+    Checking default parameteres values:
+
+    >>> print alignment_preprocessor_wrapper._parameters['input_image']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['grayscale_output_image']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['color_output_image']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['registration_roi']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['registration_resize']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['registration_color']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['median_filter_radius']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['invert_grayscale']
+    <BLANKLINE>
+
+    >>> print alignment_preprocessor_wrapper._parameters['invert_multichannel']
+    <BLANKLINE>
+
+    Checking robustness of the parameters dictionary:
+
+    >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
+    Traceback (most recent call last):
+    KeyError: 'parameter_that_does_not_exist'
+
+    >>> print p.updateParameters({"median_filter_radius" : [2,2]}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --medianFilterRadius 2 2
+
+    >>> print p.updateParameters({"median_filter_radius" : [2,2],
+    ... 'invert_grayscale':True,
+    ... 'invert_multichannel':True,
+    ... 'registration_color': 'green'}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel green --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
+
+    >>> print p.updateParameters({"median_filter_radius" : [2,2],
+    ... 'invert_grayscale':False,
+    ... 'invert_multichannel':False,
+    ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
+
+    >>> print p.updateParameters({"median_filter_radius" : None,
+    ... 'invert_grayscale':None,
+    ... 'invert_multichannel': None,
+    ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red
+
+    >>> print p.updateParameters({"median_filter_radius" : 2})
+    Traceback (most recent call last):
+    TypeError: argument 2 to map() must support iteration
+
+    >>> print p.updateParameters({"median_filter_radius" : None,
+    ... 'invert_grayscale' : None,
+    ... 'invert_multichannel' : None,
+    ... 'registration_color': None}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz
+    """
+
+    _template = """pos_slice_preprocess.py \
+                  --inputFilename {input_image} \
+                  {grayscale_output_image} {color_output_image} \
+                  {registration_roi} {registration_resize} \
+                  {registration_color} \
+                  {median_filter_radius} \
+                  {invert_grayscale} {invert_multichannel}"""
+
+    _parameters = {
+        'input_image' : filename_parameter('input_image', None),
+        'grayscale_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
+        'color_output_image': filename_parameter('-r', None, str_template="{_name} {_value}"),
+        'registration_roi': list_parameter('registrationROI', None, str_template="--{_name} {_list}"),
+        'registration_resize': value_parameter('registrationResize', None, str_template="--{_name} {_value}"),
+        'registration_color': string_parameter('registrationColorChannel', None, str_template="--{_name} {_value}"),
+        'median_filter_radius': list_parameter('medianFilterRadius', None, str_template="--{_name} {_list}"),
+        'invert_grayscale': switch_parameter('invertSourceImage', False, str_template="--{_name}"),
+        'invert_multichannel': switch_parameter('invertMultichannelImage', False, str_template="--{_name}")}
+
+class command_warp_rgb_slice(generic_wrapper):
+    """
+    A flexible RGB image affine reslice wrapper. The wrapper is designed to
+    work solely with the 8bit, three channel (RGB) images. Since the input
+    image type is fixed, the output image type is the same as the input image
+    type.
+
+    :param dimension: (optional) Dimension of the transformation (2 or 3)
+    :type dimension: int
+
+    :param background: (optional) default background color applied during image reslicing.
+    :type background: float
+
+    :param interpolation: (optional) Image intrerplation method. The allowed values are:
+        Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc.
+        Please consult the Convert3D online documentation for the details of
+        the image interpolation methods:
+        http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation
+    :type interpolation: str
+
+    :param reference_image: (required) Filename of the reference image used ruring the
+        resampling process. The prefereble type of the image if of course Niftii
+        format.
+    :type reference_image: str
+
+    :param moving_image: (required) Image to be resliced.
+    :type moving_image: str
+
+    :param transformation: (required) Affine transformation to be applied. ITKv3 affine
+        transformation file (a human readable text file) is required. Other types
+        of transformations are not well supproted.
+    :type transformation: str
+
+    :param region_origin: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the origin (in voxels) of
+        the region to extract.
+    :type region_origin: (int, int)
+
+    :param region_size: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the size (in voxels) of
+        the region to extract.
+    :type region_size: (int, int)
+
+    :param inversion_flag: (optional) True / False. Inverts the image after
+        reslicing. Note that this option requires the image type that exactly meets
+        the script specification - three channel, 8bit RGB image. Will not work for
+        any other type of the image.
+    :type inversion_flag: bool
+
+    Doctests
+    --------
+
+    # TODO: More doctests (esspecialy those with exeptions)
+
+    >>> command_warp_rgb_slice
+    <class '__main__.command_warp_rgb_slice'>
+
+    >>> command_warp_rgb_slice() #doctest: +ELLIPSIS
+    <__main__.command_warp_rgb_slice object at 0x...>
+
+    >>> print command_warp_rgb_slice() #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -as ref -clear \
+        -mcs -as b -pop -as g -pop -as r \
+        -push ref -push r -reslice-itk -as rr -type uchar -clear \
+        -push ref -push g -reslice-itk -as rg -type uchar -clear \
+        -push ref -push b -reslice-itk -as rb -type uchar -clear \
+        -push rr -push rg -push rb -omc 3
+
+    >>> print command_warp_rgb_slice(moving_image='moving.nii.gz',
+    ... reference_image='reference.nii.gz',
+    ... output_image='output.nii.gz',
+    ... transformation='transformation.txt') #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose reference.nii.gz -as ref -clear \
+        -mcs moving.nii.gz -as b -pop -as g -pop -as r \
+        -push ref -push r -reslice-itk transformation.txt -as rr -type uchar -clear \
+        -push ref -push g -reslice-itk transformation.txt -as rg -type uchar -clear \
+        -push ref -push b -reslice-itk transformation.txt -as rb -type uchar -clear \
+        -push rr -push rg -push rb -omc 3 output.nii.gz
+
+    >>> print command_warp_rgb_slice(moving_image='moving.nii.gz',
+    ... reference_image='reference.nii.gz', output_image='output.nii.gz',
+    ... transformation='transformation.txt', background=255,
+    ... region_origin=[20,20], region_size=[100,100],
+    ... inversion_flag=True) #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -background 255 reference.nii.gz -as ref -clear \
+        -mcs moving.nii.gz -as b -pop -as g -pop -as r \
+        -push ref -push r -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -scale -1 -shift 255 -type uchar -as rr -type uchar -clear \
+        -push ref -push g -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -scale -1 -shift 255 -type uchar -as rg -type uchar -clear \
+        -push ref -push b -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -scale -1 -shift 255 -type uchar -as rb -type uchar -clear \
+        -push rr -push rg -push rb -omc 3 output.nii.gz
+    """
+
+    _template = "c{dimension}d -verbose {background} {interpolation}\
+       {reference_image} -as ref -clear \
+       -mcs {moving_image}\
+       -as b \
+       -pop -as g \
+       -pop -as r \
+       -push ref -push r -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rr -type uchar -clear \
+       -push ref -push g -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rg -type uchar -clear \
+       -push ref -push b -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rb -type uchar -clear \
+       -push rr -push rg -push rb -omc 3 {output_image}"
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
+        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
+        'reference_image': pos_parameters.filename_parameter('reference_image', None),
+        'moving_image': pos_parameters.filename_parameter('moving_image', None),
+        'transformation': pos_parameters.filename_parameter('transformation', None),
+        'output_image': pos_parameters.filename_parameter('output_image', None),
+        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', False, str_template=' -scale -1 -shift 255 -type uchar'),
+    }
+
+
+class command_warp_grayscale_image(generic_wrapper):
+    """
+    A special instance of reslice grayscale image dedicated for the sequential
+    alignment script.
+
+    :param dimension: (optional) Dimension of the transformation (2 or 3)
+    :type dimension: int
+
+    :param background: (optional) default background color applied during image reslicing.
+    :type background: float
+
+    :param interpolation: (optional) Image intrerplation method. The allowed values are:
+        Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc.
+        Please consult the Convert3D online documentation for the details of
+        the image interpolation methods:
+        http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation
+    :type interpolation: str
+
+    :param reference_image: (required) Filename of the reference image used ruring the
+        resampling process. The prefereble type of the image if of course Niftii
+        format.
+    :type reference_image: str
+
+    :param moving_image: (required) Image to be resliced.
+    :type moving_image: str
+
+    :param transformation: (required) Affine transformation to be applied. ITKv3 affine
+        transformation file (a human readable text file) is required. Other types
+        of transformations are not well supproted.
+    :type transformation: str
+
+    :param region_origin: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the origin (in voxels) of
+        the region to extract.
+    :type region_origin: (int, int)
+
+    :param region_size: (optional) If subregion extraction after the
+        reslicing is to be done, this option determines the size (in voxels) of
+        the region to extract.
+    :type region_size: (int, int)
+    """
+
+    _template = "c{dimension}d -verbose {background} {interpolation}\
+        {reference_image} -as ref -clear \
+        {moving_image} -as moving \
+        -push ref -push moving -reslice-itk {transformation} \
+        {region_origin} {region_size} \
+        -type uchar -o {output_image}"
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'background': pos_parameters.value_parameter('background', None, '-{_name} {_value}'),
+        'interpolation': pos_parameters.value_parameter('interpolation', None, '-{_name} {_value}'),
+        'reference_image': pos_parameters.filename_parameter('reference_image', None),
+        'moving_image': pos_parameters.filename_parameter('moving_image', None),
+        'transformation': pos_parameters.filename_parameter('transformation', None),
+        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'output_image': pos_parameters.filename_parameter('output_image', None),
     }
 
 

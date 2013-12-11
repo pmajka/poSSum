@@ -4,7 +4,6 @@ import os
 pos parameters
 """
 
-
 class generic_parameter(object):
     """
     """
@@ -57,7 +56,6 @@ class generic_parameter(object):
     template = property(_get_str_template, _set_str_template)
     name = property(_get_name, _set_name)
 
-
 class boolean_parameter(generic_parameter):
     """
     >>> p=boolean_parameter('parameter')
@@ -90,7 +88,6 @@ class boolean_parameter(generic_parameter):
              return self._str_template.format(**self.__dict__)
         else:
             return ""
-
 
 class switch_parameter(boolean_parameter):
     """
@@ -229,7 +226,6 @@ class list_parameter(generic_parameter):
             return self._str_template.format(**self.__dict__)
         else:
             return ""
-
 
 class vector_parameter(list_parameter):
     """
@@ -605,7 +601,6 @@ class filename(generic_parameter):
 
     base_dir = property(_get_base_dir, _set_base_dir)
     """ Returns / sets base_dir """
-
 
 if __name__ == '__main__':
     import doctest
