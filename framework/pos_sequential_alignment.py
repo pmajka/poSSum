@@ -103,6 +103,7 @@ class sequential_alignment(output_volume_workflow):
     __ALIGNMENT_EPSILON = 1
     __VOL_STACK_SLICE_SPACING = 1
 
+
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
 
@@ -114,6 +115,13 @@ class sequential_alignment(output_volume_workflow):
         # processed. Make sure that all images are available.
         self.options.slice_range = \
             range(self.options.sliceRange[0], self.options.sliceRange[1] + 1)
+
+        # Verify if the reference slice index is provided and if ti is correct.
+        # The reference slice index cannot be the same as either the starting
+        # and the last slice index. This will cause an error.
+        assert self.options.sliceRange[0] < self.options.sliceRange[2] \
+                < self.options.sliceRange[1]:
+            self._logger.error("Incorrect reference slice index. The reference slice index has to be larger than the first slice index and smaller than the last slice index.")
 
         # Validate, if an input images directory is provided,
         # Obviously, we need to load the images in order to process them.
@@ -482,7 +490,7 @@ class sequential_alignment(output_volume_workflow):
             self._get_output_volume_roi()
 
         # And finally initialize and customize reslice command.
-        command = command_warp_grayscale_image(
+        command = pos_wrappers.command_warp_grayscale_image(
             reference_image = reference_image_filename,
             moving_image = moving_image_filename,
             transformation = transformation_file,
