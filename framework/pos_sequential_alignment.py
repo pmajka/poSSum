@@ -69,6 +69,21 @@ All the input images are expected to be in one of the formats described below:
        file.
 
 Obviously, the spacing as well as the image origin and directions does matter.
+
+
+python pos_sequential_alignment.py \
+        --inputImageDir /home/pmajka/Downloads/cb_test/ \
+        --sliceRange 10 120 60 -d /dev/shm/x/ \
+        --loglevel DEBUG \
+        --registrationColor blue \
+        --medianFilterRadius 4 4 \
+        --resliceBackgorund 255 \
+        --skipSourceSlicesGeneration \
+        --useRigidAffine \
+        --skipTransformations \
+        --skipReslice \
+        --outputVolumeSpacing 0.02 0.02 0.06 \
+        --outputVolumesDirectory ~/Downloads/cb_test
 """
 
 class sequential_alignment(output_volume_workflow):
@@ -119,8 +134,8 @@ class sequential_alignment(output_volume_workflow):
         # Verify if the reference slice index is provided and if ti is correct.
         # The reference slice index cannot be the same as either the starting
         # and the last slice index. This will cause an error.
-        assert self.options.sliceRange[0] < self.options.sliceRange[2] \
-                < self.options.sliceRange[1]:
+        assert self.options.sliceRange[0] < self.options.sliceRange[2] and \
+               self.options.sliceRange[2] < self.options.sliceRange[1], \
             self._logger.error("Incorrect reference slice index. The reference slice index has to be larger than the first slice index and smaller than the last slice index.")
 
         # Validate, if an input images directory is provided,
@@ -629,11 +644,25 @@ class sequential_alignment(output_volume_workflow):
         """
 
         filename_prefix = "out_"
-        filename_prefix+= "ROI-" % "x".join(map(str, self.option.registrationROI))
-        filename_prefix+= "_Resize-%s" % "x".join(map(str, self.option.registrationResize))
+
+        try:
+            filename_prefix+= "ROI-%s" % "x".join(map(str, self.options.registrationROI))
+        except:
+            filename_prefix+= "ROI-None"
+
+        try:
+            filename_prefix+= "_Resize-%s" % "x".join(map(str, self.options.registrationResize))
+        except:
+            filename_prefix+= "_Resize-None"
+
         filename_prefix+= "_Color-%s" % self.options.registrationColor
-        filename_prefix+= "_Median-%s" % "x".join(map(str, self.option.medianFilterRadius))
-        filename_prefix+= "_Metric-%d" % self.option.antsImageMetric
+
+        try:
+            filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+        except:
+            filename_prefix+= "_Median-None"
+
+        filename_prefix+= "_Metric-%s" % self.options.antsImageMetric
         filename_prefix+= "_MetricOpt-%d" % self.options.antsImageMetricOpt
         filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
 
