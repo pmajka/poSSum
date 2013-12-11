@@ -101,7 +101,14 @@ def which(program):
 
 def flatten(lst):
     """
-    TODO: Provide some doctests here!
+    >>> list(flatten([10,11,[20,21]]))
+    [10, 11, 20, 21]
+
+    >>> list(flatten([10,11,["a", "b"]]))
+    [10, 11, 'a', 'b']
+
+    >>> list(flatten([10,11,["a", []]]))
+    [10, 11, 'a']
     """
     for x in lst:
         if isinstance(x, list):
@@ -109,3 +116,7 @@ def flatten(lst):
                 yield x
         else:
                 yield x
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

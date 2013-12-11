@@ -237,7 +237,7 @@ class sequential_alignment(output_volume_workflow):
         for slice_number in self.options.slice_range:
             command = pos_wrappers.alignment_preprocessor_wrapper(
                input_image = self.f['raw_image'](idx=slice_number),
-               grayscele_output_image = self.f['src_gray'](idx=slice_number),
+               grayscale_output_image = self.f['src_gray'](idx=slice_number),
                color_output_image = self.f['src_color'](idx=slice_number),
                registration_roi = self.options.registrationROI,
                registration_resize = self.options.registrationResize,

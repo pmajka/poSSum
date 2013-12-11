@@ -314,7 +314,6 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
     @classmethod
     def _getCommandLineParser(cls):
         """
-        #TODO: Provide some extended documentation here.
         """
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 

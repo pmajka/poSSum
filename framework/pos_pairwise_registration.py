@@ -304,11 +304,14 @@ class pairwiseRegistration(output_volume_workflow):
 
         # Iterate over all filenames beeing used it the whole workflow
         # and check if all of them exists.
-        for slice_index in self.options.fixedSlicesRange + \
-                           self.options.movingSlicesRange:
-            slice_filename = self.f['moving_raw_image'](idx=slice_index)
+        filenames_to_check = map(lambda x: self.f['moving_raw_image'](idx=x),
+                                 self.options.movingSlicesRange)
+        filenames_to_check+= map(lambda x: self.f['fixed_raw_image'](idx=x),
+                                 self.options.fixedSlicesRange)
 
+        for slice_filename in filenames_to_check:
             self._logger.debug("Checking for image: %s.", slice_filename)
+
             if not os.path.isfile(slice_filename):
                 self._logger.error("File does not exist: %s. Exiting",
                                    slice_filename)
@@ -401,7 +404,6 @@ class pairwiseRegistration(output_volume_workflow):
         """
         command = pos_wrappers.alignment_preprocessor_wrapper(
             median_filter_radius = self.options.medianFilterRadius,
-            invert_grayscale = self.options.invertGrayscale,
             invert_multichannel = self.options.invertMultichannel)
         return copy.deepcopy(command)
 
@@ -685,15 +687,27 @@ class pairwiseRegistration(output_volume_workflow):
         """
         Execute stacking images based on grayscale and multichannel images.
         """
+        # Define the output volume filename. If no custom colume name is
+        # provided, the filename is based on the provided processing
+        # parameters. In the other case the provided custom filename is used.
+        # We get the output filename prefix only once as it's shared between
+        # grayscale and multichannel output volume filenames.
+        filename_prefix = self._get_parameter_based_output_prefix()
 
+        # Get the output filename for the grayscale output image.
+        # and generate the output volume itself.
+        output_filename = self.f['out_volume_gray'](fname=filename_prefix)
         command = self._get_generic_stack_slice_wrapper(\
             self.f['resliced_gray_mask'](),
-            self.f['out_volume_gray'](fname='output_volume'))
+            output_filename)
         self.execute(command)
 
+        # Get the output filename for the multichannel output image.
+        # and generate the output volume itself.
+        output_filename = self.f['out_volume_color'](fname=filename_prefix)
         command = self._get_generic_stack_slice_wrapper(\
             self.f['resliced_color_mask'](),
-            self.f['out_volume_color'](fname='output_volume'))
+            output_filename)
         self.execute(command)
 
     def _load_additional_stacks_settings(self):
@@ -749,7 +763,8 @@ class pairwiseRegistration(output_volume_workflow):
 
     def _reslice_additional_stack(self):
         """
-        Reslice the additional images stacks.
+        Reslice the additional images stacks. Note that there is no possibility
+        to switch of reslicing the additional image stacks.
         """
         commands = []
 
@@ -771,7 +786,8 @@ class pairwiseRegistration(output_volume_workflow):
         indexing of the additional stacks starts from zreo.
         :type stack_index: int
 
-        :return: #TODO:
+        :return:  multichannel reslice wrapper.
+        :rtype:  :py:class:`command_warp_rgb_slice`
         """
         # Just a pretty alias
         stackSettings = self._additional_stacks_settings[stack_index]
@@ -786,10 +802,14 @@ class pairwiseRegistration(output_volume_workflow):
         # Note that, in oposition to the moving stack, additional image stacks
         # are to be processed with different settings for each additional
         # images stack.
-        # TODO: Remove the stupid [False,True][xxx] syntax
+
+        # This non-optimal code below describes convert "0" or "1" into
+        # boolean value. Sorry for the mess :)
+        inversion_flag = [False,True][int(stackSettings['invert_rgb'])]
+
         command.updateParameters({
             'interpolation' : stackSettings['interpolation'],
-            'inversion_flag' : [False,True][int(stackSettings['invert_rgb'])],
+            'inversion_flag' : inversion_flag,
             'background' : stackSettings['background']})
         return copy.deepcopy(command)
 
@@ -800,6 +820,26 @@ class pairwiseRegistration(output_volume_workflow):
                 self.f['out_volume_color_add'](\
                     stack_id=stackIdx,fname='output_volume'))
             self.execute(command)
+
+    def _get_parameter_based_output_prefix(self):
+        """
+        Generate filename prefix base on the provided processing parameters.
+        The filename prefix is used when no other naming scheme is provided.
+        """
+
+        filename_prefix = "out_"
+        filename_prefix+= "_FixedResize-%s" % str(self.option.fixedImageResize)
+        filename_prefix+= "_MovingResize-%s" % str(self.option.movingImageResize)
+        filename_prefix+= "_fixedColor-%s" % str(self.option.registrationColorChannelFixedImage)
+        filename_prefix+= "_movingColor-%s" % str(self.option.registrationColorChannelMovingImage)
+        filename_prefix+= "_Median-%s" % "x".join(map(str, self.option.medianFilterRadius))
+        filename_prefix+= "_Metric-%d" % self.option.antsImageMetric
+        filename_prefix+= "_MetricOpt-%d" % self.options.antsImageMetricOpt
+        filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
+        filename_prefix+= "_Median-%s" % "x".join(map(str, self.option.medianFilterRadius))
+        filename_prefix+= "_outputROI-%s" % "x".join(map(str, self.option.outputVolumeROI))
+
+        return filename_prefix
 
     @classmethod
     def _getCommandLineParser(cls):
