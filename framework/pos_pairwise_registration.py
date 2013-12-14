@@ -203,7 +203,7 @@ class pairwiseRegistration(output_volume_workflow):
     __VOL_STACK_SLICE_SPACING = 1
 
     def _validate_options(self):
-        super(self.__class__, self)._initializeOptions()
+        super(self.__class__, self)._validate_options()
 
         # Ok, the first thing to check is to make sure that both slice ranges
         # are provided: the moving slice range and the fixed slice range
