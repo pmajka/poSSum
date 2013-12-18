@@ -667,9 +667,9 @@ class sequential_alignment(output_volume_workflow):
         filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
 
         try:
-            filename_prefix+= "ROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
+            filename_prefix+= "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
         except:
-            filename_prefix+= "ROI-None"
+            filename_prefix+= "outROI-None"
 
         return filename_prefix
 

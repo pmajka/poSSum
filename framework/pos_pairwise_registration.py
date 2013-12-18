@@ -24,7 +24,8 @@
 import os, sys
 import csv
 import copy
-from optparse import OptionParser, OptionGroup
+from optparse import OptionGroup
+
 from pos_wrapper_skel import output_volume_workflow
 import pos_wrappers, pos_parameters
 
@@ -163,6 +164,7 @@ pos_pairwise_registration.py \
 class pairwiseRegistration(output_volume_workflow):
     """
     Pairwise slice to slice registration script.
+    #TODO: Provide more documentation.
     """
 
     _f = {
@@ -874,9 +876,9 @@ class pairwiseRegistration(output_volume_workflow):
         filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
 
         try:
-            filename_prefix+= "ROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
+            filename_prefix+= "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
         except:
-            filename_prefix+= "ROI-None"
+            filename_prefix+= "outROI-None"
 
         return filename_prefix
 

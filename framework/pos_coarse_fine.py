@@ -121,29 +121,13 @@ class coarse_to_fine_transformation_merger_plot(generic_wrapper):
 class gnuplot_execution_wrapper(generic_wrapper):
     """
     Executes the gnuplot ploting file.
+    # TODO: Provide tests
     """
 
     _template = """gnuplot {plot_filename}; rm -fv {plot_filename};"""
 
     _parameters = {
         'plot_filename' : pos_parameters.filename_parameter('plot_filename', None),
-    }
-
-
-class invert_affine_transform(generic_wrapper):
-    """
-    A very simple wrapper of the `ComposeMultiTransform` binary file from the
-    ANTS package. The purpose of this wrapper is to simply invert given affine
-    (or, in this very case a rigid) transformation.
-    """
-    _template = """ComposeMultiTransform {dimension} \
-                  {output_image} \
-                  -i {input_filename}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'output_image': pos_parameters.filename_parameter('output_image', None),
-        'input_filename': pos_parameters.filename_parameter('input_filename', None, str_template='-i {_value}'),
     }
 
 
@@ -155,6 +139,7 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         1. self.options.sliceIndex
         2. fineTransformFilenameTemplate
         3. outputTransformFilenameTemplate
+    # TODO: Provide logging information
     """
 
     _f = {
@@ -481,9 +466,15 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         :rtype: `invert_affine_transform`
         """
         input_transformation = self.f['smooth_transf'](idx=slice_index)
-        output_transformation =  self.f['final_transf'](idx=slice_index)
+        # Ok, here's a trick. We hereby cheat by adding "-i" switch to the
+        # actual transformation name. This will cause the ANTS transformation
+        # composition binary file to invert given transformation instead of
+        # using the forward transfomation.
+        input_transformation = " -i " + input_transformation
 
-        command = invert_affine_transform(
+        output_transformation = self.f['final_transf'](idx=slice_index)
+
+        command = pos_wrappers.ants_compose_multi_transform(
             output_image = output_transformation,
             input_filename = input_transformation)
         return copy.deepcopy(command)

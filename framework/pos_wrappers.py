@@ -583,6 +583,9 @@ class chain_affine_transforms(generic_wrapper):
 
     >>> c() == {'port': {'dimension': '3', 'output_transform': 'out.txt'}}
     True
+
+    # TODO: Provide tests with affine inversion and check out if they actually
+    # work.
     """
 
     _template = """ComposeMultiTransform {dimension} {output_transform} {input_transforms}"""
