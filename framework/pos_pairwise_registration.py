@@ -473,7 +473,7 @@ class pairwiseRegistration(output_volume_workflow):
         # batch.
         commands = []
 
-        for slice_number in self._slice_assignment.values():
+        for slice_number in self._slice_assignment.keys():
 
             command = self._get_generic_source_slice_preparation_wrapper()
             command.updateParameters({
@@ -873,7 +873,11 @@ class pairwiseRegistration(output_volume_workflow):
         filename_prefix+= "_Metric-%s" % self.options.antsImageMetric
         filename_prefix+= "_MetricOpt-%d" % self.options.antsImageMetricOpt
         filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
-        filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+
+        try:
+            filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+        except:
+            filename_prefix+= "_Median-None"
 
         try:
             filename_prefix+= "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))

@@ -269,6 +269,7 @@ class sequential_alignment(output_volume_workflow):
                invert_multichannel = self.options.invertMultichannel)
             commands.append(copy.deepcopy(command))
 
+        self._logger.info("Executing the source slice generation commands.")
         # Execute the commands in a batch.
         self.execute(commands)
 
@@ -303,6 +304,7 @@ class sequential_alignment(output_volume_workflow):
         # Calculate affine transformation for each slices pair
         commands = map(lambda x: self._get_partial_transform(*x),
                                  partial_transformation_pairs)
+        self._logger.info("Executing the transformation commands.")
         self.execute(commands)
 
         # Finally, calculate composite transforms
@@ -311,7 +313,7 @@ class sequential_alignment(output_volume_workflow):
             commands.append(self._calculate_composite(moving_slice_index))
         self.execute(commands)
 
-        self._logger.info("Done with transformations.")
+        self._logger.info("Done with calculating the transformations.")
 
     def _get_slice_pair(self, moving_slice_index):
         """
@@ -356,7 +358,7 @@ class sequential_alignment(output_volume_workflow):
         :param fixed_slice_index: fixed slice index
         :type fixed_slice_index: int
 
-        :return: Registration command.
+        :return: Registration command wrapper.
         """
 
         # Define the registration settings: image-to-image metric and its
@@ -436,6 +438,10 @@ class sequential_alignment(output_volume_workflow):
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
         """
+
+        # The transformation chain is a sequence of pairs of (fixed, moving)
+        # slices. This sequence links the reference slices with given moving
+        # slice.
         transformation_chain = \
             self._get_transformation_chain(moving_slice_index)
 
@@ -462,7 +468,9 @@ class sequential_alignment(output_volume_workflow):
     def _reslice(self):
         """
         Reslice input images according to composed transformations. Both,
-        grayscale and multichannel images are resliced.
+        grayscale and multichannel images are resliced. Also reslicing of both
+        volumes can be switched of when required - but this is set somewhere
+        else :)
         """
 
         # Reslicing grayscale images.  Reslicing multichannel images. Collect
@@ -486,10 +494,14 @@ class sequential_alignment(output_volume_workflow):
 
     def _reslice_grayscale(self, slice_number):
         """
-        Reslice grayscale images.
+        Reslice grayscalce slice of the index `slice_number`.
 
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
+
+        :return: Command for reslicing given slice with the calculated
+                 transform.
+        :rtype: `pos_wrappers.command_warp_grayscale_image`
         """
 
         # Define all the filenames required by the reslice command
@@ -518,10 +530,14 @@ class sequential_alignment(output_volume_workflow):
 
     def _reslice_color(self, slice_number):
         """
-        Reslice multichannel image stack.
+        Reslice multichannel image with the given `slice_number`.
 
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
+
+        :return: Command for reslicing given slice with the calculated
+                 transform.
+        :rtype: `pos_wrappers.command_warp_grayscale_image`
         """
 
         # Define all the filenames required by the reslice command
@@ -643,6 +659,8 @@ class sequential_alignment(output_volume_workflow):
         The filename prefix is used when no other naming scheme is provided.
         """
 
+        # As you can see the generation of the output filename prefix is
+        # straigthforward but pretty tireingsome.
         filename_prefix = "out_"
 
         try:
@@ -677,15 +695,15 @@ class sequential_alignment(output_volume_workflow):
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
 
-        parser.add_option('--sliceRange', default=None,
+        obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
+        obligatory_options.add_option('--sliceRange', default=None,
             type='int', dest='sliceRange', nargs = 3,
-            help='Slice range: start, stop, reference. Requires three integers. REQUIRED')
-        parser.add_option('--inputImageDir', default=None,
+            help='Slice range: start, stop, reference. Requires three integers.')
+        obligatory_options.add_option('--inputImageDir', default=None,
             type='str', dest='inputImageDir',
-            help='')
+            help='The directory from which the input slices will be read. The directory has to contain images named according to "%04d.nii.gz" scheme.')
 
         workflow_options = OptionGroup(parser, 'Pipeline options.')
-
         workflow_options.add_option('--outputVolumesDirectory', default=False,
             dest='outputVolumesDirectory', type="str",
             help='Directory to which registration results will be sored.')
@@ -748,6 +766,7 @@ class sequential_alignment(output_volume_workflow):
             dest='useRigidAffine', action='store_const', const=True,
             help='Use rigid affine transformation.')
 
+        parser.add_option_group(obligatory_options)
         parser.add_option_group(registration_options)
         parser.add_option_group(workflow_options)
 
