@@ -21,35 +21,36 @@
 #    http://www.gnu.org/licenses/.                                            #
 #                                                                             #
 ###############################################################################
-
 import os, sys
 import copy
 from optparse import OptionParser, OptionGroup
+import tempfile
+
 import pos_parameters
-from pos_wrapper_skel import output_volume_workflow
-from pos_wrappers import generic_wrapper
+import pos_wrappers
+from pos_wrapper_skel import generic_workflow
 
 import numpy
 from scipy.ndimage.filters import gaussian_filter1d
 
-class coarse_to_fine_transformation_merger_plot(generic_wrapper):
+
+class coarse_to_fine_transformation_merger_plot(pos_wrappers.generic_wrapper):
     """
-    #TODO: Implement some axis configuration, etc.
     """
 
     _template = """#!/usr/bin/gnuplot -persist
         set macros
 
-        set terminal pngcairo enhanced color notransparent size 800,600  font 'Verdana,8'
+        set terminal pngcairo noenhanced color notransparent size 800,600 font 'Arial,9'
         set output '{graph_image}'
 
-        POS = "at graph 0.5,0.95 font ',8' center"
+        POS = "at graph 0.5,0.95 font ',10' center"
 
         NOXTICS = "set xtics; unset xlabel; set format x '';"
-        XTICS   = "set xtics; set xlabel 'Slice index' font ',8'; set format x '%%g';"
+        XTICS   = "set xtics; set xlabel 'Slice index' font ',9'; set format x '%g';"
 
         NOYTICS = "set format y ''; unset ylabel"
-        YTICS = "set format y '%%g'; set ylabel ''"
+        YTICS = "set format y '%g'; set ylabel ''"
 
         TMARGIN = "set tmargin at screen 0.90; set bmargin at screen 0.55"
         BMARGIN = "set tmargin at screen 0.50; set bmargin at screen 0.15"
@@ -80,7 +81,7 @@ class coarse_to_fine_transformation_merger_plot(generic_wrapper):
 
         set multiplot layout 2,2 rowsfirst title "Fine - coarse : {graph_image}"
 
-        set label 1 'Offset (translation) [pixels]' @POS
+        set label 1 'Offset (translation) [mm]' @POS
         @NOXTICS; @YTICS
         @TMARGIN; @LMARGIN
         plot @FN_RAW  u 0:5 @STYLE_RAW_1, @FN_SMOOTH u 0:5 @STYLE_SMOOTH_1 , \
@@ -100,7 +101,7 @@ class coarse_to_fine_transformation_merger_plot(generic_wrapper):
         set yrange [-20:20]
         plot @FN_RAW  u 0:(90-acos($2)*180./pi) @STYLE_RAW_3, @FN_SMOOTH u 0:(90-acos($2)*180./pi) @STYLE_SMOOTH_3
 
-        set label 1 'Fixed parameters [pixels]' @POS
+        set label 1 'Fixed parameters [mm]' @POS
         @XTICS; @YTICS
         @BMARGIN; @RMARGIN
         set auto y
@@ -117,21 +118,7 @@ class coarse_to_fine_transformation_merger_plot(generic_wrapper):
         'transformation_difference' : pos_parameters.filename_parameter('transformation_difference', None)
     }
 
-
-class gnuplot_execution_wrapper(generic_wrapper):
-    """
-    Executes the gnuplot ploting file.
-    # TODO: Provide tests
-    """
-
-    _template = """gnuplot {plot_filename}; rm -fv {plot_filename};"""
-
-    _parameters = {
-        'plot_filename' : pos_parameters.filename_parameter('plot_filename', None),
-    }
-
-
-class coarse_to_fine_transformation_merger(output_volume_workflow):
+class coarse_to_fine_transformation_merger(generic_workflow):
     """
     Coarse to fine transformation merger.
     Obligatory command line parameters:
@@ -182,13 +169,10 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         super(self.__class__, self)._overrideDefaults()
 
         # Assert if the proper transformation naming schemes are provided:
-        assert self.options.coarseTransformFilenameTemplateis is not None,\
-            self._logger.error("Coarse transformation filename scheme is an obligatory parameter.")
-
-        assert self.options.fineTransformFilenameTemplateis is not None,\
+        assert self.options.fineTransformFilenameTemplate is not None,\
             self._logger.error("Fine transformation filename naming scheme is an obligatory parameter.")
 
-        assert self.options.outputTransformationsFilenameTemplate is not None,\
+        assert self.options.outputTransformFilenameTemplate is not None,\
             self._logger.error("Please provide an output transformation filename scheme.")
 
         assert self.options.smoothTransformFilenameTemplate is not None,\
@@ -202,7 +186,7 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         self.f['smooth_transf'].override_path = \
             self.options.smoothTransformFilenameTemplate
 
-        filenames_to_check = map(lambda x: self.f['fine_transf'](idx=x),
+        filenames_to_check = map(lambda x: self.f['fine_transf']() % x,
             self.options.slice_range)
 
         for transf_filename in filenames_to_check:
@@ -216,11 +200,14 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         # Oh, an the last but not least. One can assign a custom reports
         # directory (for whatever reason :). If that's the case
         if self.options.reportsDirectory != None:
+            self.f['fine_report'].override_dir = self.options.reportsDirectory
+            self.f['smooth_report'].override_dir = self.options.reportsDirectory
+            self.f['difference_report'].override_dir = self.options.reportsDirectory
             self.f['final_report'].override_dir = self.options.reportsDirectory
             self.f['graph'].override_dir = self.options.reportsDirectory
             self.f['graph_source'].override_dir = self.options.reportsDirectory
 
-    def _launch(self):
+    def launch(self):
         # At the very beginning we read all the provided fine transformations
         self._extract_transformation_parameters()
 
@@ -276,14 +263,14 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         # Simple as it goes: define the name of the transformation file,
         # grab the file's content and extract the transformation parameters
         # from the file's content.
-        transformation_filename = self.f['fine_transf'](idx=slice_index)
+        transformation_filename = self.f['fine_transf']() % slice_index
         transformation_string = open(transformation_filename).readlines()
         transformation_parameters =\
-            self._extract_transformation_parameters(transformation_string)
+            self._extract_transformation_data(transformation_string)
 
         return transformation_parameters
 
-    def _extract_transformation_parameters(self, transformation_string):
+    def _extract_transformation_data(self, transformation_string):
         """
         This function assumes that itk rigid transformation file has a proper
         structure.
@@ -301,6 +288,9 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         # we simply check if the first two lines contains "Transform" and
         # "Parameters" strings, respectively. While this is not bullet-proof
         # it allows to point out some simple mistakes.
+        transformation_string_validation_flag = True
+
+
         if not transformation_string[2].strip().split(':')[0] == 'Transform':
             transformation_string_validation_flag = False
 
@@ -351,10 +341,10 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         # default all types of parameters are smoothed with the same kernel.
         # Using command line parameters one can customize this behaviour.
         parameters_index = \
-            {'fixed'    : ([6,7], self.options['smoothingSimgaFixed']), \
-             'offset'   : ([4,5], self.options['smoothingSimgaOffset']), \
-             'rotation' : ([1,2], self.options['smoothingSimgaRotation']), \
-             'scaling'  : ([0,3], self.options['smoothingSimgaScaling'])}
+            {'fixed'    : ([6,7], self.options.smoothingSimgaFixed), \
+             'offset'   : ([4,5], self.options.smoothingSimgaOffset), \
+             'rotation' : ([1,2], self.options.smoothingSimgaRotation), \
+             'scaling'  : ([0,3], self.options.smoothingSimgaScaling)}
 
         # Apply smoothing for each of the parameters. Each kind of parameters
         # is smoothed with a amount of smoothing which depends on the king of
@@ -394,6 +384,7 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         Saves the smoothed transformation parameters as a itk transformation
         files.
         """
+
         # Just an alias:
         l = self._smoothed_parameters
 
@@ -401,7 +392,7 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         # parameters and save them as an itk transformation file.
         for i in range(l.shape[1]):
             slice_index = i + self.options.slice_range[0]
-            output_filename = self.f['final_transf'](idx=slice_index)
+            output_filename = self.f['smooth_transf']() % slice_index
             self._save_itk_transform(list(l[:,i]), output_filename)
 
     def _save_itk_transform(self,  parameters, filename):
@@ -465,18 +456,18 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         :return: invert affine transformation commad wrapper.
         :rtype: `invert_affine_transform`
         """
-        input_transformation = self.f['smooth_transf'](idx=slice_index)
+        input_transformation = self.f['smooth_transf']() % slice_index
         # Ok, here's a trick. We hereby cheat by adding "-i" switch to the
         # actual transformation name. This will cause the ANTS transformation
         # composition binary file to invert given transformation instead of
         # using the forward transfomation.
         input_transformation = " -i " + input_transformation
 
-        output_transformation = self.f['final_transf'](idx=slice_index)
+        output_transformation = self.f['final_transf']() % slice_index
 
         command = pos_wrappers.ants_compose_multi_transform(
             output_image = output_transformation,
-            input_filename = input_transformation)
+            affine_list = [input_transformation])
         return copy.deepcopy(command)
 
     def _generate_report(self):
@@ -484,6 +475,7 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         Create a plot comparing the initial, smoothed and filtered affine
         transformation parameters. Pretty simple procedure :)
         """
+
         # The name of the graph will be based on the merging parameters
         # passed using the command line parameters. So:
         # grap the file prefix.
@@ -493,16 +485,16 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         # wrapper.
         command = coarse_to_fine_transformation_merger_plot(
             graph_image = self.f['graph'](desc=prefix),
-            smooth_transformations = self.f['smooth_report'],
-            fine_transformations = self.f['fine_report'],
-            transformation_difference = self.f['difference_report'])
+            smooth_transformations = self.f['smooth_report'](),
+            fine_transformations = self.f['fine_report'](),
+            transformation_difference = self.f['difference_report']())
 
         # Save the plot file
         plot_filename = self.f['graph_source']()
         open(plot_filename, 'w').write(str(command))
 
         # Execute proviouslu generated plot file
-        command = gnuplot_execution_wrapper(
+        command = pos_wrappers.gnuplot_execution_wrapper(
             plot_filename = plot_filename)
         self.execute(command)
 
@@ -530,14 +522,23 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
         """
         TODO: Reorganize the command line options into sensible groups.
         """
-        parser = output_volume_workflow._getCommandLineParser()
+        parser = generic_workflow._getCommandLineParser()
+
+        parser.add_option('-i', '--fineTransformFilenameTemplate', default=None,
+                dest='fineTransformFilenameTemplate', action='store',
+                help='aaa')
+        parser.add_option('-s', '--smoothTransformFilenameTemplate', default=None,
+                dest='smoothTransformFilenameTemplate', action='store',
+                help='')
+        parser.add_option('-o', '--outputTransformFilenameTemplate', default=None,
+                dest='outputTransformFilenameTemplate', action='store',
+                help='Store transformations in given directory instead of using default one.')
+        parser.add_option('--sliceIndex', default=None,
+                type='int', dest='sliceIndex', nargs=2,
+                help='first, last slice index')
 
         preprocessingSettings = \
                 OptionGroup(parser, 'Processing settings')
-
-        preprocessingSettings.add_option('--sliceIndex', default=None,
-                type='int', dest='sliceIndex', nargs=2,
-                help='first, last slice index')
         preprocessingSettings.add_option('--smoothingSimga', default=5,
                 type='float', dest='smoothingSimga',
                 help='General smoothing simga. Can be customized for specific parameters.')
@@ -552,20 +553,11 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
 
         workflowSettings = \
                 OptionGroup(parser, 'Workflow settings')
-        workflowSettings.add_option('--outputTransformFilenameTemplate', default=None,
-                dest='outputTransformFilenameTemplate', action='store',
-                help='Store transformations in given directory instead of using default one.')
         workflowSettings.add_option('--reportsDirectory', default=None,
                 dest='reportsDirectory', action='store',
                 help='Use custom reports directory instead of using default one.')
         workflowSettings.add_option('--skipTransformsGeneration', default=False,
                 dest='skipTransformsGeneration', action='store_const', const=True,
-                help='')
-        parser.add_option('--fineTransformFilenameTemplate', default=None,
-                dest='fineTransformFilenameTemplate', action='store',
-                help='')
-        parser.add_option('--smoothTransformFilenameTemplate', default=None,
-                dest='smoothTransformFilenameTemplate', action='store',
                 help='')
 
         parser.add_option_group(workflowSettings)
@@ -575,4 +567,4 @@ class coarse_to_fine_transformation_merger(output_volume_workflow):
 if __name__ == '__main__':
     options, args = coarse_to_fine_transformation_merger.parseArgs()
     s = coarse_to_fine_transformation_merger(options, args)
-    s.launchFilter()
+    s.launch()
