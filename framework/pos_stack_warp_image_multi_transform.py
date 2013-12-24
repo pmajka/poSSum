@@ -30,12 +30,9 @@ class stack_warp_image_multi_transform(output_volume_workflow):
     _f = {
         'moving_raw': pos_parameters.filename('moving_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'fixed_raw': pos_parameters.filename('fixed_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
-        'output_transforms': pos_parameters.filename('output_transforms', work_dir='02_transforms', str_template='{idx:04d}_Affine.txt'),
-        'resliced_gray': pos_parameters.filename('resliced_gray', work_dir='04_gray_resliced', str_template='{idx:04d}.nii.gz'),
-        'resliced_gray_mask': pos_parameters.filename('resliced_gray_mask', work_dir='04_gray_resliced', str_template='%04d.nii.gz'),
+        'output_transforms': pos_parameters.filename('output_transforms', work_dir='02_transforms', str_template='{idx:04d}'),
         'resliced_color': pos_parameters.filename('resliced_color', work_dir='05_color_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_color_mask': pos_parameters.filename('resliced_color_mask', work_dir='05_color_resliced', str_template='%04d.nii.gz'),
-        'out_volume_gray': pos_parameters.filename('out_volume_gray', work_dir='06_output_volumes', str_template='{fname}_gray.nii.gz'),
         'out_volume_color': pos_parameters.filename('out_volume_color', work_dir='06_output_volumes', str_template='{fname}_color.nii.gz'),
         }
 
@@ -121,10 +118,13 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # also customize even the output filename of both, grayscale and
         # multichannel volumes! That a variety of options!
         if self.options.outputVolumesDirectory is not False:
-            self.f['out_volume_gray'].override_dir = \
-                self.options.outputVolumesDirectory
             self.f['out_volume_color'].override_dir = \
                 self.options.outputVolumesDirectory
+
+        # At the very end we check if the reslice interpolation has a correct
+        # value.:
+        assert self.options.resliceInterpolation in [None, "NN", "BS"], \
+            "Incorrect reslice interpolation value. See the help for the list of allowed values."
 
     def launch(self):
         # Execute the parents before-execution activities
@@ -197,6 +197,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         :rtype: `pos_wrappers.ants_compose_multi_transform`
         :return: Transformation composition wrapper.
         """
+
         # Define the output transformation string.
         out_transform_filename = self.f['output_transforms'](idx=transform_index)
 
@@ -210,6 +211,39 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             output_image=out_transform_filename,
             deformable_list=[],
             affine_list=transformations_list)
+        return copy.deepcopy(command)
+
+    def _compose_reslice(self, slice_index, transform_index):
+        """
+        """
+        # Define all the filenames required by the reslice command
+        moving_image_filename = self.f['moving_raw'](idx=slice_index)
+        resliced_image_filename = self.f['resliced_color'](idx=slice_index)
+        reference_image_filename = self.f['fixed_raw'](idx=slice_index)
+
+        # Create a list of all the input transformations.
+        transformations_list = \
+            map(lambda x: x % transform_index, self.transformations)
+
+        # Define the interpolation method based on the command line parameters.
+        # The way how transformations are defined is quite crazy due to how
+        # ants reslice accepts the reslice settings. Anyway, there are two
+        # parameters defined on the provided interpolation settings.
+        interpolation_settings = {"NN": (True, None), "BS": (None, True) }
+        use_nn, use_b_splines = \
+            interpolation_settings[self.options.resliceInterpolation]
+
+        # Create and return a transformation composition wrapper.
+        command = pos_wrappers.ants_reslice(
+            dimension=self.__IMAGE_DIMENSION,
+            moving_image=moving_image_filename,
+            output_image=resliced_image_filename,
+            reference_image=reference_image_filename,
+            useNN = use_nn,
+            useBspline = use_b_splines,
+            deformable_list=[],
+            affine_list=transformations_list)
+
         return copy.deepcopy(command)
 
     def _inspect_input_data(self):
@@ -236,6 +270,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                     % transform_index
                 self.__is_filename_available(transform_filename)
 
+        self._logger.info("Apparently all the files required by the workflow are available.")
+
     def __is_filename_available(self, filename):
         """
         A helper function which queries for the given filename. Checks if the
@@ -258,86 +294,31 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         grayscale and multichannel images are resliced.
         """
 
-        # Reslicing grayscale images.  Reslicing multichannel images. Collect
-        # all reslicing commands into an array and then execute the batch.
-        if self.options.skipColorReslice is False:
-            self._logger.info("Reslicing grayscale images.")
-            commands = []
-            for slice_index in self._slice_transform_map.keys():
-                commands.append(self._reslice_grayscale(slice_index))
-            self.execute(commands)
-
         # Reslicing multichannel images. Again, collect all reslicing commands
         # into an array and then execute the batch.
-        if self.options.skipGrayReslice is False:
+        if self.options.skipReslice is False:
             self._logger.info("Reslicing multichannel images.")
             commands = []
-            for slice_index in self._slice_transform_map.keys():
-                commands.append(self._reslice_color(slice_index))
+            for slice_index, transform_index in self._slice_transform_map.items():
+                commands.append(self._compose_reslice(slice_index, transform_index))
             self.execute(commands)
 
         # Yeap, it's done.
         self._logger.info("Finished reslicing.")
 
-    def _reslice_grayscale(self, slice_number):
+    def _stack_output_images(self):
         """
-        Reslice grayscale images.
-
-        :param moving_slice_index: moving slice index
-        :type moving_slice_index: int
-        """
-
-        # Define all the filenames required by the reslice command
-        moving_image_filename = self.f['moving_raw'](idx=slice_number)
-        resliced_image_filename = self.f['resliced_gray'](idx=slice_number)
-        reference_image_filename = self.f['fixed_raw'](idx=slice_number)
-
-        # Get the transformation file index:
-        transform_index = self._slice_transform_map[slice_number]
-        transformation_file = self.f['output_transforms'](idx=transform_index)
-
-        # And finally initialize and customize reslice command.
-        command = pos_wrappers.command_warp_grayscale_image(
-            reference_image=reference_image_filename,
-            moving_image=moving_image_filename,
-            transformation=transformation_file,
-            output_image=resliced_image_filename,
-            background=self.options.resliceBackgorund,
-            interpolation=self.options.resliceInterpolation)
-
-        return copy.deepcopy(command)
-
-    def _reslice_color(self, slice_number):
-        """
-        Reslice multichannel image. The reslicing process is conducted via the
-        `pos_wrappers.command_warp_rgb_slice` class. More information on the
-        actual configuration of the reslicing process is available in the
-        documentation of the `pos_wrappers.command_warp_rgb_slice` class.
-
-        :param moving_slice_index: moving slice index
-        :type moving_slice_index: int
+        Execute stacking images based on grayscale and multichannel images.
+        Both resliced image stacks are turned into volumetric files by this
+        method.
         """
 
-        # Define all the filenames required by the reslice command
-        moving_image_filename = self.f['moving_raw'](idx=slice_number)
-        resliced_image_filename = self.f['resliced_color'](idx=slice_number)
-        reference_image_filename = self.f['fixed_raw'](idx=slice_number)
+        self._logger.info("Stacking the resliced images.")
+        command = self._get_generic_stack_slice_wrapper(
+                    'resliced_color_mask', 'out_volume_color')
+        self.execute(command)
 
-        # Get the transformation file index:
-        transform_index = self._slice_transform_map[slice_number]
-        transformation_file = self.f['output_transforms'](idx=transform_index)
-
-        # And finally initialize and customize reslice command.
-        command = pos_wrappers.command_warp_rgb_slice(
-            reference_image=reference_image_filename,
-            moving_image=moving_image_filename,
-            transformation=transformation_file,
-            output_image=resliced_image_filename,
-            background=self.options.resliceBackgorund,
-            interpolation=self.options.resliceInterpolation)
-
-        # Return the created command line parser.
-        return copy.deepcopy(command)
+        self._logger.info("Reslicing is done.")
 
     def _get_generic_stack_slice_wrapper(self, mask_type, ouput_filename_type):
         """
@@ -383,25 +364,6 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # Return the created parser.
         return copy.deepcopy(command)
 
-    def _stack_output_images(self):
-        """
-        Execute stacking images based on grayscale and multichannel images.
-        Both resliced image stacks are turned into volumetric files by this
-        method.
-        """
-
-        self._logger.info("Stacking the grayscale image stack.")
-        command = self._get_generic_stack_slice_wrapper(
-                    'resliced_gray_mask', 'out_volume_gray')
-        self.execute(command)
-
-        self._logger.info("Stacking the multichannel image stack.")
-        command = self._get_generic_stack_slice_wrapper(
-                    'resliced_color_mask', 'out_volume_color')
-        self.execute(command)
-
-        self._logger.info("Reslicing is done.")
-
     @classmethod
     def _getCommandLineParser(cls):
         """
@@ -432,11 +394,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         workflow_settings = \
             OptionGroup(parser, 'Workflow execution settings')
 
-        workflow_settings.add_option('--skipGrayReslice', default=False,
-            dest='skipGrayReslice', action='store_const', const=True,
-            help='Supress generating grayscale volume')
-        workflow_settings.add_option('--skipColorReslice', default=False,
-            dest='skipColorReslice', action='store_const', const=True,
+        workflow_settings.add_option('--skipReslice', default=False,
+            dest='skipReslice', action='store_const', const=True,
             help='Supress generating RGB volume.')
         workflow_settings.add_option('--skipOutputVolumes', default=False,
             dest='skipOutputVolumes', action='store_const', const=True,
@@ -450,13 +409,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         image_processing_options.add_option('--resliceInterpolation',
             dest='resliceInterpolation', default=None, type='str',
-            help='Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc')
-        image_processing_options.add_option('--resliceBackgorund', default=None,
-            type='float', dest='resliceBackgorund',
-            help='Background color')
-        image_processing_options.add_option('--outputVolumeROI', default=None,
-            type='int', dest='outputVolumeROI',  nargs=4,
-            help='ROI of the output volume - in respect to registration ROI.')
+            help='Interpolation used during the application of the transformation chain to the slices. This is not interpolation used during stacking the resliced images into a output volume. Linear by default byt may be changed into NN or Bspline. For the NN interpolation put just "NN" while for the Bspline interpolation put BS. No other string will be accepted.')
 
         parser.add_option_group(workflow_settings)
         parser.add_option_group(obligatory_options)
