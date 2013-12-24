@@ -842,6 +842,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
         'invert_grayscale': switch_parameter('invertSourceImage', False, str_template="--{_name}"),
         'invert_multichannel': switch_parameter('invertMultichannelImage', False, str_template="--{_name}")}
 
+
 class command_warp_rgb_slice(generic_wrapper):
     """
     A flexible RGB image affine reslice wrapper. The wrapper is designed to
@@ -1002,6 +1003,8 @@ class command_warp_grayscale_image(generic_wrapper):
         reslicing is to be done, this option determines the size (in voxels) of
         the region to extract.
     :type region_size: (int, int)
+
+    #TODO: Add doctests.
     """
 
     _template = "c{dimension}d -verbose {background} {interpolation}\
@@ -1021,6 +1024,53 @@ class command_warp_grayscale_image(generic_wrapper):
         'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
         'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
         'output_image': pos_parameters.filename_parameter('output_image', None),
+    }
+
+
+class gnuplot_execution_wrapper(generic_wrapper):
+    """
+    Executes the gnuplot ploting file. By default the executed file is removed
+    immediately after execution. This behavior can be switched off with a
+    proper switch.
+
+    >>> gnuplot_execution_wrapper
+    <class '__main__.gnuplot_execution_wrapper'>
+
+    >>> gnuplot_execution_wrapper() #doctest: +ELLIPSIS
+    <__main__.gnuplot_execution_wrapper object at 0x...>
+
+    >>> print gnuplot_execution_wrapper()
+    gnuplot ;  rm -fv ;
+
+    >>> print gnuplot_execution_wrapper(plot_filename='plot.plt')
+    gnuplot plot.plt;  rm -fv plot.plt;
+
+    >>> p = gnuplot_execution_wrapper(plot_filename='plot.plt')
+    >>> p.updateParameters({'plot_filename' : None}) #doctest: +ELLIPSIS
+    <__main__.gnuplot_execution_wrapper object at 0x...>
+    >>> print p
+    gnuplot ;  rm -fv ;
+
+    >>> p = gnuplot_execution_wrapper(\
+        plot_filename='plot.plt', remove_plot_file=False)
+    >>> print p
+    gnuplot plot.plt;  false &&  rm -fv plot.plt;
+
+    >>> print p.updateParameters({'remove_plot_file' : True})
+    gnuplot plot.plt;  false &&  rm -fv plot.plt;
+
+    >>> print p.updateParameters({'remove_plot_file' : None})
+    gnuplot plot.plt;  rm -fv plot.plt;
+    """
+
+    _template = """gnuplot {plot_filename}; {remove_plot_file} rm -fv {plot_filename};"""
+
+    # A really short comment on the 'remove_plot_file' parameters. This is a
+    # clever walkaround wchich, when set to `True` will spoil the `rm` command
+    # and force it to fail.
+    _parameters = {
+        'plot_filename' : pos_parameters.filename_parameter('plot_filename', None),
+        'remove_plot_file' : pos_parameters.boolean_parameter('remove_plot_file', False, " false && ")
     }
 
 

@@ -30,10 +30,10 @@ class stack_warp_image_multi_transform(output_volume_workflow):
     _f = {
         'moving_raw': pos_parameters.filename('moving_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'fixed_raw': pos_parameters.filename('fixed_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
-        'output_transforms': pos_parameters.filename('output_transforms', work_dir='02_transforms', str_template='{idx:04d}'),
-        'resliced_color': pos_parameters.filename('resliced_color', work_dir='05_color_resliced', str_template='{idx:04d}.nii.gz'),
-        'resliced_color_mask': pos_parameters.filename('resliced_color_mask', work_dir='05_color_resliced', str_template='%04d.nii.gz'),
-        'out_volume_color': pos_parameters.filename('out_volume_color', work_dir='06_output_volumes', str_template='{fname}_color.nii.gz'),
+        'output_transforms': pos_parameters.filename('output_transforms', work_dir='02_transforms', str_template='{idx:04d}.nii.gz'),
+        'resliced': pos_parameters.filename('resliced', work_dir='05_color_resliced', str_template='{idx:04d}.nii.gz'),
+        'resliced_mask': pos_parameters.filename('resliced_mask', work_dir='05_color_resliced', str_template='%04d.nii.gz'),
+        'out_volume': pos_parameters.filename('out_volume', work_dir='06_output_volumes', str_template='{fname}_color.nii.gz'),
         }
 
     _usage = ""
@@ -57,7 +57,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Assert if the transformation stack is defined.
         assert self.options.transformSpec is not None, \
-            "At least one transformation is required in the transformation chain. Please supply at least one --appendTransformationFilenameTemplate option"
+            "At least one transformation is required in the transformation chain. Please supply at least one --appendTransformation option"
 
         # Since, in some, rare cases, the transformation indexing is different
         # than the actual slice indexing there is a possibility to specify a
@@ -91,11 +91,11 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Check for the fixed images directory
         assert self.options.fixedImageInputDirectory is not None,\
-            self._logger.error("Fixed images directory is a obligatory parameters. Please supply the 'fixedImageInputDirectory' parameter.")
+            self._logger.error("Fixed images directory is a obligatory parameters. Please supply the '--fixedImageInputDirectory' parameter.")
 
         # And for the moving images directory
         assert self.options.movingImageInputDirectory is not None,\
-            self._logger.error("Fixed images directory is a obligatory parameters. Please supply the 'movingImageInputDirectory' parameter.")
+            self._logger.error("Fixed images directory is a obligatory parameters. Please supply the '--movingImageInputDirectory' parameter.")
 
     def _overrideDefaults(self):
         super(self.__class__, self)._overrideDefaults()
@@ -118,8 +118,12 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # also customize even the output filename of both, grayscale and
         # multichannel volumes! That a variety of options!
         if self.options.outputVolumesDirectory is not False:
-            self.f['out_volume_color'].override_dir = \
+            self.f['out_volume'].override_dir = \
                 self.options.outputVolumesDirectory
+
+        if self.options.volumeFilename:
+            self.f['out_volume'].override_fname = \
+                self.options.volumeFilename
 
         # At the very end we check if the reslice interpolation has a correct
         # value.:
@@ -132,13 +136,16 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         self._load_transformations_chain()
 
+        # Do not inspect the input files if the script is run in the
+        # trial mode
         if self.options.dryRun is False:
             self._inspect_input_data()
 
-        self._compose_transforms()
-        self._reslice()
+        if self.options.skipReslice is False:
+            self._compose_transforms()
+            self._reslice()
 
-        if self.options.skipOutputVolumes is True:
+        if self.options.skipOutputVolumes is False:
             self._stack_output_images()
 
         # Run parent's post execution activities
@@ -183,10 +190,10 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         commands = []
         for slice_index, transform_index in self._slice_transform_map.items():
             commands.append(
-                self._compose_transformation_chain(transform_index))
+                self._compose_transformation_chain(slice_index, transform_index))
         self.execute(commands)
 
-    def _compose_transformation_chain(self, transform_index):
+    def _compose_transformation_chain(self, slice_index, transform_index):
         """
         Composes a single composite transformation based on a provided chain of
         transformations.
@@ -200,6 +207,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Define the output transformation string.
         out_transform_filename = self.f['output_transforms'](idx=transform_index)
+        reference_image_filename = self.f['fixed_raw'](idx=slice_index)
 
         # Create a list of all the input transformations.
         transformations_list = \
@@ -209,6 +217,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         command = pos_wrappers.ants_compose_multi_transform(
             dimension=self.__IMAGE_DIMENSION,
             output_image=out_transform_filename,
+            reference_image=reference_image_filename,
             deformable_list=[],
             affine_list=transformations_list)
         return copy.deepcopy(command)
@@ -218,7 +227,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         """
         # Define all the filenames required by the reslice command
         moving_image_filename = self.f['moving_raw'](idx=slice_index)
-        resliced_image_filename = self.f['resliced_color'](idx=slice_index)
+        resliced_image_filename = self.f['resliced'](idx=slice_index)
         reference_image_filename = self.f['fixed_raw'](idx=slice_index)
 
         # Create a list of all the input transformations.
@@ -229,7 +238,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # The way how transformations are defined is quite crazy due to how
         # ants reslice accepts the reslice settings. Anyway, there are two
         # parameters defined on the provided interpolation settings.
-        interpolation_settings = {"NN": (True, None), "BS": (None, True) }
+        interpolation_settings = {None: (None, None) ,"NN": (True, None),
+                                  "BS": (None, True) }
         use_nn, use_b_splines = \
             interpolation_settings[self.options.resliceInterpolation]
 
@@ -265,9 +275,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
             # Iteate over all transformations related with the given slice
             # index.
-            for chain_item in self.options.transformSpec:
-                transform_filename = self.options.transformSpec[chain_item] \
-                    % transform_index
+            for transfSpec in self.options.transformSpec:
+                transform_filename = transfSpec[1] % transform_index
                 self.__is_filename_available(transform_filename)
 
         self._logger.info("Apparently all the files required by the workflow are available.")
@@ -281,6 +290,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         :param filename: Path to validate
         :type filename: str
+
+        :return: None. Exits to system when the file is invalid.
         """
 
         self._logger.debug("Checking for file: %s.", filename)
@@ -297,7 +308,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # Reslicing multichannel images. Again, collect all reslicing commands
         # into an array and then execute the batch.
         if self.options.skipReslice is False:
-            self._logger.info("Reslicing multichannel images.")
+            self._logger.info("Reslicing the images.")
             commands = []
             for slice_index, transform_index in self._slice_transform_map.items():
                 commands.append(self._compose_reslice(slice_index, transform_index))
@@ -315,10 +326,10 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         self._logger.info("Stacking the resliced images.")
         command = self._get_generic_stack_slice_wrapper(
-                    'resliced_color_mask', 'out_volume_color')
+                    'resliced_mask', 'out_volume')
         self.execute(command)
 
-        self._logger.info("Reslicing is done.")
+        self._logger.info("Stacking is done.")
 
     def _get_generic_stack_slice_wrapper(self, mask_type, ouput_filename_type):
         """
@@ -338,13 +349,9 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         """
 
         # Assign some usefull aliases.
-        start, stop, reference = self.options.sliceRange
+        start, stop = self.options.sliceRange[0], self.options.sliceRange[-1]
 
-        # Define the output volume filename. If no custom colume name is
-        # provided, the filename is based on the provided processing
-        # parameters. In the other case the provided custom filename is used.
-        filename_prefix = self._get_parameter_based_output_prefix()
-        output_filename = self.f[ouput_filename_type](fname=filename_prefix)
+        output_filename = self.f[ouput_filename_type](fname="output_volume")
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
@@ -361,7 +368,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             interpolation=self.options.setInterpolation,
             resample=self.options.outputVolumeResample)
 
-        # Return the created parser.
+        # Return the created wrapper.
         return copy.deepcopy(command)
 
     @classmethod
@@ -376,10 +383,10 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         obligatory_options.add_option('--sliceRange', default=None,
             type='int', dest='sliceRange', nargs=2,
-            help='Index of the first slice of the stack')
+            help='[Required] Index of the fist and the last images in the stack.')
         obligatory_options.add_option('--transformationsRange', default=None,
             type='int', dest='transformationsRange', nargs=2,
-            help='Indexed of the transformations.')
+            help='[Optional] The first and the last transformation index.')
         obligatory_options.add_option('--transformationsDirectory', default=None,
             dest='transformationsDirectory', action='store',
             help='Store transformations in given directory instead of using default one.')
@@ -387,7 +394,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             type='str', dest='fixedImageInputDirectory', help='')
         obligatory_options.add_option('--movingImageInputDirectory', default=None,
             type='str', dest='movingImageInputDirectory', help='')
-        obligatory_options.add_option('--appendTransformationFilenameTemplate', default=None,
+        obligatory_options.add_option('--appendTransformation', default=None,
             type='str', action='append',  nargs=2,
             dest='transformSpec', help='')
 
@@ -396,13 +403,16 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         workflow_settings.add_option('--skipReslice', default=False,
             dest='skipReslice', action='store_const', const=True,
-            help='Supress generating RGB volume.')
+            help='Supress reslicing the images.')
         workflow_settings.add_option('--skipOutputVolumes', default=False,
             dest='skipOutputVolumes', action='store_const', const=True,
             help='Supress generating color volume')
         workflow_settings.add_option('--outputVolumesDirectory', default=None,
             dest='outputVolumesDirectory', action='store',
             help='Store output volumes in given directory instead of using default one.')
+        workflow_settings.add_option('--volumeFilename', default=False,
+            dest='volumeFilename', type='str',
+            help='Filename for the output grayscale volume')
 
         image_processing_options = \
             OptionGroup(parser, "Image processing options")
