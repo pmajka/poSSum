@@ -1073,6 +1073,24 @@ class gnuplot_execution_wrapper(generic_wrapper):
         'remove_plot_file' : pos_parameters.boolean_parameter('remove_plot_file', False, " false && ")
     }
 
+class rigid_transformations_plotter_wapper(generic_wrapper):
+    """
+    #TODO: Provide doctests fore this wrapper.
+    """
+
+    _template = """
+    pos_analyze_transformation.py \
+        {signature} {report_filename} {plot_filename} \
+        {transformation_mask}
+    """
+
+    _parameters = {
+        'signature': pos_parameters.string_parameter('signature', None, '--{_name} {_value}'),
+        'report_filename': pos_parameters.filename_parameter('reportFilename', None, '--{_name} {_value}'),
+        'plot_filename': pos_parameters.filename_parameter('plotFilename', None, '--{_name} {_value}'),
+        'transformation_mask': pos_parameters.filename_parameter('transformation_mask', None, '{_value}'),
+    }
+
 
 if __name__ == '__main__':
     import doctest

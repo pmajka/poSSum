@@ -86,25 +86,28 @@ python pos_sequential_alignment.py \
         --outputVolumesDirectory ~/Downloads/cb_test
 """
 
+
 class sequential_alignment(output_volume_workflow):
     """
     Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
     """
 
     _f = {
-        'raw_image' : pos_parameters.filename('raw_image', work_dir = '00_override_this', str_template = '{idx:04d}.nii.gz'),
-        'src_gray' : pos_parameters.filename('src_gray', work_dir = '00_source_gray', str_template='{idx:04d}.nii.gz'),
-        'src_color' : pos_parameters.filename('src_color', work_dir = '01_source_color', str_template='{idx:04d}.nii.gz'),
-        'part_naming' : pos_parameters.filename('part_naming', work_dir = '02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_'),
-        'part_transf' : pos_parameters.filename('part_transf', work_dir = '02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
-        'comp_transf' : pos_parameters.filename('comp_transf', work_dir = '02_transforms', str_template='ct_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
-        'resliced_gray' : pos_parameters.filename('resliced_gray', work_dir = '04_gray_resliced', str_template='{idx:04d}.nii.gz'),
-        'resliced_gray_mask' : pos_parameters.filename('resliced_gray_mask', work_dir = '04_gray_resliced', str_template='%04d.nii.gz'),
-        'resliced_color' : pos_parameters.filename('resliced_color', work_dir = '05_color_resliced', str_template='{idx:04d}.nii.gz'),
-        'resliced_color_mask' : pos_parameters.filename('resliced_color_mask', work_dir = '05_color_resliced', str_template='%04d.nii.gz'),
-        'out_volume_gray' : pos_parameters.filename('out_volume_gray', work_dir = '06_output_volumes', str_template='{fname}_gray.nii.gz'),
-        'out_volume_color' : pos_parameters.filename('out_volume_color', work_dir = '06_output_volumes', str_template='{fname}_color.nii.gz'),
-        'transform_plot' : pos_parameters.filename('transform_plot', work_dir = '06_output_volumes', str_template='{fname}.png'),
+        'raw_image': pos_parameters.filename('raw_image', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
+        'src_gray': pos_parameters.filename('src_gray', work_dir='00_source_gray', str_template='{idx:04d}.nii.gz'),
+        'src_color': pos_parameters.filename('src_color', work_dir='01_source_color', str_template='{idx:04d}.nii.gz'),
+        'part_naming': pos_parameters.filename('part_naming', work_dir='02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_'),
+        'part_transf': pos_parameters.filename('part_transf', work_dir='02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
+        'comp_transf': pos_parameters.filename('comp_transf', work_dir='02_transforms', str_template='ct_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
+        'comp_transf_mask': pos_parameters.filename('comp_transf', work_dir='02_transforms', str_template='ct_*_Affine.txt'),
+        'resliced_gray': pos_parameters.filename('resliced_gray', work_dir='04_gray_resliced', str_template='{idx:04d}.nii.gz'),
+        'resliced_gray_mask': pos_parameters.filename('resliced_gray_mask', work_dir='04_gray_resliced', str_template='%04d.nii.gz'),
+        'resliced_color': pos_parameters.filename('resliced_color', work_dir='05_color_resliced', str_template='{idx:04d}.nii.gz'),
+        'resliced_color_mask': pos_parameters.filename('resliced_color_mask', work_dir='05_color_resliced', str_template='%04d.nii.gz'),
+        'out_volume_gray': pos_parameters.filename('out_volume_gray', work_dir='06_output_volumes', str_template='{fname}_gray.nii.gz'),
+        'out_volume_color': pos_parameters.filename('out_volume_color', work_dir='06_output_volumes', str_template='{fname}_color.nii.gz'),
+        'transform_plot': pos_parameters.filename('transform_plot', work_dir='06_output_volumes', str_template='{fname}.png'),
+        'transform_report': pos_parameters.filename('transform_report', work_dir='06_output_volumes', str_template='{fname}.txt'),
          }
 
     _usage = ""
@@ -117,7 +120,6 @@ class sequential_alignment(output_volume_workflow):
     __MI_SAMPLES = 16000
     __ALIGNMENT_EPSILON = 1
     __VOL_STACK_SLICE_SPACING = 1
-
 
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
@@ -135,7 +137,7 @@ class sequential_alignment(output_volume_workflow):
         # The reference slice index cannot be the same as either the starting
         # and the last slice index. This will cause an error.
         assert self.options.sliceRange[0] < self.options.sliceRange[2] and \
-               self.options.sliceRange[2] < self.options.sliceRange[1], \
+            self.options.sliceRange[2] < self.options.sliceRange[1], \
             self._logger.error("Incorrect reference slice index. The reference slice index has to be larger than the first slice index and smaller than the last slice index.")
 
         # Validate, if an input images directory is provided,
@@ -144,7 +146,7 @@ class sequential_alignment(output_volume_workflow):
             self._logger.error("No input images directory is provided. Please provide the input images directory (--inputImageDir)")
 
         # Verify, if the provided image-to-image metric is provided.
-        assert self.options.antsImageMetric.lower() in ['mi','cc','msq'], \
+        assert self.options.antsImageMetric.lower() in ['mi', 'cc', 'msq'], \
             self._logger.error("Provided image-to-image metric name is invalid. Three image-to-image metrics are allowed: MSQ, MI, CC.")
 
     def _overrideDefaults(self):
@@ -222,6 +224,8 @@ class sequential_alignment(output_volume_workflow):
         if self.options.skipOutputVolumes is not True:
             self._stack_output_images()
 
+        self._plot_transformations()
+
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
 
@@ -259,14 +263,14 @@ class sequential_alignment(output_volume_workflow):
         # commands.
         for slice_number in self.options.slice_range:
             command = pos_wrappers.alignment_preprocessor_wrapper(
-               input_image = self.f['raw_image'](idx=slice_number),
-               grayscale_output_image = self.f['src_gray'](idx=slice_number),
-               color_output_image = self.f['src_color'](idx=slice_number),
-               registration_roi = self.options.registrationROI,
-               registration_resize = self.options.registrationResize,
-               registration_color = self.options.registrationColor,
-               median_filter_radius = self.options.medianFilterRadius,
-               invert_multichannel = self.options.invertMultichannel)
+                input_image=self.f['raw_image'](idx=slice_number),
+                grayscale_output_image=self.f['src_gray'](idx=slice_number),
+                color_output_image=self.f['src_color'](idx=slice_number),
+                registration_roi=self.options.registrationROI,
+                registration_resize=self.options.registrationResize,
+                registration_color=self.options.registrationColor,
+                median_filter_radius=self.options.medianFilterRadius,
+                invert_multichannel=self.options.invertMultichannel)
             commands.append(copy.deepcopy(command))
 
         self._logger.info("Executing the source slice generation commands.")
@@ -295,15 +299,15 @@ class sequential_alignment(output_volume_workflow):
         # Calculate partial transforms - get partial transformation chain;
         partial_transformation_pairs = \
             map(lambda idx: self._get_slice_pair(idx),
-                            self.options.slice_range)
+            self.options.slice_range)
 
         # Flatten the slices pairs
         partial_transformation_pairs =\
-                list(flatten(partial_transformation_pairs))
+            list(flatten(partial_transformation_pairs))
 
         # Calculate affine transformation for each slices pair
         commands = map(lambda x: self._get_partial_transform(*x),
-                                 partial_transformation_pairs)
+            partial_transformation_pairs)
         self._logger.info("Executing the transformation commands.")
         self.execute(commands)
 
@@ -388,16 +392,16 @@ class sequential_alignment(output_volume_workflow):
         # Define the registration framework for 2D images,
         # without the deformable registration step, etc.
         registration = pos_wrappers.ants_registration(
-            dimension = self.__IMAGE_DIMENSION,
-            outputNaming = output_naming,
-            iterations = self.__DEFORMABLE_ITERATIONS,
-            affineIterations = affine_iterations,
-            continueAffine = None,
-            rigidAffine = use_rigid_transformation,
-            imageMetrics = metrics,
-            histogramMatching = str(self.__HISTOGRAM_MATCHING).lower(),
-            miOption = [metric_parameter, self.__MI_SAMPLES],
-            affineMetricType = affine_metric_type)
+            dimension=self.__IMAGE_DIMENSION,
+            outputNaming=output_naming,
+            iterations=self.__DEFORMABLE_ITERATIONS,
+            affineIterations=affine_iterations,
+            continueAffine=None,
+            rigidAffine=use_rigid_transformation,
+            imageMetrics=metrics,
+            histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
+            miOption=[metric_parameter, self.__MI_SAMPLES],
+            affineMetricType=affine_metric_type)
 
         # Return the registration command.
         return copy.deepcopy(registration)
@@ -592,12 +596,13 @@ class sequential_alignment(output_volume_workflow):
 
     def _get_generic_stack_slice_wrapper(self, mask_type, ouput_filename_type):
         """
-        Return generic command wrapper suitable either for stacking grayscale
-        images or multichannel images. Aproperiate command line wrapper is returned
-        depending on provided `mask_type` and `output_filename_type`.
-        The command line wrapper is prepared mostly based on the command line
-        parameters which are common between both images stacks thus so there is
-        no need to parametrize them individually.
+        Return generic command wrapper suitable either for stacking
+        grayscale images or multichannel images. Aproperiate command line
+        wrapper is returned depending on provided `mask_type` and
+        `output_filename_type`.  The command line wrapper is prepared mostly
+        based on the command line parameters which are common between both
+        images stacks thus so there is no need to parametrize them
+        individually.
 
         :param mask_type: mask type determining which images stack will be
                           converted into a volume.
@@ -618,18 +623,18 @@ class sequential_alignment(output_volume_workflow):
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
-            stack_mask = self.f[mask_type](),
-            slice_start = start,
-            slice_end = stop,
-            slice_step = self.__VOL_STACK_SLICE_SPACING,
-            output_volume_fn = output_filename,
-            permutation_order = self.options.outputVolumePermutationOrder,
-            orientation_code = self.options.outputVolumeOrientationCode,
-            output_type = self.options.outputVolumeScalarType,
-            spacing = self.options.outputVolumeSpacing,
-            origin = self.options.outputVolumeOrigin,
-            interpolation = self.options.setInterpolation,
-            resample = self.options.outputVolumeResample)
+            stack_mask=self.f[mask_type](),
+            slice_start=start,
+            slice_end=stop,
+            slice_step=self.__VOL_STACK_SLICE_SPACING,
+            output_volume_fn=output_filename,
+            permutation_order=self.options.outputVolumePermutationOrder,
+            orientation_code=self.options.outputVolumeOrientationCode,
+            output_type=self.options.outputVolumeScalarType,
+            spacing=self.options.outputVolumeSpacing,
+            origin=self.options.outputVolumeOrigin,
+            interpolation=self.options.setInterpolation,
+            resample=self.options.outputVolumeResample)
 
         # Return the created parser.
         return copy.deepcopy(command)
@@ -642,13 +647,13 @@ class sequential_alignment(output_volume_workflow):
         """
 
         self._logger.info("Stacking the grayscale image stack.")
-        command = self._get_generic_stack_slice_wrapper(\
-                    'resliced_gray_mask','out_volume_gray')
+        command = self._get_generic_stack_slice_wrapper(
+                    'resliced_gray_mask', 'out_volume_gray')
         self.execute(command)
 
         self._logger.info("Stacking the multichannel image stack.")
-        command = self._get_generic_stack_slice_wrapper(\
-                    'resliced_color_mask','out_volume_color')
+        command = self._get_generic_stack_slice_wrapper(
+                    'resliced_color_mask', 'out_volume_color')
         self.execute(command)
 
         self._logger.info("Reslicing is done.")
@@ -664,40 +669,56 @@ class sequential_alignment(output_volume_workflow):
         filename_prefix = "out_"
 
         try:
-            filename_prefix+= "ROI-%s" % "x".join(map(str, self.options.registrationROI))
+            filename_prefix += "ROI-%s" % "x".join(map(str, self.options.registrationROI))
         except:
-            filename_prefix+= "ROI-None"
+            filename_prefix += "ROI-None"
 
         try:
-            filename_prefix+= "_Resize-%s" % "x".join(map(str, self.options.registrationResize))
+            filename_prefix += "_Resize-%s" % "x".join(map(str, self.options.registrationResize))
         except:
-            filename_prefix+= "_Resize-None"
+            filename_prefix += "_Resize-None"
 
-        filename_prefix+= "_Color-%s" % self.options.registrationColor
+        filename_prefix += "_Color-%s" % self.options.registrationColor
 
         try:
-            filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+            filename_prefix += "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
         except:
-            filename_prefix+= "_Median-None"
+            filename_prefix += "_Median-None"
 
-        filename_prefix+= "_Metric-%s" % self.options.antsImageMetric
-        filename_prefix+= "_MetricOpt-%d" % self.options.antsImageMetricOpt
-        filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
+        filename_prefix += "_Metric-%s" % self.options.antsImageMetric
+        filename_prefix += "_MetricOpt-%d" % self.options.antsImageMetricOpt
+        filename_prefix += "_Affine-%s" % str(self.options.useRigidAffine)
 
         try:
-            filename_prefix+= "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
+            filename_prefix += "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
         except:
-            filename_prefix+= "outROI-None"
+            filename_prefix += "outROI-None"
 
         return filename_prefix
+
+    def _plot_transformations(self):
+        """
+        Plots the calculated composed transformations.
+        """
+        # Get the filename prefix
+        filename_prefix = self._get_parameter_based_output_prefix()
+
+        # Define and execute the transformation plotting script.
+        command = pos_wrappers.rigid_transformations_plotter_wapper(
+            signature=filename_prefix,
+            report_filename=self.f['transform_plot'](fname=filename_prefix),
+            plot_filename=self.f['transform_report'](fname=filename_prefix),
+            transformation_mask=self.f['comp_transf_mask']())
+        self.execute(command)
 
     @classmethod
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
+        #TODO: More documentation
 
         obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
         obligatory_options.add_option('--sliceRange', default=None,
-            type='int', dest='sliceRange', nargs = 3,
+            type='int', dest='sliceRange', nargs=3,
             help='Slice range: start, stop, reference. Requires three integers.')
         obligatory_options.add_option('--inputImageDir', default=None,
             type='str', dest='inputImageDir',
@@ -721,7 +742,7 @@ class sequential_alignment(output_volume_workflow):
             help='Supress transformation calculation')
         workflow_options.add_option('--skipSourceSlicesGeneration', default=False,
             dest='skipSourceSlicesGeneration', action='store_const', const=True,
-            help='Supress generation source slices')
+            help='Supress generation of the source slices')
         workflow_options.add_option('--skipReslice', default=False,
             dest='skipReslice', action='store_const', const=True,
             help='Supress generating grayscale volume')

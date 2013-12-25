@@ -86,22 +86,6 @@ class rigid_transformations_plotter(pos_wrappers.generic_wrapper):
         'transformation_report_file': pos_parameters.filename_parameter('transformation_report_file', None),
     }
 
-class rigid_transformations_plotter_wapper(pos_wrappers.generic_wrapper):
-    """
-    #TODO: Provide doctests fore this wrapper.
-    """
-
-    _template = """
-    pos_analyze_transformation.py \
-        {signature} {reportFilename} {plotFilename}
-    """
-
-    _parameters = {
-        'signature': pos_parameters.string_parameter('signature', None, '--{_name} {_value}'),
-        'reportFilename': pos_parameters.filename_parameter('reportFilename', None, '--{_name} {_value}'),
-        'plotFilename': pos_parameters.filename_parameter('plotFilename', None, '--{_name} {_value}'),
-    }
-
 
 class transformation_analyzer(enclosed_workflow):
     """
