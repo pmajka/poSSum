@@ -99,7 +99,7 @@ class sequential_alignment(output_volume_workflow):
         'part_naming': pos_parameters.filename('part_naming', work_dir='02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_'),
         'part_transf': pos_parameters.filename('part_transf', work_dir='02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
         'comp_transf': pos_parameters.filename('comp_transf', work_dir='02_transforms', str_template='ct_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
-        'comp_transf_mask': pos_parameters.filename('comp_transf', work_dir='02_transforms', str_template='ct_*_Affine.txt'),
+        'comp_transf_mask': pos_parameters.filename('comp_transf_mask', work_dir='02_transforms', str_template='ct_*_Affine.txt'),
         'resliced_gray': pos_parameters.filename('resliced_gray', work_dir='04_gray_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_gray_mask': pos_parameters.filename('resliced_gray_mask', work_dir='04_gray_resliced', str_template='%04d.nii.gz'),
         'resliced_color': pos_parameters.filename('resliced_color', work_dir='05_color_resliced', str_template='{idx:04d}.nii.gz'),
@@ -166,6 +166,8 @@ class sequential_alignment(output_volume_workflow):
             self.f['part_transf'].override_dir = \
                 self.options.transformationsDirectory
             self.f['comp_transf'].override_dir = \
+                self.options.transformationsDirectory
+            self.f['comp_transf_mask'].override_dir = \
                 self.options.transformationsDirectory
 
         # The output volumes directory may be overriden as well
@@ -666,7 +668,7 @@ class sequential_alignment(output_volume_workflow):
 
         # As you can see the generation of the output filename prefix is
         # straigthforward but pretty tireingsome.
-        filename_prefix = "out_"
+        filename_prefix = "sequential_alignment_"
 
         try:
             filename_prefix += "ROI-%s" % "x".join(map(str, self.options.registrationROI))
@@ -706,8 +708,8 @@ class sequential_alignment(output_volume_workflow):
         # Define and execute the transformation plotting script.
         command = pos_wrappers.rigid_transformations_plotter_wapper(
             signature=filename_prefix,
-            report_filename=self.f['transform_plot'](fname=filename_prefix),
-            plot_filename=self.f['transform_report'](fname=filename_prefix),
+            report_filename=self.f['transform_report'](fname=filename_prefix),
+            plot_filename=self.f['transform_plot'](fname=filename_prefix),
             transformation_mask=self.f['comp_transf_mask']())
         self.execute(command)
 
