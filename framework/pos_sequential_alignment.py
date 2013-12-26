@@ -668,7 +668,7 @@ class sequential_alignment(output_volume_workflow):
 
         # As you can see the generation of the output filename prefix is
         # straigthforward but pretty tireingsome.
-        filename_prefix = "out_"
+        filename_prefix = "sequential_alignment_"
 
         try:
             filename_prefix += "ROI-%s" % "x".join(map(str, self.options.registrationROI))
