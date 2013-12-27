@@ -61,21 +61,6 @@ COLUMN_MAPPING = {
     'image_hash' : (_FILE_HASH_COLUMN, str),
     'padded_size' : (_PADDING_COLUMN, list)}
 
-def read_image_metadata_from_sheet(attribute, slice_index):
-    column, converter = COLUMN_MAPPING[attribute]
-    row = get_row_index(slice_index)
-    try:
-        value = converter(s.cell_value(row, column))
-    except:
-        value = None
-    return value
-
-def write_image_metadata(attribute, slice_index, value):
-    column, converter = COLUMN_MAPPING[attribute]
-    row = get_row_index(slice_index)
-    if attribute in ['image_size', 'padded_size']:
-        value = "x".join(map(str, value))
-    wb.get_sheet(0).write(row, column, str(value))
 
 def round_custom(value, level = _DEFAULT_PADDING_ROUNDING):
     return math.ceil(value / level + 1) * level
@@ -90,6 +75,22 @@ def md5sum(filename):
         for chunk in iter(lambda: f.read(128*md5.block_size), b''):
             md5.update(chunk)
     return md5.hexdigest()
+
+def read_image_metadata_from_sheet(attribute, slice_index):
+    column, converter = COLUMN_MAPPING[attribute]
+    row = get_row_index(slice_index)
+    try:
+        value = converter(worksheet.cell_value(row, column))
+    except:
+        value = None
+    return value
+
+def write_image_metadata(attribute, slice_index, value):
+    column, converter = COLUMN_MAPPING[attribute]
+    row = get_row_index(slice_index)
+    if attribute in ['image_size', 'padded_size']:
+        value = "x".join(map(str, value))
+    wb.get_sheet(0).write(row, column, str(value))
 
 def get_image_size_pixels(filename):
     im = Image.open(filename)
@@ -149,16 +150,21 @@ def determine_and_set_padding(new_slice = None):
     return pad_w, pad_h
 
 
-b = xlrd.open_workbook('/home/pmajka/Dropbox/administracja/u.xls', formatting_info=True)
-s = b.sheet_by_index(_DEFAULT_SHEET_INDEX)
-wb = xlutils.copy.copy(b)
-stack_size = int(s.cell(*_CELL_STACK_SIZE).value)
+class worksheet_manager(object):
+    def __init__(self, workbook_in, workbook_out):
+        pass
+
+
+
+workbook = xlrd.open_workbook('/home/pmajka/Dropbox/administracja/u.xls', formatting_info=True)
+worksheet = workbook.sheet_by_index(_DEFAULT_SHEET_INDEX)
+wb = xlutils.copy.copy(workbook)
+stack_size = int(worksheet.cell(*_CELL_STACK_SIZE).value)
 print "Stack size", stack_size
 
 
 # Create a dictionary for all the slices within given file
 images = {}
-
 
 # -------------------------------------------------------------------
 # Extract all data related with a given slice.
