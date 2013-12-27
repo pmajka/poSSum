@@ -90,7 +90,7 @@ def write_image_metadata(attribute, slice_index, value):
     row = get_row_index(slice_index)
     if attribute in ['image_size', 'padded_size']:
         value = "x".join(map(str, value))
-    wb.get_sheet(0).write(row, column, str(value))
+    workbook_writer.get_sheet(0).write(row, column, str(value))
 
 def get_image_size_pixels(filename):
     im = Image.open(filename)
@@ -158,7 +158,7 @@ class worksheet_manager(object):
 
 workbook = xlrd.open_workbook('/home/pmajka/Dropbox/administracja/u.xls', formatting_info=True)
 worksheet = workbook.sheet_by_index(_DEFAULT_SHEET_INDEX)
-wb = xlutils.copy.copy(workbook)
+workbook_writer = xlutils.copy.copy(workbook)
 stack_size = int(worksheet.cell(*_CELL_STACK_SIZE).value)
 print "Stack size", stack_size
 
@@ -195,4 +195,4 @@ for slice_index in range(stack_size):
     write_image_metadata('padded_size', slice_index, padded_image_size)
 
 
-wb.save(os.path.join('/home/pmajka','output.xls'))
+workbook_writer.save(os.path.join('/home/pmajka','output.xls'))
