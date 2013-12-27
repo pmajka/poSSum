@@ -92,7 +92,7 @@ class input_image(object):
         return str(self.__dict__)
 
 
-b = xlrd.open_workbook('/home/pmajka/Dropbox/administracja/u.xls')
+b = xlrd.open_workbook('/home/pmajka/Dropbox/administracja/u.xls', formatting_info=True)
 s = b.sheet_by_index(0)
 wb = xlutils.copy.copy(b)
 stack_size = int(s.cell(3,2).value)
