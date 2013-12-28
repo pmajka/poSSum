@@ -180,6 +180,8 @@ class sequential_alignment(output_volume_workflow):
                 self.options.outputVolumesDirectory
             self.f['transform_plot'].override_dir = \
                 self.options.outputVolumesDirectory
+            self.f['transform_report'].override_dir = \
+                self.options.outputVolumesDirectory
 
         # Apart from just setting the custom output volumes directory, one can
         # also customize even the output filename of both, grayscale and
