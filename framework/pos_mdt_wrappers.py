@@ -82,6 +82,18 @@ class test_msq_3(pos_wrappers.generic_wrapper):
         'output_image': 'input_image'
     }
 
+class ants_smoothed_jacobian(pos_wrappers.generic_wrapper):
+    _template = """ANTSJacobian {dimension} {input_image} {output_naming} && \
+            c{dimension}d {output_naming}jacobian.nii.gz {smooth} {resample} \
+            -o {output_naming}jacobian.nii.gz """
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'input_image': pos_parameters.filename_parameter('input_image', None),
+        'output_naming': pos_parameters.filename_parameter('output_naming', None),
+        'resample': pos_parameters.vector_parameter('resample', None, str_template='-resample {_list}%'),
+        'smooth': pos_parameters.vector_parameter('smooth', None, str_template='-smooth {_list}vox')
+        }
 
 class test_msq_2(pos_wrappers.generic_wrapper):
     """
