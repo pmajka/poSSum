@@ -4,7 +4,6 @@
 import os, sys
 
 import xlrd
-import xlwt
 import xlutils.copy
 
 import hashlib
@@ -16,70 +15,105 @@ from PIL import Image
 # TODO: Validate image filenames
 # TODO: Validate masks filenames.
 
-#SOURCE_IMAGES_DIR='/home/pmajka/possum/data/03_02_NN4/66_histology_extracted_slides/'
-SOURCE_IMAGES_DIR='/home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides/'
 _ROW_OF_THE_FIRST_SLICE = 14 - 1
 _DEFAULT_PADDING_ROUNDING = 100
 _DEFAULT_SHEET_INDEX = 0
 
 _CELL_STACK_SIZE = (3, 2)
 
-_SLICE_INDEX_COLUMN = 1 # column B
-_IMAGE_NAME_COLUMN = 2 # column C
-_IMAGE_MASK_COLLUMN = 3 # column D
-_IMAGE_RESOLUTION_COLUMN = 4 # column E
-_REFERENCE_PLATE_INDEX_COLUMN = 5 # column F
-_REFERENCE_COORDINATE_COLUMN = 6 # column G
-_DISTORTION_INDEX_COLUMN = 8 # column I
-_REPLACEMENT_INDEX_COLUMN = 9 # column J
+_SLICE_INDEX_COLUMN = 1  # column B
+_IMAGE_NAME_COLUMN = 2  # column C
+_IMAGE_MASK_COLLUMN = 3  # column D
+_IMAGE_RESOLUTION_COLUMN = 4  # column E
+_REFERENCE_PLATE_INDEX_COLUMN = 5  # column F
+_REFERENCE_COORDINATE_COLUMN = 6  # column G
+_DISTORTION_INDEX_COLUMN = 8  # column I
+_REPLACEMENT_INDEX_COLUMN = 9  # column J
 
-_PROCESSING_RESOLUTION = 11 # column L
-_ROTATION_COLUMN = 12 # column M
-_HORIZONTAL_FLIP_COLLUMN = 13 # column N
-_VERTICAL_FLIP_COLUMN = 14 # column O
+_PROCESSING_RESOLUTION = 11  # column L
+_ROTATION_COLUMN = 12  # column M
+_HORIZONTAL_FLIP_COLLUMN = 13  # column N
+_VERTICAL_FLIP_COLUMN = 14  # column O
 
-_IMAGE_SIZE_COLUMN = 16 # column Q
-_FILE_SIZE_COLUMN = 17 # column R
-_FILE_HASH_COLUMN = 18 # column S
-_PADDING_COLUMN = 19 # column T
+_IMAGE_SIZE_COLUMN = 16  # column Q
+_FILE_SIZE_COLUMN = 17  # column R
+_FILE_HASH_COLUMN = 18  # column S
+_PADDING_COLUMN = 19  # column T
 
 COLUMN_MAPPING = {
-    'image_index' : (_SLICE_INDEX_COLUMN, int),
-    'image_name' : (_IMAGE_NAME_COLUMN, str),
-    'mask_name' : (_IMAGE_MASK_COLLUMN, str),
-    'image_resolution' : (_IMAGE_RESOLUTION_COLUMN, float),
-    'reference_image_index' : (_REFERENCE_PLATE_INDEX_COLUMN, int),
-    'reference_coordinate' : (_REFERENCE_COORDINATE_COLUMN, float),
-    'distortion' : (_DISTORTION_INDEX_COLUMN, str),
-    'replacement_index' : (_REPLACEMENT_INDEX_COLUMN, int),
-    'process_resolution' : (_PROCESSING_RESOLUTION, float),
-    'rotation' : (_ROTATION_COLUMN, int),
-    'horizontal_flip' : (_HORIZONTAL_FLIP_COLLUMN, bool),
-    'vertical_flip' : (_VERTICAL_FLIP_COLUMN, bool),
-    'image_size' : (_IMAGE_SIZE_COLUMN, list),
-    'file_size' : (_FILE_SIZE_COLUMN, int),
-    'image_hash' : (_FILE_HASH_COLUMN, str),
-    'padded_size' : (_PADDING_COLUMN, list)}
+    'image_index': (_SLICE_INDEX_COLUMN, int),
+    'image_name': (_IMAGE_NAME_COLUMN, str),
+    'mask_name': (_IMAGE_MASK_COLLUMN, str),
+    'image_resolution': (_IMAGE_RESOLUTION_COLUMN, float),
+    'reference_image_index': (_REFERENCE_PLATE_INDEX_COLUMN, int),
+    'reference_coordinate': (_REFERENCE_COORDINATE_COLUMN, float),
+    'distortion': (_DISTORTION_INDEX_COLUMN, str),
+    'replacement_index': (_REPLACEMENT_INDEX_COLUMN, int),
+    'process_resolution': (_PROCESSING_RESOLUTION, float),
+    'rotation': (_ROTATION_COLUMN, int),
+    'horizontal_flip': (_HORIZONTAL_FLIP_COLLUMN, bool),
+    'vertical_flip': (_VERTICAL_FLIP_COLUMN, bool),
+    'image_size': (_IMAGE_SIZE_COLUMN, list),
+    'file_size': (_FILE_SIZE_COLUMN, int),
+    'image_hash': (_FILE_HASH_COLUMN, str),
+    'padded_size': (_PADDING_COLUMN, list)}
 
 
-def round_custom(value, level = _DEFAULT_PADDING_ROUNDING):
+def round_custom(value, level=_DEFAULT_PADDING_ROUNDING):
+    """
+    Rounds the provided integer _up_ to nearest 1, 100, 1000 or any other value
+    defined by the `level` arguments.
+
+    :param value: value to be rounded. Integer is required.
+    :type value: int
+
+    :param level: value to multiple of which the `value` number will be
+                  rounded.
+    :type level: int
+
+    :return: `value` rounded up to nearest multiple of `level`
+    :rtype: int
+    """
+
     return math.ceil(value / level + 1) * level
+
 
 def md5sum(filename):
     """
-    Borrowed from
+    Calculate a md5sum of a given file. Code borrowed from
     http://stackoverflow.com/questions/1131220/get-md5-hash-of-big-files-in-python
+
+    :param filename: filename to calculate a md5 sum of
+    :type filename: str
+
+    :return: md5 sum of the `filename`
+    :rtype: str
     """
+
     md5 = hashlib.md5()
-    with open(filename,'rb') as f:
-        for chunk in iter(lambda: f.read(128*md5.block_size), b''):
+
+    with open(filename, 'rb') as f:
+        for chunk in iter(lambda: f.read(128 * md5.block_size), b''):
             md5.update(chunk)
+
     return md5.hexdigest()
 
-def get_image_size_pixels(filename):
-    im = Image.open(filename)
-    width, height = im.size
+
+def read_image_size(filename):
+    """
+    Determines the width and height of the `filename` image.
+
+    :param filename: filename to get a width and height of
+    :type filename: str
+
+    :return: tuple containing the width and height of the image.
+    :rtype: (int, int)
+    """
+
+    image = Image.open(filename)
+    width, height = image.size
     return width, height
+
 
 class input_image(object):
 
@@ -110,38 +144,81 @@ class input_image(object):
     def __str__(self):
         return str(self.__dict__)
 
-
-
-workbook_in = '/home/pmajka/Dropbox/administracja/u.xls'
-
 class worksheet_manager(object):
-    self._metadata_to_load = ['image_index', 'image_name', 'mask_name',
+    """
+    """
+
+    _metadata_to_load = ['image_index', 'image_name', 'mask_name',
         'image_resolution', 'reference_image_index', 'reference_coordinate',
         'replacement_index', 'distortion', 'process_resolution', 'rotation',
         'horizontal_flip', 'vertical_flip']
-    self._metadata_to_establish = ['file_size', 'image_hash', 'image_size']
 
-    def __init__(self, workbook_in, workbook_out):
+    _metadata_to_establish = ['file_size', 'image_hash', 'image_size']
 
+    def __init__(self, workbook_in, workbook_out=None, images_dir=None):
+        """
+        :param workbook_in: path to the workflow to read the data from
+        :type workbook_in: str
+
+        :param workbook_out: path to the workflow to write the updated data to
+        (in when no `workbook_out` is provided, the `workbook_in` is used and
+        the opration is performed 'in place'.
+        :type workbook_out: str
+
+        :param images_dir: directory containing the source images described by
+        the workbook.
+        :type image_dir: str
+        """
+
+        # When no output workbook is provided, use the input workbook as the
+        # output workbook so whole the operation will be perfomed 'in place'.
+        if workbook_out is None:
+            workbook_out = workbook_in
+
+        # Assign all the important things.
         self._workbook_in = workbook_in
         self._workbook_out = workbook_out
+        self._images_dir = images_dir
 
+        # Open the workbook and immediately assign the workbook writer to be
+        # able to edit the opened workbook.
         self._workbook = xlrd.open_workbook(workbook_in, formatting_info=True)
         self._worksheet = self._workbook.sheet_by_index(_DEFAULT_SHEET_INDEX)
         self._workbook_writer = xlutils.copy.copy(self._workbook)
 
-        self._stack_size = int(self._worksheet.cell(*_CELL_STACK_SIZE).value)
-        print "Stack size", self._stack_size
-
         # Create a dictionary for all the slices within given file
+        # This is the MOST IMPORTANT data structure within this class.
         self._images = {}
 
     def process(self):
+        """
+        Execute the pipeline.
+        """
+
+        self.load_settings_from_workbook()
         self.load_metadata_from_workbook()
         self.calculate_padding()
         self.save_workbook()
 
+    def load_settings_from_workbook(self):
+        """
+        Load those data from the workbook which are common for all the images.
+        These could be e.g. masking options, stack size, etc. Anyway we need
+        them before we start processing the individial images.
+
+        In other words -- extract metadata not associated with individual
+        images.
+        """
+
+        # Extract the stack size. Based in the stack size, the number and the
+        # indexes of the consecutive slices.
+        self._stack_size = int(self._worksheet.cell_value(*_CELL_STACK_SIZE))
+
     def load_metadata_from_workbook(self):
+        """
+        Load the metadata associated with individial images.
+        """
+
         for slice_index in range(self._stack_size):
             new_slice = input_image()
 
@@ -150,25 +227,63 @@ class worksheet_manager(object):
                 setattr(new_slice, metadata, value)
 
             for metadata in self._metadata_to_establish:
-                value = getattr(self, ['determine_and_set_' + metadata])(new_slice)
+                attribute_name = 'determine_and_set_' + metadata
+                value = getattr(self, attribute_name)(new_slice)
                 setattr(new_slice, metadata, value)
-                self._write_to_workbook(metadata, slice_index, getattr(new_slice, metadata))
+                self._write_to_workbook(metadata, slice_index, value)
 
             self._images[new_slice.image_index] = new_slice
 
     def save_workbook(self):
-        workbook_writer.save(self._workbook_out)
+        """
+        Save the the updated workflow under the provided filename. See the
+        `__init__` method for documentation on how to set the filename.
+        """
+        self._workbook_writer.save(self._workbook_out)
 
     def calculate_padding(self):
-        padded_image_size = tuple(map(int, self.determine_and_set_padding()))
-        map(lambda x: setattr(x,'padded_size', padded_image_size), self.images.values())
+        """
+        Sets a padded image size. The padded image size is a size which is
+        larger that the largest extent of the images.
 
+        The padded width and height are calculated by taking the maximal width
+        and height among all the images and then rounding them up to a multiple
+        on some base value (e.g. 10, 100, 500, etc.)
+
+        An example might be: 154 -> 200, or 1045 -> 1500.
+        """
+
+        # Get the padding size and update the internal data structure:
+        # `self._images`.
+        padded_size = tuple(map(int, self._get_padding()))
+        map(lambda x: setattr(x,'padded_size', padded_size), self._images.values())
+
+        # Then update the workbook with the calculated padding.
         for slice_index in range(self._stack_size):
-            self._write_to_workbook('padded_size', slice_index, padded_image_size)
+            self._write_to_workbook('padded_size', slice_index, padded_size)
 
     def _read_from_workbook(self, attribute, slice_index):
+        """
+        Read an attribute of a given slice from the workbook.
+
+        :param attribute: attribute to be extracted from the workbook. it is
+            assumed that the attribute name is the valid one.
+        :type attribute: str
+
+        :param slice_index: index of the slice of which the attribute will be
+            extracted.  Of course the provided slice index has to a valid one.
+        :type slice_index: int
+        """
+        # Extract the colum containing the given attribute and the proper
+        # converted function which converts a string value extracted from the
+        # workbook cell into an actual parameters value.
         column, converter = COLUMN_MAPPING[attribute]
+
+        # Get the workbook row describing particular slice index.
         row = self._get_row_index(slice_index)
+
+        # Try to extract the attribute value. If the readout causes an
+        # exception, just accept it and put None as the attribute value.
         try:
             value = converter(self._worksheet.cell_value(row, column))
         except:
@@ -176,36 +291,110 @@ class worksheet_manager(object):
         return value
 
     def _write_to_workbook(self, attribute, slice_index, value):
+        """
+        Write a given attribute value into the workbook file.
+
+        :param attribute: attribute to be extracted from the workbook. it is
+            assumed that the attribute name is the valid one.
+        :type attribute: str
+
+        :param slice_index: index of the slice of which the attribute will be
+            extracted.  Of course the provided slice index has to a valid one.
+        :type slice_index: int
+
+        :param value: Value of the attribute
+        :type value: various, depends on the particular attribute.
+        """
+        # Again, get the column index corresponding to the given attribute, as
+        # well as the converter function (which will not be used in this
+        # function) and the row describing given slice.
         column, converter = COLUMN_MAPPING[attribute]
         row = self._get_row_index(slice_index)
 
+        # Some paramteres are threaed in a different way than the other.
         if attribute in ['image_size', 'padded_size']:
             value = "x".join(map(str, value))
 
-        workbook_writer.get_sheet(0).write(row, column, str(value))
+        # Put the parameter value into the proper cell.
+        self._workbook_writer.get_sheet(0).write(row, column, str(value))
 
     def _get_row_index(self, slice_index):
+        """
+        Get the workbook row index corresponding to a given slice inde.
+
+        :param slice_index: index of the slice for which the row index will be
+            determined.
+        :type slice_index: int
+
+        :return: slice index
+        :rtype: int
+        """
         return _ROW_OF_THE_FIRST_SLICE + slice_index
 
     def determine_and_set_file_size(self, new_slice):
-        filename = os.path.join(SOURCE_IMAGES_DIR, new_slice.image_name)
+        """
+        Get the size of the image file.
+
+        :param new_slice: slice for which the size of the filename will be determined.
+        :type new_slice: `input_image`
+
+        :return: size of the file in bytes.
+        :rtype: int
+        """
+        filename = os.path.join(self._images_dir, new_slice.image_name)
         stat = os.stat(filename)
         return stat.st_size
 
     def determine_and_set_image_hash(self, new_slice):
-        filename = os.path.join(SOURCE_IMAGES_DIR, new_slice.image_name)
+        """
+        Get the md5 checksum of the file corresponding to the given slice.
+
+        :param new_slice: slice for which the md5 checksum will be caluculated.
+        :type new_slice: `input_image`
+
+        :return: md5 sum of the image file.
+        :rtype: str
+        """
+        filename = os.path.join(self._images_dir, new_slice.image_name)
         return md5sum(filename)
 
     def determine_and_set_image_size(self, new_slice):
-        filename = os.path.join(SOURCE_IMAGES_DIR, new_slice.image_name)
-        return get_image_size_pixels(filename)
+        """
+        Get the image size (width and height of the image file).
 
-    def determine_and_set_padding(self, new_slice=None):
-        max_w = max(map(lambda x: x.image_size[0], self.images.values()))
-        max_h = max(map(lambda x: x.image_size[1], self.images.values()))
+        :param new_slice: slice to determine the size of
+        :type new_slice: `input_image`
+
+        :return: tuple containing the width and height of the image.
+        :rtype: (int, int)
+        """
+        filename = os.path.join(self._images_dir, new_slice.image_name)
+        return read_image_size(filename)
+
+    def _get_padding(self, new_slice=None):
+        """
+        Get the padding size for the image stack.
+
+        :param new_slice: Leave the default value. The actual parameter value
+        is never used and the function header looks the way it looks only for
+        compatibility reasons.
+        :type new_slice: None, just leave it as it is.
+
+        :return: a padded images size (which is common for the whole image
+            stack).
+        :rtype: (int, int)
+        """
+        max_w = max(map(lambda x: x.image_size[0], self._images.values()))
+        max_h = max(map(lambda x: x.image_size[1], self._images.values()))
         pad_w = round_custom(max_w)
         pad_h = round_custom(max_h)
         return pad_w, pad_h
 
+
 if __name__ == "__main__":
-    pass
+    SOURCE_IMAGES_DIR = \
+        '/home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides/'
+    workbook_in = '/home/pmajka/Dropbox/administracja/u.xls'
+    workbook_out = '/home/pmajka/u.xls'
+    w = worksheet_manager(workbook_in, workbook_out, images_dir=SOURCE_IMAGES_DIR)
+    w.process()
