@@ -11,9 +11,6 @@ import math
 
 from PIL import Image
 
-# TODO: Validate column names
-# TODO: Validate image filenames
-# TODO: Validate masks filenames.
 
 _ROW_OF_THE_FIRST_SLICE = 14 - 1
 _DEFAULT_PADDING_ROUNDING = 100
@@ -219,19 +216,30 @@ class worksheet_manager(object):
         Load the metadata associated with individial images.
         """
 
+        # Iterate over all slices defined in the workbook and read the metadata
+        # form the workbook cells. The metadata will be saved into the
+        # `input_image` data structures ultimately passed for further
+        # manipulation in next steps of the workflow.
         for slice_index in range(self._stack_size):
             new_slice = input_image()
 
+            # There are two kinds of metadata. The first kind are the values
+            # which can be simply read from the workbook. They are processed
+            # below.
             for metadata in self._metadata_to_load:
                 value = self._read_from_workbook(metadata, slice_index)
                 setattr(new_slice, metadata, value)
 
+            # The other kind of metadata are the attributes which require
+            # additional calculations or processing. They are dealt with in the
+            # code below.
             for metadata in self._metadata_to_establish:
                 attribute_name = 'determine_and_set_' + metadata
                 value = getattr(self, attribute_name)(new_slice)
                 setattr(new_slice, metadata, value)
                 self._write_to_workbook(metadata, slice_index, value)
 
+            # Finally the given image is appended to the global image stack.
             self._images[new_slice.image_index] = new_slice
 
     def save_workbook(self):
