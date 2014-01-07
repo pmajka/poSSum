@@ -718,7 +718,6 @@ class sequential_alignment(output_volume_workflow):
     @classmethod
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
-        #TODO: More documentation
 
         obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
         obligatory_options.add_option('--sliceRange', default=None,

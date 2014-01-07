@@ -17,6 +17,8 @@ _DEFAULT_PADDING_ROUNDING = 100
 _DEFAULT_SHEET_INDEX = 0
 
 _CELL_STACK_SIZE = (3, 2)
+_CELL_SLICE_THICKNESS = (5, 2)
+_CELL_SLICING_PLANE  = (4, 2)
 
 _SLICE_INDEX_COLUMN = 1  # column B
 _IMAGE_NAME_COLUMN = 2  # column C
@@ -136,7 +138,7 @@ class input_image(object):
         self.padded_size = None
 
     def get_downsampling(self):
-        return self.process_resolution / self.image_resolution
+        return int((self.image_resolution / self.process_resolution) * 100)
 
     def __str__(self):
         return str(self.__dict__)
@@ -210,6 +212,8 @@ class worksheet_manager(object):
         # Extract the stack size. Based in the stack size, the number and the
         # indexes of the consecutive slices.
         self._stack_size = int(self._worksheet.cell_value(*_CELL_STACK_SIZE))
+        self._slice_thickness = float(self._worksheet.cell_value(*_CELL_SLICE_THICKNESS))
+        self._slicing_plane = str(self._worksheet.cell_value(*_CELL_SLICING_PLANE))
 
     def load_metadata_from_workbook(self):
         """
