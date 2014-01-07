@@ -699,6 +699,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
             -o {output_volume_fn} \
             {slice_start} {slice_end} {slice_step} \
             --permutation {permutation_order} \
+            {flip_axes} \
             --orientationCode {orientation_code} \
             --setType {output_type} \
             --setSpacing {spacing} \
@@ -714,12 +715,14 @@ class stack_and_reorient_wrapper(generic_wrapper):
         'output_volume_fn': filename_parameter('output_volume_fn', None),
         'permutation_order': list_parameter('permutation_order', [0, 1, 2], str_template='{_list}'),
         'orientation_code': string_parameter('orientation_code', 'RAS'),
+        'flip_axes': list_parameter('flipAxes', None, str_template='--{_name} {_list}'),
         'output_type': string_parameter('output_type', 'uchar'),
         'spacing': list_parameter('spacing', [1., 1., 1.], str_template='{_list}'),
         'origin': list_parameter('origin', [0, 0, 0], str_template='{_list}'),
         'interpolation': string_parameter('interpolation', None, str_template='--{_name} {_value}'),
         'resample': list_parameter('resample', [], str_template='--{_name} {_list}')
     }
+
 
 
 class alignment_preprocessor_wrapper(generic_wrapper):
