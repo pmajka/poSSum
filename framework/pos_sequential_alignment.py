@@ -50,26 +50,39 @@ Syntax
 
 .. highlight:: bash
 
+
 Summary
 -------
 
 A minimum working example of the sequential alignment script ::
+
     $python pos_sequential_alignment.py \
-    [start stop ref] --sliceRange 50 70 60
+    [start stop ref] --sliceRange 50 70 60 \
     [directory]      --inputImageDir <directory_name>
+
 
 Assumptions according the input images
 --------------------------------------
 
 All the input images are expected to be in one of the formats described below:
 
-    1) Three channel, 8-bit per channel RGB image. A 8-bit PNG image would be a
-       good example here.
-    2) Single channel 8-bit (0-255) image, for instance a 8-bit grayscale TIFF
-       file.
+    1) Three channel, 8-bit per channel RGB image in NIFTII format.
+    2) Single channel 8-bit (0-255) image, for instance a 8-bit grayscale image
+    in NIFTII format.
 
-Obviously, the spacing as well as the image origin and directions does matter.
+No other input image type is supported, trying to apply any other image
+specification will surely cause errors. Obviously, the spacing as well as the
+image origin and directions does matter. All transformations are generated
+based on the input images reference system thus, the best way is to supply
+Nifti files as the input images.
 
+
+Input images naming scheme
+--------------------------
+
+ - Images in order
+ - Continous naming
+ - Reference slice.
 
 python pos_sequential_alignment.py \
         --inputImageDir /home/pmajka/Downloads/cb_test/ \
@@ -89,7 +102,6 @@ python pos_sequential_alignment.py \
 
 class sequential_alignment(output_volume_workflow):
     """
-    Input images: three channel rgb images (uchar per channel) in niftii format. That's it.
     """
 
     _f = {
@@ -717,6 +729,9 @@ class sequential_alignment(output_volume_workflow):
 
     @classmethod
     def _getCommandLineParser(cls):
+        """
+        #TODO: Consider adding additional stacks.
+        """
         parser = output_volume_workflow._getCommandLineParser()
 
         obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
@@ -733,7 +748,7 @@ class sequential_alignment(output_volume_workflow):
             help='Directory to which registration results will be sored.')
         workflow_options.add_option('--grayscaleVolumeFilename', default=False,
             dest='grayscaleVolumeFilename', type='str',
-            help='Filename for the output grayscale volume')
+            help='Filename for the output grayscale volume.')
         workflow_options.add_option('--multichannelVolumeFilename', default=False,
             dest='multichannelVolumeFilename', type='str',
             help='Filename for the output multichannel volume.')

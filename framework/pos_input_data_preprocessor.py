@@ -11,6 +11,9 @@ import math
 
 from PIL import Image
 
+"""
+TODO: How to use this damn file? How to provide configuration?
+"""
 
 _ROW_OF_THE_FIRST_SLICE = 14 - 1
 _DEFAULT_PADDING_ROUNDING = 100
