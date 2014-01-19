@@ -20,8 +20,11 @@ _DEFAULT_PADDING_ROUNDING = 100
 _DEFAULT_SHEET_INDEX = 0
 
 _CELL_STACK_SIZE = (3, 2)
-_CELL_SLICE_THICKNESS = (5, 2)
 _CELL_SLICING_PLANE  = (4, 2)
+_CELL_SLICE_THICKNESS = (5, 2)
+
+_ATLAS_PLATE_EXTENT = (2, 5)
+_ATLAS_PLATE_SPACING = (3, 5)
 
 _SLICE_INDEX_COLUMN = 1  # column B
 _IMAGE_NAME_COLUMN = 2  # column C
@@ -217,6 +220,11 @@ class worksheet_manager(object):
         self._stack_size = int(self._worksheet.cell_value(*_CELL_STACK_SIZE))
         self._slice_thickness = float(self._worksheet.cell_value(*_CELL_SLICE_THICKNESS))
         self._slicing_plane = str(self._worksheet.cell_value(*_CELL_SLICING_PLANE))
+
+        # Also, extract the information about the reference atlas
+        self._atlas_plate_spacing = self._worksheet.cell_value(*_ATLAS_PLATE_SPACING)
+        self._atlas_plate_size = \
+            map(int, self._worksheet.cell_value(*_ATLAS_PLATE_EXTENT).strip().split("x"))
 
     def load_metadata_from_workbook(self):
         """
