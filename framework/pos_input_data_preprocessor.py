@@ -23,8 +23,9 @@ _CELL_STACK_SIZE = (3, 2)
 _CELL_SLICING_PLANE  = (4, 2)
 _CELL_SLICE_THICKNESS = (5, 2)
 
-_ATLAS_PLATE_EXTENT = (2, 5)
-_ATLAS_PLATE_SPACING = (3, 5)
+_ATLAS_USE_REFERENCE = (2, 5)
+_ATLAS_PLATE_EXTENT = (3, 5)
+_ATLAS_PLATE_SPACING = (4, 5)
 
 _SLICE_INDEX_COLUMN = 1  # column B
 _IMAGE_NAME_COLUMN = 2  # column C
@@ -222,9 +223,14 @@ class worksheet_manager(object):
         self._slicing_plane = str(self._worksheet.cell_value(*_CELL_SLICING_PLANE))
 
         # Also, extract the information about the reference atlas
-        self._atlas_plate_spacing = self._worksheet.cell_value(*_ATLAS_PLATE_SPACING)
-        self._atlas_plate_size = \
-            map(int, self._worksheet.cell_value(*_ATLAS_PLATE_EXTENT).strip().split("x"))
+        # We can use the atlas or not. Depending on the xls content, a proper
+        # switch is defined.
+        self._use_atlas = False
+        if bool(int(self._worksheet.cell_value(*_ATLAS_USE_REFERENCE))):
+            self._use_atlas = True
+            self._atlas_plate_spacing = self._worksheet.cell_value(*_ATLAS_PLATE_SPACING)
+            self._atlas_plate_size = \
+                map(int, self._worksheet.cell_value(*_ATLAS_PLATE_EXTENT).strip().split("x"))
 
     def load_metadata_from_workbook(self):
         """

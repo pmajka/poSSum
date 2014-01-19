@@ -209,7 +209,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         #TODO: Check if the provided images list actually contains the
         # reference images. If it does not, turn of the option the 'reference
         # processing' option as there is nothing to do.
-        if self.options.doReference:
+        if self.options.doReference and self.w._use_atlas:
             self._process_reference()
 
         # Remasking means applying a certain type of mask to the input rgb
@@ -518,7 +518,11 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             output_namings.append(self.f['seq_slice_to_ref_mask']())
 
         # If reference-to-slice images are required, extract them.
-        if self.options.useReferenceToSliceMask:
+        # We perform the slice extraction only when the
+        # 'useReferenceToSliceMask'
+        # as well as the proper "use atlas" switch in the excel file are
+        # defined.
+        if self.options.useReferenceToSliceMask and self.w._use_atlas:
             input_names.append(self.f['source_stacks'](stack_name='atlas_masked'))
             input_names.append(self.f['source_stacks'](stack_name='atlas_mask'))
             output_namings.append(self.f['seq_ref_to_slice']())
