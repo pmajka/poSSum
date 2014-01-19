@@ -206,9 +206,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         if self.options.doSourceStacking:
             self._stack_images_and_masks()
 
-        #TODO: Check if the provided images list actually contains the
-        # reference images. If it does not, turn of the option the 'reference
-        # processing' option as there is nothing to do.
+        # Process the reference dataset processing only when it is actually
+        # enabled by the command line parameter as well as by the contents of
+        # the excell file.
         if self.options.doReference and self.w._use_atlas:
             self._process_reference()
 
