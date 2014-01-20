@@ -68,18 +68,21 @@ class convert_to_niftiis(pos_wrappers.generic_wrapper):
     """
 
     _template = """c2d -verbose -mcs {input_rgb} \
-    -foreach  {origin} {spacing} {type} -endfor -omc 3 {output_rgb_full} \
+    -foreach  {origin} {type} {native_spacing} -endfor -omc 3 {output_rgb_full} \
     -foreach {resample} {type} -endfor -omc 3 {output_rgb_small};
-    c2d -verbose {input_mask} {interpolation} {origin} {spacing} {type} {resample} -replace 0 1 255 0 -o {output_mask} ;\
+    c2d -verbose {input_mask} {interpolation} {origin} {resample} {type} \-replace 0 1 255 0 -o {output_mask} ;\
     rm {input_rgb} {input_mask}"""
 
+    #TODO: Check is the 'spacing is really important'
+    #    'spacing': pos_parameters.vector_parameter('spacing', [1,1], '-{_name} {_list}mm'),
     _parameters = {
         'input_rgb': pos_parameters.filename_parameter('input_rgb', None),
+        'origin': pos_parameters.vector_parameter('origin', [0,0], '-{_name} {_list}mm'),
+        'type': pos_parameters.string_parameter('type', 'uchar', '-{_name} {_value}'),
+        'native_spacing': pos_parameters.vector_parameter('spacing', None, '-{_name} {_list}mm'),
+        'output_rgb_full': pos_parameters.filename_parameter('output_rgb_full', None),
         'resample': pos_parameters.value_parameter('resample', None, '-{_name} {_value}%'),
         'origin': pos_parameters.vector_parameter('origin', [0,0], '-{_name} {_list}mm'),
-        'spacing': pos_parameters.vector_parameter('spacing', [1,1], '-{_name} {_list}mm'),
-        'type': pos_parameters.string_parameter('type', 'uchar', '-{_name} {_value}'),
-        'output_rgb_full': pos_parameters.filename_parameter('output_rgb_full', None),
         'output_rgb_small': pos_parameters.filename_parameter('output_rgb_small', None),
         'input_mask': pos_parameters.filename_parameter('input_mask', None),
         'interpolation': pos_parameters.string_parameter('interpolation', 'NearestNeighbor', '-{_name} {_value}'),
@@ -225,14 +228,46 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
     def _process_reference(self):
         """
-        Process the reference images (description of assuptions...1.uchar / graysacle/rgb)
+
+        Process the reference images. The reference processing rutine consists
+        of the following activities:
+
+            1. Process each individual reference images ine the following
+            order:
+
+                a. Resample the reference images to match the resolution of the
+                downsampled experimental images.
+
+                b. Extent (or reduce the canvas) to the size passed as a
+                command line parameter. If no custom canvas size was requested
+                than the extent is not altered. Set the background color and
+                the gravity settings as well. Save the images processed this
+                way as a 256 color png image.
+
+                c. Continue processing the images describes in the previous
+                point, threshold it and save the resulting images as a mask
+                (which is called the reference-to-slice image mask and which
+                can be easily midified further).
+
+                d. Stack both the images and the masks in the similar way as
+                the experimental images.
+
+                e. Multiply the rgb stack by the mask image.
         """
+
+        # Extract the slicing plane index:
         slicing_plane_index = self.slicing_planes_settings[self.__slicing_plane]['axis']
+
+        # Extract the extreme indexed (indexes of the first and the last slices
+        # of the stack).
         first_slice, last_slice = self._get_extreme_slices()
+
+        # Get the spacing of the downsampled moving images.
         process_resolution = self.w._images[first_slice].process_resolution
         reference_resize_factor = (self.w._atlas_plate_spacing /
                                    process_resolution) * 100
 
+        # Process the individual reference images.
         commands = []
         for index, image in self.w._images.items():
             reference_index = image.reference_image_index
@@ -248,6 +283,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             commands.append(copy.copy(command))
         self.execute(commands)
 
+        # Stack the reference images and their masks into 3d stacks.
         commands = []
         command = self._get_stacking_wrapper(
             input_mask = self.f['source_ref_imgs_fmask'](),
@@ -255,6 +291,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         commands.append(copy.copy(command))
         self.execute(commands)
 
+        # The same as above but this time the masks.
         commands = []
         command = self._get_stacking_wrapper(
             input_mask = self.f['source_ref_imgs_mask_fmask'](),
@@ -262,6 +299,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         commands.append(copy.copy(command))
         self.execute(commands)
 
+        # Remask the reference image.
         commands = []
         command = self.get_remask_wrapper("atlas_mask", "atlas_rgb", "atlas_masked")
         commands.append(copy.copy(command))
@@ -343,16 +381,31 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # image.
         resampling_factor = self.w._images.values()[0].get_downsampling()
 
+        # Ok, few words of explanation here. Three niftii filer are crated
+        # from a single image. See the docstrings from details.
         commands = []
         for index, image in self.w._images.items():
-            # TODO: Origin by different gravity.
-            #ox = image.process_resolution * abs(image.image_size[0] - image.padded_size[0])/2
-            #oy = image.process_resolution * abs(image.image_size[1] - image.padded_size[1])/2
+            # Get the native resolution per images as it can be different for
+            # each individual slice images (imagine that some of them could be
+            # high resolution version and some other might be downsampled
+            # versions or something of this manner.
+            # Note that the resolution passed to the wrapper is a two element
+            # array
+            native_resolution = [image.image_resolution]*2
+
+            # Some more things to notice: the origin is set only for the full
+            # sized images. Why? To maintain spatial corespondence between the
+            # both of the images.
+
+            # TODO: Check if the spacing is actually a required artument to
+            # pass since it is not used in the wrapper.
+            #   spacing = [image.process_resolution]*2,
+
             command = convert_to_niftiis(
                 input_rgb = self.f['raw_png_full'](idx=index),
+                native_spacing = native_resolution,
                 resample = resampling_factor,
                 origin = [0, 0],
-                spacing = [image.process_resolution]*2,
                 output_rgb_small = self.f['source_images_downsampled'](idx=index),
                 output_rgb_full = self.f['source_images_fullsize'](idx=index),
                 input_mask = self.f['raw_png_masks'](idx=index),
@@ -362,45 +415,57 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
     def _stack_images_and_masks(self):
         """
-        Ok, once we have the the images it is time to stack them into 3d Niftii stacks.
+        Ok, once we have the the images it is time to stack them into 3d Niftii
+        stacks.  The downsampled rgb images are stacked into RGB niftii staick
+        by default. The source stack mask is stacked into 3d stack as well.
 
+        The remaining two volumes are stacked only upon request
+        (useSliceToSliceMask and useSliceToReferenceMask).
         """
+
         # Collect all the commands into a single batch instead of executing
         # them manually. Collecting the commands into a batch makes possible to
         # switch their execution on and off with the --dry-run.
-        commands = []
+        # This is the reason why all the commands are collected into separate
+        # batches.
+
+        # TODO: make the code more sustinct.
 
         # Stack the RGB image into the stack.
+        commands = []
         command = self._get_stacking_wrapper(
             input_mask = self.f['source_images_downsampled_fmask'](),
             output_filename = self.f['source_stacks'](stack_name="rgb"))
         commands.append(copy.copy(command))
+        self.execute(commands)
 
         # Stack the masks of the downsampled input images.
+        commands = []
         command = self._get_stacking_wrapper(
             input_mask = self.f['source_masks_fmask'](),
             output_filename = self.f['source_stacks'](stack_name="mask"))
         commands.append(copy.copy(command))
         self.execute(commands)
 
-        commands = []
         # Ok, if we are using slice-to-slice masks then we need to create
         # proper slice to slice mask image Create the slice-to-slice mask
         if self.options.useSliceToSliceMask:
+            commands = []
             command = pos_wrappers.copy_wrapper(
                 source = [self.f['source_stacks'](stack_name="mask")],
                 target = self.f['source_stacks'](stack_name="slice_to_slice_mask"))
             commands.append(copy.copy(command))
+            self.execute(commands)
 
         # Similarly, if we are planning to use a slice-to-reference mask
         # Then create the slice-to-reference mask.
         if self.options.useSliceToReferenceMask:
+            commands = []
             command = pos_wrappers.copy_wrapper(
                 source = [self.f['source_stacks'](stack_name="mask")],
                 target = self.f['source_stacks'](stack_name="slice_to_reference_mask"))
             commands.append(copy.copy(command))
-
-        self.execute(commands)
+            self.execute(commands)
 
     def _get_stacking_wrapper(self, input_mask, output_filename):
 
@@ -651,6 +716,5 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
 if __name__ == '__main__':
     options, args = volume_reconstruction_preprocessor.parseArgs()
-    options.workDir = "/home/pmajka/Downloads/test/"
     se = volume_reconstruction_preprocessor(options, args)
     se.launch()
