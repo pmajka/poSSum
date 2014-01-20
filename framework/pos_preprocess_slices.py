@@ -70,8 +70,8 @@ class convert_to_niftiis(pos_wrappers.generic_wrapper):
     _template = """c2d -verbose -mcs {input_rgb} \
     -foreach  {origin} {type} {native_spacing} -endfor -omc 3 {output_rgb_full} \
     -foreach {resample} {type} -endfor -omc 3 {output_rgb_small};
-    c2d -verbose {input_mask} {interpolation} {origin} {resample} {type} \-replace 0 1 255 0 -o {output_mask} ;\
-    rm {input_rgb} {input_mask}"""
+    c2d -verbose {input_mask} {interpolation} {origin} {resample} {type} \
+    -replace 0 1 255 0 -o {output_mask}; rm {input_rgb} {input_mask}"""
 
     _parameters = {
         'input_rgb': pos_parameters.filename_parameter('input_rgb', None),
@@ -89,6 +89,9 @@ class convert_to_niftiis(pos_wrappers.generic_wrapper):
 
 
 class preprocess_reference(pos_wrappers.generic_wrapper):
+    """
+    """
+
     _template = """convert {input_image} \
         {resize} {background} {gravity} {extent} -alpha off -colors 256 \
         \( +clone -write {output_image} +delete \) \
@@ -158,6 +161,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # TODO: Explain what does it mean: default mask, slice-to-slice mask
         # and slice-to-reference mask.
 
+        # PrintHeader exvivo_48h.nii.gz  | grep qoffset_x | cut -f2 -d= | tr -d
+        # " "
+
     """
 
     _f = {
@@ -198,13 +204,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             self.options.outputWorkbook,
             images_dir = self.options.inputImagesDir)
         self.w.process()
-
-        # -----------------------------------------------------------
-        # Then, create aliases to some important constants.
-
-        self.__stack_spacing = self.w._slice_thickness
-        self.__slicing_plane = self.w._slicing_plane
-        self.__background = [0, self.options.maskingBackground]
 
         # -----------------------------------------------------------
         # Then start processing the dataset.
@@ -262,12 +261,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
                 e. Multiply the rgb stack by the mask image.
         """
 
-        # Extract the slicing plane index:
-        slicing_plane_index = self.slicing_planes_settings[self.__slicing_plane]['axis']
-
         # Extract the extreme indexed (indexes of the first and the last slices
         # of the stack).
-        first_slice, last_slice = self._get_extreme_slices()
+        first_slice, last_slice = self.slices_span
 
         # Get the spacing of the downsampled moving images.
         process_resolution = self.w._images[first_slice].process_resolution
@@ -309,7 +305,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # Remask the reference image.
         commands = []
-        command = self.get_remask_wrapper("atlas_mask", "atlas_rgb", "atlas_masked")
+        command = self._get_remask_wrapper("atlas_mask", "atlas_rgb", "atlas_masked")
         commands.append(copy.copy(command))
         self.execute(commands)
 
@@ -384,11 +380,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         """
 
-        # Ok, get the resampling factor, which is simple downsampling ratio
-        # telling how much downsample the raw image to get the downsampled
-        # image.
-        resampling_factor = self.w._images.values()[0].get_downsampling()
-
         # Ok, few words of explanation here. Three niftii filer are crated
         # from a single image. See the docstrings from details.
         commands = []
@@ -401,13 +392,15 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             # array
             native_resolution = [image.image_resolution]*2
 
+            # Ok, get the resampling factor, which is simple downsampling ratio
+            # telling how much downsample the raw image to get the downsampled
+            # image. Again, the reampling factor might be different for
+            # different images.
+            resampling_factor = image.get_downsampling()
+
             # Some more things to notice: the origin is set only for the full
             # sized images. Why? To maintain spatial corespondence between the
             # both of the images.
-
-            # TODO: Check if the spacing is actually a required artument to
-            # pass since it is not used in the wrapper.
-            #   spacing = [image.process_resolution]*2,
 
             command = convert_to_niftiis(
                 input_rgb = self.f['raw_png_full'](idx=index),
@@ -492,13 +485,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         :rtype: `pos_wrappers.stack_and_reorient_wrapper`
         """
 
-        first_slice, last_slice = self._get_extreme_slices()
-        output_stack_spacing = self._get_output_slice_spacing()
-
-        stack_permutation_order = \
-                self.slicing_planes_settings[self.__slicing_plane]['permutation']
-        stack_flip_axes = \
-            self.slicing_planes_settings[self.__slicing_plane]['flip']
+        first_slice, last_slice = self.slices_span
 
         # TODO: generate the output origin to be compatibile with the input
         # slices. Now, the output volume will be spatially incompatibile with
@@ -506,45 +493,22 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # be supplied as the command line option.
         # TODO: Update, this requires quite a lot of work but it will be quite
         # usefull :).
+        # XXX: Note that self.output_volume_spacing is something different than
+        # self.options.output....blabla.
         command = pos_wrappers.stack_and_reorient_wrapper(
             stack_mask = input_mask,
             slice_start = first_slice,
             slice_end = last_slice,
             slice_step = 1,
             output_volume_fn = output_filename,
-            permutation_order = stack_permutation_order,
-            flip_axes = stack_flip_axes,
+            permutation_order = self.permutation,
+            flip_axes = self.flipping,
             orientation_code = self.options.outputVolumeOrientationCode,
-            spacing = output_stack_spacing,
+            spacing = self.output_volume_spacing,
             origin = self.options.outputVolumeOrigin)
         return copy.copy(command)
 
-    def _get_extreme_slices(self):
-        """
-        Extract the extreme indexed (indexes of the first and the last slices
-        of the stack).
-
-        :return: Indexed of the first and the last slices in the image stack.
-        :rtype: (int, int)
-        """
-        first_slice = min(map(lambda x: x.image_index, self.w._images.values()))
-        last_slice = max(map(lambda x: x.image_index, self.w._images.values()))
-
-        return first_slice, last_slice
-
-    def _get_output_slice_spacing(self):
-        """
-        Returns the output volume spacing based on the slices parameters.
-        """
-        first_slice, last_slice = self._get_extreme_slices()
-        in_plane_spacing = self.w._images[first_slice].process_resolution
-        output_stack_spacing = [in_plane_spacing]*3
-        # TODO: Make it more pretty
-        output_stack_spacing[self.slicing_planes_settings[self.__slicing_plane]['axis']] = self.__stack_spacing
-
-        return output_stack_spacing
-
-    def get_remask_wrapper(self, mask_file, image_file, output_file):
+    def _get_remask_wrapper(self, mask_file, image_file, output_file):
         """
         Returns a remasking command line wrapper customised by the provided
         arguments.
@@ -563,7 +527,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         wrapper = remask_wrapper(
             mask_file = self.f['source_stacks'](stack_name=mask_file), \
             input_volume = self.f['source_stacks'](stack_name=image_file), \
-            replace = self.__background, \
+            replace = [0, self.options.maskingBackground],
             masked_volume = self.f['source_stacks'](stack_name=output_file))
         return copy.copy(wrapper)
 
@@ -578,18 +542,18 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         commands = []
 
         # The regular masked volume is always generated.
-        command = self.get_remask_wrapper("mask", "rgb", "rbg_masked")
+        command = self._get_remask_wrapper("mask", "rgb", "rbg_masked")
         commands.append(command)
 
         # If required, the slice-to-slice masked volume is generated.
         if self.options.useSliceToSliceMask:
-            command = self.get_remask_wrapper("slice_to_slice_mask",\
+            command = self._get_remask_wrapper("slice_to_slice_mask",\
                 "rgb", "rbg_slice_to_slice_masked")
             commands.append(command)
 
         # If required, the slice-to-reference mask is generated.
         if self.options.useSliceToReferenceMask:
-            command = self.get_remask_wrapper("slice_to_reference_mask",\
+            command = self._get_remask_wrapper("slice_to_reference_mask",\
                 "rgb", "rbg_slice_to_reference_masked")
             commands.append(command)
 
@@ -606,10 +570,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # Get the indexes of the extreme slices,
         # which means the index of the first slice and the index of the last
         # slice of the stack.
-        first_slice, last_slice = self._get_extreme_slices()
-
-        # Extract the index of the slicing plane
-        slicing_plane_index = self.slicing_planes_settings[self.__slicing_plane]['axis']
+        first_slice, last_slice = self.slices_span
 
         # The default volume is resliced automatically
         input_names = [
@@ -649,14 +610,82 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         commands = []
         for input_name, output_naming_scheme in zip(input_names, output_namings):
             command = pos_deformable_wrappers.preprocess_slice_volume(
-                input_image = input_name,\
-                output_naming = output_naming_scheme,\
-                slicing_plane = slicing_plane_index,\
+                input_image = input_name,
+                output_naming = output_naming_scheme,
+                slicing_plane = self.slicing_plane,
                 start_slice = 0,
                 end_slice = last_slice,
                 shift_indexes = first_slice)
             commands.append(copy.copy(command))
         self.execute(commands)
+
+    # Some convenient functions below: properties to make all the code more
+    # prettier.
+
+    def __get_slicing_plane(self):
+        """
+        Extracts and returns the slicing plane index in RAS convention,
+        following the `slicing_planes_settings` variable. So: 0 goes for
+        saggital, 1 goes for coronal, 2 goes for axial.
+        """
+        # Note that this method requires the self.w._slicing_plane  to be set.
+        # usually it is.
+        try:
+            return self.slicing_planes_settings[self.w._slicing_plane]['axis']
+        except:
+            return None
+
+    def __get_flipping(self):
+        """
+        Get the flipping masks for the invidual axes.
+        """
+        # Note that this method requires the self.w._slicing_plane to be set.
+        # usually it is.
+        try:
+            return self.slicing_planes_settings[self.w._slicing_plane]['flip']
+        except:
+            return None
+
+    def __get_permutation(self):
+        """
+        Get the permutation order for the given axis
+        """
+        # Note that this method requires the self.w._slicing_plane to be set.
+        # usually it is.
+        try:
+            return self.slicing_planes_settings[self.w._slicing_plane]['permutation']
+        except:
+            return None
+
+    def __get_extreme_slices(self):
+        """
+        Extract the extreme indexed (indexes of the first and the last slices
+        of the stack).
+
+        :return: Indexed of the first and the last slices in the image stack.
+        :rtype: (int, int)
+        """
+        first_slice = min(map(lambda x: x.image_index, self.w._images.values()))
+        last_slice = max(map(lambda x: x.image_index, self.w._images.values()))
+
+        return first_slice, last_slice
+
+    def __get_output_slice_spacing(self):
+        """
+        Returns the output volume spacing based on the slices parameters.
+        """
+        first_slice, last_slice = self.slices_span
+        in_plane_spacing = self.w._images[first_slice].process_resolution
+        output_stack_spacing = [in_plane_spacing]*3
+        output_stack_spacing[self.slicing_plane] = self.w._slice_thickness
+
+        return output_stack_spacing
+
+    slicing_plane = property(__get_slicing_plane)
+    flipping = property(__get_flipping)
+    permutation = property(__get_permutation)
+    slices_span = property(__get_extreme_slices)
+    output_volume_spacing = property(__get_output_slice_spacing)
 
     @classmethod
     def _getCommandLineParser(cls):
