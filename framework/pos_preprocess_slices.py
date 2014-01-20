@@ -34,6 +34,10 @@ import pos_parameters
 import pos_wrappers
 import pos_deformable_wrappers
 
+"""
+# TODO: Explain what does it mean: default mask, slice-to-slice mask
+# and slice-to-reference mask.
+"""
 
 class input_image_padding(pos_wrappers.generic_wrapper):
     """
@@ -73,8 +77,6 @@ class convert_to_niftiis(pos_wrappers.generic_wrapper):
     c2d -verbose {input_mask} {interpolation} {origin} {resample} {type} \-replace 0 1 255 0 -o {output_mask} ;\
     rm {input_rgb} {input_mask}"""
 
-    #TODO: Check is the 'spacing is really important'
-    #    'spacing': pos_parameters.vector_parameter('spacing', [1,1], '-{_name} {_list}mm'),
     _parameters = {
         'input_rgb': pos_parameters.filename_parameter('input_rgb', None),
         'origin': pos_parameters.vector_parameter('origin', [0,0], '-{_name} {_list}mm'),
@@ -267,7 +269,8 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         reference_resize_factor = (self.w._atlas_plate_spacing /
                                    process_resolution) * 100
 
-        # Process the individual reference images.
+        # Process the individual reference images according to the command line
+        # parameters.
         commands = []
         for index, image in self.w._images.items():
             reference_index = image.reference_image_index
@@ -425,9 +428,8 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # Collect all the commands into a single batch instead of executing
         # them manually. Collecting the commands into a batch makes possible to
-        # switch their execution on and off with the --dry-run.
-        # This is the reason why all the commands are collected into separate
-        # batches.
+        # switch their execution on and off with the --dry-run.  This is the
+        # reason why all the commands are collected into separate batches.
 
         input_masks = []
         output_filenames = []
@@ -470,6 +472,20 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             self.execute(commands)
 
     def _get_stacking_wrapper(self, input_mask, output_filename):
+        """
+        Returns a stacking wrapper for... creating the image stacks.
+
+        :param input_mask: a unix-like shell mask of the files to stack. The
+            filenames should be named in such a way that the mask will reruen them
+            in order.
+        :type input_maks: str
+
+        :param output_filename: output filename if the stack.
+        :type output_filename: str
+
+        :return: Slice stacking wrapper
+        :rtype: `pos_wrappers.stack_and_reorient_wrapper`
+        """
 
         first_slice, last_slice = self._get_extreme_slices()
         output_stack_spacing = self._get_output_slice_spacing()
@@ -479,6 +495,12 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         stack_flip_axes = \
             self.slicing_planes_settings[self.__slicing_plane]['flip']
 
+        # TODO: generate the output origin to be compatibile with the input
+        # slices. Now, the output volume will be spatially incompatibile with
+        # the input slices. To make it compatibile, the output spacing has to
+        # be supplied as the command line option.
+        # TODO: Update, this requires quite a lot of work but it will be quite
+        # usefull :).
         command = pos_wrappers.stack_and_reorient_wrapper(
             stack_mask = input_mask,
             slice_start = first_slice,
@@ -489,24 +511,50 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             flip_axes = stack_flip_axes,
             orientation_code = self.options.outputVolumeOrientationCode,
             spacing = output_stack_spacing,
-            origin = [0,0,0])
+            origin = self.options.outputVolumeOrigin)
         return copy.copy(command)
 
     def _get_extreme_slices(self):
+        """
+        Extract the extreme indexed (indexes of the first and the last slices
+        of the stack).
+
+        :return: Indexed of the first and the last slices in the image stack.
+        :rtype: (int, int)
+        """
         first_slice = min(map(lambda x: x.image_index, self.w._images.values()))
         last_slice = max(map(lambda x: x.image_index, self.w._images.values()))
 
         return first_slice, last_slice
 
     def _get_output_slice_spacing(self):
+        """
+        Returns the output volume spacing based on the slices parameters.
+        """
         first_slice, last_slice = self._get_extreme_slices()
         in_plane_spacing = self.w._images[first_slice].process_resolution
         output_stack_spacing = [in_plane_spacing]*3
+        # TODO: Make it more pretty
         output_stack_spacing[self.slicing_planes_settings[self.__slicing_plane]['axis']] = self.__stack_spacing
 
         return output_stack_spacing
 
     def get_remask_wrapper(self, mask_file, image_file, output_file):
+        """
+        Returns a remasking command line wrapper customised by the provided
+        arguments.
+
+        :param mask_file: input ask filename (binary 3d niftii file)
+        :type mask_file: str
+
+        :param mask_file: input rgb file (rgb, uchar, 3d niftii file)
+        :type mask_file: str
+
+        :param output_file: output rgb file (rgb, uchar, 3d niftii file)
+        :type output_file: str
+        """
+
+        # Create the remask wrapper.
         wrapper = remask_wrapper(
             mask_file = self.f['source_stacks'](stack_name=mask_file), \
             input_volume = self.f['source_stacks'](stack_name=image_file), \
@@ -516,9 +564,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
     def _remask(self):
         """
-        # TODO: Explain what does it mean: default mask, slice-to-slice mask
-        # and slice-to-reference mask.
-
         Remasking means multiplying the 3d rgb images stack with the proper
         mask (either slice-to-slice mask or slice-to-reference mask). In this
         method, the input image stack is by default multiplied by the default
