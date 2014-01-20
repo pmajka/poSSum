@@ -429,23 +429,25 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # This is the reason why all the commands are collected into separate
         # batches.
 
-        # TODO: make the code more sustinct.
+        input_masks = []
+        output_filenames = []
 
+        # Ok this goes by the default default.
         # Stack the RGB image into the stack.
-        commands = []
-        command = self._get_stacking_wrapper(
-            input_mask = self.f['source_images_downsampled_fmask'](),
-            output_filename = self.f['source_stacks'](stack_name="rgb"))
-        commands.append(copy.copy(command))
-        self.execute(commands)
+        input_masks.append(self.f['source_images_downsampled_fmask']())
+        output_filenames.append(self.f['source_stacks'](stack_name="rgb"))
 
         # Stack the masks of the downsampled input images.
-        commands = []
-        command = self._get_stacking_wrapper(
-            input_mask = self.f['source_masks_fmask'](),
-            output_filename = self.f['source_stacks'](stack_name="mask"))
-        commands.append(copy.copy(command))
-        self.execute(commands)
+        input_masks.append(self.f['source_masks_fmask']())
+        output_filenames.append(self.f['source_stacks'](stack_name="mask"))
+
+        for in_mask, out_fname in zip(input_masks, output_filenames):
+            commands = []
+            command = self._get_stacking_wrapper(
+                input_mask = in_mask,
+                output_filename = out_fname)
+            commands.append(copy.copy(command))
+            self.execute(commands)
 
         # Ok, if we are using slice-to-slice masks then we need to create
         # proper slice to slice mask image Create the slice-to-slice mask
