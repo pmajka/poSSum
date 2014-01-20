@@ -71,7 +71,8 @@ class convert_to_niftiis(pos_wrappers.generic_wrapper):
     -foreach  {origin} {type} {native_spacing} -endfor -omc 3 {output_rgb_full} \
     -foreach {resample} {type} -endfor -omc 3 {output_rgb_small};
     c2d -verbose {input_mask} {interpolation} {origin} {resample} {type} \
-    -replace 0 1 255 0 -o {output_mask}; rm {input_rgb} {input_mask}"""
+    -replace 0 1 255 0 -popas second {output_rgb_small} -push second -copy-transform -o {output_mask}; \
+    rm {input_rgb} {input_mask}"""
 
     _parameters = {
         'input_rgb': pos_parameters.filename_parameter('input_rgb', None),
@@ -127,6 +128,33 @@ class remask_wrapper(pos_wrappers.generic_wrapper):
         'replace': pos_parameters.list_parameter('replace', None, '-{_name} {_list}'),
     }
 
+class origin_readout_wrapper(pos_wrappers.generic_wrapper):
+    """
+    Extracts the information about origin and spacing of an image in a very
+    crapy way -- by a series of the command line parameters and bash trics.
+    Very ugly but the fastest way of actually doing it.
+    """
+
+    _template = """PrintHeader {input_image} | grep qoffset"""
+
+    _parameters = {
+        'input_image': pos_parameters.filename_parameter('input_image', None),
+    }
+
+class spacing_readout_wrapper(pos_wrappers.generic_wrapper):
+    """
+    Extracts the information about origin and spacing of an image in a very
+    crapy way -- by a series of the command line parameters and bash trics.
+    Very ugly but the fastest way of actually doing it.
+    """
+
+    _template = """PrintHeader {input_image} | grep 'Voxel Spacing' \
+        | cut -f2 -d: | tr -d " " | tr -d '[]'"""
+
+    _parameters = {
+        'input_image': pos_parameters.filename_parameter('input_image', None),
+    }
+
 
 class volume_reconstruction_preprocessor(output_volume_workflow):
     """
@@ -160,10 +188,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # TODO: Explain what does it mean: default mask, slice-to-slice mask
         # and slice-to-reference mask.
-
-        # PrintHeader exvivo_48h.nii.gz  | grep qoffset_x | cut -f2 -d= | tr -d
-        # " "
-
     """
 
     _f = {
@@ -414,6 +438,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             commands.append(copy.copy(command))
         self.execute(commands)
 
+
     def _stack_images_and_masks(self):
         """
         Ok, once we have the the images it is time to stack them into 3d Niftii
@@ -487,14 +512,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         first_slice, last_slice = self.slices_span
 
-        # TODO: generate the output origin to be compatibile with the input
-        # slices. Now, the output volume will be spatially incompatibile with
-        # the input slices. To make it compatibile, the output spacing has to
-        # be supplied as the command line option.
-        # TODO: Update, this requires quite a lot of work but it will be quite
-        # usefull :).
-        # XXX: Note that self.output_volume_spacing is something different than
-        # self.options.output....blabla.
         command = pos_wrappers.stack_and_reorient_wrapper(
             stack_mask = input_mask,
             slice_start = first_slice,
@@ -505,7 +522,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             flip_axes = self.flipping,
             orientation_code = self.options.outputVolumeOrientationCode,
             spacing = self.output_volume_spacing,
-            origin = self.options.outputVolumeOrigin)
+            origin = self.output_volume_origin)
         return copy.copy(command)
 
     def _get_remask_wrapper(self, mask_file, image_file, output_file):
@@ -674,18 +691,74 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         """
         Returns the output volume spacing based on the slices parameters.
         """
-        first_slice, last_slice = self.slices_span
-        in_plane_spacing = self.w._images[first_slice].process_resolution
-        output_stack_spacing = [in_plane_spacing]*3
-        output_stack_spacing[self.slicing_plane] = self.w._slice_thickness
+        # Initialize the commands batch
+        commands = []
 
-        return output_stack_spacing
+        # We extract the altered orgin from the first image in the stack.
+        image = self.w._images.items()[0]
+        index = self.slices_span[0]
+
+        # Then, define theorigin readout command line wrapper and then
+        # append this single command into the commands batch.
+        command = spacing_readout_wrapper(
+            input_image = self.f['source_images_downsampled'](idx=index))
+        commands.append(copy.copy(command))
+
+        # Execute the commands and capture the stdout and stderr.
+        stdout, stderr = self.execute(commands)
+
+        # Ok, we extract only the x spacing of the code since the assumption
+        # that the x spacing is the same as y spacing (the images are
+        # isotropic) which is a very basic assumption.
+        spacing_x =  float(stdout.split(",")[0])
+        spacing = [spacing_x]*3
+        spacing[self.slicing_plane] = self.w._slice_thickness
+        return spacing
+
+    def __get_output_volume_origin(self):
+        """
+        Extract the origin of the resampled image. This is important as the
+        resampling is performed in the way that the sampling is not the exact
+        sampling requested. Also, the origin is a bit changes due this not
+        exact way of resampling.
+
+        The actual origin is determinated by executing some shell command which
+        stdout is processed. Not an optimal way of performing the task but at
+        least it works.
+        """
+        # Initialize the commands batch
+        commands = []
+
+        # We extract the altered orgin from the first image in the stack.
+        image = self.w._images.items()[0]
+        index = self.slices_span[0]
+
+        # Then, define theorigin readout command line wrapper and then
+        # append this single command into the commands batch.
+        command = origin_readout_wrapper(
+            input_image = self.f['source_images_downsampled'](idx=index))
+        commands.append(copy.copy(command))
+
+        # Execute the commands and capture the stdout and stderr.
+        stdout, stderr = self.execute(commands)
+
+        # Process the stdout string and extract the actual origin value. The
+        # value extracted is the offset_x. It is assumed that the offset_x
+        # is the same as the offset_y, and, since the image is an 2d image,
+        # the offset_z value is usually zero, but we don't care about it at
+        # all.
+        origin_x = float(stdout.split("\n")[0].split()[2])
+        origin = [origin_x]*3
+        origin[self.slicing_plane] = 0
+        # TODO: Until fixed properly we return [0,0,0]
+        return [0, 0, 0]
 
     slicing_plane = property(__get_slicing_plane)
     flipping = property(__get_flipping)
     permutation = property(__get_permutation)
     slices_span = property(__get_extreme_slices)
     output_volume_spacing = property(__get_output_slice_spacing)
+    output_volume_origin = property(__get_output_volume_origin)
 
     @classmethod
     def _getCommandLineParser(cls):
