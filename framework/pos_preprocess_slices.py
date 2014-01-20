@@ -34,12 +34,6 @@ import pos_parameters
 import pos_wrappers
 import pos_deformable_wrappers
 
-"""
-
-
-# TODO: Explain what does it mean: default mask, slice-to-slice mask
-# and slice-to-reference mask.
-"""
 
 class input_image_padding(pos_wrappers.generic_wrapper):
     """
@@ -160,6 +154,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         4. `source_images_downsampled` downsampled version of the SOURCE images
         files
+
+        # TODO: Explain what does it mean: default mask, slice-to-slice mask
+        # and slice-to-reference mask.
 
     """
 
