@@ -35,6 +35,8 @@ import pos_wrappers
 import pos_deformable_wrappers
 
 """
+
+
 # TODO: Explain what does it mean: default mask, slice-to-slice mask
 # and slice-to-reference mask.
 """
@@ -131,6 +133,12 @@ class remask_wrapper(pos_wrappers.generic_wrapper):
 
 class volume_reconstruction_preprocessor(output_volume_workflow):
     """
+    The whole script which you are starting to read through encapsulates the
+    process of converting the user-supplied experimental slices into several
+    datasets which are suitable for further processing (i.e. reconstruction of the
+    3d volume). Below you will find a detailed description of the consecutive
+    processing steps.
+
     A class for preprocessing the slices images before the volume
     reconstruction process.
 
