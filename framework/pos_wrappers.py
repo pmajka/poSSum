@@ -848,7 +848,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
 
 class command_warp_rgb_slice(generic_wrapper):
     """
-    A flexible RGB image affine reslice wrapper. The wrapper is designed to
+    A flexible RGB image __affine__ reslice wrapper. The wrapper is designed to
     work solely with the 8bit, three channel (RGB) images. Since the input
     image type is fixed, the output image type is the same as the input image
     type.

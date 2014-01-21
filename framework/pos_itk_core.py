@@ -99,13 +99,19 @@ def get_image_region(image_dim, crop_index, crop_size):
     return bounding_box
 
 
-def autodetect_file_type(image_path):
+def autodetect_file_type(image_path, ret_itk=True):
     """
     Autodetects image dimensions and size as well as pixel type and component
     size. `autodetect_file_type(*image_path*)`
 
     :param image_path: filename to be investigated
     :type image_path: str
+
+    :param ret_itk: A boolean value determining if the itkImageType for given
+    input image will be determined (if `True`). If `False`, only a tuple
+    describibg the image properties will be returned without trying to match
+    the itkImage.
+    :type ret_itk: bool
 
     :returns: (pixel_type, component_type, number_of_dimensions) of the image
               according to ITK classes
@@ -138,6 +144,12 @@ def autodetect_file_type(image_path):
     logger.info("   Pixel type: %s", pixel_type)
     logger.debug(image_io)
     logger.info("Matching image type...")
+
+    # If we do not intent to return itk image type then just return
+    # the tuple with the image type. Do not check it given file type is
+    # suported by the itk.
+    if not ret_itk:
+        return (pixel_type, component_type, number_of_dimensions)
 
     # Matching corresponding image type
     image_type = io_component_string_name_to_image_type[
