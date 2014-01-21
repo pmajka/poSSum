@@ -177,7 +177,10 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # TODO: Explain what does it mean: default mask, slice-to-slice mask
         # and slice-to-reference mask.
-    """
+
+        #TODO: XXX: Put some information about a systematic half pixel offset
+        # between the transformations and the source data.
+        """
 
     _f = {
         'raw_src': pos_parameters.filename('raw_src', work_dir='00_raw_images', str_template='{idx:04d}.png'),
