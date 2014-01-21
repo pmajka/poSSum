@@ -24,6 +24,7 @@ import pos_parameters
 import pos_wrappers
 from pos_itk_core import autodetect_file_type
 
+
 class split_multichannel_image(pos_wrappers.generic_wrapper):
     """
     Split the individual image into its components. By default the images are
@@ -49,12 +50,15 @@ class merge_components(pos_wrappers.generic_wrapper):
     multichannel image. The individual components are deleted afterwards.
     """
 
-    _template = """c{dimension}d {input_images} -foreach {output_type} -endfor \
+    _template = """c{dimension}d {input_images} \
+        -foreach {region_origin} {region_size} {output_type} -endfor \
         -omc {components_no} {output_image}; rm -rfv {input_images} {other_files_remove};"""
 
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 2),
         'input_images': pos_parameters.list_parameter('input_images', [], str_template='{_list}'),
+        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
         'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
         'components_no' : pos_parameters.value_parameter('components_no', 3),
         'output_image': pos_parameters.filename_parameter('output_image', None),
@@ -360,52 +364,64 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Determine the image type and use proper reslicing routine depending
         # on the image type (either grayscale reslicing process or the rgb
-        # image reslicing process).
+        # image reslicing process). To determine the image type, the first
+        # image in the stack is read and the component type is determined. If
+        # the image is a multicomponent, a multicomponent reslicing workflow is
+        # used.
         self._logger.debug("Detecting the image properties of the first image in the stack to choose a proper reslicing routine.")
-        first_image_index = self._slice_transform_map.items()[0][0]
-        first_image_filename = self.f['moving_raw'](idx=first_image_index)
-        pixel_type, component_type, number_of_dimensions = \
-            autodetect_file_type(first_image_filename, ret_itk=False)
+        first_img_idx = self._slice_transform_map.items()[0][0]
+        first_img_fname = self.f['moving_raw'](idx=first_img_idx)
+        pixel_type = autodetect_file_type(first_img_fname, ret_itk=False)[0]
 
-        if pixel_type == "vector":
+        if pixel_type in ["vector", "rgb"]:
             self._logger.info("Reslicing the images using the multichannel workflow.")
 
+            # Prepare the commands batches, each batch for a single processing
+            # step: components preparation, component reslicing and the
+            # component merge.
             commands_prepare = []
             commands_reslice = []
             commands_merge = []
 
-#           def get_all_components(file_template):
-#               files = map(lambda x: \
-#                   self.f['components'](idx=slice_index,comp=x),\
-#                   range(self.__NUMBER_OF_COMPONENTS))
-
-#               pass
+            # A convenient function for getting the list of filenames of
+            # the individual components
+            def components_fnames(index, fn_tplt):
+                files = map(lambda x: \
+                    self.f[fn_tplt](idx=index,comp=x),\
+                    range(self.__NUMBER_OF_COMPONENTS))
+                return files
 
             for slice_index, transform_index in self._slice_transform_map.items():
 
-                components = map(lambda x: \
-                    self.f['components'](idx=slice_index,comp=x),\
-                    range(self.__NUMBER_OF_COMPONENTS))
+                # Get the filenames of the moving images components filenames
+                components = components_fnames(slice_index, 'components')
 
-                resliced_components = map(lambda x: \
-                    self.f['resliced_components'](idx=slice_index,comp=x),\
-                    range(self.__NUMBER_OF_COMPONENTS))
+                # Then get the resliced components filenames
+                resliced_components = \
+                    components_fnames(slice_index, 'resliced_components')
 
+                # Splitting the mc images into individual components
                 command_prepare = split_multichannel_image(
                     input_image = self.f['moving_raw'](idx=slice_index),
                     output_components = components)
                 commands_prepare.append(command_prepare)
 
+                # Reslicing the individual components of the image
                 for channel_index in range(self.__NUMBER_OF_COMPONENTS):
-                    commands_reslice.append(self._compose_reslice(slice_index, transform_index, channel_index))
+                    commands_reslice.append(self._compose_reslice(
+                        slice_index, transform_index, channel_index))
 
+                # Merging back the resliced components.
                 command_merge = merge_components(
                     input_images = resliced_components,
                     components_no = self.__NUMBER_OF_COMPONENTS,
                     output_image = self.f['resliced'](idx=slice_index),
+                    region_origin = self.options.regionOrigin,
+                    region_size = self.options.regionSize,
                     other_files_remove = components)
                 commands_merge.append(command_merge)
 
+            # Execute all the command batched in the approperiate order.
             self._logger.info("Extracting individual components.")
             self.execute(commands_prepare)
             self._logger.info("Reslicing the images.")
@@ -510,6 +526,9 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         workflow_settings.add_option('--skipReslice', default=False,
             dest='skipReslice', action='store_const', const=True,
             help='Supress reslicing the images.')
+        workflow_settings.add_option('--skipComposeTransformations', default=False,
+            dest='skipComposeTransformations', action='store_const', const=True,
+            help='Suppress merging the transformation.')
         workflow_settings.add_option('--skipOutputVolumes', default=False,
             dest='skipOutputVolumes', action='store_const', const=True,
             help='Supress generating color volume')
@@ -526,6 +545,12 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         image_processing_options.add_option('--resliceInterpolation',
             dest='resliceInterpolation', default=None, type='str',
             help='Interpolation used during the application of the transformation chain to the slices. This is not interpolation used during stacking the resliced images into a output volume. Linear by default byt may be changed into NN or Bspline. For the NN interpolation put just "NN" while for the Bspline interpolation put BS. No other string will be accepted.')
+        image_processing_options.add_option('--regionOrigin',
+            dest='regionOrigin', default=None, type='int', nargs=2,
+            help='Region origin in voxels (2 values)')
+        image_processing_options.add_option('--regionSize',
+            dest='regionSize', default=None, type='int', nargs=2,
+            help='Region size in voxels (2 values)')
 
         parser.add_option_group(workflow_settings)
         parser.add_option_group(obligatory_options)
