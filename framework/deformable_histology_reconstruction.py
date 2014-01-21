@@ -107,7 +107,6 @@ class deformable_reconstruction_workflow(output_volume_workflow):
                 slicing_plane = self.options.slicingPlane,\
                 start_slice = self.options.startSlice, \
                 end_slice = self.options.endSlice + 1, \
-                shift_indexes = self.options.shiftIndexes, \
                 output_dir = self.f['init_slice'].base_dir)
 
         return preprocess_slices
@@ -376,9 +375,10 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
         commands = []
         for i in range(start, end +1):
+            out_idx = i + self.options.shiftFinalIndexes
             command = convert_slice_image(
                 input_image = self.f['final_deformations'](idx=i),
-                output_image = self.f['rescaled_deformations'](idx=i),
+                output_image = self.f['rescaled_deformations'](idx=out_idx),
                 scaling = norm_spacing,
                 spacing = [norm_spacing, norm_spacing])
             commands.append(copy.deepcopy(command))
@@ -388,13 +388,13 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         # spacing as, again, the spacing used in computations is ... 1x1mm
         commands = []
         for i in range(start, end +1):
+            out_idx = i + self.options.shiftFinalIndexes
             command = convert_slice_image_grayscale(
                 input_image = self.f['init_slice'](idx=i),
-                output_image = self.f['rescaled_source'](idx=i),
+                output_image = self.f['rescaled_source'](idx=out_idx),
                 spacing = [norm_spacing, norm_spacing])
             commands.append(copy.deepcopy(command))
         self.execute(commands)
-
 
     def _get_stack_intermediate_command(self):
         """
@@ -466,9 +466,9 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         parser.add_option('--endSlice', default=None,
                 type='int', dest='endSlice',
                 help='Index of the last slice of the stack')
-        parser.add_option('--shiftIndexes', default=None,
-                type='int', dest='shiftIndexes',
-                help='Shift indexes of the sliced by provided number.')
+        parser.add_option('--shiftFinalIndexes', default=0,
+                type='int', dest='shiftFinalIndexes',
+                help='Shift indexes of the final warps and slices.')
         parser.add_option('--neighbourhood', default=1, type='int',
                 dest='neighbourhood',  help='Neighbourhood radius to which given slices will be aligned.')
         parser.add_option('--iterations', default=10,
