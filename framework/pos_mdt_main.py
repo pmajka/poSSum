@@ -14,6 +14,8 @@ import pos_parameters
 import pos_wrappers
 import pos_mdt_wrappers
 
+#TODO: Automatically interrupt when the convergence is achieved.
+#TODO: Introduce the convergence threshold.
 
 class minimum_deformation_template_wrokflow(generic_workflow):
     """

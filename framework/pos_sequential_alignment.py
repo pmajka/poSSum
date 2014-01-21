@@ -731,6 +731,7 @@ class sequential_alignment(output_volume_workflow):
     def _getCommandLineParser(cls):
         """
         #TODO: Consider adding additional stacks.
+        #TODO: Use optparse "choices"
         """
         parser = output_volume_workflow._getCommandLineParser()
 

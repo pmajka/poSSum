@@ -245,8 +245,9 @@ class generic_workflow(object):
                                     shell=True, close_fds=True).communicate()
                 self._logger.debug("Last commands stdout: %s", stdout)
                 self._logger.debug("Last commands stderr: %s", stderr)
+                return stdout, stderr
             else:
-                map(lambda x: x(), commands)
+                return map(lambda x: x(), commands)
         else:
             print "\n".join(map(str, commands))
 
