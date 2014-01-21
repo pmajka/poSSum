@@ -1,26 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
-###############################################################################
-#                                                                             #
-#    This file is part of Multimodal Atlas of Monodelphis Domestica           #
-#                                                                             #
-#    Copyright (C) 2011-2012 Piotr Majka                                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is free software: you can redistribute      #
-#    it and/or modify it under the terms of the GNU General Public License    #
-#    as published by the Free Software Foundation, either version 3 of        #
-#    the License, or (at your option) any later version.                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is distributed in the hope that it          #
-#    will be useful, but WITHOUT ANY WARRANTY; without even the implied       #
-#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.         #
-#    See the GNU General Public License for more details.                     #
-#                                                                             #
-#    You should have received a copy of the GNU General Public License        #
-#    along  with  3d  Brain  Atlas  Reconstructor.   If  not,  see            #
-#    http://www.gnu.org/licenses/.                                            #
-#                                                                             #
-###############################################################################
+"""
+:author: Piotr Majka <pmajka@nencki.gov.pl>
+:revision: $Rev$
+:date: $LastChangedDate$
+
+`pos_stack_warp_image_multi_transform`, a workflow for warping a whole stack of idmages.
+
+This file is part of Multimodal Atlas of Monodelphis Domestica.
+(c) Piotr Majka 2011-2014. Restricted, damnit!
+"""
 
 import os, sys
 from optparse import OptionParser, OptionGroup
