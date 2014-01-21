@@ -58,7 +58,7 @@ class convert_to_niftiis(pos_wrappers.generic_wrapper):
 
     _template = """c2d -verbose -mcs {input_rgb} \
     -foreach  {origin} {type} {native_spacing} -endfor -omc 3 {output_rgb_full} \
-    -foreach {resample} {type} -endfor -omc 3 {output_rgb_small};
+    -foreach {resample} {type} -endfor -omc 3 {output_rgb_small}; \
     c2d -verbose {input_mask} {interpolation} {origin} {resample} {type} \
     -replace 0 1 255 0 -popas second {output_rgb_small} -push second -copy-transform -o {output_mask}; \
     rm {input_rgb} {input_mask}"""
@@ -177,16 +177,19 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # TODO: Explain what does it mean: default mask, slice-to-slice mask
         # and slice-to-reference mask.
-    """
+
+        #TODO: XXX: Put some information about a systematic half pixel offset
+        # between the transformations and the source data.
+        """
 
     _f = {
         'raw_src': pos_parameters.filename('raw_src', work_dir='00_raw_images', str_template='{idx:04d}.png'),
         'raw_png_full': pos_parameters.filename('raw_png_full', work_dir='01_raw_temp', str_template='_temp_img_{idx:04d}.png'),
         'raw_png_masks': pos_parameters.filename('raw_png_masks', work_dir='01_raw_temp', str_template='_temp_mask_{idx:04d}.png'),
         'raw_ref_imgs': pos_parameters.filename('raw_ref_imgs', work_dir='02_ref_imgs', str_template='{idx:04d}.png'),
-        'source_images_fullsize': pos_parameters.filename('source_images_fullsize', work_dir='04_source_images', str_template='fullsize_{idx:04d}.nii.gz'),
-        'source_images_downsampled': pos_parameters.filename('source_images_downsampled', work_dir='04_source_images', str_template='downsampled_{idx:04d}.nii.gz'),
-        'source_images_downsampled_fmask': pos_parameters.filename('source_images_downsampled_fmask', work_dir='04_source_images', str_template='downsampled_%04d.nii.gz'),
+        'source_images_fullsize': pos_parameters.filename('source_images_fullsize', work_dir='03_source_fullsize', str_template='{idx:04d}.nii.gz'),
+        'source_images_downsampled': pos_parameters.filename('source_images_downsampled', work_dir='04_source_downsampled', str_template='{idx:04d}.nii.gz'),
+        'source_images_downsampled_fmask': pos_parameters.filename('source_images_downsampled_fmask', work_dir='04_source_downsampled', str_template='%04d.nii.gz'),
         'source_masks': pos_parameters.filename('source_masks', work_dir='05_source_masks', str_template='{idx:04d}.nii.gz'),
         'source_masks_fmask': pos_parameters.filename('source_masks_fmask', work_dir='05_source_masks', str_template='%04d.nii.gz'),
         'source_ref_imgs': pos_parameters.filename('source_ref_imgs', work_dir='06_source_ref_imgs', str_template='{idx:04d}.png'),
@@ -606,7 +609,8 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # 'useReferenceToSliceMask'
         # as well as the proper "use atlas" switch in the excel file are
         # defined.
-        if self.options.useReferenceToSliceMask and self.w._use_atlas:
+        if all([self.options.useReferenceToSliceMask, self.w._use_atlas,
+               self.options.doReference]):
             input_names.append(self.f['source_stacks'](stack_name='atlas_masked'))
             input_names.append(self.f['source_stacks'](stack_name='atlas_mask'))
             output_namings.append(self.f['seq_ref_to_slice']())
