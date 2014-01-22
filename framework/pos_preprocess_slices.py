@@ -179,8 +179,13 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         4. `source_images_downsampled` downsampled version of the SOURCE images
         files
 
-        #TODO: XXX: Put some information about a systematic half pixel offset
-        # between the transformations and the source data.
+        #XXX NOTE: There is a slight but systematic missalignment between the
+        fullres images and the downsampled images after reconstruction. The
+        glitch is that the downsampled images have origin which is not 0,0 but
+        (pixel spacing)/2 in both directions. This happens because the
+        resampling is performed in an itk way so it slightly influentes the
+        spacing. Anyway, the systematic discrepancy is half of the downsampled
+        pixel size.
         """
 
     _f = {
