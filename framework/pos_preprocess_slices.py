@@ -179,9 +179,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         4. `source_images_downsampled` downsampled version of the SOURCE images
         files
 
-        # TODO: Explain what does it mean: default mask, slice-to-slice mask
-        # and slice-to-reference mask.
-
         #TODO: XXX: Put some information about a systematic half pixel offset
         # between the transformations and the source data.
         """
@@ -685,7 +682,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header+= "\n"
         header+= "SOURCE_FULLRES_SPACING=%f\n" % source_resolution
         header+= "SOURCE_NOMINAL_SPACING=%f\n" % process_resolution
-        header+= "SOURCE_SPACING=%f\n" % self._spacing_x
+        header+= "SOURCE_SPACING=%f\n" % self.plane_spacing
         header+= "SOURCE_THICKNESS=%f\n" % self.slice_thickness
 
         header+= "\n"
@@ -788,7 +785,10 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         """
         Returns the output volume spacing based on the slices parameters.
         """
-        # TODO: Cache this value
+
+        # Try to use the cached value if available
+        if hasattr(self, '_output_volume_spacing'):
+            return self._output_volume_spacing
 
         # Initialize the commands batch
         commands = []
@@ -809,11 +809,13 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # Ok, we extract only the x spacing of the code since the assumption
         # that the x spacing is the same as y spacing (the images are
         # isotropic) which is a very basic assumption.
-        spacing_x =  float(stdout.split(",")[0])
-        self._spacing_x = spacing_x
-        spacing = [spacing_x]*3
+        self._spacing_x =  float(stdout.split(",")[0])
+
+        spacing = [self._spacing_x]*3
         spacing[self.slicing_plane] = self.slice_thickness
-        return spacing
+        self._output_volume_spacing = spacing
+
+        return self._output_volume_spacing
 
     def __get_output_volume_origin(self):
         """
@@ -876,6 +878,21 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         """
         return self.w._stack_size
 
+    def __get_plane_spacing(self):
+        """
+        Get the actual plane spacing of the slice. The actual spacing is a bit
+        different than the theotetical spacing due to the resampling process.
+        """
+
+        # Try to use the cached value if available
+        # If not, then it's a bit tricky. A `self.output_volume_spacing`
+        # property has to be executed to make the `self._spacing_x` available.
+        if hasattr(self, '_spacing_x'):
+            return self._spacing_x
+        else:
+            self.output_volume_spacing
+            return self._spacing_x
+
     slicing_plane = property(__get_slicing_plane)
     slicing_plane_str = property(__get_slicing_plane_string)
     flipping = property(__get_flipping)
@@ -885,6 +902,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
     output_volume_origin = property(__get_output_volume_origin)
     slice_thickness = property(__get_slice_thickness)
     stack_size = property(__get_stack_size)
+    plane_spacing = property(__get_plane_spacing)
 
     @classmethod
     def _getCommandLineParser(cls):
