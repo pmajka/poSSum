@@ -421,9 +421,4 @@ class worksheet_manager(object):
 
 
 if __name__ == "__main__":
-    SOURCE_IMAGES_DIR = \
-        '/home/pmajka/possum/data/03_01_NN3/66_histology_extracted_slides/'
-    workbook_in = '/home/pmajka/Dropbox/administracja/u.xls'
-    workbook_out = '/home/pmajka/u.xls'
-    w = worksheet_manager(workbook_in, workbook_out, images_dir=SOURCE_IMAGES_DIR)
-    w.process()
+    pass

@@ -117,11 +117,13 @@ class remask_wrapper(pos_wrappers.generic_wrapper):
         'replace': pos_parameters.list_parameter('replace', None, '-{_name} {_list}'),
     }
 
+
 class origin_readout_wrapper(pos_wrappers.generic_wrapper):
     """
     Extracts the information about origin and spacing of an image in a very
     crapy way -- by a series of the command line parameters and bash trics.
     Very ugly but the fastest way of actually doing it.
+    # TODO: Replace this one by an approperiate itk function
     """
 
     _template = """PrintHeader {input_image} | grep qoffset"""
@@ -130,11 +132,13 @@ class origin_readout_wrapper(pos_wrappers.generic_wrapper):
         'input_image': pos_parameters.filename_parameter('input_image', None),
     }
 
+
 class spacing_readout_wrapper(pos_wrappers.generic_wrapper):
     """
     Extracts the information about origin and spacing of an image in a very
     crapy way -- by a series of the command line parameters and bash trics.
     Very ugly but the fastest way of actually doing it.
+    # TODO: Replace this one by an approperiate itk function
     """
 
     _template = """PrintHeader {input_image} | grep 'Voxel Spacing' \
@@ -175,11 +179,13 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         4. `source_images_downsampled` downsampled version of the SOURCE images
         files
 
-        # TODO: Explain what does it mean: default mask, slice-to-slice mask
-        # and slice-to-reference mask.
-
-        #TODO: XXX: Put some information about a systematic half pixel offset
-        # between the transformations and the source data.
+        #XXX NOTE: There is a slight but systematic missalignment between the
+        fullres images and the downsampled images after reconstruction. The
+        glitch is that the downsampled images have origin which is not 0,0 but
+        (pixel spacing)/2 in both directions. This happens because the
+        resampling is performed in an itk way so it slightly influentes the
+        spacing. Anyway, the systematic discrepancy is half of the downsampled
+        pixel size.
         """
 
     _f = {
@@ -211,6 +217,8 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         "saggital" : {'permutation': [2,0,1], 'flip': [0, 0, 0], 'axis': 0},
         "coronal"  : {'permutation': [0,2,1], 'flip': [0, 0, 0], 'axis': 1},
         "axial"    : {'permutation': [0,1,2], 'flip': [0, 1, 0], 'axis': 2}}
+
+    __DEFAULT_VOLUME_ORIENTATION_CODE = "RAS"
 
     def launch(self):
         # Load the image settings chart and process and extract all the
@@ -247,6 +255,13 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # masked volumes. Bla bla...
         if self.options.doSliceExtraction:
             self._prepare_input_slices()
+
+        # Filename of the header file. The header file is a bash script which
+        # is intended to be sourced in to simplyfy calculations by providing
+        # some frequently used variables. If the header file is not required
+        # just do not provide thi option.
+        if self.options.headerFile:
+            self._generate_bash_header()
 
     def _process_reference(self):
         """
@@ -629,6 +644,97 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             commands.append(copy.copy(command))
         self.execute(commands)
 
+    def _generate_bash_header(self):
+        """
+        Generates a bash script header which contains all important data
+        regarding the stack and the reconstruction properties. This include
+        information like number of images in the stack, image spacing, output
+        volume properties etc. Basically, all the data which is a pain in the
+        ass and which has to be carried over and over between scripts wich,
+        from my experience, is very annoying.
+
+        The purpose of the header is to be included in bash scripts so the
+        variables defined within the script remain constant and reusable
+        between various scripts.
+        """
+
+        # At the very beginning define some values which are used later.
+        first_slice, last_slice = self.slices_span
+        source_resolution = self.w._images[first_slice].image_resolution
+        process_resolution = self.w._images[first_slice].process_resolution
+        source_canvas_size = self.w._images[first_slice].padded_size
+
+        # Just to execute the property function. TODO: Make caching!
+        self.output_volume_spacing
+
+        atlas_plate_size = getattr(self.w, '_atlas_plate_size')
+        if atlas_plate_size is not None:
+            atlas_plate_size = " ".join(map(str, atlas_plate_size))
+
+        header = ""
+        header+= "#!/bin/bash\n"
+        header+= "set -xe\n"
+        header+= "\n"
+        #TODO: - Specimen name / dataset ID
+
+        header+= "\n"
+        header+= "STACK_SIZE=%d\n" % self.stack_size
+        header+= "IDX_FIRST_SLICE=%d\n" % self.slices_span[0]
+        header+= "IDX_LAST_SLICE=%d\n" % self.slices_span[1]
+        header+= "IDX_FIRST_SLICE_ZERO=0\n"
+        header+= "IDX_LAST_SLICE_ZERO=%d\n" % (self.slices_span[1] - 1,)
+
+        header+= "\n"
+        header+= "SOURCE_FULLRES_SPACING=%f\n" % source_resolution
+        header+= "SOURCE_NOMINAL_SPACING=%f\n" % process_resolution
+        header+= "SOURCE_SPACING=%f\n" % self.plane_spacing
+        header+= "SOURCE_THICKNESS=%f\n" % self.slice_thickness
+
+        header+= "\n"
+        header+= "FULLSIZE_CANVAS_SIZE=\"%s\"" % \
+            " ".join(map(str, source_canvas_size)) + "\n"
+        #TODO: - Size of the downsampled images
+
+        header+= "\n"
+        header+= "ATLAS_PLATE_SPACING=%f\n" % getattr(self.w, '_atlas_plate_spacing')
+        header+= "ATLAS_PLATE_EXTENT=\"%s\"\n" % atlas_plate_size
+
+        header+= "\n"
+        header+= "SLICING_PLANE_INDEX=%d\n" % self.slicing_plane
+        header+= "SLICING_PLANE_VERBAL=\"%s\"\n" % self.slicing_plane_str
+
+        header+= "\n"
+        header+= "OUTPUT_VOLUME_SPACING=\"%s\"\n" % \
+            " ".join(map(str, self.output_volume_spacing))
+        header+= "OUTPUT_VOLUME_ORIGIN=\"%s\"\n" % \
+            " ".join(map(str, self.output_volume_origin))
+        header+= "OUTPUT_VOLUME_PERMUTATION=\"%s\"\n" % \
+            " ".join(map(str, self.permutation))
+        header+= "OUTPUT_VOLUME_FLIPPING=\"%s\"\n" % \
+            " ".join(map(str, self.flipping))
+        header+= "OUTPUT_VOLUME_ORIENTATION=\"%s\"\n" % self.__DEFAULT_VOLUME_ORIENTATION_CODE
+
+        # Below we generate a signle variable which combines all the properties
+        # of the output volume
+        header+= "\n"
+        output_volume_pairs = dict([
+            ('--outputVolumeSpacing', '${OUTPUT_VOLUME_SPACING}'),
+            ('--outputVolumePermutationOrder', '${OUTPUT_VOLUME_PERMUTATION}'),
+            ('--outputVolumeOrientationCode', '${OUTPUT_VOLUME_ORIENTATION}'),
+            ('--outputVolumeOrigin', '${OUTPUT_VOLUME_ORIGIN}'),
+            ('--setFlip', '${OUTPUT_VOLUME_FLIPPING}')])
+
+        combined_vol_props = "OUTPUT_VOLUME_PROPERTIES=\""
+        for k, v in output_volume_pairs.items():
+            combined_vol_props+=" %s %s" % (k, v)
+        combined_vol_props += "\"\n"
+        header+= combined_vol_props
+
+        # Ok, now just save the string into a file.
+        open(self.options.headerFile,'w').write(header)
+
+
+    # ----------------------------------------------
     # Some convenient functions below: properties to make all the code more
     # prettier.
 
@@ -684,6 +790,11 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         """
         Returns the output volume spacing based on the slices parameters.
         """
+
+        # Try to use the cached value if available
+        if hasattr(self, '_output_volume_spacing'):
+            return self._output_volume_spacing
+
         # Initialize the commands batch
         commands = []
 
@@ -703,10 +814,13 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # Ok, we extract only the x spacing of the code since the assumption
         # that the x spacing is the same as y spacing (the images are
         # isotropic) which is a very basic assumption.
-        spacing_x =  float(stdout.split(",")[0])
-        spacing = [spacing_x]*3
-        spacing[self.slicing_plane] = self.w._slice_thickness
-        return spacing
+        self._spacing_x =  float(stdout.split(",")[0])
+
+        spacing = [self._spacing_x]*3
+        spacing[self.slicing_plane] = self.slice_thickness
+        self._output_volume_spacing = spacing
+
+        return self._output_volume_spacing
 
     def __get_output_volume_origin(self):
         """
@@ -746,12 +860,54 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # TODO: Until fixed properly we return [0,0,0]
         return [0, 0, 0]
 
+    def __get_slicing_plane_string(self):
+        """
+        Returns the name of the slicing plane as string. This property is set
+        up just to mask/hide the `self.w` object as I don't really want to
+        expose it.
+        """
+        return self.w._slicing_plane
+
+    def __get_slice_thickness(self):
+        """
+        Returns the nominal slice thickness of the stack (the spacing between
+        the slicing plane on in the image stack). This is just to mask the
+        `self.w` object.
+        """
+        return self.w._slice_thickness
+
+    def __get_stack_size(self):
+        """
+        Returns the total number of slices constituting the image stack. This
+        is just to mask the `self.w` object.
+        """
+        return self.w._stack_size
+
+    def __get_plane_spacing(self):
+        """
+        Get the actual plane spacing of the slice. The actual spacing is a bit
+        different than the theotetical spacing due to the resampling process.
+        """
+
+        # Try to use the cached value if available
+        # If not, then it's a bit tricky. A `self.output_volume_spacing`
+        # property has to be executed to make the `self._spacing_x` available.
+        if hasattr(self, '_spacing_x'):
+            return self._spacing_x
+        else:
+            self.output_volume_spacing
+            return self._spacing_x
+
     slicing_plane = property(__get_slicing_plane)
+    slicing_plane_str = property(__get_slicing_plane_string)
     flipping = property(__get_flipping)
     permutation = property(__get_permutation)
     slices_span = property(__get_extreme_slices)
     output_volume_spacing = property(__get_output_slice_spacing)
     output_volume_origin = property(__get_output_volume_origin)
+    slice_thickness = property(__get_slice_thickness)
+    stack_size = property(__get_stack_size)
+    plane_spacing = property(__get_plane_spacing)
 
     @classmethod
     def _getCommandLineParser(cls):
@@ -769,6 +925,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         obligatory_options.add_option('--output-workbook', default=None,
             type='str', dest='outputWorkbook',
             help='Output workbook.')
+        obligatory_options.add_option('--header-file', default=None,
+            type='str', dest='headerFile',
+            help='Filename of the header file. The header file is a bash script which is intended to be sourced in to simplyfy calculations by providing some frequently used variables. If the header file is not required just do not provide thi option.')
 
 
         source_processing = OptionGroup(parser, 'Source data processing.')
