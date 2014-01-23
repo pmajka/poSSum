@@ -43,7 +43,7 @@ class generic_wrapper(object):
 
     def __str__(self):
         replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
-        return self._template.format(**replacement)
+        return " ".join(self._template.format(**replacement).strip().split())
 
     def __call__(self, *args, **kwargs):
         print "Executing: %s" % str(self)
@@ -440,26 +440,26 @@ class ants_average_affine_transform(generic_wrapper):
     >>> str(ants_average_affine_transform(dimension=3)).strip() == 'AverageAffineTransform 3'
     True
 
-    >>> p = ants_average_affine_transform(dimension=3, output_affine_transform="out.txt")
+    >>> p = ants_average_affine_transform(dimension=3, output_affine_transform="out.txt") #doctest: +NORMALIZE_WHITESPACE
     >>> print str(p).strip()
-    AverageAffineTransform 3             out.txt
+    AverageAffineTransform 3 out.txt
 
-    >>> p.updateParameters({"reference_affine_transform":"reference_affine.txt"}) #doctest: +ELLIPSIS
+    >>> p.updateParameters({"reference_affine_transform":"reference_affine.txt"}) #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
     <__main__.ants_average_affine_transform object at 0x...>
     >>> print str(p).strip()
-    AverageAffineTransform 3             out.txt             -R reference_affine.txt
+    AverageAffineTransform 3 out.txt -R reference_affine.txt
 
     >>> p.updateParameters({"affine_list":["affine_1.txt", "affine_2.txt", "affine_3.txt"]}) #doctest: +ELLIPSIS
     <__main__.ants_average_affine_transform object at 0x...>
     >>> print str(p).strip()
-    AverageAffineTransform 3             out.txt             -R reference_affine.txt             affine_1.txt affine_2.txt affine_3.txt
+    AverageAffineTransform 3 out.txt -R reference_affine.txt affine_1.txt affine_2.txt affine_3.txt
 
     >>> p.updateParameters({"reference_affine_transform":None}) #doctest: +ELLIPSIS
     <__main__.ants_average_affine_transform object at 0x...>
     >>> print str(p).strip()
-    AverageAffineTransform 3             out.txt                          affine_1.txt affine_2.txt affine_3.txt
-
+    AverageAffineTransform 3 out.txt affine_1.txt affine_2.txt affine_3.txt
     """
+
     _template = "AverageAffineTransform {dimension} \
             {output_affine_transform} \
             {reference_affine_transform} \
@@ -1039,28 +1039,28 @@ class gnuplot_execution_wrapper(generic_wrapper):
     >>> gnuplot_execution_wrapper() #doctest: +ELLIPSIS
     <__main__.gnuplot_execution_wrapper object at 0x...>
 
-    >>> print gnuplot_execution_wrapper()
-    gnuplot ;  rm -fv ;
+    >>> print gnuplot_execution_wrapper() #doctest: +NORMALIZE_WHITESPACE
+    gnuplot ; rm -fv ;
 
     >>> print gnuplot_execution_wrapper(plot_filename='plot.plt')
-    gnuplot plot.plt;  rm -fv plot.plt;
+    gnuplot plot.plt; rm -fv plot.plt;
 
     >>> p = gnuplot_execution_wrapper(plot_filename='plot.plt')
     >>> p.updateParameters({'plot_filename' : None}) #doctest: +ELLIPSIS
     <__main__.gnuplot_execution_wrapper object at 0x...>
     >>> print p
-    gnuplot ;  rm -fv ;
+    gnuplot ; rm -fv ;
 
     >>> p = gnuplot_execution_wrapper(\
-        plot_filename='plot.plt', remove_plot_file=False)
+        plot_filename='plot.plt', remove_plot_file=False) #doctest: +NORMALIZE_WHITESPACE
     >>> print p
-    gnuplot plot.plt;  false &&  rm -fv plot.plt;
+    gnuplot plot.plt; false && rm -fv plot.plt;
 
     >>> print p.updateParameters({'remove_plot_file' : True})
-    gnuplot plot.plt;  false &&  rm -fv plot.plt;
+    gnuplot plot.plt; false && rm -fv plot.plt;
 
     >>> print p.updateParameters({'remove_plot_file' : None})
-    gnuplot plot.plt;  rm -fv plot.plt;
+    gnuplot plot.plt; rm -fv plot.plt;
     """
 
     _template = """gnuplot {plot_filename}; {remove_plot_file} rm -fv {plot_filename};"""
