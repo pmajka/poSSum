@@ -684,6 +684,8 @@ class sequential_alignment(output_volume_workflow):
         # straigthforward but pretty tireingsome.
         filename_prefix = "sequential_alignment_"
 
+        filename_prefix += "s-%d_e-%d_r-%d_" % tuple(self.options.sliceRange)
+
         try:
             filename_prefix += "ROI-%s" % "x".join(map(str, self.options.registrationROI))
         except:

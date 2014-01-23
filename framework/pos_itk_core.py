@@ -275,7 +275,7 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
 def get_itk_direction_matrix(code):
     """
     Generates direction matrix based on provided RAI code.
-    Reimplemented from:
+    Implemented after:
     http://sourceforge.net/p/c3d/git/ci/master/tree/adapters/SetOrientation.cxx
 
     :param code: RAI orientation code.

@@ -695,17 +695,16 @@ class stack_and_reorient_wrapper(generic_wrapper):
     """
 
     _template = """pos_stack_reorient.py \
-            -i {stack_mask} \
-            -o {output_volume_fn} \
-            {slice_start} {slice_end} {slice_step} \
-            --permutation {permutation_order} \
-            {flip_axes} \
-            --orientationCode {orientation_code} \
-            --setType {output_type} \
-            --setSpacing {spacing} \
-            --setOrigin {origin} \
-            {interpolation} \
-            {resample}"""
+        -i {stack_mask} \
+        -o {output_volume_fn} \
+        {slice_start} {slice_end} {slice_step} \
+        --permutation {permutation_order} \
+        {flip_axes} \
+        --orientationCode {orientation_code} \
+        --setType {output_type} \
+        --setSpacing {spacing} \
+        --setOrigin {origin} \
+        {interpolation} {resample}"""
 
     _parameters = {
         'stack_mask': filename_parameter('stack_mask', None),
@@ -898,8 +897,6 @@ class command_warp_rgb_slice(generic_wrapper):
     Doctests
     --------
 
-    # TODO: More doctests (esspecialy those with exeptions)
-
     >>> command_warp_rgb_slice
     <class '__main__.command_warp_rgb_slice'>
 
@@ -1081,11 +1078,9 @@ class rigid_transformations_plotter_wapper(generic_wrapper):
     #TODO: Provide doctests fore this wrapper.
     """
 
-    _template = """
-    pos_analyze_transformation.py \
+    _template = """pos_analyze_transformation.py \
         {signature} {report_filename} {plot_filename} \
-        {transformation_mask}
-    """
+        {transformation_mask}"""
 
     _parameters = {
         'signature': pos_parameters.string_parameter('signature', None, '--{_name} {_value}'),
