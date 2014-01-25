@@ -390,9 +390,8 @@ class sequential_alignment(output_volume_workflow):
         affine_iterations = self.__AFFINE_ITERATIONS
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
                                               fIdx=fixed_slice_index)
+
         # TODO: correct all true / false switches!
-        # TODO: Even better: introduce a ANTS boolean parameter
-        # which converts boolean value to ants bool string
         use_rigid_transformation = str(self.options.useRigidAffine).lower()
 
         # Define the image-to-image metric.
@@ -684,6 +683,8 @@ class sequential_alignment(output_volume_workflow):
         # straigthforward but pretty tireingsome.
         filename_prefix = "sequential_alignment_"
 
+        filename_prefix += "s-%d_e-%d_r-%d_" % tuple(self.options.sliceRange)
+
         try:
             filename_prefix += "ROI-%s" % "x".join(map(str, self.options.registrationROI))
         except:
@@ -730,8 +731,6 @@ class sequential_alignment(output_volume_workflow):
     @classmethod
     def _getCommandLineParser(cls):
         """
-        #TODO: Consider adding additional stacks.
-        #TODO: Use optparse "choices"
         """
         parser = output_volume_workflow._getCommandLineParser()
 
@@ -772,8 +771,9 @@ class sequential_alignment(output_volume_workflow):
             type='float', dest='resliceBackgorund',
             help='Background color')
         workflow_options.add_option('--resliceInterpolation',
-            dest='resliceInterpolation', default=None, type='str',
-            help='Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc')
+            dest='resliceInterpolation', default=None, type='choice',
+            choices=['Cubic','Gaussian','Linear','Nearest','Sinc','cubic'],
+            help='Interpolation during applying the transforms to individual slices.')
 
         registration_options = OptionGroup(parser, 'Options driving the registration process.')
         registration_options.add_option('--registrationROI', dest='registrationROI',
@@ -783,7 +783,8 @@ class sequential_alignment(output_volume_workflow):
             default=None, type='float',
             help='Scaling factor for the source image used for registration. Float between 0 and 1.')
         registration_options.add_option('--registrationColor',
-            dest='registrationColor', default='blue', type='str',
+            dest='registrationColor', default='blue', type='choice',
+            choices=['r','g','b','red','green','blue'],
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
@@ -797,7 +798,7 @@ class sequential_alignment(output_volume_workflow):
             type='int', dest='outputVolumeROI',  nargs=4,
             help='ROI of the output volume - in respect to registration ROI.')
         registration_options.add_option('--antsImageMetric', default='MI',
-            type='str', dest='antsImageMetric',
+            type='choice', dest='antsImageMetric', choices=['MI','CC','MSQ'],
             help='ANTS affine image to image metric. Three values are allowed: CC, MI, MSQ.')
         registration_options.add_option('--antsImageMetricOpt', default=32,
             type='int', dest='antsImageMetricOpt',

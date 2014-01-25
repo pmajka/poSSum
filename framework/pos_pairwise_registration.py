@@ -164,7 +164,6 @@ pos_pairwise_registration.py \
 class pairwiseRegistration(output_volume_workflow):
     """
     Pairwise slice to slice registration script.
-    #TODO: Provide more documentation.
     """
 
     _f = {
@@ -509,7 +508,6 @@ class pairwiseRegistration(output_volume_workflow):
         output_naming = self.f['transf_naming'](mIdx=moving_slice_index,
                                                 fIdx=fixed_slice_index)
         use_rigid_transformation = str(self.options.useRigidAffine).lower()
-        #TODO: Use enchanced ants boolean parameter wrapper
 
         # Define the image-to-image metric.
         metrics = []

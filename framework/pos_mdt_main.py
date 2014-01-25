@@ -11,11 +11,8 @@ import pos_common
 from pos_wrapper_skel import generic_workflow
 from pos_mdt_iteration import minimum_deformation_template_iteration
 import pos_parameters
-import pos_wrappers
 import pos_mdt_wrappers
 
-#TODO: Automatically interrupt when the convergence is achieved.
-#TODO: Introduce the convergence threshold.
 
 class minimum_deformation_template_wrokflow(generic_workflow):
     """
@@ -28,9 +25,9 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         'iteration_resliced_avg'   : pos_parameters.filename('iteration_resliced_slice_avg' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/average.nii.gz'),
         # Building the template
         'template_transf_f'   : pos_parameters.filename('template_transf_f',   work_dir = '12_transf_f', str_template = '{idx:04d}.nii.gz'),
+        'template_inv_transf_f'   : pos_parameters.filename('template_inv_transf_f',   work_dir = '13_transf_inv', str_template = '{idx:04d}.nii.gz'),
         'template_jacobian_naming'   : pos_parameters.filename('template_jacobian_naming',   work_dir = '12_transf_f', str_template = '{idx:04d}'),
-        'template_jacobian'   : pos_parameters.filename('template_jacobian',   work_dir = '12_transf_f', str_template = '{idx:04d}jacobian.nii.gz'),
-        'template_jacobian_avg'   : pos_parameters.filename('template_jacobian_avg',   work_dir = '12_transf_f', str_template = 'jacobian_average.nii.gz'),
+        'template_inv_jacobian_naming'   : pos_parameters.filename('template_inv_jacobian_naming',   work_dir = '13_transf_inv', str_template = '{idx:04d}'),
         'template_transf_f_msq'   : pos_parameters.filename('template_transf_f_msq',   work_dir = '12_transf_f', str_template = 'msq{idx:04d}.nii.gz'),
         'sddm'   : pos_parameters.filename('sddm',   work_dir = '12_transf_f', str_template = 'sddm{iter:04d}.nii.gz'),
         'sddm_convergence'   : pos_parameters.filename('sddm_convergence',   work_dir = '12_transf_f', str_template = 'sddm_convergence.txt'),
@@ -150,7 +147,6 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         self._logger.info("Workflow done!.")
         self._logger.info("SDDM map: %s",
                 self.f['sddm'](iter=self.iterations[-1]))
-        self._logger.info("Average JAC: %s:", self.f['template_jacobian_avg']())
         self._logger.info("Template: %s",
                 self.f['iteration_resliced_avg'](iter=self.iterations[-1]))
 
@@ -179,16 +175,16 @@ class minimum_deformation_template_wrokflow(generic_workflow):
                 resample = jacobian_resample_settings,
                 smooth = jacobian_smoothing_settings)
             commands.append(copy.deepcopy(command))
+
+            command = pos_mdt_wrappers.ants_smoothed_jacobian(
+                dimension = self.options.antsDimension,
+                input_image = self.f['template_inv_transf_f'](idx=i),
+                output_naming = self.f['template_inv_jacobian_naming'](idx=i),
+                resample = jacobian_resample_settings,
+                smooth = jacobian_smoothing_settings)
+            commands.append(copy.deepcopy(command))
+
         self.execute(commands)
-
-        input_images_list = \
-            map(lambda x: self.f['template_jacobian'](idx=x), self.slice_range)
-        command = pos_wrappers.average_images(
-            dimension = self.options.antsDimension,
-            input_images = input_images_list,
-            output_image = self.f['template_jacobian_avg']())
-        self.execute(command)
-
 
     def calculate_convergence(self):
         """
@@ -235,7 +231,7 @@ class minimum_deformation_template_wrokflow(generic_workflow):
         parser.add_option('--jacobianSmoothResample', default=None,
                 dest='jacobianSmoothResample', action='store', type='float',
                 nargs=6,
-                help='6 floats: smoothing in vox, resampling in %. third and sixth values are for padding purposes for 2d images. default: 1 1 1 100 100 100')
+                help='6 floats: smoothing in vox, resampling in vox. third and sixth values are for padding purposes for 2d images..')
 
         regSettings = \
                 OptionGroup(parser, 'Registration setttings.')

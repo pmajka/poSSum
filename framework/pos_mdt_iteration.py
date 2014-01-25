@@ -162,7 +162,7 @@ class minimum_deformation_template_iteration(generic_workflow):
     def _reslice_images_forward(self):
         """
         Reslice the source (initial) images towards the current template using
-        transformation calculated in corrent iteration.  This method executes
+        transformation calculated in current iteration.  This method executes
         the following code::
 
            bash
@@ -347,6 +347,19 @@ class minimum_deformation_template_iteration(generic_workflow):
                     deformable_list = deformable_list,
                     affine_list = [])
             commands.append(copy.deepcopy(command))
+
+            deformable_list = [
+                self.f['forward_average'](),
+                self.f['inverse'](idx=i)]
+
+            command = pos_wrappers.ants_compose_multi_transform(
+                    dimension = self.options.antsDimension,
+                    output_image = self.parent.f['template_inv_transf_f'](idx=i),
+                    reference_image = self.f['src_slice'](idx=i),
+                    deformable_list = deformable_list,
+                    affine_list = [])
+            commands.append(copy.deepcopy(command))
+
         self.execute(commands)
 
         # Calculate magnitides of the warp vectors for each individual image

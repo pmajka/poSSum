@@ -98,9 +98,6 @@ class generic_workflow(object):
         # specimen. Thus, it is hardcoded to not allow any computations without
         # this ID. Simple as it is.
 
-        #assert self.options.specimenId, \
-        #    self._logger.error("No specimen ID provided. Please provide a specimen ID.")
-
         # We need to check if the GNU parallel of availeble. If it's not, we
         # cannot perform parallel computations.
         if not pos_common.which(self.__PARALLEL_EXECUTABLE_NAME) and\
@@ -141,7 +138,6 @@ class generic_workflow(object):
         _dirTemplates = {
                 'sharedbf': '/dev/shm/',
                 'tempbf'  : '/tmp/'}
-
 
         # Sometimes we just don't want create any work_dir (e.g. out workflow
         # is done without creating any files. When 'workdir' command line
@@ -409,7 +405,8 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
             default=[0.,0.,0.], action='store', type='float', nargs =3,
             help=cls.__output_vol_command_line_args_help['outputVolumeOrigin'])
         outputVolumeSettings.add_option('--outputVolumeScalarType', default='uchar',
-            type='str', dest='outputVolumeScalarType',
+            type='choice', dest='outputVolumeScalarType',
+            choices=['char','uchar','short','ushort','int','uint','float','double'],
             help=cls.__output_vol_command_line_args_help['outputVolumeScalarType'])
         outputVolumeSettings.add_option('--outputVolumeSpacing', default=[1,1,1],
             type='float', nargs=3, dest='outputVolumeSpacing',
