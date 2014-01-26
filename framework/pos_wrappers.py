@@ -1089,6 +1089,98 @@ class rigid_transformations_plotter_wapper(generic_wrapper):
         'transformation_mask': pos_parameters.filename_parameter('transformation_mask', None, '{_value}'),
     }
 
+class image_similarity_wrapper(generic_wrapper):
+    """
+    Calculates image similarity between two grayscale images using a provided
+    similarity metric and applying optional affine transformation to the moving image.
+
+    Ok, a few words of explanation here: This wrapper is a bit atypical since
+    there are two templates. One template is used when a affine transformation
+    is provided, the other command template is used when the is no affine
+    transformation provided. The selection between templates is based on the
+    value of the transformation parameters. This wrapper used a hack and
+    overloads the __str__ function. This is a pretty unusual solution but I
+    like it and probably will use it more.
+
+    >>> print image_similarity_wrapper
+    <class '__main__.image_similarity_wrapper'>
+
+    >>> image_similarity_wrapper() #doctest: +ELLIPSIS
+    <__main__.image_similarity_wrapper object at 0x...>
+
+    >>> print image_similarity_wrapper() #doctest: +NORMALIZE_WHITESPACE
+    c2d -ncor | cut -f3 -d' '
+
+    # Verify initial parameters values
+
+    >>> str(image_similarity_wrapper._parameters['dimension']) == '2'
+    True
+
+    >>> str(image_similarity_wrapper._parameters['reference_image']) == ''
+    True
+
+    >>> str(image_similarity_wrapper._parameters['moving_image']) == ''
+    True
+
+    >>> str(image_similarity_wrapper._parameters['metric']) == '-ncor'
+    True
+
+    >>> str(image_similarity_wrapper._parameters['affine_transformation']) == ''
+    True
+
+    Initial parameters are verified.
+
+    >>> print image_similarity_wrapper(reference_image='r.nii.gz', moving_image='m.nii.gz')
+    c2d r.nii.gz m.nii.gz -ncor | cut -f3 -d' '
+
+    >>> print image_similarity_wrapper(reference_image='r.nii.gz', moving_image='m.nii.gz', dimension=3)
+    c3d r.nii.gz m.nii.gz -ncor | cut -f3 -d' '
+
+    # And now execution with a affine transformation
+
+    >>> print image_similarity_wrapper(reference_image='r.nii.gz',
+    ... moving_image='m.nii.gz', metric='mmi',
+    ... affine_transformation='affine.txt')
+    c2d r.nii.gz m.nii.gz -reslice-itk affine.txt r.nii.gz -mmi | cut -f3 -d' '
+
+    >>> p = image_similarity_wrapper(reference_image='r.nii.gz',
+    ... moving_image='m.nii.gz', affine_transformation='affine.txt')
+    >>> print p
+    c2d r.nii.gz m.nii.gz -reslice-itk affine.txt r.nii.gz -ncor | cut -f3 -d' '
+
+    >>> print p.updateParameters({'affine_transformation' : None})
+    c2d r.nii.gz m.nii.gz -ncor | cut -f3 -d' '
+
+    >>> print p.updateParameters({'metric' : 'nmi'})
+    c2d r.nii.gz m.nii.gz -nmi | cut -f3 -d' '
+
+    >>> print p.updateParameters({'metric' : 'msq'})
+    c2d r.nii.gz m.nii.gz -msq | cut -f3 -d' '
+
+    >>> print p.updateParameters({'affine_transformation' : 'affine.txt'})
+    c2d r.nii.gz m.nii.gz -reslice-itk affine.txt r.nii.gz -msq | cut -f3 -d' '
+    """
+
+    _template_affine = """c{dimension}d {reference_image} {moving_image} \
+        -reslice-itk {affine_transformation} {reference_image} \
+        {metric} | cut -f3 -d' '"""
+    _template_no_affine = """c{dimension}d {reference_image} {moving_image} \
+        {metric} | cut -f3 -d' '"""
+
+    def __str__(self):
+        if self.p['affine_transformation'].value is not None:
+            self._template = self._template_affine
+        else:
+            self._template = self._template_no_affine
+        return super(self.__class__, self).__str__()
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'reference_image': filename_parameter('reference_image', None),
+        'moving_image': filename_parameter('moving_image', None),
+        'metric': string_parameter('metric', 'ncor', str_template='-{_value}'),
+        'affine_transformation': filename_parameter('affine_transformation', None)}
+
 
 if __name__ == '__main__':
     import doctest
