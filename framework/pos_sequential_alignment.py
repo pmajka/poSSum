@@ -25,6 +25,8 @@ import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
 
+import networkx as nx
+
 from pos_common import flatten
 from pos_wrapper_skel import output_volume_workflow
 import pos_parameters
@@ -120,6 +122,8 @@ class sequential_alignment(output_volume_workflow):
         'out_volume_color': pos_parameters.filename('out_volume_color', work_dir='06_output_volumes', str_template='{fname}_color.nii.gz'),
         'transform_plot': pos_parameters.filename('transform_plot', work_dir='06_output_volumes', str_template='{fname}.png'),
         'transform_report': pos_parameters.filename('transform_report', work_dir='06_output_volumes', str_template='{fname}.txt'),
+        'graph_edges': pos_parameters.filename('graph_edges', work_dir='06_output_volumes', str_template='graph_edges_{sign}.csv'),
+        'similarity': pos_parameters.filename('similarity', work_dir='06_output_volumes', str_template='similarity_{sign}.csv'),
          }
 
     _usage = ""
@@ -130,7 +134,7 @@ class sequential_alignment(output_volume_workflow):
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
     __MI_SAMPLES = 16000
-    __ALIGNMENT_EPSILON = 1
+    __ALIGNMENT_EPSILON = 4
     __VOL_STACK_SLICE_SPACING = 1
 
     def _initializeOptions(self):
@@ -227,6 +231,10 @@ class sequential_alignment(output_volume_workflow):
         # aproperiate command line parameter.
         if self.options.skipTransformations is not True:
             self._calculate_transforms()
+
+        # Composite transformations take relatively small amount of time to
+        # compute:
+        self._calculate_composite_transforms()
 
         # Reslice the input slices according to the generated transforms.
         # This step may be skipped by providing approperiate command line
@@ -327,6 +335,13 @@ class sequential_alignment(output_volume_workflow):
         self._logger.info("Executing the transformation commands.")
         self.execute(commands)
 
+    def _calculate_composite_transforms(self):
+        """
+        Calculates the composite transformations which means transformations
+        linking the reference slice with the processed one.
+        """
+
+        self._calculate_similarity()
         # Finally, calculate composite transforms
         commands = []
         for moving_slice_index in self.options.slice_range:
@@ -351,7 +366,7 @@ class sequential_alignment(output_volume_workflow):
         # Array holding pairs of transformations between which the
         # transformations will be calculated.
         retDict = []
-        epsilon = self.__ALIGNMENT_EPSILON
+        epsilon = self.options.graphEdgeEpsilon
 
         if i == r:
             j = i
@@ -421,8 +436,82 @@ class sequential_alignment(output_volume_workflow):
         # Return the registration command.
         return copy.deepcopy(registration)
 
+    def _calculate_similarity(self):
+        """
+        Calculate similarities between images for which the transformations
+        were computed. Based on the similarity measures, a graph connecting
+        individual images is created as saves for further calculations.
+
+        The higher the lambda, the more reluctant the slice skipping is.
+        """
+        self._logger.info("Calculating the similarity between images.")
+
+        # Create a helper function to simplify the loops below:
+        def get_wrapper(fdx, mdx):
+            wrapper = pos_wrappers.image_similarity_wrapper(
+                reference_image= self.f['src_gray'](idx=fdx),
+                moving_image = self.f['src_gray'](idx=mdx),
+                affine_transformation = self.f['part_transf'](mIdx=mdx,fIdx=fdx))
+            return copy.copy(wrapper)
+
+        commands = [] # Will hold commands for calculating the similarity
+
+        # Will hold (moving, fixed) images partial_transforms basically: all
+        # partial transformations array
+        partial_transforms = []
+
+        self._logger.debug("Generating similarity measure warppers.")
+        for moving_slice in self.options.slice_range:
+            # Get all fixed images to which given moving slice will be aligned:
+            tpair = list(flatten(self._get_slice_pair(moving_slice)))
+
+            # Append partial transformations for given moving slice to the
+            # global partial transformations array
+            partial_transforms.append(tpair)
+
+            # Generate wrapper for measuring similarity for a given partial
+            # transformation.
+            for mdx, fdx in tpair:
+                commands.append(get_wrapper(fdx, mdx))
+
+        # Execute and commands and process the similarity measurements.
+        stdout, stderr = self.execute(commands)
+        simmilarity = map(lambda x: float(x.strip()),
+                          stdout.strip().split("\n"))
+        simmilarity = dict(zip(flatten(partial_transforms), simmilarity))
+
+        self._logger.debug("Generating graph edges.")
+        graph_connections = []
+
+        # Lambda defines slice skipping is preffered (lower l), or reluctant
+        # to slice skipping (higher)
+        l = self.options.graphEdgeLambda
+
+        for (mdx, fdx), s in simmilarity.iteritems():
+            w = (1.0 + s) * abs(mdx-fdx) * (1.0 + l)**(abs(mdx-fdx))
+            graph_connections.append((fdx, mdx, w))
+
+        self._logger.info("Creating a graph based on image similarities.")
+        # Generate the graph basen on the weight of the edges
+        self.G = nx.DiGraph()
+        self.G.add_weighted_edges_from(graph_connections)
+
+        self._logger.debug("Saving the graph to a file.")
+        # Save the edges for some further analysis.
+        nx.write_weighted_edgelist(self.G,
+            self.f['graph_edges'](sign=self.signature))
+
+        # Also, save the individual similarity metrics:
+        simm_fh = open(self.f['similarity'](sign=self.signature), 'w')
+        for (mdx, fdx), s in sorted(simmilarity.iteritems()):
+            simm_fh.write("%d %d %f\n" % (mdx, fdx, s))
+        simm_fh.close()
+
     def _get_transformation_chain(self, moving_slice_index):
         """
+        Generate transformation chain based on the Dijkstra's shortest path
+        algorithm.
+
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
 
@@ -431,22 +520,26 @@ class sequential_alignment(output_volume_workflow):
         :rtype: array
         """
 
-        # Define some convenient aliases
         i = moving_slice_index
         s, e, r = tuple(self.options.sliceRange)
 
-        retDict = []
+        # Calculate shortest paths between individual slices
+        slice_paths = nx.all_pairs_dijkstra_path(self.G)
 
+        # Get the shortest path linking given moving slice with the reference
+        # slice.
+        path = list(reversed(slice_paths[r][i]))
+        chain = []
+
+        # In case we hit a reference slice :)
         if i == r:
-            retDict.append((i, i))
-        if i > r:
-            for j in list(reversed(range(r, i))):
-                retDict.append((j + 1, j))
-        if i < r:
-            for j in range(i, r):
-                retDict.append((j, j + 1))
+            chain.append((r, r))
 
-        return retDict
+        # For all the other cases collect partial transforms.
+        for step in range(len(path) - 1):
+            chain.append((path[step], path[step + 1]))
+
+        return chain
 
     def _calculate_composite(self, moving_slice_index):
         """
@@ -633,8 +726,7 @@ class sequential_alignment(output_volume_workflow):
         # Define the output volume filename. If no custom colume name is
         # provided, the filename is based on the provided processing
         # parameters. In the other case the provided custom filename is used.
-        filename_prefix = self._get_parameter_based_output_prefix()
-        output_filename = self.f[ouput_filename_type](fname=filename_prefix)
+        output_filename = self.f[ouput_filename_type](fname=self.signature)
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
@@ -706,6 +798,9 @@ class sequential_alignment(output_volume_workflow):
         filename_prefix += "_MetricOpt-%d" % self.options.antsImageMetricOpt
         filename_prefix += "_Affine-%s" % str(self.options.useRigidAffine)
 
+        filename_prefix += "_eps-%d_lam%02.2f" % \
+            (self.options.graphEdgeEpsilon, self.options.graphEdgeLambda)
+
         try:
             filename_prefix += "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
         except:
@@ -713,18 +808,18 @@ class sequential_alignment(output_volume_workflow):
 
         return filename_prefix
 
+    signature = property(_get_parameter_based_output_prefix)
+
     def _plot_transformations(self):
         """
         Plots the calculated composed transformations.
         """
-        # Get the filename prefix
-        filename_prefix = self._get_parameter_based_output_prefix()
 
         # Define and execute the transformation plotting script.
         command = pos_wrappers.rigid_transformations_plotter_wapper(
-            signature=filename_prefix,
-            report_filename=self.f['transform_report'](fname=filename_prefix),
-            plot_filename=self.f['transform_plot'](fname=filename_prefix),
+            signature=self.signature,
+            report_filename=self.f['transform_report'](fname=self.signature),
+            plot_filename=self.f['transform_plot'](fname=self.signature),
             transformation_mask=self.f['comp_transf_mask']())
         self.execute(command)
 
@@ -806,6 +901,12 @@ class sequential_alignment(output_volume_workflow):
         registration_options.add_option('--useRigidAffine', default=False,
             dest='useRigidAffine', action='store_const', const=True,
             help='Use rigid affine transformation.')
+        registration_options.add_option('--graphEdgeLambda', default=0.0,
+            dest='graphEdgeLambda', action='store', type="float",
+            help='Provedes lambda value for the graph edges generation.')
+        registration_options.add_option('--graphEdgeEpsilon', default=1,
+            dest='graphEdgeEpsilon', action='store', type="int",
+            help='Provedes epsilon value for the graph edges generation.')
 
         parser.add_option_group(obligatory_options)
         parser.add_option_group(registration_options)
