@@ -56,28 +56,28 @@ class rigid_transformations_plotter(pos_wrappers.generic_wrapper):
 
     This is quite a primitive plot as almost all of the plotting parameters are
     set automatically thus the plot is rather not artistic one.
+    TODO: Provide some doctests here.
     """
 
-    _template = """#!/usr/bin/gnuplot -persist
-        set terminal pngcairo noenhanced color notransparent size 800,400 font 'Arial,10'
-        set output '{graph_image}'
+    _template = """set terminal pngcairo noenhanced color notransparent size 800,400 font 'Arial,10';
+        set output '{graph_image}';
 
-        set title  sprintf("registration results\\n %s", '{calculation_prefix}')
-        set xlabel "slide number"
-        set ylabel "translation [mm]"
-        set y2label "rotation [degrees]"
+        set title  sprintf("registration results\\n %s", '{calculation_prefix}');
+        set xlabel "slide number";
+        set ylabel "translation [mm]";
+        set y2label "rotation [degrees]";
 
-        set yrange [:]
-        set y2range [:]
+        set yrange [:];
+        set y2range [:];
 
-        set xtics nomirror
-        set y2tics auto nomirror
-        set ytics auto nomirror
+        set xtics nomirror;
+        set y2tics auto nomirror;
+        set ytics auto nomirror;
 
         plot '{transformation_report_file}' u 0:3 w l title 'horizontal translation', \
             '{transformation_report_file}' u 0:2 w l title 'vertical translation', \
             '{transformation_report_file}' u 0:(sqrt($2**2+$3**2)) w l title 'total translation', \
-            '{transformation_report_file}' u 0:1 axes x1y2 w l title 'rotation angle'
+            '{transformation_report_file}' u 0:1 axes x1y2 w l title 'rotation angle';
     """
 
     _parameters = {
