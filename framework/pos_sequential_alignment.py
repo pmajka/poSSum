@@ -93,12 +93,29 @@ python pos_sequential_alignment.py \
         --registrationColor blue \
         --medianFilterRadius 4 4 \
         --resliceBackgorund 255 \
-        --skipSourceSlicesGeneration \
+        --disable-source-slices-generation \
         --useRigidAffine \
-        --skipTransformations \
-        --skipReslice \
+        --enableTransformations \
+        --enableReslice \
         --outputVolumeSpacing 0.02 0.02 0.06 \
         --outputVolumesDirectory ~/Downloads/cb_test
+
+
+Description of the output files
+-------------------------------
+
+As an output of the sequential alignment script many output files are produced
+apart from the aligned volumes. Below contents and meaning of the individual
+files are explained:
+
+    1. Transformation report: Contains transformation parameteres calculated
+    for individual slices. The file contains only parameters related to the
+    rigid transformation: translation vector as well as rotation angle.
+
+    2. Graph edges file, TODO: provide some more information.
+
+    3. Similarity measure between individual images.
+
 """
 
 
@@ -224,12 +241,12 @@ class sequential_alignment(output_volume_workflow):
         # simltaneously by a single routine. Slices preparation may be
         # disabled, switched off by providing approperiate command line
         # parameter. In that's the case, this step will be skipped.
-        if self.options.skipSourceSlicesGeneration is not True:
+        if self.options.sourceSlicesGeneration is True:
             self._generate_source_slices()
 
         # Generate transforms. This step may be switched off by providing
         # aproperiate command line parameter.
-        if self.options.skipTransformations is not True:
+        if self.options.enableTransformations is True:
             self._calculate_transforms()
 
         # Composite transformations take relatively small amount of time to
@@ -239,13 +256,13 @@ class sequential_alignment(output_volume_workflow):
         # Reslice the input slices according to the generated transforms.
         # This step may be skipped by providing approperiate command line
         # parameter.
-        if self.options.skipReslice is not True:
+        if self.options.enableReslice is True:
             self._reslice()
 
         # Stack both grayscale as well as the rgb slices into a volume.
         # This step may be skipped by providing approperiate command line
         # parameter.
-        if self.options.skipOutputVolumes is not True:
+        if self.options.enableOutputVolumes is True:
             self._stack_output_images()
 
         self._plot_transformations()
@@ -837,70 +854,55 @@ class sequential_alignment(output_volume_workflow):
             type='str', dest='inputImageDir',
             help='The directory from which the input slices will be read. The directory has to contain images named according to "%04d.nii.gz" scheme.')
 
-        workflow_options = OptionGroup(parser, 'Pipeline options.')
-        workflow_options.add_option('--outputVolumesDirectory', default=False,
-            dest='outputVolumesDirectory', type="str",
-            help='Directory to which registration results will be sored.')
-        workflow_options.add_option('--grayscaleVolumeFilename', default=False,
-            dest='grayscaleVolumeFilename', type='str',
-            help='Filename for the output grayscale volume.')
-        workflow_options.add_option('--multichannelVolumeFilename', default=False,
-            dest='multichannelVolumeFilename', type='str',
-            help='Filename for the output multichannel volume.')
-        workflow_options.add_option('--transformationsDirectory', default=False,
-            dest='transformationsDirectory', type="str",
-            help='Use provided transformation directory instead of the default one.')
-        workflow_options.add_option('--skipTransformations', default=False,
-            dest='skipTransformations', action='store_const', const=True,
-            help='Supress transformation calculation')
-        workflow_options.add_option('--skipSourceSlicesGeneration', default=False,
-            dest='skipSourceSlicesGeneration', action='store_const', const=True,
-            help='Supress generation of the source slices')
-        workflow_options.add_option('--skipReslice', default=False,
-            dest='skipReslice', action='store_const', const=True,
-            help='Supress generating grayscale volume')
-        workflow_options.add_option('--skipOutputVolumes', default=False,
-            dest='skipOutputVolumes', action='store_const', const=True,
-            help='Supress generating color volume')
-        workflow_options.add_option('--resliceBackgorund', default=None,
-            type='float', dest='resliceBackgorund',
-            help='Background color')
-        workflow_options.add_option('--resliceInterpolation',
-            dest='resliceInterpolation', default=None, type='choice',
-            choices=['Cubic','Gaussian','Linear','Nearest','Sinc','cubic'],
-            help='Interpolation during applying the transforms to individual slices.')
 
-        registration_options = OptionGroup(parser, 'Options driving the registration process.')
-        registration_options.add_option('--registrationROI', dest='registrationROI',
-            default=None, type='int', nargs=4,
-            help='ROI of the input image used for registration (ox, oy, sx, sy).')
-        registration_options.add_option('--registrationResize', dest='registrationResize',
-            default=None, type='float',
-            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
-        registration_options.add_option('--registrationColor',
+        source_processing = OptionGroup(parser, 'Source data processing.')
+
+        source_processing.add_option('--enable-sources-slices-generation', default=True,
+            dest='sourceSlicesGeneration', action='store_true',
+            help='Enable / disable generation of the source slices')
+        source_processing.add_option('--disable-sources-slices-generation', default=True,
+            dest='sourceSlicesGeneration', action='store_false')
+
+        source_processing.add_option('--registrationColor',
             dest='registrationColor', default='blue', type='choice',
             choices=['r','g','b','red','green','blue'],
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
-        registration_options.add_option('--medianFilterRadius', dest='medianFilterRadius',
+        source_processing.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        registration_options.add_option('--invertMultichannel', dest='invertMultichannel',
+        source_processing.add_option('--invertMultichannel', dest='invertMultichannel',
             default=None, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
-        registration_options.add_option('--outputVolumeROI', default=None,
-            type='int', dest='outputVolumeROI',  nargs=4,
-            help='ROI of the output volume - in respect to registration ROI.')
+        source_processing.add_option('--registrationROI', dest='registrationROI',
+            default=None, type='int', nargs=4,
+            help='ROI of the input image used for registration (ox, oy, sx, sy).')
+
+
+        registration_options = OptionGroup(parser, 'Registration options.')
+
+        registration_options.add_option('--enable-transformations', default=True,
+            dest='enableTransformations', action='store_true',
+            help='Supress transformation calculation')
+        registration_options.add_option('--disable-transformations', default=True,
+            dest='enableTransformations', action='store_true')
+
+        registration_options.add_option('--transformationsDirectory', default=False,
+            dest='transformationsDirectory', type="str",
+            help='Use provided transformation directory instead of the default one.')
+        registration_options.add_option('--registrationResize', dest='registrationResize',
+            default=None, type='float',
+            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
+        registration_options.add_option('--useRigidAffine', default=False,
+            dest='useRigidAffine', action='store_const', const=True,
+            help='Use rigid affine transformation.')
         registration_options.add_option('--antsImageMetric', default='MI',
             type='choice', dest='antsImageMetric', choices=['MI','CC','MSQ'],
             help='ANTS affine image to image metric. Three values are allowed: CC, MI, MSQ.')
         registration_options.add_option('--antsImageMetricOpt', default=32,
             type='int', dest='antsImageMetricOpt',
             help='Parameter of ANTS i2i metric. Makes a sense only when provided metric can be customized.')
-        registration_options.add_option('--useRigidAffine', default=False,
-            dest='useRigidAffine', action='store_const', const=True,
-            help='Use rigid affine transformation.')
         registration_options.add_option('--graphEdgeLambda', default=0.0,
             dest='graphEdgeLambda', action='store', type="float",
             help='Provedes lambda value for the graph edges generation.')
@@ -908,9 +910,50 @@ class sequential_alignment(output_volume_workflow):
             dest='graphEdgeEpsilon', action='store', type="int",
             help='Provedes epsilon value for the graph edges generation.')
 
+
+        reslicing_options = OptionGroup(parser, 'Reslicing options.')
+
+        reslicing_options.add_option('--enable-reslice', default=True,
+            dest='enableReslice', action='store_true',
+            help='Supress generating grayscale volume')
+        reslicing_options.add_option('--disable-reslice', default=True,
+            dest='enableReslice', action='store_false')
+
+        reslicing_options.add_option('--resliceBackgorund', default=None,
+            type='float', dest='resliceBackgorund',
+            help='Background color')
+        reslicing_options.add_option('--resliceInterpolation',
+            dest='resliceInterpolation', default=None, type='choice',
+            choices=['Cubic','Gaussian','Linear','Nearest','Sinc','cubic'],
+            help='Interpolation during applying the transforms to individual slices.')
+        reslicing_options.add_option('--outputVolumeROI', default=None,
+            type='int', dest='outputVolumeROI',  nargs=4,
+            help='ROI of the output volume - in respect to registration ROI.')
+
+
+        output_volume_opts = OptionGroup(parser, 'Output volume options.')
+
+        output_volume_opts.add_option('--enable-output-volumes', default=True,
+            dest='enableOutputVolumes', action='store_true',
+            help='Supress generating color volume')
+        output_volume_opts.add_option('--disable-output-volumes', default=True,
+            dest='enableOutputVolumes', action='store_false')
+
+        output_volume_opts.add_option('--outputVolumesDirectory', default=False,
+            dest='outputVolumesDirectory', type="str",
+            help='Directory in which the reconstruction results will be sored.')
+        output_volume_opts.add_option('--grayscaleVolumeFilename', default=False,
+            dest='grayscaleVolumeFilename', type='str',
+            help='Filename for the output grayscale volume.')
+        output_volume_opts.add_option('--multichannelVolumeFilename', default=False,
+            dest='multichannelVolumeFilename', type='str',
+            help='Filename for the output multichannel (rgb) volume.')
+
         parser.add_option_group(obligatory_options)
+        parser.add_option_group(source_processing)
         parser.add_option_group(registration_options)
-        parser.add_option_group(workflow_options)
+        parser.add_option_group(reslicing_options)
+        parser.add_option_group(output_volume_opts)
 
         return parser
 
