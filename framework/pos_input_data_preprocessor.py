@@ -122,6 +122,25 @@ def read_image_size(filename):
 
 
 class input_image(object):
+    """
+
+    An instance of the input image along with its metadata. Carries the cruical
+    metadata as well as some auxiliary information e.g.:
+
+        - Image filename,
+        - Coresponding image mask (if assigned), NOT USED,
+        - Image spatial resolution,
+        - Reference image index nad refrence plane coordinate,
+        - Type of distortion if the image is distorted,
+        - Spatial resolution of the downsampled images,
+        - Angle of rotation, if applied,
+        - Horizontal and vertical flip, if applied,
+        - Image file size, hash and dimensions
+        - and many, many other.
+
+    Some information is stored within the excel file, but some of the data has
+    to be calculated during runtime.
+    """
 
     def __init__(self):
         self.index = None
@@ -150,8 +169,10 @@ class input_image(object):
     def __str__(self):
         return str(self.__dict__)
 
+
 class worksheet_manager(object):
     """
+
     """
 
     _metadata_to_load = ['image_index', 'image_name', 'mask_name',

@@ -9,6 +9,27 @@
 
 This file is part of Multimodal Atlas of Monodelphis Domestica.
 (c) Piotr Majka 2011-2014. Restricted, damnit!
+
+
+Conversion of the input images to the Niftii format
+---------------------------------------------------
+
+The first step of the processing comprises the conversion of the raw input
+images to the Niftii format. Assuming the input image is a 24bit, RGB image,
+the following procedures are carried out:
+
+ 1. Processing the input rgb image into the full sized png files:
+    a. Flip the image horizontally if required,
+    b. Flip the image vertically if required,
+    c. Set the image canvas gravity and extent the image canvas,
+    d. Split the extended canvas image into individual color channels,
+    e. Select desired color channel and apply median filter to this channel,
+    f. Threshold the filtered image to obtain an image mask,
+    g. Save the full sized mask.
+
+2. Process the images into niftis:
+    a. Well, convert and save. Simple as this.
+
 """
 
 import os, sys
@@ -28,8 +49,8 @@ class input_image_padding(pos_wrappers.generic_wrapper):
     """
     """
 
-    _template = """convert {input_image} {background} {gravity} {extent} \
-    {rotation} {horizontal_flip} {vertical_flip} \
+    _template = """convert {input_image} {background} {rotation}\
+    {horizontal_flip} {vertical_flip} {gravity} {extent} \
     \( +clone -write {full_size_output} \
          {color_channel} {median} -separate \
         -write {temp_mask} +delete \); \
@@ -216,7 +237,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
     slicing_planes_settings = {
         "saggital" : {'permutation': [2,0,1], 'flip': [0, 0, 0], 'axis': 0},
         "coronal"  : {'permutation': [0,2,1], 'flip': [0, 0, 0], 'axis': 1},
-        "axial"    : {'permutation': [0,1,2], 'flip': [0, 1, 0], 'axis': 2}}
+        "axial"    : {'permutation': [0,1,2], 'flip': [0, 0, 0], 'axis': 2}}
 
     __DEFAULT_VOLUME_ORIENTATION_CODE = "RAS"
 
@@ -664,10 +685,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         process_resolution = self.w._images[first_slice].process_resolution
         source_canvas_size = self.w._images[first_slice].padded_size
 
-        # Just to execute the property function. TODO: Make caching!
-        self.output_volume_spacing
-
-        atlas_plate_size = getattr(self.w, '_atlas_plate_size')
+        atlas_plate_size = getattr(self.w, '_atlas_plate_size', None)
         if atlas_plate_size is not None:
             atlas_plate_size = " ".join(map(str, atlas_plate_size))
 
@@ -696,7 +714,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         #TODO: - Size of the downsampled images
 
         header+= "\n"
-        header+= "ATLAS_PLATE_SPACING=%f\n" % getattr(self.w, '_atlas_plate_spacing')
+        header+= "ATLAS_PLATE_SPACING=%f\n" % getattr(self.w, '_atlas_plate_spacing', None)
         header+= "ATLAS_PLATE_EXTENT=\"%s\"\n" % atlas_plate_size
 
         header+= "\n"
@@ -1023,4 +1041,4 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 if __name__ == '__main__':
     options, args = volume_reconstruction_preprocessor.parseArgs()
     se = volume_reconstruction_preprocessor(options, args)
-    se.launch()
+
