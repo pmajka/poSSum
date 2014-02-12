@@ -1041,4 +1041,5 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 if __name__ == '__main__':
     options, args = volume_reconstruction_preprocessor.parseArgs()
     se = volume_reconstruction_preprocessor(options, args)
+    se.launch()
 

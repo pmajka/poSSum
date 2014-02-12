@@ -22,7 +22,7 @@
 #                                                                             #
 ###############################################################################
 import os, sys
-from optparse import OptionParser, OptionGroup
+from optparse import OptionGroup
 import copy
 
 import networkx as nx
@@ -466,12 +466,12 @@ class sequential_alignment(output_volume_workflow):
         # Create a helper function to simplify the loops below:
         def get_wrapper(fdx, mdx):
             wrapper = pos_wrappers.image_similarity_wrapper(
-                reference_image= self.f['src_gray'](idx=fdx),
-                moving_image = self.f['src_gray'](idx=mdx),
-                affine_transformation = self.f['part_transf'](mIdx=mdx,fIdx=fdx))
+                reference_image=self.f['src_gray'](idx=fdx),
+                moving_image=self.f['src_gray'](idx=mdx),
+                affine_transformation=self.f['part_transf'](mIdx=mdx, fIdx=fdx))
             return copy.copy(wrapper)
 
-        commands = [] # Will hold commands for calculating the similarity
+        commands = []  # Will hold commands for calculating the similarity
 
         # Will hold (moving, fixed) images partial_transforms basically: all
         # partial transformations array
@@ -505,7 +505,7 @@ class sequential_alignment(output_volume_workflow):
         l = self.options.graphEdgeLambda
 
         for (mdx, fdx), s in simmilarity.iteritems():
-            w = (1.0 + s) * abs(mdx-fdx) * (1.0 + l)**(abs(mdx-fdx))
+            w = (1.0 + s) * abs(mdx - fdx) * (1.0 + l) ** (abs(mdx - fdx))
             graph_connections.append((fdx, mdx, w))
 
         self._logger.info("Creating a graph based on image similarities.")
@@ -587,10 +587,10 @@ class sequential_alignment(output_volume_workflow):
 
         # Initialize and define the composite transformation wrapper
         command = pos_wrappers.ants_compose_multi_transform(
-            dimension = self.__IMAGE_DIMENSION,
-            output_image = composite_transform_filename,
-            deformable_list = [],
-            affine_list = partial_transformations)
+            dimension=self.__IMAGE_DIMENSION,
+            output_image=composite_transform_filename,
+            deformable_list=[],
+            affine_list=partial_transformations)
 
         return copy.deepcopy(command)
 
@@ -647,14 +647,14 @@ class sequential_alignment(output_volume_workflow):
 
         # And finally initialize and customize reslice command.
         command = pos_wrappers.command_warp_grayscale_image(
-            reference_image = reference_image_filename,
-            moving_image = moving_image_filename,
-            transformation = transformation_file,
-            output_image = resliced_image_filename,
-            background = self.options.resliceBackgorund,
-            interpolation = self.options.resliceInterpolation,
-            region_origin = region_origin_roi,
-            region_size = region_size_roi)
+            reference_image=reference_image_filename,
+            moving_image=moving_image_filename,
+            transformation=transformation_file,
+            output_image=resliced_image_filename,
+            background=self.options.resliceBackgorund,
+            interpolation=self.options.resliceInterpolation,
+            region_origin=region_origin_roi,
+            region_size=region_size_roi)
         return copy.deepcopy(command)
 
     def _reslice_color(self, slice_number):
@@ -683,15 +683,15 @@ class sequential_alignment(output_volume_workflow):
 
         # And finally initialize and customize reslice command.
         command = pos_wrappers.command_warp_rgb_slice(
-            reference_image = reference_image_filename,
-            moving_image = moving_image_filename,
-            transformation = transformation_file,
-            output_image = resliced_image_filename,
-            region_origin = region_origin_roi,
-            region_size = region_size_roi,
-            background = self.options.resliceBackgorund,
-            interpolation = self.options.resliceInterpolation,
-            inversion_flag = self.options.invertMultichannel)
+            reference_image=reference_image_filename,
+            moving_image=moving_image_filename,
+            transformation=transformation_file,
+            output_image=resliced_image_filename,
+            region_origin=region_origin_roi,
+            region_size=region_size_roi,
+            background=self.options.resliceBackgorund,
+            interpolation=self.options.resliceInterpolation,
+            inversion_flag=self.options.invertMultichannel)
 
         # Return the created command line parser.
         return copy.deepcopy(command)
@@ -854,7 +854,6 @@ class sequential_alignment(output_volume_workflow):
             type='str', dest='inputImageDir',
             help='The directory from which the input slices will be read. The directory has to contain images named according to "%04d.nii.gz" scheme.')
 
-
         source_processing = OptionGroup(parser, 'Source data processing.')
 
         source_processing.add_option('--enable-sources-slices-generation', default=True,
@@ -865,7 +864,7 @@ class sequential_alignment(output_volume_workflow):
 
         source_processing.add_option('--registrationColor',
             dest='registrationColor', default='blue', type='choice',
-            choices=['r','g','b','red','green','blue'],
+            choices=['r', 'g', 'b', 'red', 'green', 'blue'],
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
@@ -879,14 +878,13 @@ class sequential_alignment(output_volume_workflow):
             default=None, type='int', nargs=4,
             help='ROI of the input image used for registration (ox, oy, sx, sy).')
 
-
         registration_options = OptionGroup(parser, 'Registration options.')
 
         registration_options.add_option('--enable-transformations', default=True,
             dest='enableTransformations', action='store_true',
             help='Supress transformation calculation')
         registration_options.add_option('--disable-transformations', default=True,
-            dest='enableTransformations', action='store_true')
+            dest='enableTransformations', action='store_false')
 
         registration_options.add_option('--transformationsDirectory', default=False,
             dest='transformationsDirectory', type="str",
@@ -898,7 +896,7 @@ class sequential_alignment(output_volume_workflow):
             dest='useRigidAffine', action='store_const', const=True,
             help='Use rigid affine transformation.')
         registration_options.add_option('--antsImageMetric', default='MI',
-            type='choice', dest='antsImageMetric', choices=['MI','CC','MSQ'],
+            type='choice', dest='antsImageMetric', choices=['MI', 'CC', 'MSQ'],
             help='ANTS affine image to image metric. Three values are allowed: CC, MI, MSQ.')
         registration_options.add_option('--antsImageMetricOpt', default=32,
             type='int', dest='antsImageMetricOpt',
@@ -909,7 +907,6 @@ class sequential_alignment(output_volume_workflow):
         registration_options.add_option('--graphEdgeEpsilon', default=1,
             dest='graphEdgeEpsilon', action='store', type="int",
             help='Provedes epsilon value for the graph edges generation.')
-
 
         reslicing_options = OptionGroup(parser, 'Reslicing options.')
 
@@ -924,12 +921,11 @@ class sequential_alignment(output_volume_workflow):
             help='Background color')
         reslicing_options.add_option('--resliceInterpolation',
             dest='resliceInterpolation', default=None, type='choice',
-            choices=['Cubic','Gaussian','Linear','Nearest','Sinc','cubic'],
+            choices=['Cubic', 'Gaussian', 'Linear', 'Nearest', 'Sinc', 'cubic'],
             help='Interpolation during applying the transforms to individual slices.')
         reslicing_options.add_option('--outputVolumeROI', default=None,
             type='int', dest='outputVolumeROI',  nargs=4,
             help='ROI of the output volume - in respect to registration ROI.')
-
 
         output_volume_opts = OptionGroup(parser, 'Output volume options.')
 

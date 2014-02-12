@@ -44,6 +44,7 @@ class generic_wrapper(object):
     def __str__(self):
         replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
         return " ".join(self._template.format(**replacement).strip().split())
+        #return self._template.format(**replacement).strip()
 
     def __call__(self, *args, **kwargs):
         print "Executing: %s" % str(self)
@@ -959,7 +960,7 @@ class command_warp_rgb_slice(generic_wrapper):
         'output_image': pos_parameters.filename_parameter('output_image', None),
         'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
         'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
-        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', False, str_template=' -scale -1 -shift 255 -type uchar'),
+        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', None, str_template=' -scale -1 -shift 255 -type uchar'),
     }
 
 
@@ -1063,7 +1064,7 @@ class gnuplot_execution_wrapper(generic_wrapper):
     gnuplot plot.plt; rm -fv plot.plt;
     """
 
-    _template = """gnuplot {plot_filename}; {remove_plot_file} rm -fv {plot_filename};"""
+    _template = """gnuplot {plot_filename}; {remove_plot_file} cat {plot_filename};"""
 
     # A really short comment on the 'remove_plot_file' parameters. This is a
     # clever walkaround wchich, when set to `True` will spoil the `rm` command
