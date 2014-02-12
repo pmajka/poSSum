@@ -103,7 +103,8 @@ The parameters have the following meaning:
     the indexed of the primary moving stack.
 
     2. `--additionalInvertMultichannel`: Determines of the input images are
-    inverted ofr the purpose of reslicing. Only two values are allowed: Either "1" or "0".
+    inverted ofr the purpose of reslicing. Only two values are allowed: Either
+    "1" or "0".
 
     3. `--additionalMultichannelVolume`: Filename of the output rgb volume. The
     parameters is no less obligatory than all the other parameters. Output
@@ -212,7 +213,7 @@ class pairwiseRegistration(output_volume_workflow):
             self._logger.error("Fixed slices range (`--fixedSlicesRange`) is obligatory. Please provide the fixed slices range. ")
 
         assert self.options.movingSlicesRange, \
-            self._logger.error("Moving range parameters (`--fixedSlicesRange`) are required. Please provide the moving slices range. ")
+            self._logger.error("Moving range parameters (`--movingSlicesRange`) are required. Please provide the moving slices range. ")
 
         # Validate, if an input images directory is provided,
         # Obviously, we need to load the images in order to process them.
@@ -244,7 +245,7 @@ class pairwiseRegistration(output_volume_workflow):
 
         # If no slice assignment file is provided, then 1:1 moving image to
         # fixed image is automatically generated.
-        if not image_pairs_filename :
+        if not image_pairs_filename:
             self._logger.debug(
             "No slice assignment file was provided. Using pairwise assignment.")
             self._slice_assignment = \
@@ -254,8 +255,8 @@ class pairwiseRegistration(output_volume_workflow):
             # Here I use pretty neat code snipper for determining the
             # dialect of teh csv file. Found at:
             # http://docs.python.org/2/library/csv.html#csv.Sniffer
-            self._logger.debug(\
-               "Loading slice-to-slice assignment from %s.", mapping_file)
+            self._logger.debug(
+            "Loading slice-to-slice assignment from %s.", mapping_file)
             with open(image_pairs_filename, 'rb') as mapping_file:
                 dialect = csv.Sniffer().sniff(mapping_file.read(1024))
                 mapping_file.seek(0)
@@ -328,7 +329,7 @@ class pairwiseRegistration(output_volume_workflow):
         # and check if all of them exists.
         filenames_to_check = map(lambda x: self.f['moving_raw_image'](idx=x),
                                  self.options.movingSlicesRange)
-        filenames_to_check+= map(lambda x: self.f['fixed_raw_image'](idx=x),
+        filenames_to_check += map(lambda x: self.f['fixed_raw_image'](idx=x),
                                  self.options.fixedSlicesRange)
 
         for slice_filename in filenames_to_check:
@@ -338,9 +339,6 @@ class pairwiseRegistration(output_volume_workflow):
                 self._logger.error("File does not exist: %s. Exiting",
                                    slice_filename)
                 sys.exit(1)
-
-        # TODO: Inspect if the images constituting the additional image stacks
-        # do actually exist!.
 
     def _generate_slice_index(self):
         """
@@ -425,8 +423,8 @@ class pairwiseRegistration(output_volume_workflow):
         Get generic slice preparation wrapper for further refinement.
         """
         command = pos_wrappers.alignment_preprocessor_wrapper(
-            median_filter_radius = self.options.medianFilterRadius,
-            invert_multichannel = self.options.invertMultichannel)
+            median_filter_radius=self.options.medianFilterRadius,
+            invert_multichannel=self.options.invertMultichannel)
         return copy.deepcopy(command)
 
     def _generate_fixed_slices(self):
@@ -447,11 +445,11 @@ class pairwiseRegistration(output_volume_workflow):
 
             command = self._get_generic_source_slice_preparation_wrapper()
             command.updateParameters({
-                'registration_color' : self.options.registrationColorChannelFixedImage,
-                'registration_resize' : self.options.fixedImageResize,
-                'input_image' :  self.f['fixed_raw_image'](idx=slice_number),
-                'grayscale_output_image' : self.f['fixed_gray'](idx=slice_number),
-                'color_output_image' : self.f['fixed_color'](idx=slice_number)})
+                'registration_color': self.options.registrationColorChannelFixedImage,
+                'registration_resize': self.options.fixedImageResize,
+                'input_image': self.f['fixed_raw_image'](idx=slice_number),
+                'grayscale_output_image': self.f['fixed_gray'](idx=slice_number),
+                'color_output_image': self.f['fixed_color'](idx=slice_number)})
             commands.append(copy.deepcopy(command))
 
         # Execute the commands in a batch.
@@ -476,11 +474,11 @@ class pairwiseRegistration(output_volume_workflow):
 
             command = self._get_generic_source_slice_preparation_wrapper()
             command.updateParameters({
-                'registration_color' : self.options.registrationColorChannelMovingImage,
-                'registration_resize' : self.options.movingImageResize,
-                'input_image' :  self.f['moving_raw_image'](idx=slice_number),
-                'grayscale_output_image' : self.f['moving_gray'](idx=slice_number),
-                'color_output_image' : self.f['moving_color'](idx=slice_number)})
+                'registration_color': self.options.registrationColorChannelMovingImage,
+                'registration_resize': self.options.movingImageResize,
+                'input_image': self.f['moving_raw_image'](idx=slice_number),
+                'grayscale_output_image': self.f['moving_gray'](idx=slice_number),
+                'color_output_image': self.f['moving_color'](idx=slice_number)})
             commands.append(copy.deepcopy(command))
 
         # Execute the commands in a batch.
@@ -491,7 +489,9 @@ class pairwiseRegistration(output_volume_workflow):
         commands = []
         for moving_slice, fixed_slice in self._slice_assignment.items():
             transform_command = self._calculate_single_transform(moving_slice, fixed_slice)
-            commands.append(transform_command)
+            if not os.path.isfile(self.f['transf_file'](mIdx=moving_slice)):
+                commands.append(transform_command)
+
         self.execute(commands)
 
     def _calculate_single_transform(self, moving_slice_index, fixed_slice_index):
@@ -526,16 +526,16 @@ class pairwiseRegistration(output_volume_workflow):
         # Define the registration framework for 2D images,
         # without the deformable registration step, etc.
         registration = pos_wrappers.ants_registration(
-            dimension = self.__IMAGE_DIMENSION,
-            outputNaming = output_naming,
-            iterations = self.__DEFORMABLE_ITERATIONS,
-            affineIterations = affine_iterations,
-            continueAffine = None,
-            rigidAffine = use_rigid_transformation,
-            imageMetrics = metrics,
-            histogramMatching = str(self.__HISTOGRAM_MATCHING).lower(),
-            miOption = [metric_parameter, self.__MI_SAMPLES],
-            affineMetricType = affine_metric_type)
+            dimension=self.__IMAGE_DIMENSION,
+            outputNaming=output_naming,
+            iterations=self.__DEFORMABLE_ITERATIONS,
+            affineIterations=affine_iterations,
+            continueAffine=None,
+            rigidAffine=use_rigid_transformation,
+            imageMetrics=metrics,
+            histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
+            miOption=[metric_parameter, self.__MI_SAMPLES],
+            affineMetricType=affine_metric_type)
 
         # Return the registration command.
         return copy.deepcopy(registration)
@@ -597,10 +597,11 @@ class pairwiseRegistration(output_volume_workflow):
         """
         # Define all the filenames required by the reslice command
 
-        # There are two ways of defining the moving slice image. Either 1) it can
-        # go from the source movins slices that were used for the registration
-        # purposes or 2) the moving images can go from the additional images
-        # stack. This is solved by passing the whole `filename` parameter.
+        # There are two ways of defining the moving slice image. Either 1) it
+        # can go from the source movins slices that were used for the
+        # registration purposes or 2) the moving images can go from the
+        # additional images stack. This is solved by passing the whole
+        # `filename` parameter.
         moving_image_filename = moving_filename_generator(idx=slice_number)
         resliced_image_filename = resliced_type
         transformation_file = self.f['transf_file'](mIdx=slice_number)
@@ -617,12 +618,12 @@ class pairwiseRegistration(output_volume_workflow):
 
         # And finally initialize and customize reslice command.
         command = wrapper_type(
-            reference_image = reference_image_filename,
-            moving_image = moving_image_filename,
-            transformation = transformation_file,
-            output_image = resliced_image_filename,
-            region_origin = region_origin_roi,
-            region_size = region_size_roi)
+            reference_image=reference_image_filename,
+            moving_image=moving_image_filename,
+            transformation=transformation_file,
+            output_image=resliced_image_filename,
+            region_origin=region_origin_roi,
+            region_size=region_size_roi)
         return copy.deepcopy(command)
 
     def _reslice_grayscale(self, slice_number):
@@ -639,8 +640,8 @@ class pairwiseRegistration(output_volume_workflow):
             resliced_type=self.f['resliced_gray'](idx=slice_number),
             slice_number=slice_number)
         command.updateParameters({
-            'background' : self.options.resliceBackgorund,
-            'interpolation' : self.options.resliceInterpolation})
+            'background':self.options.resliceBackgorund,
+            'interpolation':self.options.resliceInterpolation})
 
         return copy.deepcopy(command)
 
@@ -658,9 +659,9 @@ class pairwiseRegistration(output_volume_workflow):
             resliced_type=self.f['resliced_color'](idx=slice_number),
             slice_number=slice_number)
         command.updateParameters({
-            'background' : self.options.resliceBackgorund,
-            'interpolation' : self.options.resliceInterpolation,
-            'inversion_flag' : self.options.invertMultichannel})
+            'background': self.options.resliceBackgorund,
+            'interpolation': self.options.resliceInterpolation,
+            'inversion_flag': self.options.invertMultichannel})
 
         return copy.deepcopy(command)
 
@@ -688,18 +689,18 @@ class pairwiseRegistration(output_volume_workflow):
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
-            stack_mask = mask_type,
-            slice_start = start,
-            slice_end = stop,
-            slice_step = self.__VOL_STACK_SLICE_SPACING,
-            output_volume_fn = output_filename,
-            permutation_order = self.options.outputVolumePermutationOrder,
-            orientation_code = self.options.outputVolumeOrientationCode,
-            output_type = self.options.outputVolumeScalarType,
-            spacing = self.options.outputVolumeSpacing,
-            origin = self.options.outputVolumeOrigin,
-            interpolation = self.options.setInterpolation,
-            resample = self.options.outputVolumeResample)
+            stack_mask=mask_type,
+            slice_start=start,
+            slice_end=stop,
+            slice_step=self.__VOL_STACK_SLICE_SPACING,
+            output_volume_fn=output_filename,
+            permutation_order=self.options.outputVolumePermutationOrder,
+            orientation_code=self.options.outputVolumeOrientationCode,
+            output_type=self.options.outputVolumeScalarType,
+            spacing=self.options.outputVolumeSpacing,
+            origin=self.options.outputVolumeOrigin,
+            interpolation=self.options.setInterpolation,
+            resample=self.options.outputVolumeResample)
 
         # Return the created wrapper.
         return copy.deepcopy(command)
@@ -718,7 +719,7 @@ class pairwiseRegistration(output_volume_workflow):
         # Get the output filename for the grayscale output image.
         # and generate the output volume itself.
         output_filename = self.f['out_volume_gray'](fname=filename_prefix)
-        command = self._get_generic_stack_slice_wrapper(\
+        command = self._get_generic_stack_slice_wrapper(
             self.f['resliced_gray_mask'](),
             output_filename)
         self.execute(command)
@@ -726,7 +727,7 @@ class pairwiseRegistration(output_volume_workflow):
         # Get the output filename for the multichannel output image.
         # and generate the output volume itself.
         output_filename = self.f['out_volume_color'](fname=filename_prefix)
-        command = self._get_generic_stack_slice_wrapper(\
+        command = self._get_generic_stack_slice_wrapper(
             self.f['resliced_color_mask'](),
             output_filename)
         self.execute(command)
@@ -750,18 +751,18 @@ class pairwiseRegistration(output_volume_workflow):
 
         # List of command line parameters (`add_stack_fields`) which are
         # translated to given dictionary keys (`add_stack_key`).
-        add_stack_fields = ['additionalMovingImagesDirectory', \
-                'additionalInvertMultichannel', \
-                'additionalMultichannelVolume', 'additionalInterpolation', \
+        add_stack_fields = ['additionalMovingImagesDirectory',
+                'additionalInvertMultichannel',
+                'additionalMultichannelVolume', 'additionalInterpolation',
                 'additionalInterpolationBackground']
-        add_stack_keys = ['imgDir',  'invert_rgb', 'rgbVolName',\
+        add_stack_keys = ['imgDir',  'invert_rgb', 'rgbVolName',
                 'interpolation', 'background']
 
         # Validation if all the additional image stacks are properly defined.
         # The validation is performed in a two steps. First step is pretty
         # simple - length of all command-line based arrays for additional image
         # stack has to be equal.
-        lenghts = map(lambda x: len(getattr(self.options,x)), add_stack_fields)
+        lenghts = map(lambda x: len(getattr(self.options, x)), add_stack_fields)
         if len(set(lenghts)) != 1:
             self._logger.error("Provided additional stack information is invalid.")
 
@@ -834,20 +835,20 @@ class pairwiseRegistration(output_volume_workflow):
 
         # This non-optimal code below describes convert "0" or "1" into
         # boolean value. Sorry for the mess :)
-        inversion_flag = [False,True][int(stackSettings['invert_rgb'])]
+        inversion_flag = [None, True][int(stackSettings['invert_rgb'])]
 
         command.updateParameters({
-            'interpolation' : stackSettings['interpolation'],
-            'inversion_flag' : inversion_flag,
-            'background' : stackSettings['background']})
+            'interpolation': stackSettings['interpolation'],
+            'inversion_flag': inversion_flag,
+            'background': stackSettings['background']})
         return copy.deepcopy(command)
 
     def _stack_additional_image_stacks(self):
         for stackIdx in range(len(self._additional_stacks_settings)):
-            command = self._get_generic_stack_slice_wrapper(\
+            command = self._get_generic_stack_slice_wrapper(
                 self.f['resliced_add_color_mask'](stack_id=stackIdx),
-                self.f['out_volume_color_add'](\
-                    stack_id=stackIdx,fname='output_volume'))
+                self.f['out_volume_color_add'](
+                    stack_id=stackIdx, fname='output_volume'))
             self.execute(command)
 
     def _get_parameter_based_output_prefix(self):
@@ -858,29 +859,29 @@ class pairwiseRegistration(output_volume_workflow):
 
         filename_prefix = "out_"
 
-        filename_prefix+= "_FixedResize-%s" % str(self.options.fixedImageResize)
-        filename_prefix+= "_MovingResize-%s" % str(self.options.movingImageResize)
-        filename_prefix+= "_fixedColor-%s" % str(self.options.registrationColorChannelFixedImage)
-        filename_prefix+= "_movingColor-%s" % str(self.options.registrationColorChannelMovingImage)
+        filename_prefix += "_FixedResize-%s" % str(self.options.fixedImageResize)
+        filename_prefix += "_MovingResize-%s" % str(self.options.movingImageResize)
+        filename_prefix += "_fixedColor-%s" % str(self.options.registrationColorChannelFixedImage)
+        filename_prefix += "_movingColor-%s" % str(self.options.registrationColorChannelMovingImage)
 
         try:
-            filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+            filename_prefix += "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
         except:
-            filename_prefix+= "_Median-None"
+            filename_prefix += "_Median-None"
 
-        filename_prefix+= "_Metric-%s" % self.options.antsImageMetric
-        filename_prefix+= "_MetricOpt-%d" % self.options.antsImageMetricOpt
-        filename_prefix+= "_Affine-%s" % str(self.options.useRigidAffine)
-
-        try:
-            filename_prefix+= "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
-        except:
-            filename_prefix+= "_Median-None"
+        filename_prefix += "_Metric-%s" % self.options.antsImageMetric
+        filename_prefix += "_MetricOpt-%d" % self.options.antsImageMetricOpt
+        filename_prefix += "_Affine-%s" % str(self.options.useRigidAffine)
 
         try:
-            filename_prefix+= "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
+            filename_prefix += "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
         except:
-            filename_prefix+= "outROI-None"
+            filename_prefix += "_Median-None"
+
+        try:
+            filename_prefix += "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
+        except:
+            filename_prefix += "outROI-None"
 
         return filename_prefix
 
