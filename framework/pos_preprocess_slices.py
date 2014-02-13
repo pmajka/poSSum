@@ -587,19 +587,19 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         commands = []
 
         # The regular masked volume is always generated.
-        command = self._get_remask_wrapper("mask", "rgb", "rbg_masked")
+        command = self._get_remask_wrapper("mask", "rgb", "rgb_masked")
         commands.append(command)
 
         # If required, the slice-to-slice masked volume is generated.
         if self.options.useSliceToSliceMask:
             command = self._get_remask_wrapper("slice_to_slice_mask",\
-                "rgb", "rbg_slice_to_slice_masked")
+                "rgb", "rgb_slice_to_slice_masked")
             commands.append(command)
 
         # If required, the slice-to-reference mask is generated.
         if self.options.useSliceToReferenceMask:
             command = self._get_remask_wrapper("slice_to_reference_mask",\
-                "rgb", "rbg_slice_to_reference_masked")
+                "rgb", "rgb_slice_to_reference_masked")
             commands.append(command)
 
         # Execute all the batch.
@@ -619,7 +619,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # The default volume is resliced automatically
         input_names = [
-            self.f['source_stacks'](stack_name='rbg_masked'),
+            self.f['source_stacks'](stack_name='rgb_masked'),
             self.f['source_stacks'](stack_name='mask')]
 
         output_namings = [
@@ -628,14 +628,14 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # Slice-to-slice slices and masks are extracted upon request
         if self.options.useSliceToSliceMask:
-            input_names.append(self.f['source_stacks'](stack_name='rbg_slice_to_slice_masked'))
+            input_names.append(self.f['source_stacks'](stack_name='rgb_slice_to_slice_masked'))
             input_names.append(self.f['source_stacks'](stack_name='slice_to_slice_mask'))
             output_namings.append(self.f['seq_slice_to_slice']())
             output_namings.append(self.f['seq_slice_to_slice_mask']())
 
         # Slice-to-reference slices and masks are extracted upon purpose
         if self.options.useSliceToReferenceMask:
-            input_names.append(self.f['source_stacks'](stack_name='rbg_slice_to_reference_masked'))
+            input_names.append(self.f['source_stacks'](stack_name='rgb_slice_to_reference_masked'))
             input_names.append(self.f['source_stacks'](stack_name='slice_to_reference_mask'))
             output_namings.append(self.f['seq_slice_to_ref']())
             output_namings.append(self.f['seq_slice_to_ref_mask']())
@@ -694,6 +694,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header+= "set -xe\n"
         header+= "\n"
         #TODO: - Specimen name / dataset ID
+        #TODO: - Header file generation date
 
         header+= "\n"
         header+= "STACK_SIZE=%d\n" % self.stack_size
@@ -748,6 +749,23 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         combined_vol_props += "\"\n"
         header+= combined_vol_props
 
+        header+="\n\n"
+        header+="VOL_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="mask")
+        header+="VOL_RGB_MASKED=%s\n" % \
+           self.f['source_stacks'](stack_name="rgb_masked")
+        header+="VOL_RGB_SLICE_TO_REF_MASKED=%s\n" % \
+            self.f['source_stacks'](stack_name="rgb_slice_to_reference_masked")
+        header+="VOL_RGB_SLICE_TO_SLICE_MASKED=%s\n" % \
+            self.f['source_stacks'](stack_name="rgb_slice_to_slice_masked")
+        header+="VOL_RGB=%s\n" % \
+            self.f['source_stacks'](stack_name="rgb")
+        header+="VOL_SLICE_TO_REF_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="slice_to_reference_mask")
+        header+="VOL_SLICE_TO_SLICE_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="slice_to_slice_mask")
+
+        header+="\n\n"
         # Ok, now just save the string into a file.
         open(self.options.headerFile,'w').write(header)
 
