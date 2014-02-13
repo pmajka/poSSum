@@ -260,6 +260,15 @@ class deformable_reconstruction_iteration(generic_workflow):
                             parameter = parameter)
                 metrics.append(copy.deepcopy(outline_metric))
 
+            if self.options.referenceVolume and self.options.referenceVolumeWeight > 0:
+                reference_metric = pos_wrappers.ants_intensity_meric(
+                            fixed_image  = self.parent_process.f['ref_custom'](idx=j),
+                            moving_image = self.f['src_slice'](idx=i),
+                            metric = r_metric,
+                            weight = self.options.referenceVolumeWeight,
+                            parameter = parameter)
+                metrics.append(copy.deepcopy(reference_metric))
+
             if i in self.subset:
                 registration = pos_wrappers.ants_registration(
                             dimension = 2,

@@ -31,16 +31,16 @@ class deformable_reconstruction_workflow(output_volume_workflow):
     _f = { \
          # Initial grayscale slices
         'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_slice_mask' : pos_parameters.filename('init_slice_mask', work_dir = '01_init_slices', str_template = '????.png'),
         'init_slice_naming' : pos_parameters.filename('init_slice_naming', work_dir = '01_init_slices', str_template = '%04d.nii.gz'),
         # Initial outline mask
         'init_outline' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_outline_mask' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '????.png'),
         'init_outline_naming' : pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.nii.gz'),
         # Initial custom outlier mask
         'init_custom' : pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_custom_mask' : pos_parameters.filename('init_custom_mask', work_dir = '04_custom_slices', str_template = '????.png'),
         'init_custom_naming' : pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '%04d.nii.gz'),
+        # Initial external reference images
+        'ref_custom' : pos_parameters.filename('ref_custom_naming', work_dir = '03_reference_slices', str_template = '{idx:04d}.nii.gz'),
+        'ref_custom_naming' : pos_parameters.filename('ref_custom_naming', work_dir = '03_reference_slices', str_template = '%04d.nii.gz'),
         # Iteration
         'iteration'  : pos_parameters.filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
         'iteration_out_naming' : pos_parameters.filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
@@ -73,6 +73,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         # Handling situation when no volume is provided
         if not any([self.options.inputVolume, \
                    self.options.outlineVolume, \
+                   self.options.referenceVolume,\
                    self.options.maskedVolume]):
             print >> sys.stderr, "No input volumes provided. Exiting."
             sys.exit(1)
@@ -90,6 +91,10 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         if self.options.outlineVolume:
             self.options.outlineVolumeWeight = float(self.options.outlineVolume[0])
             self.options.outlineVolume = self.options.outlineVolume[1]
+
+        if self.options.referenceVolume:
+            self.options.referenceVolumeWeight = float(self.options.referenceVolume[0])
+            self.options.referenceVolume = self.options.referenceVolume[1]
 
         if self.options.maskedVolume:
             self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])
@@ -143,8 +148,19 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             prepare_outline_volume.updateParameters({
                 'input_image' : self.options.outlineVolume,
                 'output_naming' : self.f['init_outline_naming'](),
-                'output_dir' : self.f['init_outline_naming'].base_dir})
+                'output_dir' : self.f['init_outline'].base_dir})
             prepare_outline_volume()
+
+        if self.options.referenceVolume:
+            prepare_reference_volume = \
+                    self._get_prepare_volume_command_template()
+
+            prepare_reference_volume.updateParameters({
+                'input_image' : self.options.referenceVolume,
+                'output_naming' : self.f['ref_custom_naming'](),
+                'output_dir' : self.f['ref_custom'].base_dir})
+            prepare_reference_volume()
+
 
         # Handling custom mask volume. This volume is a mask volume which means
         # that it is a binary volume and contains only 0 and 1 values.
@@ -483,6 +499,9 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         parser.add_option('--outlineVolume','-o', default=None,
                 type='str', dest='outlineVolume', nargs = 2,
                 help='Outline label driving the registration')
+        parser.add_option('--referenceVolume','-r', default=None,
+                type='str', dest='referenceVolume', nargs = 2,
+                help='Reference volume to register slices to')
         parser.add_option('--maskedVolume','-m', default=None,
                 type='str', dest='maskedVolume', nargs = 2,
                 help='Custom slice mask for driving the registration')
