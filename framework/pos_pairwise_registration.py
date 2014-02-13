@@ -162,6 +162,23 @@ pos_pairwise_registration.py \
 
 """
 
+
+class image_voxel_count_wrapper(pos_wrappers.generic_wrapper):
+    """
+    """
+
+    _template = """c{dimension}d {image} -shift -{background} \
+        -thresh 0 0 0 1 {voxel_sum} {voxel_integral} | cut -f3 -d' ' """
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'image': pos_parameters.filename_parameter('image', False),
+        'background' : pos_parameters.value_parameter('shift', 0, '{_value}'),
+        'voxel_sum' : pos_parameters.boolean_parameter('voxel-sum', None, str_template='-{_name}'),
+        'voxel_integral' : pos_parameters.boolean_parameter('voxel-integral', None, str_template='-{_name}')
+    }
+
+
 class pairwiseRegistration(output_volume_workflow):
     """
     Pairwise slice to slice registration script.
@@ -340,6 +357,67 @@ class pairwiseRegistration(output_volume_workflow):
                                    slice_filename)
                 sys.exit(1)
 
+    def _correct_slice_assignment(self):
+        """
+        Replace inaproperiate reference slices with their approperiate
+        counterparts. What's all the buzz about. Well, sometimes  a given
+        reference slice may happen to be a entirely blank slice. In such case
+        it cannot be used as any registration cannot be performed with such an
+        image (a non-blank image to a blank image. This will not work).
+
+        To avoid pitfalls related with these blank reference images, the
+        workflow elliminates such images and replaces them with a valid (non
+        blank) images.
+        """
+        # Well, we need numpy here.
+        import numpy as np
+
+        # Repair indexes of moving slices for which a blank reference slice was
+        # defined:
+        self._logger.debug("Correcting slice to slice assignment for those moving slice for which a blank reference slice was assigned.")
+
+        # This array will collect all the number of non-blank voxels for each
+        # slice.
+        ref_slice_voxel_counts = []
+
+        # Iterate over all reference slices and detect the number of voxels per
+        # slice.
+        for fixed_index in self._slice_assignment.values():
+            command = image_voxel_count_wrapper(
+                image = self.f['fixed_gray'](idx=fixed_index),
+                background = self.options.resliceBackgorund,
+                voxel_sum = True)
+            vox_count = float(command()['stdout'].strip())
+            ref_slice_voxel_counts.append(vox_count)
+
+        # Convert the list into a numpy array, and then extract the index of
+        # the first and the last nonzero slices.
+        ref_slice_voxel_counts = np.array(ref_slice_voxel_counts)
+        first_nonzero = np.nonzero(ref_slice_voxel_counts)[0][3]
+        last_nonzero = np.nonzero(ref_slice_voxel_counts)[0][-3]
+
+        # Calculate the offset from zero to the index of the first moving slice
+        # (yeah, crazy, but we assumed that the slice indexing may start not
+        # from zero.
+        np_offset = min(self._slice_assignment.keys())
+
+        for moving_index in self._slice_assignment.keys():
+
+            # Check if the number of voxels in given reference slice is zero?
+            if ref_slice_voxel_counts[moving_index - np_offset] == 0:
+
+                # If we're in the first half of the slice, we use first nonzero
+                # slice index. In the other case, the last nonzero image is
+                # used.
+                if moving_index < len(self._slice_assignment.keys()) / 2:
+                    self._slice_assignment[moving_index] = first_nonzero
+                    self._logger.debug("Setting ref(%d) = %d." \
+                        % (moving_index, first_nonzero + np_offset))
+                else:
+                    self._slice_assignment[moving_index] = last_nonzero
+                    self._logger.debug("Setting ref(%d) = %d." \
+                        % (moving_index, last_nonzero + np_offset))
+
     def _generate_slice_index(self):
         """
         Generate moving image to fixed image mappings.
@@ -390,6 +468,10 @@ class pairwiseRegistration(output_volume_workflow):
         if self.options.skipPreprocessing is not True:
             self._generate_fixed_slices()
             self._generate_moving_slices()
+
+        # Elliminate blank reference slices.
+        if self.options.dryRun is False:
+            self._correct_slice_assignment()
 
         # Generate transforms. This step may be switched off by providing
         # aproperiate command line parameter.
@@ -905,10 +987,10 @@ class pairwiseRegistration(output_volume_workflow):
 
         parser.add_option('--fixedImageResize',  default=None,
             type='float', dest='fixedImageResize',
-            action='store', nargs =1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
+            action='store', nargs = 1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
         parser.add_option('--movingImageResize', default=None,
             type='float', dest='movingImageResize',
-            action='store', nargs =1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
+            action='store', nargs = 1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
 
         parser.add_option('--registrationColorChannelMovingImage', default='blue',
             type='str', dest='registrationColorChannelMovingImage',
