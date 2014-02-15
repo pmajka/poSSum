@@ -689,13 +689,16 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         if atlas_plate_size is not None:
             atlas_plate_size = " ".join(map(str, atlas_plate_size))
 
+        import time
+
         header = ""
         header+= "#!/bin/bash\n"
         header+= "set -xe\n"
         header+= "\n"
-        #TODO: - Specimen name / dataset ID
-        #TODO: - Header file generation date
+        header+= "# Generation date: " + time.strftime("%d_%m_%Y_%H-%M-%S")
+        header+= "\n\n"
 
+        header+= "SPECIMEN_NAME=%s\n" % self.w._specimen_id
         header+= "\n"
         header+= "STACK_SIZE=%d\n" % self.stack_size
         header+= "IDX_FIRST_SLICE=%d\n" % self.slices_span[0]
@@ -764,8 +767,33 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             self.f['source_stacks'](stack_name="slice_to_reference_mask")
         header+="VOL_SLICE_TO_SLICE_MASK=%s\n" % \
             self.f['source_stacks'](stack_name="slice_to_slice_mask")
+        header+="VOL_ATLAS_TO_SLICE_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="atlas_mask")
+        header+="VOL_ATLAS_RGB=%s\n" % \
+            self.f['source_stacks'](stack_name="atlas_rgb")
+        header+="VOL_ATLAS_TO_SLICE_MASKED=%s\n" % \
+            self.f['source_stacks'](stack_name="atlas_masked")
 
-        header+="\n\n"
+        header+="\n"
+        header+="DIR_IMAGES=%s/\n" % \
+            self.f['seq_input_img'].base_dir
+        header+="DIR_MASKS=%s/\n" % \
+           self.f['seq_input_mask'].base_dir
+        header+="DIR_SLICE_TO_SLICE_MASKED=%s/\n" % \
+            self.f['seq_slice_to_slice'].base_dir
+        header+="DIR_SLICE_TO_SLICE_MASKS=%s/\n" % \
+            self.f['seq_slice_to_slice_mask'].base_dir
+        header+="DIR_SLICE_TO_REF=%s/\n" % \
+            self.f['seq_slice_to_ref'].base_dir
+        header+="DIR_SLICE_TO_REF_MASK=%s/\n" % \
+            self.f['seq_slice_to_ref_mask'].base_dir
+        header+="DIR_REF_TO_SLICE=%s/\n" % \
+            self.f['seq_ref_to_slice'].base_dir
+        header+="DIR_REF_TO_SLICE_MASK=%s/\n" % \
+            self.f['seq_ref_to_slice_mask'].base_dir
+
+        header+="\n"
+
         # Ok, now just save the string into a file.
         open(self.options.headerFile,'w').write(header)
 
