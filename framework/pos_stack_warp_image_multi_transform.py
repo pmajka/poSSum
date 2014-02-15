@@ -74,6 +74,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         'moving_raw': pos_parameters.filename('moving_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'fixed_raw': pos_parameters.filename('fixed_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'output_transforms': pos_parameters.filename('output_transforms', work_dir='02_transforms', str_template='{idx:04d}.nii.gz'),
+        'output_transf_affine': pos_parameters.filename('output_transf_affine', work_dir='02_transforms', str_template='{idx:04d}.txt'),
         'components': pos_parameters.filename('components', work_dir='04_rgb_components', str_template='{idx:04d}_{comp:02d}.nii.gz'),
         'resliced_components': pos_parameters.filename('resliced_components', work_dir='05_resliced_rgb_components', str_template='{idx:04d}_{comp:02d}.nii.gz'),
         'resliced': pos_parameters.filename('resliced', work_dir='06_resliced', str_template='{idx:04d}.nii.gz'),
@@ -159,6 +160,9 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         if self.options.transformationsDirectory is not False:
             self.f['output_transforms'].override_dir = \
                 self.options.transformationsDirectory
+        if self.options.transformationsDirectory is not False:
+            self.f['output_transf_affine'].override_dir = \
+                self.options.transformationsDirectory
 
         # Apart from just setting the custom output volumes directory, one can
         # also customize even the output filename of both, grayscale and
@@ -210,6 +214,11 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # Initialize workflow-wide transformation array.
         self.transformations = []
 
+        # Make a flag indicating that there are only affine transformations if
+        # form of txt files. This flag will be changes if an deformation field
+        # transformation will be encountered.
+        self._affine_transforms_only = True
+
         # Iterate over all provided transformation and then put it into the
         # transformation array. The provided transformation is used in
         # "forward" mode when the "0" is used in the paramters specification.
@@ -221,6 +230,10 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                 invert = " -i "
             else:
                 invert = " "
+
+            # Deformation filed encountered. Disable the 'affine only' flag.
+            if transfSpec[1].endswith(".nii.gz"):
+                self._affine_transforms_only = False
 
             # Add forward or inverse tranfromation for the transformation
             # chain. Note that the array stores only the transformation
@@ -252,7 +265,13 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         """
 
         # Define the output transformation string.
-        out_transform_filename = self.f['output_transforms'](idx=transform_index)
+        # The output transformation filename depends on the type of the
+        # transformation series. It may be a deformation field or a text file.
+        if self._affine_transforms_only is True:
+            filename_type = 'output_transf_affine'
+        else:
+            filename_type = 'output_transforms'
+        out_transform_filename = self.f[filename_type](idx=transform_index)
         reference_image_filename = self.f['fixed_raw'](idx=slice_index)
 
         # Create a list of all the input transformations.
