@@ -19,6 +19,7 @@ _ROW_OF_THE_FIRST_SLICE = 14 - 1
 _DEFAULT_PADDING_ROUNDING = 100
 _DEFAULT_SHEET_INDEX = 0
 
+_CELL_SPECIMEN_ID = (2, 2)
 _CELL_STACK_SIZE = (3, 2)
 _CELL_SLICING_PLANE  = (4, 2)
 _CELL_SLICE_THICKNESS = (5, 2)
@@ -239,6 +240,7 @@ class worksheet_manager(object):
 
         # Extract the stack size. Based in the stack size, the number and the
         # indexes of the consecutive slices.
+        self._specimen_id = str(self._worksheet.cell_value(*_CELL_SPECIMEN_ID))
         self._stack_size = int(self._worksheet.cell_value(*_CELL_STACK_SIZE))
         self._slice_thickness = float(self._worksheet.cell_value(*_CELL_SLICE_THICKNESS))
         self._slicing_plane = str(self._worksheet.cell_value(*_CELL_SLICING_PLANE))
