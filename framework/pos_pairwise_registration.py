@@ -601,10 +601,6 @@ class pairwiseRegistration(output_volume_workflow):
             parameter=metric_parameter)
         metrics.append(copy.deepcopy(metric))
 
-        #TODO: Handle ants boolean switches:
-        # 1) Use histogram matching
-        # 2) Use rigid affine registration,
-
         # Define the registration framework for 2D images,
         # without the deformable registration step, etc.
         registration = pos_wrappers.ants_registration(
@@ -808,11 +804,12 @@ class pairwiseRegistration(output_volume_workflow):
 
         # Get the output filename for the multichannel output image.
         # and generate the output volume itself.
-        output_filename = self.f['out_volume_color'](fname=filename_prefix)
-        command = self._get_generic_stack_slice_wrapper(
-            self.f['resliced_color_mask'](),
-            output_filename)
-        self.execute(command)
+        if self.options.skipColorReslice is not True:
+            output_filename = self.f['out_volume_color'](fname=filename_prefix)
+            command = self._get_generic_stack_slice_wrapper(
+                self.f['resliced_color_mask'](),
+                output_filename)
+            self.execute(command)
 
     def _load_additional_stacks_settings(self):
         """

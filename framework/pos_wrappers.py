@@ -584,9 +584,6 @@ class chain_affine_transforms(generic_wrapper):
 
     >>> c() == {'port': {'dimension': '3', 'output_transform': 'out.txt'}}
     True
-
-    # TODO: Provide tests with affine inversion and check out if they actually
-    # work.
     """
 
     _template = """ComposeMultiTransform {dimension} {output_transform} {input_transforms}"""
@@ -1005,7 +1002,41 @@ class command_warp_grayscale_image(generic_wrapper):
         the region to extract.
     :type region_size: (int, int)
 
-    #TODO: Add doctests.
+    Doctests
+    --------
+
+    >>> command_warp_grayscale_image
+    <class '__main__.command_warp_grayscale_image'>
+
+    >>> command_warp_grayscale_image() #doctest: +ELLIPSIS
+    <__main__.command_warp_grayscale_image object at 0x...>
+
+    >>> print command_warp_grayscale_image() #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -as ref -clear -as moving -push ref -push moving \
+    -reslice-itk -type uchar -o
+
+    >>> p = command_warp_grayscale_image(reference_image='ref.nii.gz',
+    ... moving_image='moving.nii.gz', transformation='transf.txt',
+    ... output_image='output.nii.gz') #doctest: +NORMALIZE_WHITESPACE
+    >>> print p #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose ref.nii.gz -as ref -clear moving.nii.gz -as moving \
+    -push ref -push moving -reslice-itk transf.txt \
+    -type uchar -o output.nii.gz
+
+    >>> p.updateParameters({'background': 255, 'interpolation': 'nn'}) #doctest: +ELLIPSIS
+    <__main__.command_warp_grayscale_image object at 0x...>
+    >>> print p #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -background 255 -interpolation nn ref.nii.gz -as ref -clear\
+    moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
+    -type uchar -o output.nii.gz
+
+    >>> p.updateParameters({'region_origin': [10,10,10],
+    ... 'region_size': [50,50,50], 'dimension': 3}) #doctest: +ELLIPSIS
+    <__main__.command_warp_grayscale_image object at 0x...>
+    >>> print p #doctest: +NORMALIZE_WHITESPACE
+    c3d -verbose -background 255 -interpolation nn ref.nii.gz -as ref -clear \
+    moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
+    -region 10x10x10vox 50x50x50vox -type uchar -o output.nii.gz
     """
 
     _template = "c{dimension}d -verbose {background} {interpolation}\
@@ -1064,7 +1095,7 @@ class gnuplot_execution_wrapper(generic_wrapper):
     gnuplot plot.plt; rm -fv plot.plt;
     """
 
-    _template = """gnuplot {plot_filename}; {remove_plot_file} cat {plot_filename};"""
+    _template = """gnuplot {plot_filename}; {remove_plot_file} rm -fv {plot_filename};"""
 
     # A really short comment on the 'remove_plot_file' parameters. This is a
     # clever walkaround wchich, when set to `True` will spoil the `rm` command

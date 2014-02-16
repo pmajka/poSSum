@@ -406,7 +406,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             # the individual components
             def components_fnames(index, fn_tplt):
                 files = map(lambda x: \
-                    self.f[fn_tplt](idx=index,comp=x),\
+                    self.f[fn_tplt](idx=index, comp=x),\
                     range(self.__NUMBER_OF_COMPONENTS))
                 return files
 

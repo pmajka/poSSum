@@ -423,7 +423,8 @@ class sequential_alignment(output_volume_workflow):
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
                                               fIdx=fixed_slice_index)
 
-        # TODO: correct all true / false switches!
+        # Yeah, I know this is not the most optimal way
+        # to make a true/false string out of boolean value but ...
         use_rigid_transformation = str(self.options.useRigidAffine).lower()
 
         # Define the image-to-image metric.

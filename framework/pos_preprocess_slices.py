@@ -715,7 +715,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header+= "\n"
         header+= "FULLSIZE_CANVAS_SIZE=\"%s\"" % \
             " ".join(map(str, source_canvas_size)) + "\n"
-        #TODO: - Size of the downsampled images
 
         header+= "\n"
         header+= "ATLAS_PLATE_SPACING=%f\n" % getattr(self.w, '_atlas_plate_spacing', None)
