@@ -14,7 +14,6 @@ Slice preprocessing script
 This file is part of Multimodal Atlas of Monodelphis Domestica.
 (c) Piotr Majka 2011-2014. Restricted, damnit!
 """
-
 import os, sys
 from optparse import OptionGroup
 import copy
@@ -23,47 +22,6 @@ from pos_wrapper_skel import output_volume_workflow
 import pos_parameters
 import pos_wrappers
 from pos_itk_core import autodetect_file_type
-
-
-class split_multichannel_image(pos_wrappers.generic_wrapper):
-    """
-    Split the individual image into its components. By default the images are
-    converted to the uchar type.
-    # TODO: Move to pos_wrappers and provide documentation.
-    """
-
-    _template = """c{dimension}d -mcs {input_image} -foreach {output_type} -endfor \
-        -oo {output_components}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'input_image': pos_parameters.filename_parameter('input_image', None),
-        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
-        'output_components': pos_parameters.list_parameter('output_components', [], str_template='{_list}')
-        }
-
-
-class merge_components(pos_wrappers.generic_wrapper):
-    """
-    # TODO: Move to pos_wrappers and provide documentation.
-    Merges the individual components of the multichannel image into actual
-    multichannel image. The individual components are deleted afterwards.
-    """
-
-    _template = """c{dimension}d {input_images} \
-        -foreach {region_origin} {region_size} {output_type} -endfor \
-        -omc {components_no} {output_image}; rm -rfv {input_images} {other_files_remove};"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'input_images': pos_parameters.list_parameter('input_images', [], str_template='{_list}'),
-        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
-        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
-        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
-        'components_no' : pos_parameters.value_parameter('components_no', 3),
-        'output_image': pos_parameters.filename_parameter('output_image', None),
-        'other_files_remove': pos_parameters.list_parameter('other_files_remove', [], str_template='{_list}')
-        }
 
 
 class stack_warp_image_multi_transform(output_volume_workflow):
@@ -420,7 +378,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                     components_fnames(slice_index, 'resliced_components')
 
                 # Splitting the mc images into individual components
-                command_prepare = split_multichannel_image(
+                command_prepare = pos_wrappers.split_multichannel_image(
                     input_image = self.f['moving_raw'](idx=slice_index),
                     output_components = components)
                 commands_prepare.append(command_prepare)
@@ -431,7 +389,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                         slice_index, transform_index, channel_index))
 
                 # Merging back the resliced components.
-                command_merge = merge_components(
+                command_merge = pos_wrappers.merge_components(
                     input_images = resliced_components,
                     components_no = self.__NUMBER_OF_COMPONENTS,
                     output_image = self.f['resliced'](idx=slice_index),
