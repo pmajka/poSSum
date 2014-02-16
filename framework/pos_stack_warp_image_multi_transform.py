@@ -473,8 +473,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
     @classmethod
     def _getCommandLineParser(cls):
         """
-        #TODO: _getCommandLineParser -> _get_command_line_parser
         """
+
         parser = output_volume_workflow._getCommandLineParser()
 
         obligatory_options = \
