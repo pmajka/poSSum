@@ -227,10 +227,11 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # transformation series. It may be a deformation field or a text file.
         if self._affine_transforms_only is True:
             filename_type = 'output_transf_affine'
+            reference_image_filename = None
         else:
             filename_type = 'output_transforms'
+            reference_image_filename = self.f['fixed_raw'](idx=slice_index)
         out_transform_filename = self.f[filename_type](idx=transform_index)
-        reference_image_filename = self.f['fixed_raw'](idx=slice_index)
 
         # Create a list of all the input transformations.
         transformations_list = \
