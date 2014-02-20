@@ -13,7 +13,6 @@ import pos_wrappers
 import pos_parameters
 
 """
-#TODO: documentation and description, usage examples.
 
 Rigid transformation plotting script
 ************************************
@@ -56,7 +55,6 @@ class rigid_transformations_plotter(pos_wrappers.generic_wrapper):
 
     This is quite a primitive plot as almost all of the plotting parameters are
     set automatically thus the plot is rather not artistic one.
-    TODO: Provide some doctests here.
     """
 
     _template = """set terminal pngcairo noenhanced color notransparent size 800,400 font 'Arial,10';
