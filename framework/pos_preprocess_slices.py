@@ -242,6 +242,12 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
     __DEFAULT_VOLUME_ORIENTATION_CODE = "RAS"
 
     def launch(self):
+
+        # Override the default reference images directory if required:
+        if self.options.inputReferenceDir is not False:
+            self.f['raw_ref_imgs'].override_dir = \
+                self.options.inputReferenceDir
+
         # Load the image settings chart and process and extract all the
         # required metadata.
 
@@ -982,6 +988,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         obligatory_options.add_option('--input-images-dir', default=None,
             type='str', dest='inputImagesDir',
             help='The directory from which the input images will be read.')
+        obligatory_options.add_option('--input-reference-dir', default=None,
+            type='str', dest='inputReferenceDir',
+            help='The directory holding the reference slices.')
         obligatory_options.add_option('--input-workbook', default=None,
             type='str', dest='inputWorkbook',
             help='Input workbook.')
