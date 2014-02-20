@@ -819,9 +819,6 @@ class pairwiseRegistration(output_volume_workflow):
         for the moving stack.
 
         Additional stack settings are optional.
-
-        # TODO: Validate the provided properties (e.g. length of all the
-        # 'additional' command line parameters).
         """
 
         # Array holding parameters of the adddtional images stacks
