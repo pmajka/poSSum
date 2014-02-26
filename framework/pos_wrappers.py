@@ -43,7 +43,8 @@ class generic_wrapper(object):
 
     def __str__(self):
         replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
-        return " ".join(self._template.format(**replacement).strip().split())
+        #return " ".join(self._template.format(**replacement).strip().split())
+        return self._template.format(**replacement).strip()
 
     def __call__(self, *args, **kwargs):
         print "Executing: %s" % str(self)
@@ -67,6 +68,7 @@ class generic_wrapper(object):
         for (name, value) in parameters.items():
             self.p[name].value = value
         return self
+
 
 class touch_wrapper(generic_wrapper):
     _template = """touch {files}"""
@@ -169,6 +171,7 @@ class ants_registration(generic_wrapper):
         execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
 
         return execution
+
 
 class ants_reslice(generic_wrapper):
     """
@@ -302,6 +305,7 @@ class ants_intensity_meric(generic_wrapper):
 
     value = property(_get_value, _set_value)
 
+
 class ants_point_set_estimation_metric(generic_wrapper):
     """
     Wrapper for ANTS Point Set Estimation metric template.  The role of this
@@ -411,6 +415,7 @@ class ants_point_set_estimation_metric(generic_wrapper):
 
     value = property(_get_value, _set_value)
 
+
 class ants_average_affine_transform(generic_wrapper):
     """
     AverageAffineTransform ImageDimension output_affine_transform
@@ -480,6 +485,7 @@ class ants_average_affine_transform(generic_wrapper):
 
 class ants_compose_multi_transform(generic_wrapper):
     """
+    TODO: Provide doctest.
     """
     _template = """ComposeMultiTransform {dimension} \
                   {output_image} \
@@ -583,9 +589,6 @@ class chain_affine_transforms(generic_wrapper):
 
     >>> c() == {'port': {'dimension': '3', 'output_transform': 'out.txt'}}
     True
-
-    # TODO: Provide tests with affine inversion and check out if they actually
-    # work.
     """
 
     _template = """ComposeMultiTransform {dimension} {output_transform} {input_transforms}"""
@@ -721,7 +724,6 @@ class stack_and_reorient_wrapper(generic_wrapper):
         'interpolation': string_parameter('interpolation', None, str_template='--{_name} {_value}'),
         'resample': list_parameter('resample', [], str_template='--{_name} {_list}')
     }
-
 
 
 class alignment_preprocessor_wrapper(generic_wrapper):
@@ -959,7 +961,7 @@ class command_warp_rgb_slice(generic_wrapper):
         'output_image': pos_parameters.filename_parameter('output_image', None),
         'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
         'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
-        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', False, str_template=' -scale -1 -shift 255 -type uchar'),
+        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', None, str_template=' -scale -1 -shift 255 -type uchar'),
     }
 
 
@@ -1004,7 +1006,41 @@ class command_warp_grayscale_image(generic_wrapper):
         the region to extract.
     :type region_size: (int, int)
 
-    #TODO: Add doctests.
+    Doctests
+    --------
+
+    >>> command_warp_grayscale_image
+    <class '__main__.command_warp_grayscale_image'>
+
+    >>> command_warp_grayscale_image() #doctest: +ELLIPSIS
+    <__main__.command_warp_grayscale_image object at 0x...>
+
+    >>> print command_warp_grayscale_image() #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -as ref -clear -as moving -push ref -push moving \
+    -reslice-itk -type uchar -o
+
+    >>> p = command_warp_grayscale_image(reference_image='ref.nii.gz',
+    ... moving_image='moving.nii.gz', transformation='transf.txt',
+    ... output_image='output.nii.gz') #doctest: +NORMALIZE_WHITESPACE
+    >>> print p #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose ref.nii.gz -as ref -clear moving.nii.gz -as moving \
+    -push ref -push moving -reslice-itk transf.txt \
+    -type uchar -o output.nii.gz
+
+    >>> p.updateParameters({'background': 255, 'interpolation': 'nn'}) #doctest: +ELLIPSIS
+    <__main__.command_warp_grayscale_image object at 0x...>
+    >>> print p #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -background 255 -interpolation nn ref.nii.gz -as ref -clear\
+    moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
+    -type uchar -o output.nii.gz
+
+    >>> p.updateParameters({'region_origin': [10,10,10],
+    ... 'region_size': [50,50,50], 'dimension': 3}) #doctest: +ELLIPSIS
+    <__main__.command_warp_grayscale_image object at 0x...>
+    >>> print p #doctest: +NORMALIZE_WHITESPACE
+    c3d -verbose -background 255 -interpolation nn ref.nii.gz -as ref -clear \
+    moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
+    -region 10x10x10vox 50x50x50vox -type uchar -o output.nii.gz
     """
 
     _template = "c{dimension}d -verbose {background} {interpolation}\
@@ -1088,6 +1124,253 @@ class rigid_transformations_plotter_wapper(generic_wrapper):
         'plot_filename': pos_parameters.filename_parameter('plotFilename', None, '--{_name} {_value}'),
         'transformation_mask': pos_parameters.filename_parameter('transformation_mask', None, '{_value}'),
     }
+
+class image_similarity_wrapper(generic_wrapper):
+    """
+    Calculates image similarity between two grayscale images using a provided
+    similarity metric and applying optional affine transformation to the moving image.
+
+    Ok, a few words of explanation here: This wrapper is a bit atypical since
+    there are two templates. One template is used when a affine transformation
+    is provided, the other command template is used when the is no affine
+    transformation provided. The selection between templates is based on the
+    value of the transformation parameters. This wrapper used a hack and
+    overloads the __str__ function. This is a pretty unusual solution but I
+    like it and probably will use it more.
+
+    >>> print image_similarity_wrapper
+    <class '__main__.image_similarity_wrapper'>
+
+    >>> image_similarity_wrapper() #doctest: +ELLIPSIS
+    <__main__.image_similarity_wrapper object at 0x...>
+
+    >>> print image_similarity_wrapper() #doctest: +NORMALIZE_WHITESPACE
+    c2d -ncor | cut -f3 -d' '
+
+    # Verify initial parameters values
+
+    >>> str(image_similarity_wrapper._parameters['dimension']) == '2'
+    True
+
+    >>> str(image_similarity_wrapper._parameters['reference_image']) == ''
+    True
+
+    >>> str(image_similarity_wrapper._parameters['moving_image']) == ''
+    True
+
+    >>> str(image_similarity_wrapper._parameters['metric']) == '-ncor'
+    True
+
+    >>> str(image_similarity_wrapper._parameters['affine_transformation']) == ''
+    True
+
+    Initial parameters are verified.
+
+    >>> print image_similarity_wrapper(reference_image='r.nii.gz', moving_image='m.nii.gz')
+    c2d r.nii.gz m.nii.gz -ncor | cut -f3 -d' '
+
+    >>> print image_similarity_wrapper(reference_image='r.nii.gz', moving_image='m.nii.gz', dimension=3)
+    c3d r.nii.gz m.nii.gz -ncor | cut -f3 -d' '
+
+    # And now execution with a affine transformation
+
+    >>> print image_similarity_wrapper(reference_image='r.nii.gz',
+    ... moving_image='m.nii.gz', metric='mmi',
+    ... affine_transformation='affine.txt')
+    c2d r.nii.gz m.nii.gz -reslice-itk affine.txt r.nii.gz -mmi | cut -f3 -d' '
+
+    >>> p = image_similarity_wrapper(reference_image='r.nii.gz',
+    ... moving_image='m.nii.gz', affine_transformation='affine.txt')
+    >>> print p
+    c2d r.nii.gz m.nii.gz -reslice-itk affine.txt r.nii.gz -ncor | cut -f3 -d' '
+
+    >>> print p.updateParameters({'affine_transformation' : None})
+    c2d r.nii.gz m.nii.gz -ncor | cut -f3 -d' '
+
+    >>> print p.updateParameters({'metric' : 'nmi'})
+    c2d r.nii.gz m.nii.gz -nmi | cut -f3 -d' '
+
+    >>> print p.updateParameters({'metric' : 'msq'})
+    c2d r.nii.gz m.nii.gz -msq | cut -f3 -d' '
+
+    >>> print p.updateParameters({'affine_transformation' : 'affine.txt'})
+    c2d r.nii.gz m.nii.gz -reslice-itk affine.txt r.nii.gz -msq | cut -f3 -d' '
+    """
+
+    _template_affine = """c{dimension}d {reference_image} {moving_image} \
+        -reslice-itk {affine_transformation} {reference_image} \
+        {metric} | cut -f3 -d' '"""
+    _template_no_affine = """c{dimension}d {reference_image} {moving_image} \
+        {metric} | cut -f3 -d' '"""
+
+    def __str__(self):
+        if self.p['affine_transformation'].value is not None:
+            self._template = self._template_affine
+        else:
+            self._template = self._template_no_affine
+        return super(self.__class__, self).__str__()
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'reference_image': filename_parameter('reference_image', None),
+        'moving_image': filename_parameter('moving_image', None),
+        'metric': string_parameter('metric', 'ncor', str_template='-{_value}'),
+        'affine_transformation': filename_parameter('affine_transformation', None)}
+
+
+class split_multichannel_image(generic_wrapper):
+    """
+    Split the individual image into its components. By default the images are
+    converted to the uchar type.
+
+    Doctests
+    --------
+
+    >>> split_multichannel_image
+    <class '__main__.split_multichannel_image'>
+
+    >>> split_multichannel_image() #doctest: +ELLIPSIS
+    <__main__.split_multichannel_image object at 0x...>
+
+    >>> print split_multichannel_image() #doctest: +NORMALIZE_WHITESPACE
+    c2d -mcs -foreach -type uchar -endfor -oo
+
+    Verify initial parameters values
+
+    >>> str(split_multichannel_image._parameters['dimension']) == '2'
+    True
+
+    >>> str(split_multichannel_image._parameters['input_image']) == ''
+    True
+
+    >>> str(split_multichannel_image._parameters['output_type']) == '-type uchar'
+    True
+
+    >>> str(split_multichannel_image._parameters['output_components']) == ''
+    True
+
+    >>> print split_multichannel_image(input_image='i.nii.gz',
+    ... output_type='o.nii.gz',
+    ... output_components = ['o1.nii.gz', 'o2.nii.gz', 'o3.nii.gz']) #doctest: +NORMALIZE_WHITESPACE
+    c2d -mcs i.nii.gz -foreach -type o.nii.gz -endfor -oo o1.nii.gz o2.nii.gz o3.nii.gz
+
+    >>> p = split_multichannel_image(input_image='i.nii.gz')
+    >>> print p
+    c2d -mcs i.nii.gz -foreach -type uchar -endfor -oo
+
+    >>> print p.updateParameters({'output_type': 'ushort',
+    ... 'output_components': ['a.nii.gz', 'b.nii.gz', 'c.nii.gz']})
+    c2d -mcs i.nii.gz -foreach -type ushort -endfor -oo a.nii.gz b.nii.gz c.nii.gz
+
+    >>> print p.updateParameters({'dimension': 3})
+    c3d -mcs i.nii.gz -foreach -type ushort -endfor -oo a.nii.gz b.nii.gz c.nii.gz
+    """
+
+    _template = """c{dimension}d -mcs {input_image} -foreach {output_type} -endfor \
+        -oo {output_components}"""
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'input_image': pos_parameters.filename_parameter('input_image', None),
+        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
+        'output_components': pos_parameters.list_parameter('output_components', [], str_template='{_list}')
+        }
+
+
+class merge_components(generic_wrapper):
+    """
+    Merges the individual components of the multichannel image into actual
+    multichannel image. The individual components are deleted afterwards.
+
+    >>> merge_components
+    <class '__main__.merge_components'>
+
+    >>> merge_components() #doctest: +ELLIPSIS
+    <__main__.merge_components object at 0x...>
+
+    >>> print merge_components()
+    c2d -foreach -type uchar -endfor -omc 3 ; rm -rfv ;
+
+
+    Verify initial parameters values
+
+    >>> str(merge_components._parameters['dimension']) == '2'
+    True
+
+    >>> str(merge_components._parameters['input_images']) == ''
+    True
+
+    >>> str(merge_components._parameters['region_origin']) == ''
+    True
+
+    >>> str(merge_components._parameters['region_size']) == ''
+    True
+
+    >>> str(merge_components._parameters['output_type']) == '-type uchar'
+    True
+
+    >>> str(merge_components._parameters['components_no']) == '3'
+    True
+
+    >>> str(merge_components._parameters['output_image']) == ''
+    True
+
+    >>> str(merge_components._parameters['other_files_remove']) == ''
+    True
+
+
+    Testing individual parameters
+
+    >>> print merge_components(dimension=3)
+    c3d -foreach -type uchar -endfor -omc 3 ; rm -rfv ;
+
+    >>> print merge_components(input_images=['o1.nii.gz', 'o2.nii.gz',
+    ... 'o3.nii.gz']) #doctest: +NORMALIZE_WHITESPACE
+    c2d o1.nii.gz o2.nii.gz o3.nii.gz -foreach -type uchar -endfor -omc 3 ;\
+    rm -rfv o1.nii.gz o2.nii.gz o3.nii.gz ;
+
+    >>> print merge_components(region_origin=[10, 20, 30])
+    c2d -foreach -region 10x20x30vox -type uchar -endfor -omc 3 ; rm -rfv ;
+
+    >>> print merge_components(region_size=[1, 2, 3])
+    c2d -foreach 1x2x3vox -type uchar -endfor -omc 3 ; rm -rfv ;
+
+    >>> print merge_components(output_type='ushort')
+    c2d -foreach -type ushort -endfor -omc 3 ; rm -rfv ;
+
+    >>> print merge_components(components_no=4)
+    c2d -foreach -type uchar -endfor -omc 4 ; rm -rfv ;
+
+    >>> print merge_components(output_image='output.nii.gz')
+    c2d -foreach -type uchar -endfor -omc 3 output.nii.gz; rm -rfv ;
+
+    >>> print merge_components(other_files_remove=['some_othe_file.nii.gz'])
+    c2d -foreach -type uchar -endfor -omc 3 ; rm -rfv some_othe_file.nii.gz;
+
+
+    And all of them combined
+
+    >>> print merge_components(dimension=2, region_origin=[10, 20, 30],
+    ... region_size=[1, 2, 3], output_type='float', components_no=4,
+    ... output_image='output.nii.gz', other_files_remove=['a_file.nii.gz']) #doctest: +NORMALIZE_WHITESPACE
+    c2d -foreach -region 10x20x30vox 1x2x3vox -type float -endfor \
+    -omc 4 output.nii.gz; rm -rfv a_file.nii.gz;
+    """
+
+    _template = """c{dimension}d {input_images} \
+        -foreach {region_origin} {region_size} {output_type} -endfor \
+        -omc {components_no} {output_image}; rm -rfv {input_images} {other_files_remove};"""
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'input_images': pos_parameters.list_parameter('input_images', [], str_template='{_list}'),
+        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
+        'components_no' : pos_parameters.value_parameter('components_no', 3),
+        'output_image': pos_parameters.filename_parameter('output_image', None),
+        'other_files_remove': pos_parameters.list_parameter('other_files_remove', [], str_template='{_list}')
+        }
 
 
 if __name__ == '__main__':

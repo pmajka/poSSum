@@ -11,14 +11,12 @@ import math
 
 from PIL import Image
 
-"""
-TODO: How to use this damn file? How to provide configuration?
-"""
 
 _ROW_OF_THE_FIRST_SLICE = 14 - 1
 _DEFAULT_PADDING_ROUNDING = 100
 _DEFAULT_SHEET_INDEX = 0
 
+_CELL_SPECIMEN_ID = (1, 2)
 _CELL_STACK_SIZE = (3, 2)
 _CELL_SLICING_PLANE  = (4, 2)
 _CELL_SLICE_THICKNESS = (5, 2)
@@ -122,6 +120,25 @@ def read_image_size(filename):
 
 
 class input_image(object):
+    """
+
+    An instance of the input image along with its metadata. Carries the cruical
+    metadata as well as some auxiliary information e.g.:
+
+        - Image filename,
+        - Coresponding image mask (if assigned), NOT USED,
+        - Image spatial resolution,
+        - Reference image index nad refrence plane coordinate,
+        - Type of distortion if the image is distorted,
+        - Spatial resolution of the downsampled images,
+        - Angle of rotation, if applied,
+        - Horizontal and vertical flip, if applied,
+        - Image file size, hash and dimensions
+        - and many, many other.
+
+    Some information is stored within the excel file, but some of the data has
+    to be calculated during runtime.
+    """
 
     def __init__(self):
         self.index = None
@@ -150,8 +167,10 @@ class input_image(object):
     def __str__(self):
         return str(self.__dict__)
 
+
 class worksheet_manager(object):
     """
+
     """
 
     _metadata_to_load = ['image_index', 'image_name', 'mask_name',
@@ -218,6 +237,7 @@ class worksheet_manager(object):
 
         # Extract the stack size. Based in the stack size, the number and the
         # indexes of the consecutive slices.
+        self._specimen_id = str(self._worksheet.cell_value(*_CELL_SPECIMEN_ID))
         self._stack_size = int(self._worksheet.cell_value(*_CELL_STACK_SIZE))
         self._slice_thickness = float(self._worksheet.cell_value(*_CELL_SLICE_THICKNESS))
         self._slicing_plane = str(self._worksheet.cell_value(*_CELL_SLICING_PLANE))

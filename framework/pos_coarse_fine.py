@@ -21,6 +21,7 @@
 #    http://www.gnu.org/licenses/.                                            #
 #                                                                             #
 ###############################################################################
+
 import os, sys
 import copy
 from optparse import OptionParser, OptionGroup
@@ -118,6 +119,7 @@ class coarse_to_fine_transformation_merger_plot(pos_wrappers.generic_wrapper):
         'transformation_difference' : pos_parameters.filename_parameter('transformation_difference', None)
     }
 
+
 class coarse_to_fine_transformation_merger(generic_workflow):
     """
     Coarse to fine transformation merger.
@@ -126,7 +128,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         1. self.options.sliceIndex
         2. fineTransformFilenameTemplate
         3. outputTransformFilenameTemplate
-    # TODO: Provide logging information
+
     """
 
     _f = {
@@ -520,8 +522,8 @@ class coarse_to_fine_transformation_merger(generic_workflow):
     @classmethod
     def _getCommandLineParser(cls):
         """
-        TODO: Reorganize the command line options into sensible groups.
         """
+
         parser = generic_workflow._getCommandLineParser()
 
         parser.add_option('-i', '--fineTransformFilenameTemplate', default=None,

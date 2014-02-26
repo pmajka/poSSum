@@ -6,6 +6,9 @@
 Nonlinear registration and visualization framework Piotr Majka
 ========================================
 
+TODO: Rewrite the glyph drawing function
+TODO: Specification of the connectivity graph plotting function.
+
 
 Obvious prerequirements
 =====================================
@@ -22,3 +25,4 @@ Non obvious prerequirements
        sudo easy_install -U config
 
   2. sudo easy_install xlrd xlwt xlutils
+  3. sudo easy_install networkx 

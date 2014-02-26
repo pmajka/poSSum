@@ -14,7 +14,6 @@ Slice preprocessing script
 This file is part of Multimodal Atlas of Monodelphis Domestica.
 (c) Piotr Majka 2011-2014. Restricted, damnit!
 """
-
 import os, sys
 from optparse import OptionGroup
 import copy
@@ -25,47 +24,6 @@ import pos_wrappers
 from pos_itk_core import autodetect_file_type
 
 
-class split_multichannel_image(pos_wrappers.generic_wrapper):
-    """
-    Split the individual image into its components. By default the images are
-    converted to the uchar type.
-    # TODO: Move to pos_wrappers and provide documentation.
-    """
-
-    _template = """c{dimension}d -mcs {input_image} -foreach {output_type} -endfor \
-        -oo {output_components}"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'input_image': pos_parameters.filename_parameter('input_image', None),
-        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
-        'output_components': pos_parameters.list_parameter('output_components', [], str_template='{_list}')
-        }
-
-
-class merge_components(pos_wrappers.generic_wrapper):
-    """
-    # TODO: Move to pos_wrappers and provide documentation.
-    Merges the individual components of the multichannel image into actual
-    multichannel image. The individual components are deleted afterwards.
-    """
-
-    _template = """c{dimension}d {input_images} \
-        -foreach {region_origin} {region_size} {output_type} -endfor \
-        -omc {components_no} {output_image}; rm -rfv {input_images} {other_files_remove};"""
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'input_images': pos_parameters.list_parameter('input_images', [], str_template='{_list}'),
-        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
-        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
-        'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
-        'components_no' : pos_parameters.value_parameter('components_no', 3),
-        'output_image': pos_parameters.filename_parameter('output_image', None),
-        'other_files_remove': pos_parameters.list_parameter('other_files_remove', [], str_template='{_list}')
-        }
-
-
 class stack_warp_image_multi_transform(output_volume_workflow):
     """
     """
@@ -74,6 +32,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         'moving_raw': pos_parameters.filename('moving_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'fixed_raw': pos_parameters.filename('fixed_raw', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'output_transforms': pos_parameters.filename('output_transforms', work_dir='02_transforms', str_template='{idx:04d}.nii.gz'),
+        'output_transf_affine': pos_parameters.filename('output_transf_affine', work_dir='02_transforms', str_template='{idx:04d}.txt'),
         'components': pos_parameters.filename('components', work_dir='04_rgb_components', str_template='{idx:04d}_{comp:02d}.nii.gz'),
         'resliced_components': pos_parameters.filename('resliced_components', work_dir='05_resliced_rgb_components', str_template='{idx:04d}_{comp:02d}.nii.gz'),
         'resliced': pos_parameters.filename('resliced', work_dir='06_resliced', str_template='{idx:04d}.nii.gz'),
@@ -159,6 +118,9 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         if self.options.transformationsDirectory is not False:
             self.f['output_transforms'].override_dir = \
                 self.options.transformationsDirectory
+        if self.options.transformationsDirectory is not False:
+            self.f['output_transf_affine'].override_dir = \
+                self.options.transformationsDirectory
 
         # Apart from just setting the custom output volumes directory, one can
         # also customize even the output filename of both, grayscale and
@@ -210,6 +172,11 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # Initialize workflow-wide transformation array.
         self.transformations = []
 
+        # Make a flag indicating that there are only affine transformations if
+        # form of txt files. This flag will be changes if an deformation field
+        # transformation will be encountered.
+        self._affine_transforms_only = True
+
         # Iterate over all provided transformation and then put it into the
         # transformation array. The provided transformation is used in
         # "forward" mode when the "0" is used in the paramters specification.
@@ -221,6 +188,10 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                 invert = " -i "
             else:
                 invert = " "
+
+            # Deformation filed encountered. Disable the 'affine only' flag.
+            if transfSpec[1].endswith(".nii.gz"):
+                self._affine_transforms_only = False
 
             # Add forward or inverse tranfromation for the transformation
             # chain. Note that the array stores only the transformation
@@ -252,8 +223,15 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         """
 
         # Define the output transformation string.
-        out_transform_filename = self.f['output_transforms'](idx=transform_index)
-        reference_image_filename = self.f['fixed_raw'](idx=slice_index)
+        # The output transformation filename depends on the type of the
+        # transformation series. It may be a deformation field or a text file.
+        if self._affine_transforms_only is True:
+            filename_type = 'output_transf_affine'
+            reference_image_filename = None
+        else:
+            filename_type = 'output_transforms'
+            reference_image_filename = self.f['fixed_raw'](idx=slice_index)
+        out_transform_filename = self.f[filename_type](idx=transform_index)
 
         # Create a list of all the input transformations.
         transformations_list = \
@@ -387,7 +365,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             # the individual components
             def components_fnames(index, fn_tplt):
                 files = map(lambda x: \
-                    self.f[fn_tplt](idx=index,comp=x),\
+                    self.f[fn_tplt](idx=index, comp=x),\
                     range(self.__NUMBER_OF_COMPONENTS))
                 return files
 
@@ -401,7 +379,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                     components_fnames(slice_index, 'resliced_components')
 
                 # Splitting the mc images into individual components
-                command_prepare = split_multichannel_image(
+                command_prepare = pos_wrappers.split_multichannel_image(
                     input_image = self.f['moving_raw'](idx=slice_index),
                     output_components = components)
                 commands_prepare.append(command_prepare)
@@ -412,7 +390,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                         slice_index, transform_index, channel_index))
 
                 # Merging back the resliced components.
-                command_merge = merge_components(
+                command_merge = pos_wrappers.merge_components(
                     input_images = resliced_components,
                     components_no = self.__NUMBER_OF_COMPONENTS,
                     output_image = self.f['resliced'](idx=slice_index),
@@ -496,8 +474,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
     @classmethod
     def _getCommandLineParser(cls):
         """
-        #TODO: _getCommandLineParser -> _get_command_line_parser
         """
+
         parser = output_volume_workflow._getCommandLineParser()
 
         obligatory_options = \

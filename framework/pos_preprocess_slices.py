@@ -9,6 +9,27 @@
 
 This file is part of Multimodal Atlas of Monodelphis Domestica.
 (c) Piotr Majka 2011-2014. Restricted, damnit!
+
+
+Conversion of the input images to the Niftii format
+---------------------------------------------------
+
+The first step of the processing comprises the conversion of the raw input
+images to the Niftii format. Assuming the input image is a 24bit, RGB image,
+the following procedures are carried out:
+
+ 1. Processing the input rgb image into the full sized png files:
+    a. Flip the image horizontally if required,
+    b. Flip the image vertically if required,
+    c. Set the image canvas gravity and extent the image canvas,
+    d. Split the extended canvas image into individual color channels,
+    e. Select desired color channel and apply median filter to this channel,
+    f. Threshold the filtered image to obtain an image mask,
+    g. Save the full sized mask.
+
+2. Process the images into niftis:
+    a. Well, convert and save. Simple as this.
+
 """
 
 import os, sys
@@ -28,8 +49,8 @@ class input_image_padding(pos_wrappers.generic_wrapper):
     """
     """
 
-    _template = """convert {input_image} {background} {gravity} {extent} \
-    {rotation} {horizontal_flip} {vertical_flip} \
+    _template = """convert {input_image} {background} {rotation}\
+    {horizontal_flip} {vertical_flip} {gravity} {extent} \
     \( +clone -write {full_size_output} \
          {color_channel} {median} -separate \
         -write {temp_mask} +delete \); \
@@ -216,11 +237,17 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
     slicing_planes_settings = {
         "saggital" : {'permutation': [2,0,1], 'flip': [0, 0, 0], 'axis': 0},
         "coronal"  : {'permutation': [0,2,1], 'flip': [0, 0, 0], 'axis': 1},
-        "axial"    : {'permutation': [0,1,2], 'flip': [0, 1, 0], 'axis': 2}}
+        "axial"    : {'permutation': [0,1,2], 'flip': [0, 0, 0], 'axis': 2}}
 
     __DEFAULT_VOLUME_ORIENTATION_CODE = "RAS"
 
     def launch(self):
+
+        # Override the default reference images directory if required:
+        if self.options.inputReferenceDir is not False:
+            self.f['raw_ref_imgs'].override_dir = \
+                self.options.inputReferenceDir
+
         # Load the image settings chart and process and extract all the
         # required metadata.
 
@@ -566,19 +593,19 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         commands = []
 
         # The regular masked volume is always generated.
-        command = self._get_remask_wrapper("mask", "rgb", "rbg_masked")
+        command = self._get_remask_wrapper("mask", "rgb", "rgb_masked")
         commands.append(command)
 
         # If required, the slice-to-slice masked volume is generated.
         if self.options.useSliceToSliceMask:
             command = self._get_remask_wrapper("slice_to_slice_mask",\
-                "rgb", "rbg_slice_to_slice_masked")
+                "rgb", "rgb_slice_to_slice_masked")
             commands.append(command)
 
         # If required, the slice-to-reference mask is generated.
         if self.options.useSliceToReferenceMask:
             command = self._get_remask_wrapper("slice_to_reference_mask",\
-                "rgb", "rbg_slice_to_reference_masked")
+                "rgb", "rgb_slice_to_reference_masked")
             commands.append(command)
 
         # Execute all the batch.
@@ -598,7 +625,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # The default volume is resliced automatically
         input_names = [
-            self.f['source_stacks'](stack_name='rbg_masked'),
+            self.f['source_stacks'](stack_name='rgb_masked'),
             self.f['source_stacks'](stack_name='mask')]
 
         output_namings = [
@@ -607,14 +634,14 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # Slice-to-slice slices and masks are extracted upon request
         if self.options.useSliceToSliceMask:
-            input_names.append(self.f['source_stacks'](stack_name='rbg_slice_to_slice_masked'))
+            input_names.append(self.f['source_stacks'](stack_name='rgb_slice_to_slice_masked'))
             input_names.append(self.f['source_stacks'](stack_name='slice_to_slice_mask'))
             output_namings.append(self.f['seq_slice_to_slice']())
             output_namings.append(self.f['seq_slice_to_slice_mask']())
 
         # Slice-to-reference slices and masks are extracted upon purpose
         if self.options.useSliceToReferenceMask:
-            input_names.append(self.f['source_stacks'](stack_name='rbg_slice_to_reference_masked'))
+            input_names.append(self.f['source_stacks'](stack_name='rgb_slice_to_reference_masked'))
             input_names.append(self.f['source_stacks'](stack_name='slice_to_reference_mask'))
             output_namings.append(self.f['seq_slice_to_ref']())
             output_namings.append(self.f['seq_slice_to_ref_mask']())
@@ -664,19 +691,20 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         process_resolution = self.w._images[first_slice].process_resolution
         source_canvas_size = self.w._images[first_slice].padded_size
 
-        # Just to execute the property function. TODO: Make caching!
-        self.output_volume_spacing
-
-        atlas_plate_size = getattr(self.w, '_atlas_plate_size')
+        atlas_plate_size = getattr(self.w, '_atlas_plate_size', None)
         if atlas_plate_size is not None:
             atlas_plate_size = " ".join(map(str, atlas_plate_size))
+
+        import time
 
         header = ""
         header+= "#!/bin/bash\n"
         header+= "set -xe\n"
         header+= "\n"
-        #TODO: - Specimen name / dataset ID
+        header+= "# Generation date: " + time.strftime("%d_%m_%Y_%H-%M-%S")
+        header+= "\n\n"
 
+        header+= "SPECIMEN_NAME=%s\n" % self.w._specimen_id
         header+= "\n"
         header+= "STACK_SIZE=%d\n" % self.stack_size
         header+= "IDX_FIRST_SLICE=%d\n" % self.slices_span[0]
@@ -693,10 +721,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header+= "\n"
         header+= "FULLSIZE_CANVAS_SIZE=\"%s\"" % \
             " ".join(map(str, source_canvas_size)) + "\n"
-        #TODO: - Size of the downsampled images
 
         header+= "\n"
-        header+= "ATLAS_PLATE_SPACING=%f\n" % getattr(self.w, '_atlas_plate_spacing')
+        header+= "ATLAS_PLATE_SPACING=%f\n" % getattr(self.w, '_atlas_plate_spacing', None)
         header+= "ATLAS_PLATE_EXTENT=\"%s\"\n" % atlas_plate_size
 
         header+= "\n"
@@ -729,6 +756,48 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             combined_vol_props+=" %s %s" % (k, v)
         combined_vol_props += "\"\n"
         header+= combined_vol_props
+
+        header+="\n\n"
+        header+="VOL_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="mask")
+        header+="VOL_RGB_MASKED=%s\n" % \
+           self.f['source_stacks'](stack_name="rgb_masked")
+        header+="VOL_RGB_SLICE_TO_REF_MASKED=%s\n" % \
+            self.f['source_stacks'](stack_name="rgb_slice_to_reference_masked")
+        header+="VOL_RGB_SLICE_TO_SLICE_MASKED=%s\n" % \
+            self.f['source_stacks'](stack_name="rgb_slice_to_slice_masked")
+        header+="VOL_RGB=%s\n" % \
+            self.f['source_stacks'](stack_name="rgb")
+        header+="VOL_SLICE_TO_REF_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="slice_to_reference_mask")
+        header+="VOL_SLICE_TO_SLICE_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="slice_to_slice_mask")
+        header+="VOL_ATLAS_TO_SLICE_MASK=%s\n" % \
+            self.f['source_stacks'](stack_name="atlas_mask")
+        header+="VOL_ATLAS_RGB=%s\n" % \
+            self.f['source_stacks'](stack_name="atlas_rgb")
+        header+="VOL_ATLAS_TO_SLICE_MASKED=%s\n" % \
+            self.f['source_stacks'](stack_name="atlas_masked")
+
+        header+="\n"
+        header+="DIR_IMAGES=%s/\n" % \
+            self.f['seq_input_img'].base_dir
+        header+="DIR_MASKS=%s/\n" % \
+           self.f['seq_input_mask'].base_dir
+        header+="DIR_SLICE_TO_SLICE_MASKED=%s/\n" % \
+            self.f['seq_slice_to_slice'].base_dir
+        header+="DIR_SLICE_TO_SLICE_MASKS=%s/\n" % \
+            self.f['seq_slice_to_slice_mask'].base_dir
+        header+="DIR_SLICE_TO_REF=%s/\n" % \
+            self.f['seq_slice_to_ref'].base_dir
+        header+="DIR_SLICE_TO_REF_MASK=%s/\n" % \
+            self.f['seq_slice_to_ref_mask'].base_dir
+        header+="DIR_REF_TO_SLICE=%s/\n" % \
+            self.f['seq_ref_to_slice'].base_dir
+        header+="DIR_REF_TO_SLICE_MASK=%s/\n" % \
+            self.f['seq_ref_to_slice_mask'].base_dir
+
+        header+="\n"
 
         # Ok, now just save the string into a file.
         open(self.options.headerFile,'w').write(header)
@@ -919,6 +988,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         obligatory_options.add_option('--input-images-dir', default=None,
             type='str', dest='inputImagesDir',
             help='The directory from which the input images will be read.')
+        obligatory_options.add_option('--input-reference-dir', default=None,
+            type='str', dest='inputReferenceDir',
+            help='The directory holding the reference slices.')
         obligatory_options.add_option('--input-workbook', default=None,
             type='str', dest='inputWorkbook',
             help='Input workbook.')
@@ -1024,3 +1096,4 @@ if __name__ == '__main__':
     options, args = volume_reconstruction_preprocessor.parseArgs()
     se = volume_reconstruction_preprocessor(options, args)
     se.launch()
+

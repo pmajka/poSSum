@@ -201,7 +201,7 @@ class minimum_deformation_template_iteration(generic_workflow):
 
         .. note:: The command uses normalization feature of the `AverageImages`
             tool which does some sharpening (see the source of the `AverageImages`)
-            which sometimes leads to stragne effects. The uses should be able to
+            which sometimes leads to stragne effects. The users should be able to
             trun it off on demand (perhaps one day...)
         """
 

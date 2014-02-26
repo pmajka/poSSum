@@ -22,8 +22,10 @@
 #                                                                             #
 ###############################################################################
 import os, sys
-from optparse import OptionParser, OptionGroup
+from optparse import OptionGroup
 import copy
+
+import networkx as nx
 
 from pos_common import flatten
 from pos_wrapper_skel import output_volume_workflow
@@ -91,12 +93,29 @@ python pos_sequential_alignment.py \
         --registrationColor blue \
         --medianFilterRadius 4 4 \
         --resliceBackgorund 255 \
-        --skipSourceSlicesGeneration \
+        --disable-source-slices-generation \
         --useRigidAffine \
-        --skipTransformations \
-        --skipReslice \
+        --enableTransformations \
+        --enableReslice \
         --outputVolumeSpacing 0.02 0.02 0.06 \
         --outputVolumesDirectory ~/Downloads/cb_test
+
+
+Description of the output files
+-------------------------------
+
+As an output of the sequential alignment script many output files are produced
+apart from the aligned volumes. Below contents and meaning of the individual
+files are explained:
+
+    1. Transformation report: Contains transformation parameteres calculated
+    for individual slices. The file contains only parameters related to the
+    rigid transformation: translation vector as well as rotation angle.
+
+    2. Graph edges file, TODO: provide some more information.
+
+    3. Similarity measure between individual images.
+
 """
 
 
@@ -120,6 +139,8 @@ class sequential_alignment(output_volume_workflow):
         'out_volume_color': pos_parameters.filename('out_volume_color', work_dir='06_output_volumes', str_template='{fname}_color.nii.gz'),
         'transform_plot': pos_parameters.filename('transform_plot', work_dir='06_output_volumes', str_template='{fname}.png'),
         'transform_report': pos_parameters.filename('transform_report', work_dir='06_output_volumes', str_template='{fname}.txt'),
+        'graph_edges': pos_parameters.filename('graph_edges', work_dir='06_output_volumes', str_template='graph_edges_{sign}.csv'),
+        'similarity': pos_parameters.filename('similarity', work_dir='06_output_volumes', str_template='similarity_{sign}.csv'),
          }
 
     _usage = ""
@@ -130,7 +151,7 @@ class sequential_alignment(output_volume_workflow):
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
     __MI_SAMPLES = 16000
-    __ALIGNMENT_EPSILON = 1
+    __ALIGNMENT_EPSILON = 4
     __VOL_STACK_SLICE_SPACING = 1
 
     def _initializeOptions(self):
@@ -220,24 +241,28 @@ class sequential_alignment(output_volume_workflow):
         # simltaneously by a single routine. Slices preparation may be
         # disabled, switched off by providing approperiate command line
         # parameter. In that's the case, this step will be skipped.
-        if self.options.skipSourceSlicesGeneration is not True:
+        if self.options.sourceSlicesGeneration is True:
             self._generate_source_slices()
 
         # Generate transforms. This step may be switched off by providing
         # aproperiate command line parameter.
-        if self.options.skipTransformations is not True:
+        if self.options.enableTransformations is True:
             self._calculate_transforms()
+
+        # Composite transformations take relatively small amount of time to
+        # compute:
+        self._calculate_composite_transforms()
 
         # Reslice the input slices according to the generated transforms.
         # This step may be skipped by providing approperiate command line
         # parameter.
-        if self.options.skipReslice is not True:
+        if self.options.enableReslice is True:
             self._reslice()
 
         # Stack both grayscale as well as the rgb slices into a volume.
         # This step may be skipped by providing approperiate command line
         # parameter.
-        if self.options.skipOutputVolumes is not True:
+        if self.options.enableOutputVolumes is True:
             self._stack_output_images()
 
         self._plot_transformations()
@@ -327,6 +352,13 @@ class sequential_alignment(output_volume_workflow):
         self._logger.info("Executing the transformation commands.")
         self.execute(commands)
 
+    def _calculate_composite_transforms(self):
+        """
+        Calculates the composite transformations which means transformations
+        linking the reference slice with the processed one.
+        """
+
+        self._calculate_similarity()
         # Finally, calculate composite transforms
         commands = []
         for moving_slice_index in self.options.slice_range:
@@ -351,7 +383,7 @@ class sequential_alignment(output_volume_workflow):
         # Array holding pairs of transformations between which the
         # transformations will be calculated.
         retDict = []
-        epsilon = self.__ALIGNMENT_EPSILON
+        epsilon = self.options.graphEdgeEpsilon
 
         if i == r:
             j = i
@@ -391,7 +423,8 @@ class sequential_alignment(output_volume_workflow):
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
                                               fIdx=fixed_slice_index)
 
-        # TODO: correct all true / false switches!
+        # Yeah, I know this is not the most optimal way
+        # to make a true/false string out of boolean value but ...
         use_rigid_transformation = str(self.options.useRigidAffine).lower()
 
         # Define the image-to-image metric.
@@ -421,8 +454,82 @@ class sequential_alignment(output_volume_workflow):
         # Return the registration command.
         return copy.deepcopy(registration)
 
+    def _calculate_similarity(self):
+        """
+        Calculate similarities between images for which the transformations
+        were computed. Based on the similarity measures, a graph connecting
+        individual images is created as saves for further calculations.
+
+        The higher the lambda, the more reluctant the slice skipping is.
+        """
+        self._logger.info("Calculating the similarity between images.")
+
+        # Create a helper function to simplify the loops below:
+        def get_wrapper(fdx, mdx):
+            wrapper = pos_wrappers.image_similarity_wrapper(
+                reference_image=self.f['src_gray'](idx=fdx),
+                moving_image=self.f['src_gray'](idx=mdx),
+                affine_transformation=self.f['part_transf'](mIdx=mdx, fIdx=fdx))
+            return copy.copy(wrapper)
+
+        commands = []  # Will hold commands for calculating the similarity
+
+        # Will hold (moving, fixed) images partial_transforms basically: all
+        # partial transformations array
+        partial_transforms = []
+
+        self._logger.debug("Generating similarity measure warppers.")
+        for moving_slice in self.options.slice_range:
+            # Get all fixed images to which given moving slice will be aligned:
+            tpair = list(flatten(self._get_slice_pair(moving_slice)))
+
+            # Append partial transformations for given moving slice to the
+            # global partial transformations array
+            partial_transforms.append(tpair)
+
+            # Generate wrapper for measuring similarity for a given partial
+            # transformation.
+            for mdx, fdx in tpair:
+                commands.append(get_wrapper(fdx, mdx))
+
+        # Execute and commands and process the similarity measurements.
+        stdout, stderr = self.execute(commands)
+        simmilarity = map(lambda x: float(x.strip()),
+                          stdout.strip().split("\n"))
+        simmilarity = dict(zip(flatten(partial_transforms), simmilarity))
+
+        self._logger.debug("Generating graph edges.")
+        graph_connections = []
+
+        # Lambda defines slice skipping is preffered (lower l), or reluctant
+        # to slice skipping (higher)
+        l = self.options.graphEdgeLambda
+
+        for (mdx, fdx), s in simmilarity.iteritems():
+            w = (1.0 + s) * abs(mdx - fdx) * (1.0 + l) ** (abs(mdx - fdx))
+            graph_connections.append((fdx, mdx, w))
+
+        self._logger.info("Creating a graph based on image similarities.")
+        # Generate the graph basen on the weight of the edges
+        self.G = nx.DiGraph()
+        self.G.add_weighted_edges_from(graph_connections)
+
+        self._logger.debug("Saving the graph to a file.")
+        # Save the edges for some further analysis.
+        nx.write_weighted_edgelist(self.G,
+            self.f['graph_edges'](sign=self.signature))
+
+        # Also, save the individual similarity metrics:
+        simm_fh = open(self.f['similarity'](sign=self.signature), 'w')
+        for (mdx, fdx), s in sorted(simmilarity.iteritems()):
+            simm_fh.write("%d %d %f\n" % (mdx, fdx, s))
+        simm_fh.close()
+
     def _get_transformation_chain(self, moving_slice_index):
         """
+        Generate transformation chain based on the Dijkstra's shortest path
+        algorithm.
+
         :param moving_slice_index: moving slice index
         :type moving_slice_index: int
 
@@ -431,22 +538,26 @@ class sequential_alignment(output_volume_workflow):
         :rtype: array
         """
 
-        # Define some convenient aliases
         i = moving_slice_index
         s, e, r = tuple(self.options.sliceRange)
 
-        retDict = []
+        # Calculate shortest paths between individual slices
+        slice_paths = nx.all_pairs_dijkstra_path(self.G)
 
+        # Get the shortest path linking given moving slice with the reference
+        # slice.
+        path = list(reversed(slice_paths[r][i]))
+        chain = []
+
+        # In case we hit a reference slice :)
         if i == r:
-            retDict.append((i, i))
-        if i > r:
-            for j in list(reversed(range(r, i))):
-                retDict.append((j + 1, j))
-        if i < r:
-            for j in range(i, r):
-                retDict.append((j, j + 1))
+            chain.append((r, r))
 
-        return retDict
+        # For all the other cases collect partial transforms.
+        for step in range(len(path) - 1):
+            chain.append((path[step], path[step + 1]))
+
+        return chain
 
     def _calculate_composite(self, moving_slice_index):
         """
@@ -477,10 +588,10 @@ class sequential_alignment(output_volume_workflow):
 
         # Initialize and define the composite transformation wrapper
         command = pos_wrappers.ants_compose_multi_transform(
-            dimension = self.__IMAGE_DIMENSION,
-            output_image = composite_transform_filename,
-            deformable_list = [],
-            affine_list = partial_transformations)
+            dimension=self.__IMAGE_DIMENSION,
+            output_image=composite_transform_filename,
+            deformable_list=[],
+            affine_list=partial_transformations)
 
         return copy.deepcopy(command)
 
@@ -537,14 +648,14 @@ class sequential_alignment(output_volume_workflow):
 
         # And finally initialize and customize reslice command.
         command = pos_wrappers.command_warp_grayscale_image(
-            reference_image = reference_image_filename,
-            moving_image = moving_image_filename,
-            transformation = transformation_file,
-            output_image = resliced_image_filename,
-            background = self.options.resliceBackgorund,
-            interpolation = self.options.resliceInterpolation,
-            region_origin = region_origin_roi,
-            region_size = region_size_roi)
+            reference_image=reference_image_filename,
+            moving_image=moving_image_filename,
+            transformation=transformation_file,
+            output_image=resliced_image_filename,
+            background=self.options.resliceBackgorund,
+            interpolation=self.options.resliceInterpolation,
+            region_origin=region_origin_roi,
+            region_size=region_size_roi)
         return copy.deepcopy(command)
 
     def _reslice_color(self, slice_number):
@@ -573,15 +684,15 @@ class sequential_alignment(output_volume_workflow):
 
         # And finally initialize and customize reslice command.
         command = pos_wrappers.command_warp_rgb_slice(
-            reference_image = reference_image_filename,
-            moving_image = moving_image_filename,
-            transformation = transformation_file,
-            output_image = resliced_image_filename,
-            region_origin = region_origin_roi,
-            region_size = region_size_roi,
-            background = self.options.resliceBackgorund,
-            interpolation = self.options.resliceInterpolation,
-            inversion_flag = self.options.invertMultichannel)
+            reference_image=reference_image_filename,
+            moving_image=moving_image_filename,
+            transformation=transformation_file,
+            output_image=resliced_image_filename,
+            region_origin=region_origin_roi,
+            region_size=region_size_roi,
+            background=self.options.resliceBackgorund,
+            interpolation=self.options.resliceInterpolation,
+            inversion_flag=self.options.invertMultichannel)
 
         # Return the created command line parser.
         return copy.deepcopy(command)
@@ -633,8 +744,7 @@ class sequential_alignment(output_volume_workflow):
         # Define the output volume filename. If no custom colume name is
         # provided, the filename is based on the provided processing
         # parameters. In the other case the provided custom filename is used.
-        filename_prefix = self._get_parameter_based_output_prefix()
-        output_filename = self.f[ouput_filename_type](fname=filename_prefix)
+        output_filename = self.f[ouput_filename_type](fname=self.signature)
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
@@ -706,6 +816,9 @@ class sequential_alignment(output_volume_workflow):
         filename_prefix += "_MetricOpt-%d" % self.options.antsImageMetricOpt
         filename_prefix += "_Affine-%s" % str(self.options.useRigidAffine)
 
+        filename_prefix += "_eps-%d_lam%02.2f" % \
+            (self.options.graphEdgeEpsilon, self.options.graphEdgeLambda)
+
         try:
             filename_prefix += "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
         except:
@@ -713,18 +826,18 @@ class sequential_alignment(output_volume_workflow):
 
         return filename_prefix
 
+    signature = property(_get_parameter_based_output_prefix)
+
     def _plot_transformations(self):
         """
         Plots the calculated composed transformations.
         """
-        # Get the filename prefix
-        filename_prefix = self._get_parameter_based_output_prefix()
 
         # Define and execute the transformation plotting script.
         command = pos_wrappers.rigid_transformations_plotter_wapper(
-            signature=filename_prefix,
-            report_filename=self.f['transform_report'](fname=filename_prefix),
-            plot_filename=self.f['transform_plot'](fname=filename_prefix),
+            signature=self.signature,
+            report_filename=self.f['transform_report'](fname=self.signature),
+            plot_filename=self.f['transform_plot'](fname=self.signature),
             transformation_mask=self.f['comp_transf_mask']())
         self.execute(command)
 
@@ -742,74 +855,102 @@ class sequential_alignment(output_volume_workflow):
             type='str', dest='inputImageDir',
             help='The directory from which the input slices will be read. The directory has to contain images named according to "%04d.nii.gz" scheme.')
 
-        workflow_options = OptionGroup(parser, 'Pipeline options.')
-        workflow_options.add_option('--outputVolumesDirectory', default=False,
-            dest='outputVolumesDirectory', type="str",
-            help='Directory to which registration results will be sored.')
-        workflow_options.add_option('--grayscaleVolumeFilename', default=False,
-            dest='grayscaleVolumeFilename', type='str',
-            help='Filename for the output grayscale volume.')
-        workflow_options.add_option('--multichannelVolumeFilename', default=False,
-            dest='multichannelVolumeFilename', type='str',
-            help='Filename for the output multichannel volume.')
-        workflow_options.add_option('--transformationsDirectory', default=False,
-            dest='transformationsDirectory', type="str",
-            help='Use provided transformation directory instead of the default one.')
-        workflow_options.add_option('--skipTransformations', default=False,
-            dest='skipTransformations', action='store_const', const=True,
-            help='Supress transformation calculation')
-        workflow_options.add_option('--skipSourceSlicesGeneration', default=False,
-            dest='skipSourceSlicesGeneration', action='store_const', const=True,
-            help='Supress generation of the source slices')
-        workflow_options.add_option('--skipReslice', default=False,
-            dest='skipReslice', action='store_const', const=True,
-            help='Supress generating grayscale volume')
-        workflow_options.add_option('--skipOutputVolumes', default=False,
-            dest='skipOutputVolumes', action='store_const', const=True,
-            help='Supress generating color volume')
-        workflow_options.add_option('--resliceBackgorund', default=None,
-            type='float', dest='resliceBackgorund',
-            help='Background color')
-        workflow_options.add_option('--resliceInterpolation',
-            dest='resliceInterpolation', default=None, type='choice',
-            choices=['Cubic','Gaussian','Linear','Nearest','Sinc','cubic'],
-            help='Interpolation during applying the transforms to individual slices.')
+        source_processing = OptionGroup(parser, 'Source data processing.')
 
-        registration_options = OptionGroup(parser, 'Options driving the registration process.')
-        registration_options.add_option('--registrationROI', dest='registrationROI',
-            default=None, type='int', nargs=4,
-            help='ROI of the input image used for registration (ox, oy, sx, sy).')
-        registration_options.add_option('--registrationResize', dest='registrationResize',
-            default=None, type='float',
-            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
-        registration_options.add_option('--registrationColor',
+        source_processing.add_option('--enable-sources-slices-generation', default=True,
+            dest='sourceSlicesGeneration', action='store_true',
+            help='Enable / disable generation of the source slices')
+        source_processing.add_option('--disable-sources-slices-generation', default=True,
+            dest='sourceSlicesGeneration', action='store_false')
+
+        source_processing.add_option('--registrationColor',
             dest='registrationColor', default='blue', type='choice',
-            choices=['r','g','b','red','green','blue'],
+            choices=['r', 'g', 'b', 'red', 'green', 'blue'],
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
-        registration_options.add_option('--medianFilterRadius', dest='medianFilterRadius',
+        source_processing.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        registration_options.add_option('--invertMultichannel', dest='invertMultichannel',
+        source_processing.add_option('--invertMultichannel', dest='invertMultichannel',
             default=None, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
-        registration_options.add_option('--outputVolumeROI', default=None,
-            type='int', dest='outputVolumeROI',  nargs=4,
-            help='ROI of the output volume - in respect to registration ROI.')
+        source_processing.add_option('--registrationROI', dest='registrationROI',
+            default=None, type='int', nargs=4,
+            help='ROI of the input image used for registration (ox, oy, sx, sy).')
+
+        registration_options = OptionGroup(parser, 'Registration options.')
+
+        registration_options.add_option('--enable-transformations', default=True,
+            dest='enableTransformations', action='store_true',
+            help='Supress transformation calculation')
+        registration_options.add_option('--disable-transformations', default=True,
+            dest='enableTransformations', action='store_false')
+
+        registration_options.add_option('--transformationsDirectory', default=False,
+            dest='transformationsDirectory', type="str",
+            help='Use provided transformation directory instead of the default one.')
+        registration_options.add_option('--registrationResize', dest='registrationResize',
+            default=None, type='float',
+            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
+        registration_options.add_option('--useRigidAffine', default=False,
+            dest='useRigidAffine', action='store_const', const=True,
+            help='Use rigid affine transformation.')
         registration_options.add_option('--antsImageMetric', default='MI',
-            type='choice', dest='antsImageMetric', choices=['MI','CC','MSQ'],
+            type='choice', dest='antsImageMetric', choices=['MI', 'CC', 'MSQ'],
             help='ANTS affine image to image metric. Three values are allowed: CC, MI, MSQ.')
         registration_options.add_option('--antsImageMetricOpt', default=32,
             type='int', dest='antsImageMetricOpt',
             help='Parameter of ANTS i2i metric. Makes a sense only when provided metric can be customized.')
-        registration_options.add_option('--useRigidAffine', default=False,
-            dest='useRigidAffine', action='store_const', const=True,
-            help='Use rigid affine transformation.')
+        registration_options.add_option('--graphEdgeLambda', default=0.0,
+            dest='graphEdgeLambda', action='store', type="float",
+            help='Provedes lambda value for the graph edges generation.')
+        registration_options.add_option('--graphEdgeEpsilon', default=1,
+            dest='graphEdgeEpsilon', action='store', type="int",
+            help='Provedes epsilon value for the graph edges generation.')
+
+        reslicing_options = OptionGroup(parser, 'Reslicing options.')
+
+        reslicing_options.add_option('--enable-reslice', default=True,
+            dest='enableReslice', action='store_true',
+            help='Supress generating grayscale volume')
+        reslicing_options.add_option('--disable-reslice', default=True,
+            dest='enableReslice', action='store_false')
+
+        reslicing_options.add_option('--resliceBackgorund', default=None,
+            type='float', dest='resliceBackgorund',
+            help='Background color')
+        reslicing_options.add_option('--resliceInterpolation',
+            dest='resliceInterpolation', default=None, type='choice',
+            choices=['Cubic', 'Gaussian', 'Linear', 'Nearest', 'Sinc', 'cubic'],
+            help='Interpolation during applying the transforms to individual slices.')
+        reslicing_options.add_option('--outputVolumeROI', default=None,
+            type='int', dest='outputVolumeROI',  nargs=4,
+            help='ROI of the output volume - in respect to registration ROI.')
+
+        output_volume_opts = OptionGroup(parser, 'Output volume options.')
+
+        output_volume_opts.add_option('--enable-output-volumes', default=True,
+            dest='enableOutputVolumes', action='store_true',
+            help='Supress generating color volume')
+        output_volume_opts.add_option('--disable-output-volumes', default=True,
+            dest='enableOutputVolumes', action='store_false')
+
+        output_volume_opts.add_option('--outputVolumesDirectory', default=False,
+            dest='outputVolumesDirectory', type="str",
+            help='Directory in which the reconstruction results will be sored.')
+        output_volume_opts.add_option('--grayscaleVolumeFilename', default=False,
+            dest='grayscaleVolumeFilename', type='str',
+            help='Filename for the output grayscale volume.')
+        output_volume_opts.add_option('--multichannelVolumeFilename', default=False,
+            dest='multichannelVolumeFilename', type='str',
+            help='Filename for the output multichannel (rgb) volume.')
 
         parser.add_option_group(obligatory_options)
+        parser.add_option_group(source_processing)
         parser.add_option_group(registration_options)
-        parser.add_option_group(workflow_options)
+        parser.add_option_group(reslicing_options)
+        parser.add_option_group(output_volume_opts)
 
         return parser
 
