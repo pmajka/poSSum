@@ -129,6 +129,7 @@ def float_colour_to_int(color, maxValue=255.):
     return tuple(int(x * maxValue) for x in color)
 
 
+
 class pos_color(object):
     """
     Color object. Class representing a color :) A versatile way of manipulating
@@ -738,7 +739,7 @@ class pos_palette(object):
     def get(cls, name, min=0.0, max=1.0):
         """
         A conveniet function wrapper that loads the palette either from file or
-        from the internal library.  The methos checks if a given name of the
+        from the internal library. The methos checks if a given name of the
         palette is a filename or library palette name. In the former case the
         palette is loaded from the file, in the latter -- from internal
         library. Simple.

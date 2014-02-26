@@ -43,8 +43,8 @@ class generic_wrapper(object):
 
     def __str__(self):
         replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
-        return " ".join(self._template.format(**replacement).strip().split())
-        #return self._template.format(**replacement).strip()
+        #return " ".join(self._template.format(**replacement).strip().split())
+        return self._template.format(**replacement).strip()
 
     def __call__(self, *args, **kwargs):
         print "Executing: %s" % str(self)

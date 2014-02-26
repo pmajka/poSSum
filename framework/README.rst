@@ -6,6 +6,9 @@
 Nonlinear registration and visualization framework Piotr Majka
 ========================================
 
+TODO: Rewrite the glyph drawing function
+TODO: Specification of the connectivity graph plotting function.
+
 
 Obvious prerequirements
 =====================================
