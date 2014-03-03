@@ -1,41 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*
-###############################################################################
-#                                                                             #
-#    This file is part of Multimodal Atlas of Monodelphis Domestica           #
-#                                                                             #
-#    Copyright (C) 2011-2012 Piotr Majka                                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is free software: you can redistribute      #
-#    it and/or modify it under the terms of the GNU General Public License    #
-#    as published by the Free Software Foundation, either version 3 of        #
-#    the License, or (at your option) any later version.                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is distributed in the hope that it          #
-#    will be useful, but WITHOUT ANY WARRANTY; without even the implied       #
-#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.         #
-#    See the GNU General Public License for more details.                     #
-#                                                                             #
-#    You should have received a copy of the GNU General Public License        #
-#    along  with  3d  Brain  Atlas  Reconstructor.   If  not,  see            #
-#    http://www.gnu.org/licenses/.                                            #
-#                                                                             #
-###############################################################################
-import os, sys
-import csv
-import copy
-from optparse import OptionGroup
 
-from pos_wrapper_skel import output_volume_workflow
-import pos_wrappers, pos_parameters
 
 """
 Pos pairwise alignment script
 *****************************
-
-:author: Piotr Majka <pmajka@nencki.gov.pl>
-:revision: $Rev$
-:date: $LastChangedDate$
 
 `pos_pairwise_registration` -- a pairwise registration script.
 
@@ -81,7 +50,6 @@ image stack to process. While the transformations are caluclated based on a
 single image stack (let's call it a primary image stack), the transformation
 may be applied to other image stacks (reffered as the additional image stacks).
 Obviously, the additional image stacks are optional.
-
 
 
 Providing additional image stacks
@@ -161,6 +129,14 @@ pos_pairwise_registration.py \
         --dryRun
 
 """
+
+import os, sys
+import csv
+import copy
+from optparse import OptionGroup
+
+import pos_wrappers, pos_parameters
+from pos_wrapper_skel import output_volume_workflow
 
 
 class image_voxel_count_wrapper(pos_wrappers.generic_wrapper):

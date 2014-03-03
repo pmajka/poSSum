@@ -44,22 +44,6 @@ class gnuplot_wrapper(pos_wrappers.generic_wrapper):
             }
 
 
-class visualize_wrap_field(pos_wrappers.generic_wrapper):
-    _template = """python ../../draw_glyphs_2d.py \
-        --warpImage {warp_image} \
-        --sliceImage {slice_image} \
-        --screenshot {screenshot_filename} \
-        --configuration {configuration_filename}\
-        --cleanup"""
-
-    _parameters = {
-        'warp_image'  : filename_parameter('warp_image', None),
-        'slice_image' : filename_parameter('slice_image', None),
-        'screenshot_filename'  : filename_parameter('screenshot_filename', None),
-        'configuration_filename' : filename_parameter('configuration_filename', None)
-        }
-
-
 class convert_slice_image(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -mcs {input_image}\
             -foreach {spacing} {scaling} -endfor \

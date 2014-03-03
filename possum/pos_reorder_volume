@@ -1,19 +1,17 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*
 
 """
-.. module:: pos_reorder_volume
-    :platform: Ubuntu
-    :synopsis: A script for reordering slices
-
-.. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
+TODO: Provide the module desctiption
 """
+
 
 import random
 import csv
 import itk
 import pos_itk_core
 import pos_wrapper_skel
+
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
@@ -353,6 +351,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
     @staticmethod
     def parseArgs():
+        # TODO: make the filename a variable:
         usage_string = "python pos_slice_volume.py  -i <input_filename> -o <output_filename> --reorderMapping <reorder_mapping_file>"
 
         __output_vol_command_line_args_help = {}

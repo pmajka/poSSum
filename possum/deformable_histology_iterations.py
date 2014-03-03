@@ -1,10 +1,13 @@
 #!/usr/bin/python
+
 import copy
 import numpy as np
-from pos_deformable_wrappers import blank_slice_deformation_wrapper
-from pos_wrapper_skel import generic_workflow
+
 import pos_wrappers
+from pos_wrapper_skel import generic_workflow
 import pos_parameters
+from pos_deformable_wrappers import blank_slice_deformation_wrapper
+
 
 class deformable_reconstruction_iteration(generic_workflow):
     _f = { \

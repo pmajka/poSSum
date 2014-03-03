@@ -1,17 +1,22 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*
+
+"""
+TODO: Put module docstring here.
+TODO: Provide logging infromation inherited from the output_volume_workflow
+"""
+
 import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
 
-from deformable_histology_iterations import deformable_reconstruction_iteration
 import pos_wrappers
-import pos_parameters
-
-from pos_deformable_wrappers import preprocess_slice_volume,\
-                  visualize_wrap_field, convert_slice_image,\
-                  convert_slice_image_grayscale
 from pos_wrapper_skel import output_volume_workflow
+import pos_parameters
+from deformable_histology_iterations import deformable_reconstruction_iteration
+from pos_deformable_wrappers import preprocess_slice_volume,\
+    convert_slice_image, convert_slice_image_grayscale
+
 
 class deformable_reconstruction_workflow(output_volume_workflow):
     """
@@ -69,6 +74,9 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
     def __init__(self, options, args):
         super(self.__class__, self).__init__(options, args)
+
+        # TODO: Create the _validate_options routine
+        # to make the option validation prior to the workflow initialization
 
         # Handling situation when no volume is provided
         if not any([self.options.inputVolume, \
@@ -196,7 +204,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
                                self.options.iterations):
 
             print >> sys.stderr, "-------------------------------------------------"
-            print >> sys.stderr, "Staring iteration: %d of %d" \
+            print >> sys.stderr, "Staring iteration: %workflow of %workflow" \
                                         % (iteration +1, self.options.iterations)
             print >> sys.stderr, "-------------------------------------------------"
 
@@ -243,26 +251,9 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
         if self.options.stackFinalDeformation:
             self._generate_final_transforms()
-            self._visualize_warps()
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
-
-    def _visualize_warps(self):
-        """
-        """
-        start, end, eps, iteration = self._get_edges()
-        commands = []
-
-        for i in range(start, end +1):
-            command = visualize_wrap_field(
-                warp_image = self.f['rescaled_deformations'](idx=i),
-                slice_image = self.f['rescaled_source'](idx=i),
-                screenshot_filename = self.f['warp_field_visualization'](idx=i),
-                configuration_filename = self.options.glyphConfiguration)
-            commands.append(copy.deepcopy(command))
-
-        self.execute(commands, parallel=False)
 
     def _get_edges(self):
         """
@@ -521,9 +512,6 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         parser.add_option('--stackFinalDeformation', default=False, const=True,
                 dest='stackFinalDeformation', action='store_const',
                 help='Stack filnal deformation fileld.')
-        parser.add_option('--glyphConfiguration', default=None, type=str,
-                dest='glyphConfiguration', action='store',
-                help='Stack filnal deformation fileld.')
 
         regSettings = \
                 OptionGroup(parser, 'Registration setttings.')
@@ -555,5 +543,5 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
 if __name__ == '__main__':
     options, args = deformable_reconstruction_workflow.parseArgs()
-    d = deformable_reconstruction_workflow(options, args)
-    d.launch()
+    workflow = deformable_reconstruction_workflow(options, args)
+    workflow.launch()

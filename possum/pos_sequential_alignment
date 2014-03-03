@@ -1,39 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
-###############################################################################
-#                                                                             #
-#    This file is part of Multimodal Atlas of Monodelphis Domestica           #
-#                                                                             #
-#    Copyright (C) 2011-2012 Piotr Majka                                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is free software: you can redistribute      #
-#    it and/or modify it under the terms of the GNU General Public License    #
-#    as published by the Free Software Foundation, either version 3 of        #
-#    the License, or (at your option) any later version.                      #
-#                                                                             #
-#    3d Brain Atlas Reconstructor is distributed in the hope that it          #
-#    will be useful, but WITHOUT ANY WARRANTY; without even the implied       #
-#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.         #
-#    See the GNU General Public License for more details.                     #
-#                                                                             #
-#    You should have received a copy of the GNU General Public License        #
-#    along  with  3d  Brain  Atlas  Reconstructor.   If  not,  see            #
-#    http://www.gnu.org/licenses/.                                            #
-#                                                                             #
-###############################################################################
-import os, sys
-from optparse import OptionGroup
-import copy
 
-import networkx as nx
-
-from pos_common import flatten
-from pos_wrapper_skel import output_volume_workflow
-import pos_parameters
-import pos_wrappers
 
 """
-
 Sequential alignment workflow
 *****************************
 
@@ -115,8 +84,18 @@ files are explained:
     2. Graph edges file, TODO: provide some more information.
 
     3. Similarity measure between individual images.
-
 """
+
+import os, sys
+from optparse import OptionGroup
+import copy
+
+import networkx as nx
+
+from pos_common import flatten
+from pos_wrapper_skel import output_volume_workflow
+import pos_parameters
+import pos_wrappers
 
 
 class sequential_alignment(output_volume_workflow):
@@ -174,7 +153,7 @@ class sequential_alignment(output_volume_workflow):
             self._logger.error("Incorrect reference slice index. The reference slice index has to be larger than the first slice index and smaller than the last slice index.")
 
         # Validate, if an input images directory is provided,
-        # Obviously, we need to load the images in order to process them.
+        # Obviously, we need to load the images in order to workflow them.
         assert self.options.inputImageDir, \
             self._logger.error("No input images directory is provided. Please provide the input images directory (--inputImageDir)")
 
@@ -230,7 +209,7 @@ class sequential_alignment(output_volume_workflow):
         # Execute the parents before-execution activities
         super(self.__class__, self)._pre_launch()
 
-        # Before launching the registration process check, if the intput
+        # Before launching the registration workflow check, if the intput
         # directory and all the input images exist. Note that the input image
         # inspection is performed in case of performing the actual
         # computations. In case of trial runs, no validation if performed.
@@ -492,7 +471,7 @@ class sequential_alignment(output_volume_workflow):
             for mdx, fdx in tpair:
                 commands.append(get_wrapper(fdx, mdx))
 
-        # Execute and commands and process the similarity measurements.
+        # Execute and commands and workflow the similarity measurements.
         stdout, stderr = self.execute(commands)
         simmilarity = map(lambda x: float(x.strip()),
                           stdout.strip().split("\n"))
@@ -956,5 +935,5 @@ class sequential_alignment(output_volume_workflow):
 
 if __name__ == '__main__':
     options, args = sequential_alignment.parseArgs()
-    process = sequential_alignment(options, args)
-    process.launch()
+    workflow = sequential_alignment(options, args)
+    workflow.launch()
