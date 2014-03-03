@@ -1,13 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*
+
 
 """
 Volume slicing script
 *********************
-
-:author: Piotr Majka <pmajka@nencki.gov.pl>
-:revision: $Rev$
-:date: $LastChangedDate$
 
 `pos_slice_volume`, a volume slicing module.
 
@@ -96,6 +93,7 @@ Will extract the square slice of 50x50 pixel that originates in pixel (40,100).
 Reference
 =========
 """
+
 
 import pos_wrapper_skel
 import itk

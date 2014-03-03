@@ -2,18 +2,12 @@
 # -*- coding: utf-8 -*
 
 """
-Slice preprocessing script
+Stack wrapper script.
 **************************
 
-:author: Piotr Majka <pmajka@nencki.gov.pl>
-:revision: $Rev$
-:date: $LastChangedDate$
-
-`pos_stack_warp_image_multi_transform`, a workflow for warping a whole stack of idmages.
-
-This file is part of Multimodal Atlas of Monodelphis Domestica.
-(c) Piotr Majka 2011-2014. Restricted, damnit!
+`pos_stack_warp_image_multi_transform`, a workflow for warping a whole stack of images.
 """
+
 import os, sys
 from optparse import OptionGroup
 import copy

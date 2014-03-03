@@ -103,7 +103,7 @@ Smooth and invert images
 Now some more complicated processing example. The code below takes an rgb image
 for input, extracts default color channel and applies smoothing and inverts the
 images. Both grayscale and rgb images are outputes. Note, however, that only
-grayscale image is smoothed by the median filter::
+grayscale image is smoothed by the median workflow::
 
     $pos_slice_preprocess.py
         [required]      --inputFilename <filename>
@@ -113,6 +113,7 @@ grayscale image is smoothed by the median filter::
                         --invertSourceImage
                         --invertMultichannelImage
 """
+
 
 import itk
 import pos_wrapper_skel
@@ -128,7 +129,7 @@ def prepare_single_channel(input_image,
     # Determine image dimensionality:
     image_dim = len(input_image.GetSpacing())
 
-    # Declare an variable holding output of the last applied filter:
+    # Declare an variable holding output of the last applied workflow:
     last_res = None
 
     # Handle image cropping:
@@ -212,7 +213,7 @@ def collapse_pseudo_3d_image(input_image, input_type,
         # approperiate lookup table.
         collapsed_img_type = types_reduced_dimensions[input_type]
 
-        # Initialize and set up image slicing filter
+        # Initialize and set up image slicing workflow
         extract_slice = \
             itk.ExtractImageFilter[input_type, collapsed_img_type].New()
         extract_slice.SetExtractionRegion(region)
@@ -376,7 +377,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
             # A simple dictionary mapping string provided via command line to a
             # specific image channel (image channel is provided as string while
-            # the filter requires an integer)
+            # the workflow requires an integer)
             str_to_num_map = {'r': 0, 'g': 1, 'b': 2,
                               'red': 0, 'green': 1, 'blue': 2}
 
@@ -518,7 +519,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
         parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
-            help='Median filter radius in voxels e.g. 2 2')
+            help='Median workflow radius in voxels e.g. 2 2')
         parser.add_option('--invertSourceImage', dest='invertSourceImage',
             default=False, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
@@ -532,5 +533,5 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
 if __name__ == '__main__':
     options, args = prepare_slice_for_seq_alignment.parseArgs()
-    filter = prepare_slice_for_seq_alignment(options, args)
-    filter.launch()
+    workflow = prepare_slice_for_seq_alignment(options, args)
+    workflow.launch()

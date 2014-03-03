@@ -1,13 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*
 
+
 """
-.. module:: pos_stack_reorient
-    :platform: Ubuntu
-    :synopsis: A volume stacking and reorienting script.
-
-.. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
-
 A script for stacking slices and reorienting volumes
 ****************************************************
 
@@ -58,11 +53,12 @@ as the input filetype.
     **24bpp** rgb files, no alpha channel. Providing a different type of
     multichannel images will cause an error. However, you are fully allowed to
     use any usual type (uchar, ushort, float) of a single channel images.
-
 """
+
 import itk
 import pos_wrapper_skel
 import pos_itk_core
+
 
 class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
     """
