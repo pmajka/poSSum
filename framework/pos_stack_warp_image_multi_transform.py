@@ -14,6 +14,7 @@ Slice preprocessing script
 This file is part of Multimodal Atlas of Monodelphis Domestica.
 (c) Piotr Majka 2011-2014. Restricted, damnit!
 """
+
 import os, sys
 from optparse import OptionGroup
 import copy
