@@ -34,5 +34,3 @@ AverageAffineTransform
 AverageImages
 c3d
 c2d
-
-
