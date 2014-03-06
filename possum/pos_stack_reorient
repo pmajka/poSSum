@@ -371,10 +371,10 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         parser.add_option('--resample', default=None,
             type='float', nargs=3, dest='resample',
             help=__output_vol_command_line_args_help['resample'])
-        parser.add_option('--permutation', default=[0,1,2],
+        parser.add_option('--permutation', default=[0, 1, 2],
             type='int', nargs=3, dest='permutation',
             help=__output_vol_command_line_args_help['permutation'])
-        parser.add_option('--flipAxes', default=[0,0,0],
+        parser.add_option('--flipAxes', default=[0, 0, 0],
             type='int', nargs=3, dest='flipAxes',
             help=__output_vol_command_line_args_help['setFlip'])
         parser.add_option('--flipAroundOrigin', default=False,

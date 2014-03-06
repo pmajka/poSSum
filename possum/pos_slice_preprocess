@@ -130,7 +130,7 @@ def prepare_single_channel(input_image,
     image_dim = len(input_image.GetSpacing())
 
     # Declare an variable holding output of the last applied workflow:
-    last_res = None
+    last_output = None
 
     # Handle image cropping:
     if crop_index and crop_size:
@@ -142,21 +142,21 @@ def prepare_single_channel(input_image,
         crop_filter.SetRegionOfInterest(bounding_box)
         crop_filter.Update()
 
-        last_res = crop_filter.GetOutput()
+        last_output = crop_filter.GetOutput()
     else:
-        last_res = input_image
-        last_res.Update()
-        last_res.UpdateOutputData()
-        last_res.UpdateOutputInformation()
+        last_output = input_image
+        last_output.Update()
+        last_output.UpdateOutputData()
+        last_output.UpdateOutputInformation()
 
     # Handle image inversion:
     if invert:
         max_filter = itk.MinimumMaximumImageFilter[input_image].New()
-        max_filter.SetInput(last_res)
+        max_filter.SetInput(last_output)
 
         invert_filter = \
             itk.InvertIntensityImageFilter[input_image, input_image].New()
-        invert_filter.SetInput(last_res)
+        invert_filter.SetInput(last_output)
 
         if invert_max:
             invert_filter.SetMaximum(invert_max)
@@ -164,32 +164,32 @@ def prepare_single_channel(input_image,
             invert_filter.SetMaximum(max_filter.GetMaximum())
 
         invert_filter.Update()
-        last_res = invert_filter.GetOutput()
+        last_output = invert_filter.GetOutput()
 
     # Handle median filtering
     if median_radius:
         median = itk.MedianImageFilter[input_image, input_image].New()
-        median.SetInput(last_res)
+        median.SetInput(last_output)
         median.SetRadius(median_radius)
         median.Update()
 
-        last_res = median.GetOutput()
+        last_output = median.GetOutput()
 
     # Handle image rescaling
     if (scale_factor is not None) and (int(scale_factor) != 1):
-        last_res = resample_image_filter(last_res, scale_factor)
+        last_output = resample_image_filter(last_output, scale_factor)
 
     # Handle results rescaling
     if all([rescale_min, rescale_max]):
         rescaler = \
             itk.RescaleIntensityImageFilter[input_image, input_image].New()
-        rescaler.SetInput(last_res)
+        rescaler.SetInput(last_output)
         rescaler.SetOutputMinimum(rescale_min)
         rescaler.SetOutputMaximum(rescale_max)
 
-        last_res = rescaler.GetOutput()
+        last_output = rescaler.GetOutput()
 
-    return last_res
+    return last_output
 
 
 def collapse_pseudo_3d_image(input_image, input_type,

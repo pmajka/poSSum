@@ -1,13 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
 
-"""
-.. module:: pos_itk_core
-    :platform: Ubuntu
-    :synopsis: Core functions for itk support in Python.
-
-.. moduleauthor:: Piotr Majka <pmajka@nencki.gov.pl>
-"""
 import itk
 import logging
 

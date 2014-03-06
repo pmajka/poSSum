@@ -6,10 +6,6 @@
 Sequential alignment workflow
 *****************************
 
-:author: Piotr Majka <pmajka@nencki.gov.pl>
-:revision: $Rev$
-:date: $LastChangedDate$
-
 `pos_sequential_alignment` -- a sequential alignment script.
 
 This file is part of imaging data integration framework,
@@ -85,6 +81,7 @@ files are explained:
 
     3. Similarity measure between individual images.
 """
+
 
 import os, sys
 from optparse import OptionGroup
