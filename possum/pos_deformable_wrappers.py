@@ -5,7 +5,7 @@ import pos_wrappers
 
 
 class preprocess_slice_volume(pos_wrappers.generic_wrapper):
-    _template = """pos_slice_volume.py \
+    _template = """pos_slice_volume \
             -i {input_image} \
             -o "{output_naming}" \
             -s {slicing_plane} \

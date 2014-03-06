@@ -69,7 +69,6 @@ class generic_wrapper(object):
             self.p[name].value = value
         return self
 
-
 class touch_wrapper(generic_wrapper):
     _template = """touch {files}"""
 
@@ -171,7 +170,6 @@ class ants_registration(generic_wrapper):
         execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
 
         return execution
-
 
 class ants_reslice(generic_wrapper):
     """
@@ -305,7 +303,6 @@ class ants_intensity_meric(generic_wrapper):
 
     value = property(_get_value, _set_value)
 
-
 class ants_point_set_estimation_metric(generic_wrapper):
     """
     Wrapper for ANTS Point Set Estimation metric template.  The role of this
@@ -414,7 +411,6 @@ class ants_point_set_estimation_metric(generic_wrapper):
         pass
 
     value = property(_get_value, _set_value)
-
 
 class ants_average_affine_transform(generic_wrapper):
     """
@@ -609,7 +605,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
     """
     A wraper for a swiss army kife for reorienting, stacking, permuting and
     flipping input volumes. For more details please check manual for
-    `pos_stack_reorient.py` script.
+    `pos_stack_reorient` script.
 
     .. note:: There are two obligatory parameters: `stack_mask` and
               `output_volume_fn`.
@@ -661,7 +657,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
     <BLANKLINE>
 
     >>> print stack_and_reorient_wrapper() #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient.py -i -o --permutation 0 1 2 \
+    pos_stack_reorient -i -o --permutation 0 1 2 \
         --orientationCode RAS --setType uchar \
         --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
@@ -671,18 +667,18 @@ class stack_and_reorient_wrapper(generic_wrapper):
     KeyError: 'parameter_that_does_not_exist'
 
     >>> print p.updateParameters({"stack_mask":"%04d.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient.py -i %04d.nii.gz -o --permutation 0 1 2 \
+    pos_stack_reorient -i %04d.nii.gz -o --permutation 0 1 2 \
         --orientationCode RAS --setType uchar --setSpacing 1.0 1.0 1.0 \
         --setOrigin 0 0 0
 
     >>> print p.updateParameters({"slice_start":"%04d.nii.gz",
     ... "slice_end" : 20, "slice_start" : 1, "slice_step":1}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient.py -i %04d.nii.gz -o --stackingOptions 1 20 1 \
+    pos_stack_reorient -i %04d.nii.gz -o --stackingOptions 1 20 1 \
         --permutation 0 1 2  --orientationCode RAS  --setType uchar \
         --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
     >>> print p.updateParameters({"output_volume_fn": "output.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient.py -i %04d.nii.gz -o output.nii.gz \
+    pos_stack_reorient -i %04d.nii.gz -o output.nii.gz \
       --stackingOptions 1 20 1 --permutation 0 1 2 --orientationCode RAS \
       --setType uchar --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
@@ -691,13 +687,13 @@ class stack_and_reorient_wrapper(generic_wrapper):
     ... "interpolation" : "Cubic",
     ... "permutation_order" : [2, 1, 0], "resample": [0.5, 2.0, 3.0],
     ... "orientation_code" : "RAS"}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient.py -i %04d.nii.gz -o output.nii.gz --stackingOptions 1 20 1\
+    pos_stack_reorient -i %04d.nii.gz -o output.nii.gz --stackingOptions 1 20 1\
       --permutation 2 1 0 --orientationCode RAS --setType ushort\
       --setSpacing 0.5 0.5 0.5 --setOrigin 1 1 1 --interpolation Cubic\
       --resample 0.5 2.0 3.0
     """
 
-    _template = """pos_stack_reorient.py \
+    _template = """pos_stack_reorient \
         -i {stack_mask} \
         -o {output_volume_fn} \
         {slice_start} {slice_end} {slice_step} \
@@ -728,7 +724,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
 class alignment_preprocessor_wrapper(generic_wrapper):
     """
-    A wrapper for the `pos_slice_preprocess.py` script. Since the script itself
+    A wrapper for the `pos_slice_preprocess` script. Since the script itself
     provides an extensive documentation, the detailed description of command
     line options is skipped in the wrapper's documentation.
 
@@ -747,12 +743,12 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     <__main__.alignment_preprocessor_wrapper object at 0x...>
 
     >>> print alignment_preprocessor_wrapper() #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess.py --inputFilename
+    pos_slice_preprocess --inputFilename
 
     >>> print alignment_preprocessor_wrapper(input_image="input.nii.gz",
     ... grayscale_output_image="grayscale.nii.gz",
     ... color_output_image="color.nii.gz") #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess.py --inputFilename input.nii.gz -g grayscale.nii.gz -r color.nii.gz
+    pos_slice_preprocess --inputFilename input.nii.gz -g grayscale.nii.gz -r color.nii.gz
 
     >>> p=alignment_preprocessor_wrapper(input_image="i.nii.gz",
     ... grayscale_output_image="g.nii.gz",
@@ -796,25 +792,25 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     KeyError: 'parameter_that_does_not_exist'
 
     >>> print p.updateParameters({"median_filter_radius" : [2,2]}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --medianFilterRadius 2 2
+    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --medianFilterRadius 2 2
 
     >>> print p.updateParameters({"median_filter_radius" : [2,2],
     ... 'invert_grayscale':True,
     ... 'invert_multichannel':True,
     ... 'registration_color': 'green'}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel green --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
+    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel green --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
 
     >>> print p.updateParameters({"median_filter_radius" : [2,2],
     ... 'invert_grayscale':False,
     ... 'invert_multichannel':False,
     ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
+    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red --medianFilterRadius 2 2 --invertSourceImage --invertMultichannelImage
 
     >>> print p.updateParameters({"median_filter_radius" : None,
     ... 'invert_grayscale':None,
     ... 'invert_multichannel': None,
     ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red
+    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --registrationColorChannel red
 
     >>> print p.updateParameters({"median_filter_radius" : 2})
     Traceback (most recent call last):
@@ -824,10 +820,10 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     ... 'invert_grayscale' : None,
     ... 'invert_multichannel' : None,
     ... 'registration_color': None}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess.py --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz
+    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz
     """
 
-    _template = """pos_slice_preprocess.py \
+    _template = """pos_slice_preprocess \
                   --inputFilename {input_image} \
                   {grayscale_output_image} {color_output_image} \
                   {registration_roi} {registration_resize} \
@@ -1154,7 +1150,6 @@ class image_similarity_wrapper(generic_wrapper):
         'moving_image': filename_parameter('moving_image', None),
         'metric': string_parameter('metric', 'ncor', str_template='-{_value}'),
         'affine_transformation': filename_parameter('affine_transformation', None)}
-
 
 class split_multichannel_image(generic_wrapper):
     """
