@@ -6,6 +6,7 @@ pos parameters
 
 class generic_parameter(object):
     """
+    TODO: Describe the meaning and sense of the the generic_parameter class
     """
     _str_template = None
 

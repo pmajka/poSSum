@@ -34,16 +34,6 @@ class blank_slice_deformation_wrapper(pos_wrappers.generic_wrapper):
             }
 
 
-class gnuplot_wrapper(pos_wrappers.generic_wrapper):
-    _template = "gnuplot {plot_file}; inkscape {svg_file} --export-png={output_file} -d 300 -y 1;"
-
-    _parameters = {
-            'plot_file' : filename_parameter('plot_file', None),
-            'svg_file' : filename_parameter('svg_file', None),
-            'output_file' : filename_parameter('output_file', None),
-            }
-
-
 class convert_slice_image(pos_wrappers.generic_wrapper):
     _template = """c{dimension}d -mcs {input_image}\
             -foreach {spacing} {scaling} -endfor \

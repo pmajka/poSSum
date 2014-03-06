@@ -35,91 +35,6 @@ import numpy
 from scipy.ndimage.filters import gaussian_filter1d
 
 
-class coarse_to_fine_transformation_merger_plot(pos_wrappers.generic_wrapper):
-    """
-    """
-
-    _template = """#!/usr/bin/gnuplot -persist
-        set macros
-
-        set terminal pngcairo noenhanced color notransparent size 800,600 font 'Arial,9'
-        set output '{graph_image}'
-
-        POS = "at graph 0.5,0.95 font ',10' center"
-
-        NOXTICS = "set xtics; unset xlabel; set format x '';"
-        XTICS   = "set xtics; set xlabel 'Slice index' font ',9'; set format x '%g';"
-
-        NOYTICS = "set format y ''; unset ylabel"
-        YTICS = "set format y '%g'; set ylabel ''"
-
-        TMARGIN = "set tmargin at screen 0.90; set bmargin at screen 0.55"
-        BMARGIN = "set tmargin at screen 0.50; set bmargin at screen 0.15"
-        LMARGIN = "set lmargin at screen 0.10; set rmargin at screen 0.50"
-        RMARGIN = "set lmargin at screen 0.55; set rmargin at screen 0.95"
-
-        FN_SMOOTH = "'{smooth_transformations}'"
-        FN_RAW = "'{fine_transformations}'"
-        FN_DIFF = "'{transformation_difference}'"
-
-        set style line 1 lc rgb '#031A49' lt 1 lw 1 # --- blue
-        set style line 2 lc rgb '#1D4599' lt 1 lw 1 # --- lblue
-        set style line 3 lc rgb '#025214' lt 1 lw 1 # --- blue
-        set style line 4 lc rgb '#11AD34' lt 1 lw 1 # --- red
-        set style line 5 lc rgb '#E62B17' lt 1 lw 1 # --- blue
-        set style line 6 lc rgb '#6D0D03' lt 1 lw 1 # --- red
-        set style line 7 lc rgb '#E69F17' lt 1 lw 1 # --- blue
-        set style line 8 lc rgb '#6D4903' lt 1 lw 1 # --- red
-
-        STYLE_RAW_1    = "w l ls 1 notitle"
-        STYLE_SMOOTH_1 = "w l ls 2 notitle"
-        STYLE_RAW_2    = "w l ls 3 notitle"
-        STYLE_SMOOTH_2 = "w l ls 4 notitle"
-        STYLE_RAW_3    = "w l ls 5 notitle"
-        STYLE_SMOOTH_3 = "w l ls 6 notitle"
-        STYLE_RAW_4    = "w l ls 7 notitle"
-        STYLE_SMOOTH_4 = "w l ls 8 notitle"
-
-        set multiplot layout 2,2 rowsfirst title "Fine - coarse : {graph_image}"
-
-        set label 1 'Offset (translation) [mm]' @POS
-        @NOXTICS; @YTICS
-        @TMARGIN; @LMARGIN
-        plot @FN_RAW  u 0:5 @STYLE_RAW_1, @FN_SMOOTH u 0:5 @STYLE_SMOOTH_1 , \
-            @FN_RAW  u 0:6 @STYLE_RAW_2, @FN_SMOOTH u 0:6 @STYLE_SMOOTH_2
-
-        set label 1 'Horizontal and vertical scaling' @POS
-        @NOXTICS; @YTICS
-        @TMARGIN; @RMARGIN
-        set yrange [0.95:1.05]
-        plot @FN_RAW u 0:1 @STYLE_RAW_3, @FN_SMOOTH u 0:1 @STYLE_SMOOTH_3 , \
-            @FN_RAW u 0:4 @STYLE_RAW_4, @FN_SMOOTH u 0:4 @STYLE_SMOOTH_4
-
-        set label 1 'Slice rotation [degrees]' @POS
-        @XTICS; @YTICS
-        @BMARGIN; @LMARGIN
-        set nokey
-        set yrange [-20:20]
-        plot @FN_RAW  u 0:(90-acos($2)*180./pi) @STYLE_RAW_3, @FN_SMOOTH u 0:(90-acos($2)*180./pi) @STYLE_SMOOTH_3
-
-        set label 1 'Fixed parameters [mm]' @POS
-        @XTICS; @YTICS
-        @BMARGIN; @RMARGIN
-        set auto y
-        plot @FN_RAW  u 0:7 @STYLE_RAW_3, @FN_SMOOTH u 0:7 @STYLE_SMOOTH_3 , \
-            @FN_RAW  u 0:8 @STYLE_RAW_4, @FN_SMOOTH u 0:8 @STYLE_SMOOTH_4
-
-        unset multiplot
-        """
-
-    _parameters = {
-        'graph_image' : pos_parameters.filename_parameter('graph_image', None),
-        'smooth_transformations' : pos_parameters.filename_parameter('smooth_transformations', None),
-        'fine_transformations' : pos_parameters.filename_parameter('fine_transformations', None),
-        'transformation_difference' : pos_parameters.filename_parameter('transformation_difference', None)
-    }
-
-
 class coarse_to_fine_transformation_merger(generic_workflow):
     """
     Coarse to fine transformation merger.
@@ -140,7 +55,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         'smooth_report' : pos_parameters.filename('smooth_report', work_dir = '05_reports', str_template='smooth_transformations.csv'),
         'difference_report' : pos_parameters.filename('difference_report', work_dir = '05_reports', str_template='difference_trasnformations.csv'),
         'final_report' : pos_parameters.filename('final_report', work_dir = '05_reports', str_template='final_transformations.csv'),
-        'graph' : pos_parameters.filename('graph', work_dir = '05_reports', str_template='graph_{desc:s}.png'),
+        'graph' : pos_parameters.filename('graph', work_dir = '05_reports', str_template='graph_{desc:workflow}.png'),
         'graph_source' : pos_parameters.filename('graph_source', work_dir = '05_reports', str_template='graph_source.plt'),
          }
 
@@ -192,15 +107,15 @@ class coarse_to_fine_transformation_merger(generic_workflow):
             self.options.slice_range)
 
         for transf_filename in filenames_to_check:
-            self._logger.debug("Checking for image: %s.", transf_filename)
+            self._logger.debug("Checking for image: %workflow.", transf_filename)
 
             if not os.path.isfile(transf_filename):
-                self._logger.error("File does not exist: %s. Exiting",
+                self._logger.error("File does not exist: %workflow. Exiting",
                     transf_filename)
                 sys.exit(1)
 
         # Oh, an the last but not least. One can assign a custom reports
-        # directory (for whatever reason :). If that's the case
+        # directory (for whatever reason :). If that'workflow the case
         if self.options.reportsDirectory != None:
             self.f['fine_report'].override_dir = self.options.reportsDirectory
             self.f['smooth_report'].override_dir = self.options.reportsDirectory
@@ -222,9 +137,6 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         if self.options.skipTransformsGeneration == False:
             self._store_smoothed_transformations()
             self._generate_final_transformations()
-
-        # At the end of the calculations, simple report graph is generated.
-        self._generate_report()
 
     def _extract_transformation_parameters(self):
         """
@@ -263,8 +175,8 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         """
 
         # Simple as it goes: define the name of the transformation file,
-        # grab the file's content and extract the transformation parameters
-        # from the file's content.
+        # grab the file'workflow content and extract the transformation parameters
+        # from the file'workflow content.
         transformation_filename = self.f['fine_transf']() % slice_index
         transformation_string = open(transformation_filename).readlines()
         transformation_parameters =\
@@ -459,7 +371,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         :rtype: `invert_affine_transform`
         """
         input_transformation = self.f['smooth_transf']() % slice_index
-        # Ok, here's a trick. We hereby cheat by adding "-i" switch to the
+        # Ok, here'workflow a trick. We hereby cheat by adding "-i" switch to the
         # actual transformation name. This will cause the ANTS transformation
         # composition binary file to invert given transformation instead of
         # using the forward transfomation.
@@ -471,34 +383,6 @@ class coarse_to_fine_transformation_merger(generic_workflow):
             output_image = output_transformation,
             affine_list = [input_transformation])
         return copy.deepcopy(command)
-
-    def _generate_report(self):
-        """
-        Create a plot comparing the initial, smoothed and filtered affine
-        transformation parameters. Pretty simple procedure :)
-        """
-
-        # The name of the graph will be based on the merging parameters
-        # passed using the command line parameters. So:
-        # grap the file prefix.
-        prefix = self._get_parameters_based_filename_prefix()
-
-        # Define the gnuplot plotting file using the approperiate plotting
-        # wrapper.
-        command = coarse_to_fine_transformation_merger_plot(
-            graph_image = self.f['graph'](desc=prefix),
-            smooth_transformations = self.f['smooth_report'](),
-            fine_transformations = self.f['fine_report'](),
-            transformation_difference = self.f['difference_report']())
-
-        # Save the plot file
-        plot_filename = self.f['graph_source']()
-        open(plot_filename, 'w').write(str(command))
-
-        # Execute proviouslu generated plot file
-        command = pos_wrappers.gnuplot_execution_wrapper(
-            plot_filename = plot_filename)
-        self.execute(command)
 
     def _get_parameters_based_filename_prefix(self):
         """
@@ -529,7 +413,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         parser.add_option('-i', '--fineTransformFilenameTemplate', default=None,
                 dest='fineTransformFilenameTemplate', action='store',
                 help='aaa')
-        parser.add_option('-s', '--smoothTransformFilenameTemplate', default=None,
+        parser.add_option('-workflow', '--smoothTransformFilenameTemplate', default=None,
                 dest='smoothTransformFilenameTemplate', action='store',
                 help='')
         parser.add_option('-o', '--outputTransformFilenameTemplate', default=None,
@@ -568,5 +452,5 @@ class coarse_to_fine_transformation_merger(generic_workflow):
 
 if __name__ == '__main__':
     options, args = coarse_to_fine_transformation_merger.parseArgs()
-    s = coarse_to_fine_transformation_merger(options, args)
-    s.launch()
+    workflow = coarse_to_fine_transformation_merger(options, args)
+    workflow.launch()

@@ -244,8 +244,6 @@ class sequential_alignment(output_volume_workflow):
         if self.options.enableOutputVolumes is True:
             self._stack_output_images()
 
-        self._plot_transformations()
-
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
 
@@ -806,19 +804,6 @@ class sequential_alignment(output_volume_workflow):
         return filename_prefix
 
     signature = property(_get_parameter_based_output_prefix)
-
-    def _plot_transformations(self):
-        """
-        Plots the calculated composed transformations.
-        """
-
-        # Define and execute the transformation plotting script.
-        command = pos_wrappers.rigid_transformations_plotter_wapper(
-            signature=self.signature,
-            report_filename=self.f['transform_report'](fname=self.signature),
-            plot_filename=self.f['transform_plot'](fname=self.signature),
-            transformation_mask=self.f['comp_transf_mask']())
-        self.execute(command)
 
     @classmethod
     def _getCommandLineParser(cls):

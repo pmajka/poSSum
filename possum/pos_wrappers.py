@@ -43,8 +43,8 @@ class generic_wrapper(object):
 
     def __str__(self):
         replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
-        #return " ".join(self._template.format(**replacement).strip().split())
-        return self._template.format(**replacement).strip()
+        return " ".join(self._template.format(**replacement).strip().split())
+        #return self._template.format(**replacement).strip()
 
     def __call__(self, *args, **kwargs):
         print "Executing: %s" % str(self)
@@ -1062,68 +1062,6 @@ class command_warp_grayscale_image(generic_wrapper):
         'output_image': pos_parameters.filename_parameter('output_image', None),
     }
 
-
-class gnuplot_execution_wrapper(generic_wrapper):
-    """
-    Executes the gnuplot ploting file. By default the executed file is removed
-    immediately after execution. This behavior can be switched off with a
-    proper switch.
-
-    >>> gnuplot_execution_wrapper
-    <class '__main__.gnuplot_execution_wrapper'>
-
-    >>> gnuplot_execution_wrapper() #doctest: +ELLIPSIS
-    <__main__.gnuplot_execution_wrapper object at 0x...>
-
-    >>> print gnuplot_execution_wrapper() #doctest: +NORMALIZE_WHITESPACE
-    gnuplot ; rm -fv ;
-
-    >>> print gnuplot_execution_wrapper(plot_filename='plot.plt')
-    gnuplot plot.plt; rm -fv plot.plt;
-
-    >>> p = gnuplot_execution_wrapper(plot_filename='plot.plt')
-    >>> p.updateParameters({'plot_filename' : None}) #doctest: +ELLIPSIS
-    <__main__.gnuplot_execution_wrapper object at 0x...>
-    >>> print p
-    gnuplot ; rm -fv ;
-
-    >>> p = gnuplot_execution_wrapper(\
-        plot_filename='plot.plt', remove_plot_file=False) #doctest: +NORMALIZE_WHITESPACE
-    >>> print p
-    gnuplot plot.plt; false && rm -fv plot.plt;
-
-    >>> print p.updateParameters({'remove_plot_file' : True})
-    gnuplot plot.plt; false && rm -fv plot.plt;
-
-    >>> print p.updateParameters({'remove_plot_file' : None})
-    gnuplot plot.plt; rm -fv plot.plt;
-    """
-
-    _template = """gnuplot {plot_filename}; {remove_plot_file} rm -fv {plot_filename};"""
-
-    # A really short comment on the 'remove_plot_file' parameters. This is a
-    # clever walkaround wchich, when set to `True` will spoil the `rm` command
-    # and force it to fail.
-    _parameters = {
-        'plot_filename' : pos_parameters.filename_parameter('plot_filename', None),
-        'remove_plot_file' : pos_parameters.boolean_parameter('remove_plot_file', False, " false && ")
-    }
-
-class rigid_transformations_plotter_wapper(generic_wrapper):
-    """
-    #TODO: Provide doctests fore this wrapper.
-    """
-
-    _template = """pos_analyze_transformation.py \
-        {signature} {report_filename} {plot_filename} \
-        {transformation_mask}"""
-
-    _parameters = {
-        'signature': pos_parameters.string_parameter('signature', None, '--{_name} {_value}'),
-        'report_filename': pos_parameters.filename_parameter('reportFilename', None, '--{_name} {_value}'),
-        'plot_filename': pos_parameters.filename_parameter('plotFilename', None, '--{_name} {_value}'),
-        'transformation_mask': pos_parameters.filename_parameter('transformation_mask', None, '{_value}'),
-    }
 
 class image_similarity_wrapper(generic_wrapper):
     """
