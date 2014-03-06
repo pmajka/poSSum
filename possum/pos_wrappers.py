@@ -481,8 +481,58 @@ class ants_average_affine_transform(generic_wrapper):
 
 class ants_compose_multi_transform(generic_wrapper):
     """
-    TODO: Provide doctest.
+    >>> ants_compose_multi_transform
+    <class '__main__.ants_compose_multi_transform'>
+
+    >>> ants_compose_multi_transform() #doctest: +ELLIPSIS
+    <__main__.ants_compose_multi_transform object at 0x...>
+
+    >>> str(ants_compose_multi_transform._parameters['dimension']) == '2'
+    True
+
+    >>> str(ants_compose_multi_transform._parameters['output_image']) == ''
+    True
+
+    >>> str(ants_compose_multi_transform._parameters['reference_image']) == ''
+    True
+
+    >>> str(ants_compose_multi_transform._parameters['deformable_list']) == ''
+    True
+
+    >>> str(ants_compose_multi_transform._parameters['affine_list']) == ''
+    True
+
+    >>> str(ants_compose_multi_transform()).strip() == 'ComposeMultiTransform 2'
+    True
+
+    >>> str(ants_compose_multi_transform(dimension=3)).strip() == 'ComposeMultiTransform 3'
+    True
+
+    >>> p = ants_compose_multi_transform(dimension=3, output_image="out.nii.gz") #doctest: +NORMALIZE_WHITESPACE
+    >>> print str(p).strip()
+    ComposeMultiTransform 3 out.nii.gz
+
+    >>> p.updateParameters({"affine_list":["affine_1.txt", "affine_2.txt", "affine_3.txt"]}) #doctest: +ELLIPSIS
+    <__main__.ants_compose_multi_transform object at 0x...>
+    >>> print str(p).strip()
+    ComposeMultiTransform 3 out.nii.gz affine_1.txt affine_2.txt affine_3.txt
+
+    >>> p.updateParameters({"reference_image":"reference_image.nii.gz"}) #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+    <__main__.ants_compose_multi_transform object at 0x...>
+    >>> print str(p).strip()
+    ComposeMultiTransform 3 out.nii.gz -R reference_image.nii.gz affine_1.txt affine_2.txt affine_3.txt
+
+    >>> p.updateParameters({"reference_image":None}) #doctest: +ELLIPSIS
+    <__main__.ants_compose_multi_transform object at 0x...>
+    >>> print str(p).strip()
+    ComposeMultiTransform 3 out.nii.gz affine_1.txt affine_2.txt affine_3.txt
+
+    >>> p.updateParameters({"deformable_list":['warp_1.nii.gz','warp_2.nii.gz']}) #doctest: +ELLIPSIS
+    <__main__.ants_compose_multi_transform object at 0x...>
+    >>> print str(p).strip()
+    ComposeMultiTransform 3 out.nii.gz warp_1.nii.gz warp_2.nii.gz affine_1.txt affine_2.txt affine_3.txt
     """
+
     _template = """ComposeMultiTransform {dimension} \
                   {output_image} \
                   {reference_image} \
