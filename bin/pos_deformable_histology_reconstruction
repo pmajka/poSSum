@@ -4,7 +4,6 @@
 """
 TODO: Put module docstring here.
 TODO: Provide logging infromation inherited from the output_volume_workflow
-TODO: Introduce logging.
 """
 
 import os, sys
@@ -32,8 +31,8 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
     in order to generate smooth and acurate volumetric reconstructions from 2d
     slices.
-
     """
+
     _f = { \
          # Initial grayscale slices
         'init_slice' : pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
@@ -73,19 +72,19 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
     _usage = ""
 
-    def __init__(self, options, args):
-        super(self.__class__, self).__init__(options, args)
-
-        # TODO: Create the _validate_options routine
-        # to make the option validation prior to the workflow initialization
+    def _initializeOptions(self):
+        super(self.__class__, self)._initializeOptions()
 
         # Handling situation when no volume is provided
         if not any([self.options.inputVolume, \
                    self.options.outlineVolume, \
                    self.options.referenceVolume,\
                    self.options.maskedVolume]):
-            print >> sys.stderr, "No input volumes provided. Exiting."
+            self._logger.error("No input volumes provided. Exiting.")
             sys.exit(1)
+
+    def _overrideDefaults(self):
+        super(self.__class__, self)._overrideDefaults()
 
         # Process each type of the input volume. Currently there are three types
         # of input volumes supported: The input grayscale volume (the actual
@@ -96,14 +95,20 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         if self.options.inputVolume:
             self.options.inputVolumeWeight = float(self.options.inputVolume[0])
             self.options.inputVolume = self.options.inputVolume[1]
+            self._logger.info("Selected input volume: %d, assigned weight: %f ." % \
+                self.options.inputVolume, self.options.inputVolumeWeight)
 
         if self.options.outlineVolume:
             self.options.outlineVolumeWeight = float(self.options.outlineVolume[0])
             self.options.outlineVolume = self.options.outlineVolume[1]
+            self._logger.info("Selected outline volume: %d, assigned weight: %f ." % \
+                self.options.outlineVolume, self.options.outlineVolumeWeight)
 
         if self.options.referenceVolume:
             self.options.referenceVolumeWeight = float(self.options.referenceVolume[0])
             self.options.referenceVolume = self.options.referenceVolume[1]
+            self._logger.info("Selected reference volume: %d, assigned weight: %f ." % \
+                self.options.referenceVolume, self.options.referenceVolumeWeight)
 
         if self.options.maskedVolume:
             self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])

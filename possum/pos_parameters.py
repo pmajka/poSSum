@@ -1,13 +1,18 @@
 import os
 
 """
-pos parameters
+
 """
 
 class generic_parameter(object):
     """
-    TODO: Describe the meaning and sense of the the generic_parameter class
+    The generic parameter object represents a logic piece of a shell command
+    (e.g. a parameter with its value). Since there are multiple types of
+    parameters like filenames, numbers, boolean switches and more complicated,
+    subclasses of the generic_parameter object are used to express diferent
+    types of parameters.
     """
+
     _str_template = None
 
     def __init__(self, name, value=None, str_template=None):
