@@ -24,3 +24,4 @@ echo "(+) All necessary shell commands are available."
 POS_DIR=`dirname $(readlink -f $0)`
 export PYTHONPATH=$PYTHONPATH:${POS_DIR}/possum/
 export PATH=$PATH:${POS_DIR}/bin/
+echo "(+) The paths are set."
