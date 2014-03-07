@@ -21,9 +21,6 @@ Contents:
    pos_stack_reorient
    pos_itk_core
    pos_slice_preprocess
-   pos_palette
-
-
 
 
 
