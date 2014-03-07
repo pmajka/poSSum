@@ -6,10 +6,6 @@
 Slice preprocessing script
 **************************
 
-:author: Piotr Majka <pmajka@nencki.gov.pl>
-:revision: $Rev$
-:date: $LastChangedDate$
-
 `pos_slice_preprocess`, a section preprocessing script.
 
 This file is part of Multimodal Atlas of Monodelphis Domestica.

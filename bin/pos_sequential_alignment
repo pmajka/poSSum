@@ -114,7 +114,6 @@ class sequential_alignment(output_volume_workflow):
         'resliced_color_mask': pos_parameters.filename('resliced_color_mask', work_dir='05_color_resliced', str_template='%04d.nii.gz'),
         'out_volume_gray': pos_parameters.filename('out_volume_gray', work_dir='06_output_volumes', str_template='{fname}_gray.nii.gz'),
         'out_volume_color': pos_parameters.filename('out_volume_color', work_dir='06_output_volumes', str_template='{fname}_color.nii.gz'),
-        'transform_plot': pos_parameters.filename('transform_plot', work_dir='06_output_volumes', str_template='{fname}.png'),
         'transform_report': pos_parameters.filename('transform_report', work_dir='06_output_volumes', str_template='{fname}.txt'),
         'graph_edges': pos_parameters.filename('graph_edges', work_dir='06_output_volumes', str_template='graph_edges_{sign}.csv'),
         'similarity': pos_parameters.filename('similarity', work_dir='06_output_volumes', str_template='similarity_{sign}.csv'),
@@ -187,8 +186,6 @@ class sequential_alignment(output_volume_workflow):
             self.f['out_volume_gray'].override_dir = \
                 self.options.outputVolumesDirectory
             self.f['out_volume_color'].override_dir = \
-                self.options.outputVolumesDirectory
-            self.f['transform_plot'].override_dir = \
                 self.options.outputVolumesDirectory
             self.f['transform_report'].override_dir = \
                 self.options.outputVolumesDirectory
