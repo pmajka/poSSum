@@ -555,6 +555,7 @@ class pairwiseRegistration(output_volume_workflow):
     def _calculate_single_transform(self, moving_slice_index, fixed_slice_index):
         """
         #TODO: test out different types of slices' indexes' (the VERY strange one)
+        TODO: documentation of the arguments.
         """
         # Define the registration settings: image-to-image metric and its
         # parameter, number of iterations, output naming, type of the affine

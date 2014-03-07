@@ -211,7 +211,6 @@ class generic_workflow(object):
         :type parallel: bool
         """
 
-        #TODO: Implement pbs job dependencies
         # (https://docs.loni.org/wiki/PBS_Job_Chains_and_Dependencies)
         # http://librarian.phys.washington.edu/athena/index.php/Job_Submission_Tutorial#NEW:_PBS_Job_Dependencies_.28advanced.29
         # http://beige.ucs.indiana.edu/I590/node45.html

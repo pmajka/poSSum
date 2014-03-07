@@ -350,9 +350,6 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
     @staticmethod
     def parseArgs():
-        # TODO: make the filename a variable:
-        usage_string = "python pos_slice_volume.py  -i <input_filename> -o <output_filename> --reorderMapping <reorder_mapping_file>"
-
         __output_vol_command_line_args_help = {}
         __output_vol_command_line_args_help['inputImage'] =\
                 """Required: input image filename."""

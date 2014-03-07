@@ -77,7 +77,8 @@ files are explained:
     for individual slices. The file contains only parameters related to the
     rigid transformation: translation vector as well as rotation angle.
 
-    2. Graph edges file, TODO: provide some more information.
+    2. Graph edges file. A file holding a graph in which the vertices are the
+    images and the edges weights are based on the image similarity.
 
     3. Similarity measure between individual images.
 """
