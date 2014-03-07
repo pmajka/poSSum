@@ -5,7 +5,7 @@ set -xe
 # the spacing of the image being coregistered is 1x1mm
 # and all the parameters are tuned to serve 1x1 spacing image!
 
-python ../../deformable_histology_reconstruction.py --specimenId marmoset\
+python deformable_histology_reconstruction \
     --inputVolume 1 /home/pmajka/Downloads/other/marmoset_atlas/images/ooo.nii.gz \
     -d /dev/shm/dt1/ \
     --slicingPlane 1\
@@ -25,5 +25,3 @@ python ../../deformable_histology_reconstruction.py --specimenId marmoset\
     --outputVolumeOrientationCode RAS \
     --stackFinalDeformation \
     --loglevel DEBUG \
-    --glyphConfiguration deformable_reconstruction_marmoset_glyphs.cfg \
-    --skipTransformations 
