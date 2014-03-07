@@ -2,8 +2,17 @@
 # -*- coding: utf-8 -*
 
 """
-TODO: Put module docstring here.
-TODO: Provide logging infromation inherited from the output_volume_workflow
+A framework for performing deformable reconstruction of histological volumes
+based on histological slices. The framework combines:
+    * Advanced Normalization Tools (ANTS, http://www.picsl.upenn.edu/ANTS/)
+    * ImageMagick (http://www.imagemagick.org/script/index.php)
+    * Insight Segmentation and Registration Toolkit (ITK, http://www.itk.org/)
+    * ITKSnap and Convert3d (http://www.itksnap.org/)
+    * Visualization Toolkit (VTK, http://www.vtk.org/)
+    * and a number of homemade software
+
+in order to generate smooth and acurate volumetric reconstructions from 2d
+slices.
 """
 
 import os, sys
@@ -14,23 +23,14 @@ import pos_wrappers
 from pos_wrapper_skel import output_volume_workflow
 import pos_parameters
 from deformable_histology_iterations import deformable_reconstruction_iteration
+
 from pos_deformable_wrappers import preprocess_slice_volume,\
     convert_slice_image, convert_slice_image_grayscale
 
 
 class deformable_reconstruction_workflow(output_volume_workflow):
     """
-    A framework for performing deformable reconstruction of histological volumes
-    based on histological slices. The framework combines:
-       * Advanced Normalization Tools (ANTS, http://www.picsl.upenn.edu/ANTS/)
-       * ImageMagick (http://www.imagemagick.org/script/index.php)
-       * Insight Segmentation and Registration Toolkit (ITK, http://www.itk.org/)
-       * ITKSnap and Convert3d (http://www.itksnap.org/)
-       * Visualization Toolkit (VTK, http://www.vtk.org/)
-       * and a number of homemade software
 
-    in order to generate smooth and acurate volumetric reconstructions from 2d
-    slices.
     """
 
     _f = { \
@@ -95,24 +95,26 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         if self.options.inputVolume:
             self.options.inputVolumeWeight = float(self.options.inputVolume[0])
             self.options.inputVolume = self.options.inputVolume[1]
-            self._logger.info("Selected input volume: %d, assigned weight: %f ." % \
+            self._logger.info("Selected input volume: %s, assigned weight: %f ." % \
                 self.options.inputVolume, self.options.inputVolumeWeight)
 
         if self.options.outlineVolume:
             self.options.outlineVolumeWeight = float(self.options.outlineVolume[0])
             self.options.outlineVolume = self.options.outlineVolume[1]
-            self._logger.info("Selected outline volume: %d, assigned weight: %f ." % \
+            self._logger.info("Selected outline volume: %s, assigned weight: %f ." % \
                 self.options.outlineVolume, self.options.outlineVolumeWeight)
 
         if self.options.referenceVolume:
             self.options.referenceVolumeWeight = float(self.options.referenceVolume[0])
             self.options.referenceVolume = self.options.referenceVolume[1]
-            self._logger.info("Selected reference volume: %d, assigned weight: %f ." % \
+            self._logger.info("Selected reference volume: %s, assigned weight: %f ." % \
                 self.options.referenceVolume, self.options.referenceVolumeWeight)
 
         if self.options.maskedVolume:
             self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])
             self.options.maskedVolume = self.options.maskedVolume[1]
+            self._logger.info("Applying a custom slice maask: %s ." % \
+                self.options.maskedVolume)
 
     def _get_prepare_volume_command_template(self):
         """
@@ -209,10 +211,10 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         for iteration in range(self.options.startFromIteration,\
                                self.options.iterations):
 
-            print >> sys.stderr, "-------------------------------------------------"
-            print >> sys.stderr, "Staring iteration: %workflow of %workflow" \
-                                        % (iteration +1, self.options.iterations)
-            print >> sys.stderr, "-------------------------------------------------"
+            self._logger.info("--------------------------------------")
+            self._logger.info("Staring iteration: %d of %d" % \
+                (iteration +1, self.options.iterations))
+            self._logger.info("--------------------------------------")
 
             self.current_iteration = iteration
 
