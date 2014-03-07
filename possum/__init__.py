@@ -1,6 +1,3 @@
 """
 
-
 """
-
-import pos_parameters

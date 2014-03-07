@@ -47,7 +47,7 @@ END
 # generate_fixed_images | bash -x
 # rm -vf *.png
 
-python ../../pos_pairwise_registration.py \
+pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
@@ -59,7 +59,7 @@ python ../../pos_pairwise_registration.py \
     --multichannelVolumeFilename test_1_color.nii.gz\
     -d /dev/shm/x/
 
-python ../../pos_pairwise_registration.py \
+pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
@@ -74,7 +74,7 @@ python ../../pos_pairwise_registration.py \
     --multichannelVolumeFilename test_2_color.nii.gz\
     -d /dev/shm/x/
 
-python ../../pos_pairwise_registration.py \
+pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
@@ -89,7 +89,7 @@ python ../../pos_pairwise_registration.py \
     --multichannelVolumeFilename test_3_color.nii.gz\
     -d /dev/shm/x/
 
-python ../../pos_pairwise_registration.py \
+pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
@@ -104,7 +104,7 @@ python ../../pos_pairwise_registration.py \
     --multichannelVolumeFilename test_4_color.nii.gz\
     -d /dev/shm/x/
 
-python ../../pos_pairwise_registration.py \
+pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
@@ -120,7 +120,7 @@ python ../../pos_pairwise_registration.py \
     --multichannelVolumeFilename test_5_color.nii.gz\
     -d /dev/shm/x/
 
-python ../../pos_pairwise_registration.py \
+pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
