@@ -1,6 +1,33 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
 
+
+"""
+
+The coarse-to-fine script splits a series of rigid transformation into low- and
+high- frequency components. The overall idea of how this script works is
+described toroughly in the paper by XXXX et. al. 2006. Although the actual
+implementation is a bit different.
+
+
+Biref description
+=================
+
+Created two series of rigid transformations out of a single series.
+
+
+Implementation details
+======================
+
+Split transformation into parameters. Smooth parameters. Create a new series of transformations.
+
+
+Usage examples
+==============
+
+TODO
+"""
+
 import os, sys
 import copy
 from optparse import OptionParser, OptionGroup
