@@ -190,14 +190,14 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         permute.SetInput(input_image)
         permute.SetOrder(self.options.permutation)
         self._logger.debug("Setting the axes permutation to: %s.",
-                           str(self.options.permutation))
+                str(self.options.permutation))
 
         # Flipping the permuted volume
         flip = itk.FlipImageFilter[permute.GetOutput()].New()
         flip.SetInput(permute.GetOutput())
         flip.SetFlipAxes(self.options.flipAxes)
         self._logger.debug("Applying the flip axis settings: %s.",
-                           str(self.options.flipAxes))
+                str(self.options.flipAxes))
 
         # Do we flip the axes around the origin?:
         if self.options.flipAroundOrigin:
@@ -205,7 +205,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         else:
             flip.FlipAboutOriginOff()
         self._logger.debug("Flip around origin? %s",
-                           str(self.options.flipAroundOrigin))
+                str(self.options.flipAroundOrigin))
 
         # Changing the image information, if required
         change_information = \
@@ -216,13 +216,13 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             change_information.ChangeOriginOn()
             change_information.SetOutputOrigin(self.options.setOrigin)
             self._logger.debug("Changing the origin to: %s.",
-                               str(self.options.setOrigin))
+                str(self.options.setOrigin))
 
         if self.options.setSpacing:
             change_information.ChangeSpacingOn()
             change_information.SetOutputSpacing(self.options.setSpacing)
             self._logger.debug("Changing the spacing to: %s.",
-                               str(self.options.setOrigin))
+                str(self.options.setOrigin))
 
         if self.options.orientationCode:
             ras_code = self.options.orientationCode.upper()
