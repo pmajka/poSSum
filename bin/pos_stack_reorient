@@ -6,9 +6,6 @@
 A script for stacking slices and reorienting volumes
 ****************************************************
 
-This file is part of Multimodal Atlas of Monodelphis Domestica.
-(c) Piotr Majka 2011-2013. Restricted, damnit!
-
 Syntax
 ======
 
@@ -395,5 +392,5 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
 
 if __name__ == '__main__':
     options, args = reorient_image_wrokflow.parseArgs()
-    d = reorient_image_wrokflow(options, args)
-    d.launch()
+    workflow = reorient_image_wrokflow(options, args)
+    workflow.launch()

@@ -1,5 +1,6 @@
 import copy
 import subprocess as sub
+
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
                 ants_transformation_parameter, vector_parameter, list_parameter, \
                 switch_parameter, ants_regularization_parameter, boolean_parameter
@@ -51,7 +52,7 @@ class generic_wrapper(object):
 
         # Tested against execution of multiple commands
         # http://stackoverflow.com/questions/359347/execute-commands-sequentially-in-python
-        stdout, stderr =  sub.Popen(str(self), stdout=sub.PIPE,
+        stdout, stderr = sub.Popen(str(self), stdout=sub.PIPE,
                             stderr=sub.PIPE, shell=True,
                             close_fds=True).communicate()
         print stdout.strip()
@@ -68,6 +69,7 @@ class generic_wrapper(object):
         for (name, value) in parameters.items():
             self.p[name].value = value
         return self
+
 
 class touch_wrapper(generic_wrapper):
     _template = """touch {files}"""
@@ -107,7 +109,7 @@ class compress_wrapper(generic_wrapper):
 
     _parameters = {
         'archive_filename': filename_parameter('archive_filename', None),
-        'pathname' : filename_parameter('pathname', None),
+        'pathname': filename_parameter('pathname', None),
     }
 
 
@@ -115,16 +117,22 @@ class ants_jacobian(generic_wrapper):
     _template = """ANTSJacobian {dimension} {input_image} {output_naming}"""
 
     _parameters = {
-        'dimension'     : value_parameter('dimension', 2),
-        'input_image'   : filename_parameter('input_image', None),
-        'output_naming' : filename_parameter('output_naming', None),
-        }
+        'dimension': value_parameter('dimension', 2),
+        'input_image': filename_parameter('input_image', None),
+        'output_naming': filename_parameter('output_naming', None),
+    }
 
 
 class ants_registration(generic_wrapper):
     """
+    Wrapper for the Advanced Normalization Tools. Tested with the following
+    ANTS versions:
+
+        1. ANTs-1.9.v4-Linux
+        2. ANTs-1.9.x-Linux
     """
-    _template = """/opt/ANTs-1.9.x-Linux/bin//ANTS {dimension} \
+
+    _template = """ANTS {dimension} \
        {verbose} \
        {transformation} {regularization} {outputNaming} \
        {imageMetrics} \
@@ -153,7 +161,7 @@ class ants_registration(generic_wrapper):
         'imageMetrics': list_parameter('image_to_image_metrics', [], '{_list}'),
         'maskImage': filename_parameter('mask-image', None, str_template='--{_name} {_value}'),
         'miOption': vector_parameter('MI-option', None, str_template='--{_name} {_list}'),
-        'affineMetricType' : value_parameter('affine-metric-type', None, str_template='--{_name} {_value}')
+        'affineMetricType': value_parameter('affine-metric-type', None, str_template='--{_name} {_value}')
     }
 
     _io_pass = {
@@ -170,6 +178,7 @@ class ants_registration(generic_wrapper):
         execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
 
         return execution
+
 
 class ants_reslice(generic_wrapper):
     """
@@ -303,6 +312,7 @@ class ants_intensity_meric(generic_wrapper):
 
     value = property(_get_value, _set_value)
 
+
 class ants_point_set_estimation_metric(generic_wrapper):
     """
     Wrapper for ANTS Point Set Estimation metric template.  The role of this
@@ -399,10 +409,10 @@ class ants_point_set_estimation_metric(generic_wrapper):
         'fixed_points': filename_parameter('fixed_points', None),
         'moving_points': filename_parameter('moving_points', None),
         'weight': value_parameter('weight', 1),
-        'point_set_percentage' : value_parameter('point_set_percentage', 1.0),
-        'point_set_sigma' : value_parameter('point_set_sigma', None,  str_template=',{_value}'),
-        'boundary_points_only' : boolean_parameter('boundary_points_only', False, str_template=',{_value}'),
-        }
+        'point_set_percentage': value_parameter('point_set_percentage', 1.0),
+        'point_set_sigma': value_parameter('point_set_sigma', None,  str_template=',{_value}'),
+        'boundary_points_only': boolean_parameter('boundary_points_only', False, str_template=',{_value}'),
+    }
 
     def _get_value(self):
         return str(self)
@@ -882,7 +892,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
                   {invert_grayscale} {invert_multichannel}"""
 
     _parameters = {
-        'input_image' : filename_parameter('input_image', None),
+        'input_image': filename_parameter('input_image', None),
         'grayscale_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
         'color_output_image': filename_parameter('-r', None, str_template="{_name} {_value}"),
         'registration_roi': list_parameter('registrationROI', None, str_template="--{_name} {_list}"),
@@ -1005,9 +1015,9 @@ class command_warp_rgb_slice(generic_wrapper):
         'moving_image': pos_parameters.filename_parameter('moving_image', None),
         'transformation': pos_parameters.filename_parameter('transformation', None),
         'output_image': pos_parameters.filename_parameter('output_image', None),
-        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
-        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
-        'inversion_flag' : pos_parameters.boolean_parameter('inversion_flag', None, str_template=' -scale -1 -shift 255 -type uchar'),
+        'region_origin': pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size': pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'inversion_flag': pos_parameters.boolean_parameter('inversion_flag', None, str_template=' -scale -1 -shift 255 -type uchar'),
     }
 
 
@@ -1103,8 +1113,8 @@ class command_warp_grayscale_image(generic_wrapper):
         'reference_image': pos_parameters.filename_parameter('reference_image', None),
         'moving_image': pos_parameters.filename_parameter('moving_image', None),
         'transformation': pos_parameters.filename_parameter('transformation', None),
-        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
-        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'region_origin': pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size': pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
         'output_image': pos_parameters.filename_parameter('output_image', None),
     }
 
@@ -1200,6 +1210,7 @@ class image_similarity_wrapper(generic_wrapper):
         'moving_image': filename_parameter('moving_image', None),
         'metric': string_parameter('metric', 'ncor', str_template='-{_value}'),
         'affine_transformation': filename_parameter('affine_transformation', None)}
+
 
 class split_multichannel_image(generic_wrapper):
     """
@@ -1347,10 +1358,10 @@ class merge_components(generic_wrapper):
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 2),
         'input_images': pos_parameters.list_parameter('input_images', [], str_template='{_list}'),
-        'region_origin' : pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
-        'region_size' : pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'region_origin': pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
+        'region_size': pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
         'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
-        'components_no' : pos_parameters.value_parameter('components_no', 3),
+        'components_no': pos_parameters.value_parameter('components_no', 3),
         'output_image': pos_parameters.filename_parameter('output_image', None),
         'other_files_remove': pos_parameters.list_parameter('other_files_remove', [], str_template='{_list}')
         }
