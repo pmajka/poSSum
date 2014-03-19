@@ -9,6 +9,15 @@ from pos_wrapper_skel import generic_workflow
 import pos_parameters
 from pos_deformable_wrappers import blank_slice_deformation_wrapper
 
+"""
+* Assigning weights for the images by reading them from files or
+    applying weighting functions.
+* Preprocessing images: calculating images that will be used to
+    perform registration based on the resliced images from previous
+    iteration.
+* Launching actual registration process and calculating deformation
+    fields.
+"""
 
 class deformable_reconstruction_iteration(generic_workflow):
     _f = {
@@ -336,17 +345,6 @@ class deformable_reconstruction_iteration(generic_workflow):
         self.execute(commands)
 
     def launch(self):
-        """
-        Launching a deformable registration iteration means:
-
-            * Assigning weights for the images by reading them from files or
-              applying weighting functions.
-            * Preprocessing images: calculating images that will be used to
-              perform registration based on the resliced images from previous
-              iteration.
-            * Launching actual registration process and calculating deformation
-              fields.
-        """
 
         self._assign_weights()
         self._preprocess_images()
