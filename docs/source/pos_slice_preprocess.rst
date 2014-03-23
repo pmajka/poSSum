@@ -3,6 +3,7 @@ Preprocess slices for registration
 
 .. highlight:: bash
 
+
 Usage summary
 -------------
 
@@ -19,12 +20,17 @@ All supported features in one invocation (an example) ::
                         --invertSourceImage
                         --invertMultichannelImage
 
-Details
--------
+
+Desctiption
+-----------
 
 This script performs several operations on the section's image in order to
 prepare it to the coregistration process. It provides a flexible set of
 processing options to shape the slice image.
+
+
+Input image requirements
+________________________
 
 The script requires only one input parameter - the slice image to process
 (provided via `--inputFilename` command line option). It has to be in one of
@@ -79,6 +85,7 @@ square from the whole image and outputs only color image::
                         --registrationColorChannel blue
                         --registrationResize 0.5
                         --registrationROI 200 200 100 100
+
 
 Smooth and invert images
 ------------------------
