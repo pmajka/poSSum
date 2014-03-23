@@ -13,15 +13,11 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   pos_common
-   pos_parameters
-   pos_wrapper_skel
-   pos_wrappers
    pos_slice_volume
    pos_stack_reorient
-   pos_itk_core
    pos_slice_preprocess
 
+   possum
 
 
 Indices and tables
