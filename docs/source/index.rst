@@ -8,16 +8,32 @@ Welcome to Nonlinear registration framework's documentation!
 
 Nonlinear registration framework by Piotr Majka
 
-Contents:
+
+Basic workflow building blocks
+
+
+More more complex biulding blocks
+
+   possum
+
+
+Examples of complete workflows
+
+   possum
+   
+
+Api reference
+
 
 .. toctree::
    :maxdepth: 2
-   
+
    pos_slice_volume
    pos_stack_reorient
    pos_slice_preprocess
 
    possum
+
 
 
 Indices and tables
