@@ -2,11 +2,11 @@
 .. vim:syntax=rest
 
 
-Nonlinear volumetric reconstruction framework
-========================================
+poSSum volumetric reconstruction framework
+===========================================================
 
 
-Overwiew
+Overview
 ========
 
 The poSSum framework is a set of scripts and workflows which purpose it to
@@ -18,13 +18,13 @@ Installation
 ============
 
 Below one can find the description of the dependencies.
-For the exact installation steps, check the <<section>> section.
+For the exact installation steps, check the `installation procedure` section below.
 
 Requirements and dependencies
 -----------------------------
 
 In order to make the poSSum framework working, several dependencies has to be
-satisfied. Below one can find the list of dependencies with a brief instuction
+satisfied. Below one can find the list of dependencies with a brief instruction
 on installing the individual dependencies.
 
 
@@ -35,22 +35,22 @@ Installation was tested using the Ubuntu 12.04 server, amd64 version::
 
     http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso
 
-The system was instatlled with the default settings.
+The system was installed with the default settings.
 Only the system locale were altered.
 
 
 InsightToolkit 4.3.1
 --------------------
 
-The poSSum framework required the InsightToolkit (ITK, http://www.itk.org/)
-image processing library. PosSSum was created and tested with ITK 4.3.1
+The poSSum framework requires the InsightToolkit (ITK, http://www.itk.org/)
+image processing library. PosSSum was created and tested using ITK 4.3.1
 (http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.1.tar.gz/download)
-thus this ITK version is reccomended. Due to rapid developement of the ITK
-framework it is not guaranteed (although qute likely) that the poSSum will work
-newer and some of the older ITK versions.
+thus this ITK version is recommended. Due to rapid development of the ITK
+framework it is not guaranteed (although quite likely) that the poSSum will work
+with newer as well as with some of the older ITK versions.
 
 In order to install the InsightToolkit one has to perform the steps described on
-the ITK website: 
+the ITK website (http://www.itk.org/Wiki/ITK/Complete_Setup): 
 
   1. Install the packages required to install ITK. Check ITK website for
      details.
@@ -66,8 +66,7 @@ the ITK website:
 
   4. Make the build. Note that the build process usually takes a long
      time (a couple of hours) to complete. It is a good idea to leave
-     the compilation as a overnight task and be patient and not to
-     irritate if something goes wrong (as it surely will).
+     the compilation as a overnight task and be patient.
 
 
 Advanced Normalization Tools
@@ -75,16 +74,17 @@ Advanced Normalization Tools
 
 The Advanced Normalization Tools (or shortly ANTS) is an image normalization and
 registration framework which provides reliable and algorithms for image
-registration. ANTS binaries may be downloaded from the ANTS website: ..
-- Advanced Normalizatin Tools (ANTS, http://stnava.github.io/ANTs/),
+registration. ANTS binaries may be downloaded from the ANTS website: http://stnava.github.io/ANTs/,
 The posSSum framework was tested with ANTS v3 as well as ANTS v4.
 
 
 Convert 3D and ItkSnap tool
 ---------------------------
-Convert 3D (cruical) and ItkSnap (not criucal but extremely usefull).
+
+Convert 3D (crucial) and ItkSnap (not crucial but extremely useful).
 Visit the http://www.itksnap.org/ in order to get both, the Convert 3D
 as well as the ItkSnap.
+
 
 
 Exact installation procedure
@@ -101,25 +101,25 @@ Download the system installation disk image::
 And install the system with the default settings.
 
 
-Install the necessacy packages
+Install the necessary packages
 ------------------------------------
 
-  1. NumpPy, SciPy and Sphinx packages::
+1. NumpPy, SciPy and Sphinx packages::
 
-     sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools
+    sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools
 
-     And the required python modules::
+   And the required python modules::
 
-     sudo easy_install -U config
-     sudo easy_install -U networkx
+    sudo easy_install -U config
+    sudo easy_install -U networkx
 
-  2. Install the ImageMagick package::
+2. Install the ImageMagick package::
      
-     sudo apt-get install imagemagick
+    sudo apt-get install imagemagick
 
-  3. Install packages required for the Itk installation::
+3. Install packages required for the Itk installation::
 
-     sudo apt-get install build-essential ccmake cmake-curses-gui
+    sudo apt-get install build-essential ccmake cmake-curses-gui
 
 
 Install InsightToolkit
@@ -133,7 +133,48 @@ As described below::
      mkdir -p InsightToolkit-4.3.1-build && cd InsightToolkit-4.3.1-build
      cmake ../InsightToolkit-4.3.1
 
-Setup the cmake so the python wrapping will be installed and make the build::
+Setup the cmake so the python wrappings will be installed::
+
+    BUILD_EXAMPLES                   OFF
+    BUILD_SHARED_LIBS                ON
+    BUILD_TESTING                    OFF
+    CMAKE_BUILD_TYPE                 Release
+    INSTALL_WRAP_ITK_COMPATIBILITY   ON
+    ITKV3_COMPATIBILITY              ON
+    ITK_BUILD_ALL_MODULES            ON
+    ITK_USE_SYSTEM_SWIG              OFF
+    ITK_WRAP_DIMS                    2;3
+    ITK_WRAP_DOC                     OFF
+    ITK_WRAP_EXPLICIT                OFF
+    ITK_WRAP_GCCXML                  ON
+    ITK_WRAP_JAVA                    OFF
+    ITK_WRAP_PERL                    OFF
+    ITK_WRAP_PYTHON                  ON
+    ITK_WRAP_RUBY                    OFF
+    ITK_WRAP_SWIGINTERFACE           ON
+    ITK_WRAP_TCL                     OFF
+    ITK_WRAP_complex_double          ON
+    ITK_WRAP_complex_float           ON
+    ITK_WRAP_covariant_vector_doub   OFF
+    ITK_WRAP_covariant_vector_floa   ON
+    ITK_WRAP_double                  ON
+    ITK_WRAP_float                   ON
+    ITK_WRAP_rgb_unsigned_char       ON
+    ITK_WRAP_rgb_unsigned_short      OFF
+    ITK_WRAP_rgba_unsigned_char      ON
+    ITK_WRAP_rgba_unsigned_short     OFF
+    ITK_WRAP_signed_char             OFF
+    ITK_WRAP_signed_long             OFF
+    ITK_WRAP_signed_short            ON
+    ITK_WRAP_unsigned_char           ON
+    ITK_WRAP_unsigned_long           OFF
+    ITK_WRAP_unsigned_short          OFF
+    ITK_WRAP_vector_double           ON
+    ITK_WRAP_vector_float            ON
+    SWIG_DIR                         /home/test/InsightToolkit-4.3.1-build/Wrapping/Generators/SwigInterface/swig/share/swig/2
+    SWIG_EXECUTABLE                  /home/test/InsightToolkit-4.3.1-build/Wrapping/Generators/SwigInterface/swig/bin/swig
+
+And then make the build::
 
      make
 
