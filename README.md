@@ -1,5 +1,3 @@
-.. -*- rest -*-
-.. vim:syntax=rest
 
 
 poSSum volumetric reconstruction framework
@@ -104,20 +102,20 @@ And install the system with the default settings.
 Install the necessary packages
 ------------------------------------
 
-1. NumpPy, SciPy and Sphinx packages::
+NumpPy, SciPy and Sphinx packages::
 
     sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools
 
-   And the required python modules::
+And the required python modules::
 
     sudo easy_install -U config
     sudo easy_install -U networkx
 
-2. Install the ImageMagick package::
-     
+Install the ImageMagick package::
+
     sudo apt-get install imagemagick
 
-3. Install packages required for the Itk installation::
+Install packages required for the Itk installation::
 
     sudo apt-get install build-essential ccmake cmake-curses-gui
 
