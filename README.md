@@ -104,7 +104,7 @@ Install the necessary packages
 
 NumpPy, SciPy and Sphinx packages::
 
-    sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools
+    sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools parallel
 
 And the required python modules::
 

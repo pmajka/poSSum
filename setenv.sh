@@ -5,7 +5,7 @@ export LC_ALL=C
 #--------------------------------------------------------------------
 # Check if the necessary shell commands are available
 
-EXECUTABLES='mkdir rm cp tar ANTSJacobian ANTS WarpImageMultiTransform AverageAffineTransform AverageImages c3d c2d'
+EXECUTABLES='mkdir rm cp tar ANTSJacobian ANTS WarpImageMultiTransform AverageAffineTransform AverageImages c3d c2d parallel'
 
 for executable in ${EXECUTABLES}
 do
