@@ -1,7 +1,7 @@
 The purpose of this class is to change order of slices of given volume
 along specified axis according to a provided mapping.
 
-Usage examples
+Reorder slices
 ==============
 
 .. highlight:: bash
@@ -12,7 +12,7 @@ Usage summary
 
 All supported features in one invocation (an example) ::
 
-    $pos_reorder_volume.py  -i input.nii.gz \
+    pos_reorder_volume.py  -i input.nii.gz \
                             -o output.nii.gz\
     [filename]              --mapping mapping_file.txt\
     [allowed values: 1,2,3] --sliceAxisIndex 1
@@ -23,35 +23,35 @@ Simple usage example
 
 A minimal valid invocation would look like this::
 
-    $pos_reorder_volume.py -i input.nii.gz \
-                            -o output.nii.gz
+    pos_reorder_volume.py -i input.nii.gz \
+                          -o output.nii.gz
 
-The invocation will load the `input.nii.gz` image, shuffle the slices along
-the '0' axis of the image (the default one) and save a new image under the
-name `output.nii.gz`
+The invocation will load the ``input.nii.gz`` image, shuffle the slices along
+the ``0`` axis of the image (the default one) and save a new image under the
+name ``output.nii.gz``.
 
 
 Input image type
 ----------------
 
 The script supports both grayscale and multichannel volumes. In case of
-grayscale images, any type supported by python `itk` wrappers should be
+grayscale images, any type supported by python itk wrappers should be
 processed successfully. Regarding the multichannel volumes, the only
-supported type is a `uchar` rgb image. The output volume type is the same
+supported type is a ``uchar`` rgb image. The output volume type is the same
 as the input volume type.
 
 
 Mapping file
 ------------
 
-The reordering may be driven by a mapping provided using `--mapping`
+The reordering may be driven by a mapping provided using ``--mapping``
 option::
 
     $pos_reorder_volume.py  -i input.nii.gz \
                             -o output.nii.gz\
                             --mapping mapping_file.txt
 
-Will cause the script to use `mapping_file.txt` to reorder the slices. See
+Will cause the script to use ``mapping_file.txt`` to reorder the slices. See
 below for the requirements regarding the format of the mapping file.
 
 

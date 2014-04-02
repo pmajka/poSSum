@@ -1,4 +1,4 @@
-possum Package
+poSSum Package
 ==============
 
 :mod:`possum` Package

@@ -3,36 +3,33 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Nonlinear registration framework's documentation!
-===========================================================================
+Welcome to the PoSSum Nonlinear Registration Framework
+========================================================
 
 Nonlinear registration framework by Piotr Majka
 
 
-Basic workflow building blocks
+Basic workflow building blocks:
 
+* :doc:`pos_slice_volume`
+* :doc:`pos_stack_reorient`
+* :doc:`pos_slice_preprocess`
+* :doc:`pos_reorder_volume`
 
-More more complex biulding blocks
+More more complex building blocks:
 
-   possum
+* pos_sequential_alignment
+* pos_pairwise_registration
+* pos_deformable_histology_reconstruction
+* pos_coarse_fine
 
+Examples of complete workflows:
 
-Examples of complete workflows
+* possum
 
-   possum
-   
+Api reference:
 
-Api reference
-
-
-.. toctree::
-   :maxdepth: 2
-
-   pos_slice_volume
-   pos_stack_reorient
-   pos_slice_preprocess
-
-   possum
+* :doc:`possum`
 
 
 
