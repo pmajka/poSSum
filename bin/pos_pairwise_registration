@@ -139,6 +139,14 @@ import pos_wrappers, pos_parameters
 from pos_wrapper_skel import output_volume_workflow
 
 
+IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0
+#Transform 0
+Transform: MatrixOffsetTransformBase_double_2_2
+Parameters: 0 0 0 0 0 0
+FixedParameters: 0 0
+"""
+
+
 class image_voxel_count_wrapper(pos_wrappers.generic_wrapper):
     """
     """
@@ -393,6 +401,41 @@ class pairwiseRegistration(output_volume_workflow):
                     self._slice_assignment[moving_index] = last_nonzero
                     self._logger.debug("Setting ref(%d) = %d." \
                         % (moving_index, last_nonzero + np_offset))
+
+        # Ok, now we have to perform the same operation for the moving slices.
+        # The idea is to locate the blank moving images. For these slices there
+        # is no need to calculate any transformation (singe the are blank
+        # anyway). Thus, a identity transformation is created for the blank
+        # moving slices.
+        self._logger.debug("Searching for blank moving images.")
+
+        # Iterate over all reference slices and detect the number of voxels per
+        # slice.
+        mov_slice_voxel_counts = []
+
+        # Iterate over all moving slices and detect the number of voxels per
+        # slice.
+        for moving_index in self._slice_assignment.keys():
+            command = image_voxel_count_wrapper(
+                image = self.f['moving_gray'](idx=moving_index),
+                background = self.options.resliceBackgorund,
+                voxel_sum = True)
+            vox_count = float(command()['stdout'].strip())
+            mov_slice_voxel_counts.append(vox_count)
+
+            # if the moving slice is a blank slice, apply an identity
+            # transformation.
+            if vox_count == 0:
+                self._generate_identity_transformation(\
+                 self.f['transf_file'](mIdx=moving_index))
+                self._logger.info("Blank moving slice found. %d" % moving_index)
+                self._logger.info("An identity transform will be applied.")
+
+    def _generate_identity_transformation(self, filename):
+        """
+        Generated an two dimensional identity transformation.
+        """
+        open(filename,'w').write(IDENTITY_TRANSFORM_STRING)
 
     def _generate_slice_index(self):
         """
