@@ -117,7 +117,7 @@ Install the ImageMagick package::
 
 Install packages required for the Itk installation::
 
-    sudo apt-get install build-essential ccmake cmake-curses-gui
+    sudo apt-get install build-essential cmake-curses-gui
 
 
 Install InsightToolkit

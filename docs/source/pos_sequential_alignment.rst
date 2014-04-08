@@ -1,18 +1,14 @@
+This workflow executes the sequential alignment procedure.
+#TODO: Put something more about the sequrntial alignment procedure.
+
+
 Sequential alignment workflow
 =======================================
 
-`pos_sequential_alignment` -- a sequential alignment script.
+.. highlight:: bash
 
-This file is part of imaging data integration framework,
-a private property of Piotr Majka
-(c) Piotr Majka 2011-2013. Restricted, damnit!
-
-Syntax
-======
-
-
-Summary
--------
+Usage summary
+-------------
 
 A minimum working example of the sequential alignment script ::
 
@@ -21,42 +17,40 @@ A minimum working example of the sequential alignment script ::
     [directory]      --inputImageDir <directory_name>
 
 
-Assumptions according the input images
+Assumptions of the input images
 --------------------------------------
 
-All the input images are expected to be in one of the formats described below:
+All the input images are expected to be in one of the formats described below :
 
-1. Three channel, 8-bit per channel RGB image in NIFTII format.
+1. Three channel, 8-bit per channel RGB image in NIfTI format.
 2. Single channel 8-bit (0-255) image, for instance a 8-bit grayscale image
-   in NIFTII format.
+   in NIfTI format.
 
 No other input image type is supported, trying to apply any other image
 specification will surely cause errors. Obviously, the spacing as well as the
-image origin and directions does matter. All transformations are generated
-based on the input images reference system thus, the best way is to supply
-Nifti files as the input images.
+image origin and directions does matter. All transformations are generated based
+on the input images reference system thus, the best way is to supply NIfTI files
+as the input images.
 
 
 Input images naming scheme
 --------------------------
 
- - Images in order
- - Continous naming
- - Reference slice.
+TODO: Describe the parameters for the workflow.
+Images in order Continous naming, Reference slice ::
 
-python pos_sequential_alignment.py \
-        --inputImageDir /home/pmajka/Downloads/cb_test/ \
-        --sliceRange 10 120 60 -d /dev/shm/x/ \
-        --loglevel DEBUG \
-        --registrationColor blue \
-        --medianFilterRadius 4 4 \
-        --resliceBackgorund 255 \
-        --disable-source-slices-generation \
-        --useRigidAffine \
-        --enableTransformations \
-        --enableReslice \
-        --outputVolumeSpacing 0.02 0.02 0.06 \
-        --outputVolumesDirectory ~/Downloads/cb_test
+    python pos_sequential_alignment.py \
+            --inputImageDir dir_with_the_niftii_images/ \
+            --sliceRange 10 120 60
+            --loglevel DEBUG \
+            --registrationColor blue \
+            --medianFilterRadius 4 4 \
+            --resliceBackgorund 255 \
+            --disable-source-slices-generation \
+            --useRigidAffine \
+            --enableTransformations \
+            --enableReslice \
+            --outputVolumeSpacing 0.02 0.02 0.06
 
 
 Description of the output files

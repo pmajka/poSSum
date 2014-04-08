@@ -1,6 +1,7 @@
 The purpose of this class is to change order of slices of given volume
 along specified axis according to a provided mapping.
 
+
 Reorder slices
 ==============
 
@@ -47,9 +48,9 @@ Mapping file
 The reordering may be driven by a mapping provided using ``--mapping``
 option::
 
-    $pos_reorder_volume.py  -i input.nii.gz \
-                            -o output.nii.gz\
-                            --mapping mapping_file.txt
+    pos_reorder_volume.py  -i input.nii.gz \
+                           -o output.nii.gz\
+                           --mapping mapping_file.txt
 
 Will cause the script to use ``mapping_file.txt`` to reorder the slices. See
 below for the requirements regarding the format of the mapping file.
