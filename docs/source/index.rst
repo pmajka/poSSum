@@ -18,8 +18,8 @@ Basic workflow building blocks:
 
 More more complex building blocks:
 
-* pos_sequential_alignment
-* pos_pairwise_registration
+* :doc:`pos_sequential_alignment`
+* :doc:`pos_pairwise_registration`
 * pos_deformable_histology_reconstruction
 * pos_coarse_fine
 
