@@ -4,6 +4,10 @@ Align sections pairwisely
 
 .. highlight:: bash
 
+.. contents::
+   :local:
+   :depth: 2
+
 
 Usage summary
 -------------
@@ -32,9 +36,8 @@ ranges are copied from the general slice range. When provided, the custom
 slices ranges override the default slice range value.
 
 
-
 How to process additional image stacks
---------------------------------------
++++++++++++++++++++++++++++++++++++++++++++++
 
 .. note ::
     First of all: additional stack settings are optional while the primary image
@@ -51,7 +54,7 @@ may be applied to other image stacks (reffered as the `additional image stacks`)
 
 
 Providing additional image stacks
----------------------------------
++++++++++++++++++++++++++++++++++++++++++++++
 
 Information on additional image stacks is provided using several command line
 arguments, namely: ``--additionalMovingImagesDirectory``,
@@ -65,7 +68,7 @@ The parameters have the following meaning:
     1. ``--additionalInvertMultichannel``: directory containing the input images
     comprising the image stack. The input images have to provided as three
     channel, 8bit per channel RGB images. The names should comply the
-    "%04d.nii.gz" format and the indexes of the slices have to be the same as
+    ``%04d.nii.gz`` format and the indexes of the slices have to be the same as
     the indexed of the primary moving stack.
 
     2. ``--additionalInvertMultichannel``: Determines of the input images are
