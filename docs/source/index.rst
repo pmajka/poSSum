@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the PoSSum Nonlinear Registration Framework
+Welcome to the poSSum Nonlinear Registration Framework
 ========================================================
 
 Nonlinear registration framework by Piotr Majka
