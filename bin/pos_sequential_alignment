@@ -51,6 +51,7 @@ class sequential_alignment(output_volume_workflow):
     __HISTOGRAM_MATCHING = True
     __MI_SAMPLES = 16000
     __ALIGNMENT_EPSILON = 4
+    __ANTS_AFFINE_GRADIENT_DESCENT = [0.5, 0.95, 1.e-4, 1.e-4]
     __VOL_STACK_SLICE_SPACING = 1
 
     def _initializeOptions(self):
@@ -344,6 +345,8 @@ class sequential_alignment(output_volume_workflow):
             imageMetrics=metrics,
             histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
             miOption=[metric_parameter, self.__MI_SAMPLES],
+            allMetricsConverge=None,
+            affineGradientDescent=self.__ANTS_AFFINE_GRADIENT_DESCENT,
             affineMetricType=affine_metric_type)
 
         # Return the registration command.
