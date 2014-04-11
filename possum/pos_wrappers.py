@@ -157,7 +157,7 @@ class ants_registration(generic_wrapper):
         'allMetricsConverge': switch_parameter('use-all-metrics-for-convergence', True, str_template='--{_name} {_value}'),
         'initialAffine': filename_parameter('initial-affine', None, str_template='--{_name} {_value}'),
         'fixedImageInitialAffine': filename_parameter('fixed-image-initial-affine', None, str_template='--{_name} {_value}'),
-        'affineGradientDescent': vector_parameter('affine-gradient-descent-option', None, '--{_name} {_value}'),
+        'affineGradientDescent': vector_parameter('affine-gradient-descent-option', None, '--{_name} {_list}'),
         'imageMetrics': list_parameter('image_to_image_metrics', [], '{_list}'),
         'maskImage': filename_parameter('mask-image', None, str_template='--{_name} {_value}'),
         'miOption': vector_parameter('MI-option', None, str_template='--{_name} {_list}'),

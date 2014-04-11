@@ -21,7 +21,7 @@ More more complex building blocks:
 * :doc:`pos_sequential_alignment`
 * :doc:`pos_pairwise_registration`
 * pos_deformable_histology_reconstruction
-* pos_coarse_fine
+* :doc:`pos_coarse_fine`
 
 Examples of complete workflows:
 

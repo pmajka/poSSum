@@ -3,29 +3,8 @@
 
 
 """
-
-The coarse-to-fine script splits a series of rigid transformation into low- and
-high- frequency components. The overall idea of how this script works is
-described toroughly in the paper by XXXX et. al. 2006. Although the actual
-implementation is a bit different.
-
-
-Biref description
-=================
-
-Created two series of rigid transformations out of a single series.
-
-
-Implementation details
-======================
-
-Split transformation into parameters. Smooth parameters. Create a new series of transformations.
-
-
-Usage examples
-==============
-
-TODO
+The coarse-to-fine script splits a series of transformations into low- and
+high- frequency components.
 """
 
 import os, sys
@@ -49,7 +28,6 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         1. self.options.sliceIndex
         2. fineTransformFilenameTemplate
         3. outputTransformFilenameTemplate
-
     """
 
     _f = {
