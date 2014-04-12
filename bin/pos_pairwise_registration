@@ -77,7 +77,7 @@ class pairwiseRegistration(output_volume_workflow):
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
     __MI_SAMPLES = 16000
-__ANTS_AFFINE_GRADIENT_DESCENT = [0.5, 0.95, 1.e-4, 1.e-4]
+    __ANTS_AFFINE_GRADIENT_DESCENT = [0.5, 0.95, 1.e-4, 1.e-4]
     __VOL_STACK_SLICE_SPACING = 1
 
     def _validate_options(self):
