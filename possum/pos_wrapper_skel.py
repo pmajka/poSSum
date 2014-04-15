@@ -96,7 +96,7 @@ class generic_workflow(object):
         # particual animal. When you have multiple animals they can get confused
         # easily. In the future, specimen ID, will act as database ID for given
         # specimen. Thus, it is hardcoded to not allow any computations without
-        # this ID. Simple as it is.
+        # this ID. As simple as that.
 
         # We need to check if the GNU parallel of availeble. If it's not, we
         # cannot perform parallel computations.

@@ -72,6 +72,54 @@ class generic_wrapper(object):
 
 
 class touch_wrapper(generic_wrapper):
+    """
+    A very simple ``touch`` bash command wrapper.
+
+    :param files: A list of files to touch. Even if you're touching only a
+                  single file you have to still pass it as a list.
+    :type files: list of strings
+
+    >>> touch_wrapper
+    <class '__main__.touch_wrapper'>
+
+    >>> touch_wrapper() #doctest: +ELLIPSIS
+    <__main__.touch_wrapper object at 0x...>
+
+    >>> print touch_wrapper()
+    touch
+
+    >>> p=touch_wrapper(files=['file1.txt'])
+    >>> p #doctest: +ELLIPSIS
+    <__main__.touch_wrapper object at 0x...>
+
+    >>> print p
+    touch file1.txt
+
+    >>> p=touch_wrapper(files=['file1.txt', 'file2.txt'])
+    >>> print p
+    touch file1.txt file2.txt
+
+    >>> print p.updateParameters({"files":[]})
+    touch
+
+    >>> print p.updateParameters({"files":"a_poorly_provided_parameter.txt"})
+    touch a _ p o o r l y _ p r o v i d e d _ p a r a m e t e r . t x t
+
+    >>> print p.updateParameters({"files":["f1.txt","f2.py", "f3.nii.gz"]})
+    touch f1.txt f2.py f3.nii.gz
+
+    >>> print p.updateParameters({"files":None})
+    touch
+
+    >>> print p.updateParameters({"files":True})
+    Traceback (most recent call last):
+    TypeError: argument 2 to map() must support iteration
+
+    >>> print p.updateParameters({"files":2})
+    Traceback (most recent call last):
+    TypeError: argument 2 to map() must support iteration
+    """
+
     _template = """touch {files}"""
 
     _parameters = {
@@ -642,9 +690,6 @@ class chain_affine_transforms(generic_wrapper):
     >>> c = chain_affine_transforms(dimension = 3, input_transforms = ['01.txt', '02.txt'], output_transform = "out.txt")
     >>> print c
     ComposeMultiTransform 3 out.txt 01.txt 02.txt
-
-    >>> c() == {'port': {'dimension': '3', 'output_transform': 'out.txt'}}
-    True
     """
 
     _template = """ComposeMultiTransform {dimension} {output_transform} {input_transforms}"""

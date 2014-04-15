@@ -191,7 +191,7 @@ class list_parameter(generic_parameter):
 
     >>> p=list_parameter(value=[1,2,3])
     Traceback (most recent call last):
-    TypeError: __init__() takes at least 2 non-keyword arguments (1 given)
+    TypeError: __init__() takes at least 2 arguments (2 given)
 
     >>> p=list_parameter(name='test')
     >>> p #doctest: +ELLIPSIS
@@ -292,7 +292,7 @@ class ants_transformation_parameter(ants_specific_parameter):
 
     >>> p=ants_transformation_parameter(value=['Gauss',(0,0)])
     Traceback (most recent call last):
-    TypeError: __init__() takes at least 2 non-keyword arguments (1 given)
+    TypeError: __init__() takes at least 2 arguments (2 given)
 
     >>> p=ants_transformation_parameter('test', value=['Gauss',(0,0)])
     >>> p #doctest: +ELLIPSIS
@@ -327,11 +327,11 @@ class ants_regularization_parameter(ants_specific_parameter):
 
     >>> print ants_regularization_parameter('a_parameter')
     Traceback (most recent call last):
-    TypeError: 'NoneType' object is unsubscriptable
+    TypeError: 'NoneType' object has no attribute '__getitem__'
 
     >>> print ants_regularization_parameter(value=['s'])
     Traceback (most recent call last):
-    TypeError: __init__() takes at least 2 non-keyword arguments (1 given)
+    TypeError: __init__() takes at least 2 arguments (2 given)
 
     >>> print ants_regularization_parameter('a_parameter', value=[9,0])
     Traceback (most recent call last):
