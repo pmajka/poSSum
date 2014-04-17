@@ -7,8 +7,8 @@ Preprocess slices for registration and reconstruction.
 """
 
 import itk
-import pos_wrapper_skel
-from pos_itk_core import get_image_region, autodetect_file_type,\
+from possum import pos_wrapper_skel
+from possum.pos_itk_core import get_image_region, autodetect_file_type,\
         types_reduced_dimensions, resample_image_filter
 
 

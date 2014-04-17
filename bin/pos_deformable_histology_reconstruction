@@ -19,12 +19,13 @@ import os, sys
 from optparse import OptionParser, OptionGroup
 import copy
 
-import pos_wrappers
-from pos_wrapper_skel import output_volume_workflow
-import pos_parameters
-from deformable_histology_iterations import deformable_reconstruction_iteration
+from possum import pos_wrappers
+from possum import pos_parameters
 
-from pos_deformable_wrappers import preprocess_slice_volume,\
+from possum.pos_wrapper_skel import output_volume_workflow
+from possum.deformable_histology_iterations import deformable_reconstruction_iteration
+
+from possum.pos_deformable_wrappers import preprocess_slice_volume,\
     convert_slice_image, convert_slice_image_grayscale
 
 

@@ -6,12 +6,12 @@ The purpose of this class is to change order of slices of given volume
 along specified axis according to a provided mapping.
 """
 
-
 import random
 import csv
 import itk
-import pos_itk_core
-import pos_wrapper_skel
+
+from possum import pos_itk_core
+from possum import pos_wrapper_skel
 
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):

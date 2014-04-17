@@ -10,8 +10,8 @@ import csv
 import copy
 from optparse import OptionGroup
 
-import pos_wrappers, pos_parameters
-from pos_wrapper_skel import output_volume_workflow
+from possum import pos_wrappers, pos_parameters
+from possum.pos_wrapper_skel import output_volume_workflow
 
 
 IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0

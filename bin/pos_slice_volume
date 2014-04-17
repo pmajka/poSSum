@@ -5,10 +5,10 @@
 A volume slicing script.
 """
 
-import pos_wrapper_skel
 import itk
-import pos_itk_core
 
+from possum import pos_wrapper_skel
+from possum import pos_itk_core
 
 class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
     """

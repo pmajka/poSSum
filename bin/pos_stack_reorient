@@ -6,8 +6,8 @@ A script for stacking slices and reorienting volumes.
 """
 
 import itk
-import pos_wrapper_skel
-import pos_itk_core
+from possum import pos_wrapper_skel
+from possum import pos_itk_core
 
 
 class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):

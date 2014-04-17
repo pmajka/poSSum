@@ -9,14 +9,13 @@ high frequency components.
 
 import os, sys
 import copy
-from optparse import OptionParser, OptionGroup
-
-import pos_parameters
-import pos_wrappers
-from pos_wrapper_skel import generic_workflow
-
 import numpy
 from scipy.ndimage.filters import gaussian_filter1d
+from optparse import OptionParser, OptionGroup
+
+from possum import pos_parameters
+from possum import pos_wrappers
+from possum.pos_wrapper_skel import generic_workflow
 
 
 class coarse_to_fine_transformation_merger(generic_workflow):

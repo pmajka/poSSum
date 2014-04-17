@@ -12,10 +12,10 @@ import os, sys
 from optparse import OptionGroup
 import copy
 
-from pos_wrapper_skel import output_volume_workflow
-import pos_parameters
-import pos_wrappers
-from pos_itk_core import autodetect_file_type
+from possum.pos_wrapper_skel import output_volume_workflow
+from possum import pos_parameters
+from possum import pos_wrappers
+from possum.pos_itk_core import autodetect_file_type
 
 
 class stack_warp_image_multi_transform(output_volume_workflow):
