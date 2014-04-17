@@ -1,4 +1,3 @@
-from __future__ import print_function
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 import io
@@ -21,50 +20,41 @@ def read(*filenames, **kwargs):
 
 long_description = read('README.md', 'CHANGES.txt')
 
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
 
-    def run_tests(self):
-        import pytest
-        errcode = pytest.main(self.test_args)
-        sys.exit(errcode)
+def run_tests(self):
+    import pytest
+    errcode = pytest.main(self.test_args)
+    sys.exit(errcode)
 
 setup(
-    name='possum',
+    name='possum-reconstruction',
     version=possum.__version__,
     url='http://github.com/pmajka/possum/',
     license='TODO: Define a licence',
     author='Piotr Majka',
     tests_require=['doctest>=2.6'],
-    install_requires=['TODO:Provide some information hereFlask>=0.10.1',
-                    'Flask-SQLAlchemy>=1.0',
-                    'SQLAlchemy==0.8.2',
-                    ],
-    cmdclass={'test': doctest},
+    install_requires=['config>=0.3.9', 'networkx>=1.8.1'],
+    cmdclass={'test': run_tests},
     author_email='piotr.majka@op.pl',
     description='Serial sections based three dimensional volume reconstruction.',
     long_description=long_description,
-    packages=['possum'],
+    packages=['possum','bin'],
+    scripts=['bin/pos_coarse_fine', 'bin/pos_deformable_histology_reconstruction', 'bin/pos_pairwise_registration', 'bin/pos_reorder_volume', 'bin/pos_sequential_alignment', 'bin/pos_slice_preprocess', 'bin/pos_slice_volume', 'bin/pos_stack_reorient', 'bin/pos_stack_warp_image_multi_transform'],
     include_package_data=True,
     platforms='Linux',
     test_suite='possum.test.test_possum',
     classifiers = [
         'Programming Language :: Python',
         'Development Status :: 4 - Beta',
-        'TODO:Natural Language :: English',
-        'TODO:Environment :: Web Environment',
-        'TODO:Intended Audience :: Developers',
-        'TODO:License :: OSI Approved :: Apache Software License',
-        'TODO:Operating System :: OS Independent',
-        'TODO:Topic :: Software Development :: Libraries :: Python Modules',
-        'TODO:Topic :: Software Development :: Libraries :: Application Frameworks',
-        'TODO:Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Natural Language :: English',
+        'Environment :: Console',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'Operating System :: POSIX :: Linux',
+        'Topic :: Scientific/Engineering :: Medical Science Apps.',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
         ],
     extras_require={
         'testing': ['doctest'],
     }
 )
-

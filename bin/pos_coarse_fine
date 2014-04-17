@@ -4,7 +4,7 @@
 
 """
 The coarse-to-fine script splits a series of transformations into low- and
-high- frequency components.
+high frequency components.
 """
 
 import os, sys
