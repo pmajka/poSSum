@@ -2,6 +2,8 @@
 
 """
 
+__version__ = '0.16.0'
+
 import pos_common
 import pos_itk_core
 

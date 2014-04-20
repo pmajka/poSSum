@@ -1,0 +1,2 @@
+recursive-include test  *
+global-exclude setenv.sh
