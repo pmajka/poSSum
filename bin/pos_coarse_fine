@@ -20,13 +20,8 @@ from possum.pos_wrapper_skel import generic_workflow
 
 class coarse_to_fine_transformation_merger(generic_workflow):
     """
-    #TODO: provide tutorials and documentation.
-    Coarse to fine transformation merger.
-    Obligatory command line parameters:
-
-        1. self.options.sliceIndex
-        2. fineTransformFilenameTemplate
-        3. outputTransformFilenameTemplate
+    The coarse-to-fine script splits a series of transformations into low- and
+    high frequency components.
     """
 
     _f = {
