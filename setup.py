@@ -20,11 +20,21 @@ def read(*filenames, **kwargs):
 
 long_description = read('README.md', 'CHANGES.txt')
 
+class run_tests(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
 
-def run_tests(self):
-    import pytest
-    errcode = pytest.main(self.test_args)
-    sys.exit(errcode)
+    def run_tests(self):
+        import doctest
+
+        verbose_flag = False
+        print doctest.testmod(possum.pos_wrappers, verbose=verbose_flag)
+        print doctest.testmod(possum.pos_parameters, verbose=verbose_flag)
+        print doctest.testmod(possum.pos_wrapper_skel, verbose=verbose_flag)
+        print doctest.testmod(possum.pos_common, verbose=verbose_flag)
+
 
 setup(
     name='possum-reconstruction',
@@ -32,8 +42,7 @@ setup(
     url='http://github.com/pmajka/possum/',
     license='TODO: Define a licence',
     author='Piotr Majka',
-    tests_require=['doctest>=2.6'],
-    install_requires=['config>=0.3.9', 'networkx>=1.8.1'],
+    install_requires=['config>=0.3.9', 'networkx>=1.6'],
     cmdclass={'test': run_tests},
     author_email='piotr.majka@op.pl',
     description='Serial sections based three dimensional volume reconstruction.',
@@ -55,6 +64,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Application Frameworks',
         ],
     extras_require={
-        'testing': ['doctest'],
+        'testing': ['setuptools.tests.doctest'],
     }
 )
