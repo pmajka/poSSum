@@ -43,6 +43,13 @@ END
 # generate_fixed_images | bash -x
 # rm -vf *.png
 
+# ---------------------------------------------------------
+# Remove the results from the previous iterations
+rm -rfv *.nii.gz
+
+# ---------------------------------------------------------
+# Start the calculations
+
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
@@ -124,3 +131,8 @@ pos_pairwise_registration \
     --grayscaleVolumeFilename test_6_gray.nii.gz\
     --multichannelVolumeFilename test_6_color.nii.gz\
     -d /dev/shm/x/
+
+# -------------------------------------------------------------------
+# Validate the md5 sums
+# -------------------------------------------------------------------
+md5sum -c test_pos_pairwise_alignment_ellipses.md5
