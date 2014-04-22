@@ -57,3 +57,6 @@ pos_slice_preprocess \
     --registrationResize 0.5 \
     --medianFilterRadius 4 4 \
     --invertMultichannelImage
+
+md5sum -c test_slice_preprocess.md5
+exit $?
