@@ -7,6 +7,16 @@ Preprocess slices for registration
 Usage summary
 -------------
 
+.. todo::
+
+   Provide a graph showing how the input image is processed.
+
+.. graphviz::
+
+   digraph foo {
+         "bar" -> "baz";
+            }
+
 All supported features in one invocation (an example) ::
 
     pos_slice_preprocess.py
@@ -66,7 +76,7 @@ The folloving invocation takes an rgb input image and produces two output
 files: grayscale (by default, the blue channel is extracted) and rgb image,
 both in nifti format. No additional processing is performed ::
 
-    pos_slice_preprocess.py
+    pos_slice_preprocess
         [required]      --inputFilename <filename>
                         --grayscaleOutputImage <filename>
                         --colorOutputImage <filename>
@@ -78,7 +88,7 @@ Trim and rescale and image
 The example below the script takes an image scales it down and extracts a
 square from the whole image and outputs only color image::
 
-    pos_slice_preprocess.py
+    pos_slice_preprocess
         [required]      --inputFilename <filename>
                         --grayscaleOutputImage <filename>
                         --registrationColorChannel blue
@@ -94,10 +104,16 @@ for input, extracts default color channel and applies smoothing and inverts the
 images. Both grayscale and rgb images are outputes. Note, however, that only
 grayscale image is smoothed by the median workflow::
 
-    pos_slice_preprocess.py
+    pos_slice_preprocess
         [required]      --inputFilename <filename>
                         --grayscaleOutputImage <filename>
                         --colorOutputImage <filename>
                         --medianFilterRadius 2 2
                         --invertSourceImage
                         --invertMultichannelImage
+
+Examples
+--------
+
+Please see the examples in the `tests/test_slice_preprocess` directory which
+contains several examples on using the `pos_slice_preprocess` script.
