@@ -2,17 +2,8 @@
 # -*- coding: utf-8 -*
 
 """
-A framework for performing deformable reconstruction of histological volumes
-based on histological slices. The framework combines:
-    * Advanced Normalization Tools (ANTS, http://www.picsl.upenn.edu/ANTS/)
-    * ImageMagick (http://www.imagemagick.org/script/index.php)
-    * Insight Segmentation and Registration Toolkit (ITK, http://www.itk.org/)
-    * ITKSnap and Convert3d (http://www.itksnap.org/)
-    * Visualization Toolkit (VTK, http://www.vtk.org/)
-    * and a number of homemade software
-
-in order to generate smooth and acurate volumetric reconstructions from 2d
-slices.
+A framework for performing deformable reconstruction of smooth and acurate
+volumetric reconstructions from 2d slices.
 """
 
 import os, sys

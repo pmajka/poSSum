@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to the poSSum Nonlinear Registration Framework
+Welcome to the poSSum 3D Image reconstruction framework
 ========================================================
 
-Nonlinear registration framework by Piotr Majka
+PoSSum 3D image reconstruction framework by Piotr Majka (pmajka@nencki.gov.pl)
 
 
 Basic workflow building blocks:
