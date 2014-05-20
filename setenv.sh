@@ -5,7 +5,7 @@ export LC_ALL=C
 #--------------------------------------------------------------------
 # Check if the necessary shell commands are available
 
-EXECUTABLES='mkdir rm cp tar ANTSJacobian ANTS WarpImageMultiTransform AverageAffineTransform AverageImages c3d c2d parallel'
+EXECUTABLES='mkdir rm cp tar ANTSJacobian ANTS WarpImageMultiTransform AverageAffineTransform AverageImages c3d c2d parallel convert'
 
 for executable in ${EXECUTABLES}
 do
@@ -21,7 +21,7 @@ echo "(+) All necessary shell commands are available."
 
 #--------------------------------------------------------------------
 
-POS_DIR=`dirname $(readlink -f $0)`
-export PYTHONPATH=$PYTHONPATH:${POS_DIR}/possum/
+POS_DIR=`pwd`
+export PYTHONPATH=$PYTHONPATH:${POS_DIR}
 export PATH=$PATH:${POS_DIR}/bin/
 echo "(+) The paths are set."
