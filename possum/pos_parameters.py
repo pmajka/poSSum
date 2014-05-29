@@ -66,7 +66,7 @@ class boolean_parameter(generic_parameter):
     """
     >>> p=boolean_parameter('parameter')
     >>> p #doctest: +ELLIPSIS
-    <__main__.boolean_parameter object at 0x...>
+    <possum.pos_parameters.boolean_parameter object at 0x...>
 
     >>> print p
     <BLANKLINE>
@@ -99,7 +99,7 @@ class switch_parameter(boolean_parameter):
     """
     >>> p=switch_parameter('a_switch', False, "--{_name}")
     >>> p #doctest: +ELLIPSIS
-    <__main__.switch_parameter object at 0x...>
+    <possum.pos_parameters.switch_parameter object at 0x...>
 
     >>> print p
     <BLANKLINE>
@@ -127,7 +127,7 @@ class string_parameter(generic_parameter):
     >>> p=string_parameter('a_name')
 
     >>> p #doctest: +ELLIPSIS
-    <__main__.string_parameter object at 0x...>
+    <possum.pos_parameters.string_parameter object at 0x...>
 
     >>> print p
     <BLANKLINE>
@@ -195,7 +195,7 @@ class list_parameter(generic_parameter):
 
     >>> p=list_parameter(name='test')
     >>> p #doctest: +ELLIPSIS
-    <__main__.list_parameter object at 0x...>
+    <possum.pos_parameters.list_parameter object at 0x...>
 
     >>> p=list_parameter(name='test', value=[1,2,3,4])
     >>> print p
@@ -241,7 +241,7 @@ class vector_parameter(list_parameter):
 
     >>> p=vector_parameter('number-of-iterations', [10000,10000,10000], "--{_name} {_list}")
     >>> p #doctest: +ELLIPSIS
-    <__main__.vector_parameter object at 0x...>
+    <possum.pos_parameters.vector_parameter object at 0x...>
 
     >>> print p
     --number-of-iterations 10000x10000x10000
@@ -288,7 +288,7 @@ class ants_specific_parameter(generic_parameter):
 class ants_transformation_parameter(ants_specific_parameter):
     """
     >>> ants_transformation_parameter
-    <class '__main__.ants_transformation_parameter'>
+    <class 'possum.pos_parameters.ants_transformation_parameter'>
 
     >>> p=ants_transformation_parameter(value=['Gauss',(0,0)])
     Traceback (most recent call last):
@@ -296,7 +296,7 @@ class ants_transformation_parameter(ants_specific_parameter):
 
     >>> p=ants_transformation_parameter('test', value=['Gauss',(0,0)])
     >>> p #doctest: +ELLIPSIS
-    <__main__.ants_transformation_parameter object at 0x...>
+    <possum.pos_parameters.ants_transformation_parameter object at 0x...>
 
     >>> print p #doctest: +NORMALIZE_WHITESPACE
     -t Gauss[0,0]
@@ -319,7 +319,7 @@ class ants_transformation_parameter(ants_specific_parameter):
 class ants_regularization_parameter(ants_specific_parameter):
     """
     >>> ants_regularization_parameter
-    <class '__main__.ants_regularization_parameter'>
+    <class 'possum.pos_parameters.ants_regularization_parameter'>
 
     >>> p=ants_regularization_parameter()
     Traceback (most recent call last):
@@ -343,7 +343,7 @@ class ants_regularization_parameter(ants_specific_parameter):
 
     >>> p=ants_regularization_parameter('a_parameter', value=['s',(2,2)])
     >>> p #doctest: +ELLIPSIS
-    <__main__.ants_regularization_parameter object at 0x...>
+    <possum.pos_parameters.ants_regularization_parameter object at 0x...>
 
     >>> p=ants_regularization_parameter('a_parameter', value=['Gauss',(2,2)])
     >>> print p #doctest: +NORMALIZE_WHITESPACE
@@ -435,7 +435,7 @@ class filename(generic_parameter):
         >>> f=filename("test_name", "test_value", job_dir="/a_dir/",
         ... work_dir="a_workdir", str_template="{_name}_{_value}.txt")
         >>> f # doctest: +ELLIPSIS
-        <__main__.filename object at 0x...>
+        <possum.pos_parameters.filename object at 0x...>
 
         >>> f() == '/a_dir/a_workdir/test_name_test_value.txt'
         True
@@ -608,6 +608,6 @@ class filename(generic_parameter):
     base_dir = property(_get_base_dir, _set_base_dir)
     """ Returns / sets base_dir """
 
-if __name__ == '__main__':
+if __name__ == 'possum.pos_parameters':
     import doctest
     doctest.testmod()

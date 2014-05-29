@@ -19,7 +19,7 @@ class generic_wrapper(object):
 
     >>> w=generic_wrapper()
     >>> w #doctest: +ELLIPSIS
-    <__main__.generic_wrapper object at 0x...>
+    <possum.pos_wrappers.generic_wrapper object at 0x...>
 
     >>> w._template
     >>> w._template='Serialization template {name}'
@@ -80,17 +80,17 @@ class touch_wrapper(generic_wrapper):
     :type files: list of strings
 
     >>> touch_wrapper
-    <class '__main__.touch_wrapper'>
+    <class 'possum.pos_wrappers.touch_wrapper'>
 
     >>> touch_wrapper() #doctest: +ELLIPSIS
-    <__main__.touch_wrapper object at 0x...>
+    <possum.pos_wrappers.touch_wrapper object at 0x...>
 
     >>> print touch_wrapper()
     touch
 
     >>> p=touch_wrapper(files=['file1.txt'])
     >>> p #doctest: +ELLIPSIS
-    <__main__.touch_wrapper object at 0x...>
+    <possum.pos_wrappers.touch_wrapper object at 0x...>
 
     >>> print p
     touch file1.txt
@@ -288,10 +288,10 @@ class ants_intensity_meric(generic_wrapper):
     :type parameter: int
 
     >>> ants_intensity_meric
-    <class '__main__.ants_intensity_meric'>
+    <class 'possum.pos_wrappers.ants_intensity_meric'>
 
     >>> ants_intensity_meric() #doctest: +ELLIPSIS
-    <__main__.ants_intensity_meric object at 0x...>
+    <possum.pos_wrappers.ants_intensity_meric object at 0x...>
 
     >>> print ants_intensity_meric()
     -m CC[,,1,4]
@@ -305,7 +305,7 @@ class ants_intensity_meric(generic_wrapper):
 
     >>> p=ants_intensity_meric(fixed_image='fixed.nii.gz',moving_image='moving.nii.gz')
     >>> p #doctest: +ELLIPSIS
-    <__main__.ants_intensity_meric object at 0x...>
+    <possum.pos_wrappers.ants_intensity_meric object at 0x...>
     >>> print p
     -m CC[fixed.nii.gz,moving.nii.gz,1,4]
 
@@ -320,7 +320,7 @@ class ants_intensity_meric(generic_wrapper):
     '-m CC[fixed.nii.gz,moving.nii.gz,1,4]'
 
     >>> p.updateParameters({"weight":0.5}) #doctest: +ELLIPSIS
-    <__main__.ants_intensity_meric object at 0x...>
+    <possum.pos_wrappers.ants_intensity_meric object at 0x...>
 
     >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
     Traceback (most recent call last):
@@ -402,11 +402,11 @@ class ants_point_set_estimation_metric(generic_wrapper):
     :type boundary_points_only: bool
 
     >>> ants_point_set_estimation_metric
-    <class '__main__.ants_point_set_estimation_metric'>
+    <class 'possum.pos_wrappers.ants_point_set_estimation_metric'>
 
     >>> p=ants_point_set_estimation_metric()
     >>> p #doctest: +ELLIPSIS
-    <__main__.ants_point_set_estimation_metric object at 0x...>
+    <possum.pos_wrappers.ants_point_set_estimation_metric object at 0x...>
 
     >>> str(ants_point_set_estimation_metric._parameters['boundary_points_only']) == ''
     True
@@ -429,22 +429,22 @@ class ants_point_set_estimation_metric(generic_wrapper):
     -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,1,1.0]
 
     >>> p.updateParameters({"weight":0.5}) #doctest: +ELLIPSIS
-    <__main__.ants_point_set_estimation_metric object at 0x...>
+    <possum.pos_wrappers.ants_point_set_estimation_metric object at 0x...>
     >>> print p
     -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,1.0]
 
     >>> p.updateParameters({"point_set_sigma":0.25}) #doctest: +ELLIPSIS
-    <__main__.ants_point_set_estimation_metric object at 0x...>
+    <possum.pos_wrappers.ants_point_set_estimation_metric object at 0x...>
     >>> print p
     -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,1.0,0.25]
 
     >>> p.updateParameters({"point_set_sigma":None, "boundary_points_only":True}) #doctest: +ELLIPSIS
-    <__main__.ants_point_set_estimation_metric object at 0x...>
+    <possum.pos_wrappers.ants_point_set_estimation_metric object at 0x...>
     >>> print p
     -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,1.0,True]
 
     >>> p.updateParameters({"point_set_percentage":0.1,"point_set_sigma":None, "boundary_points_only":True}) #doctest: +ELLIPSIS
-    <__main__.ants_point_set_estimation_metric object at 0x...>
+    <possum.pos_wrappers.ants_point_set_estimation_metric object at 0x...>
     >>> print p
     -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,0.1,True]
     """
@@ -470,6 +470,7 @@ class ants_point_set_estimation_metric(generic_wrapper):
 
     value = property(_get_value, _set_value)
 
+
 class ants_average_affine_transform(generic_wrapper):
     """
     AverageAffineTransform ImageDimension output_affine_transform
@@ -477,10 +478,10 @@ class ants_average_affine_transform(generic_wrapper):
                    {[-i] affine_transform_txt [weight(=1)] ]}
 
     >>> ants_average_affine_transform
-    <class '__main__.ants_average_affine_transform'>
+    <class 'possum.pos_wrappers.ants_average_affine_transform'>
 
     >>> ants_average_affine_transform() #doctest: +ELLIPSIS
-    <__main__.ants_average_affine_transform object at 0x...>
+    <possum.pos_wrappers.ants_average_affine_transform object at 0x...>
 
     >>> str(ants_average_affine_transform._parameters['dimension']) == '2'
     True
@@ -504,17 +505,17 @@ class ants_average_affine_transform(generic_wrapper):
     AverageAffineTransform 3 out.txt
 
     >>> p.updateParameters({"reference_affine_transform":"reference_affine.txt"}) #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    <__main__.ants_average_affine_transform object at 0x...>
+    <possum.pos_wrappers.ants_average_affine_transform object at 0x...>
     >>> print str(p).strip()
     AverageAffineTransform 3 out.txt -R reference_affine.txt
 
     >>> p.updateParameters({"affine_list":["affine_1.txt", "affine_2.txt", "affine_3.txt"]}) #doctest: +ELLIPSIS
-    <__main__.ants_average_affine_transform object at 0x...>
+    <possum.pos_wrappers.ants_average_affine_transform object at 0x...>
     >>> print str(p).strip()
     AverageAffineTransform 3 out.txt -R reference_affine.txt affine_1.txt affine_2.txt affine_3.txt
 
     >>> p.updateParameters({"reference_affine_transform":None}) #doctest: +ELLIPSIS
-    <__main__.ants_average_affine_transform object at 0x...>
+    <possum.pos_wrappers.ants_average_affine_transform object at 0x...>
     >>> print str(p).strip()
     AverageAffineTransform 3 out.txt affine_1.txt affine_2.txt affine_3.txt
     """
@@ -540,10 +541,10 @@ class ants_average_affine_transform(generic_wrapper):
 class ants_compose_multi_transform(generic_wrapper):
     """
     >>> ants_compose_multi_transform
-    <class '__main__.ants_compose_multi_transform'>
+    <class 'possum.pos_wrappers.ants_compose_multi_transform'>
 
     >>> ants_compose_multi_transform() #doctest: +ELLIPSIS
-    <__main__.ants_compose_multi_transform object at 0x...>
+    <possum.pos_wrappers.ants_compose_multi_transform object at 0x...>
 
     >>> str(ants_compose_multi_transform._parameters['dimension']) == '2'
     True
@@ -571,22 +572,22 @@ class ants_compose_multi_transform(generic_wrapper):
     ComposeMultiTransform 3 out.nii.gz
 
     >>> p.updateParameters({"affine_list":["affine_1.txt", "affine_2.txt", "affine_3.txt"]}) #doctest: +ELLIPSIS
-    <__main__.ants_compose_multi_transform object at 0x...>
+    <possum.pos_wrappers.ants_compose_multi_transform object at 0x...>
     >>> print str(p).strip()
     ComposeMultiTransform 3 out.nii.gz affine_1.txt affine_2.txt affine_3.txt
 
     >>> p.updateParameters({"reference_image":"reference_image.nii.gz"}) #doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    <__main__.ants_compose_multi_transform object at 0x...>
+    <possum.pos_wrappers.ants_compose_multi_transform object at 0x...>
     >>> print str(p).strip()
     ComposeMultiTransform 3 out.nii.gz -R reference_image.nii.gz affine_1.txt affine_2.txt affine_3.txt
 
     >>> p.updateParameters({"reference_image":None}) #doctest: +ELLIPSIS
-    <__main__.ants_compose_multi_transform object at 0x...>
+    <possum.pos_wrappers.ants_compose_multi_transform object at 0x...>
     >>> print str(p).strip()
     ComposeMultiTransform 3 out.nii.gz affine_1.txt affine_2.txt affine_3.txt
 
     >>> p.updateParameters({"deformable_list":['warp_1.nii.gz','warp_2.nii.gz']}) #doctest: +ELLIPSIS
-    <__main__.ants_compose_multi_transform object at 0x...>
+    <possum.pos_wrappers.ants_compose_multi_transform object at 0x...>
     >>> print str(p).strip()
     ComposeMultiTransform 3 out.nii.gz warp_1.nii.gz warp_2.nii.gz affine_1.txt affine_2.txt affine_3.txt
     """
@@ -720,10 +721,10 @@ class stack_and_reorient_wrapper(generic_wrapper):
               go togeather.
 
     >>> stack_and_reorient_wrapper
-    <class '__main__.stack_and_reorient_wrapper'>
+    <class 'possum.pos_wrappers.stack_and_reorient_wrapper'>
 
     >>> stack_and_reorient_wrapper() #doctest: +ELLIPSIS
-    <__main__.stack_and_reorient_wrapper object at 0x...>
+    <possum.pos_wrappers.stack_and_reorient_wrapper object at 0x...>
 
     >>> print stack_and_reorient_wrapper._parameters['stack_mask']
     <BLANKLINE>
@@ -842,10 +843,10 @@ class alignment_preprocessor_wrapper(generic_wrapper):
 
 
     >>> alignment_preprocessor_wrapper
-    <class '__main__.alignment_preprocessor_wrapper'>
+    <class 'possum.pos_wrappers.alignment_preprocessor_wrapper'>
 
     >>> alignment_preprocessor_wrapper() #doctest: +ELLIPSIS
-    <__main__.alignment_preprocessor_wrapper object at 0x...>
+    <possum.pos_wrappers.alignment_preprocessor_wrapper object at 0x...>
 
     >>> print alignment_preprocessor_wrapper() #doctest: +NORMALIZE_WHITESPACE
     pos_slice_preprocess --inputFilename
@@ -859,7 +860,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     ... grayscale_output_image="g.nii.gz",
     ... color_output_image="c.nii.gz")
     >>> p #doctest: +ELLIPSIS
-    <__main__.alignment_preprocessor_wrapper object at 0x...>
+    <possum.pos_wrappers.alignment_preprocessor_wrapper object at 0x...>
 
     Checking default parameteres values:
 
@@ -1001,10 +1002,10 @@ class command_warp_rgb_slice(generic_wrapper):
     --------
 
     >>> command_warp_rgb_slice
-    <class '__main__.command_warp_rgb_slice'>
+    <class 'possum.pos_wrappers.command_warp_rgb_slice'>
 
     >>> command_warp_rgb_slice() #doctest: +ELLIPSIS
-    <__main__.command_warp_rgb_slice object at 0x...>
+    <possum.pos_wrappers.command_warp_rgb_slice object at 0x...>
 
     >>> print command_warp_rgb_slice() #doctest: +NORMALIZE_WHITESPACE
     c2d -verbose -as ref -clear \
@@ -1111,10 +1112,10 @@ class command_warp_grayscale_image(generic_wrapper):
     --------
 
     >>> command_warp_grayscale_image
-    <class '__main__.command_warp_grayscale_image'>
+    <class 'possum.pos_wrappers.command_warp_grayscale_image'>
 
     >>> command_warp_grayscale_image() #doctest: +ELLIPSIS
-    <__main__.command_warp_grayscale_image object at 0x...>
+    <possum.pos_wrappers.command_warp_grayscale_image object at 0x...>
 
     >>> print command_warp_grayscale_image() #doctest: +NORMALIZE_WHITESPACE
     c2d -verbose -as ref -clear -as moving -push ref -push moving \
@@ -1129,7 +1130,7 @@ class command_warp_grayscale_image(generic_wrapper):
     -type uchar -o output.nii.gz
 
     >>> p.updateParameters({'background': 255, 'interpolation': 'nn'}) #doctest: +ELLIPSIS
-    <__main__.command_warp_grayscale_image object at 0x...>
+    <possum.pos_wrappers.command_warp_grayscale_image object at 0x...>
     >>> print p #doctest: +NORMALIZE_WHITESPACE
     c2d -verbose -background 255 -interpolation nn ref.nii.gz -as ref -clear\
     moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
@@ -1137,7 +1138,7 @@ class command_warp_grayscale_image(generic_wrapper):
 
     >>> p.updateParameters({'region_origin': [10,10,10],
     ... 'region_size': [50,50,50], 'dimension': 3}) #doctest: +ELLIPSIS
-    <__main__.command_warp_grayscale_image object at 0x...>
+    <possum.pos_wrappers.command_warp_grayscale_image object at 0x...>
     >>> print p #doctest: +NORMALIZE_WHITESPACE
     c3d -verbose -background 255 -interpolation nn ref.nii.gz -as ref -clear \
     moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
@@ -1178,10 +1179,10 @@ class image_similarity_wrapper(generic_wrapper):
     like it and probably will use it more.
 
     >>> print image_similarity_wrapper
-    <class '__main__.image_similarity_wrapper'>
+    <class 'possum.pos_wrappers.image_similarity_wrapper'>
 
     >>> image_similarity_wrapper() #doctest: +ELLIPSIS
-    <__main__.image_similarity_wrapper object at 0x...>
+    <possum.pos_wrappers.image_similarity_wrapper object at 0x...>
 
     >>> print image_similarity_wrapper() #doctest: +NORMALIZE_WHITESPACE
     c2d -ncor | cut -f3 -d' '
@@ -1266,10 +1267,10 @@ class split_multichannel_image(generic_wrapper):
     --------
 
     >>> split_multichannel_image
-    <class '__main__.split_multichannel_image'>
+    <class 'possum.pos_wrappers.split_multichannel_image'>
 
     >>> split_multichannel_image() #doctest: +ELLIPSIS
-    <__main__.split_multichannel_image object at 0x...>
+    <possum.pos_wrappers.split_multichannel_image object at 0x...>
 
     >>> print split_multichannel_image() #doctest: +NORMALIZE_WHITESPACE
     c2d -mcs -foreach -type uchar -endfor -oo
@@ -1322,10 +1323,10 @@ class merge_components(generic_wrapper):
     multichannel image. The individual components are deleted afterwards.
 
     >>> merge_components
-    <class '__main__.merge_components'>
+    <class 'possum.pos_wrappers.merge_components'>
 
     >>> merge_components() #doctest: +ELLIPSIS
-    <__main__.merge_components object at 0x...>
+    <possum.pos_wrappers.merge_components object at 0x...>
 
     >>> print merge_components()
     c2d -foreach -type uchar -endfor -omc 3 ; rm -rfv ;
@@ -1411,7 +1412,90 @@ class merge_components(generic_wrapper):
         'other_files_remove': pos_parameters.list_parameter('other_files_remove', [], str_template='{_list}')
         }
 
+class image_voxel_count_wrapper(generic_wrapper):
+    """
+    Determines the amount (sum or integral) of non-background pixels in the
+    provided image.  The backgorund color can be customized. The wrapper
+    requires setting up the: `image`, `background`, `voxel_sum` or
+    `voxel_integral` parameters to work properly.
 
-if __name__ == '__main__':
+    .. note ::
+        Only positive (incl. 0) background values are supported.
+
+    #TODO: Implement negative background values support.
+
+    >>> image_voxel_count_wrapper
+    <class 'possum.pos_wrappers.image_voxel_count_wrapper'>
+
+    >>> image_voxel_count_wrapper() #doctest: +ELLIPSIS
+    <possum.pos_wrappers.image_voxel_count_wrapper object at 0x...>
+
+    >>> print image_voxel_count_wrapper()
+    c2d -shift - -thresh 0 0 0 1 | cut -f3 -d' '
+
+
+    Verify initial parameters values
+
+    >>> str(image_voxel_count_wrapper._parameters['dimension']) == '2'
+    True
+
+    >>> str(image_voxel_count_wrapper._parameters['image']) == ''
+    True
+
+    >>> str(image_voxel_count_wrapper._parameters['background']) == ''
+    True
+
+    >>> str(image_voxel_count_wrapper._parameters['voxel_sum']) == ''
+    True
+
+    >>> str(image_voxel_count_wrapper._parameters['voxel_integral']) == ''
+    True
+
+
+    Testing individual parameters
+
+    >>> print image_voxel_count_wrapper(dimension=3)
+    c3d -shift - -thresh 0 0 0 1 | cut -f3 -d' '
+
+    >>> print image_voxel_count_wrapper(image='image.nii.gz')
+    c2d image.nii.gz -shift - -thresh 0 0 0 1 | cut -f3 -d' '
+
+    >>> print image_voxel_count_wrapper(background=-20)
+    c2d -shift --20 -thresh 0 0 0 1 | cut -f3 -d' '
+
+    >>> print image_voxel_count_wrapper(background=0.0)
+    c2d -shift -0.0 -thresh 0 0 0 1 | cut -f3 -d' '
+
+    >>> print image_voxel_count_wrapper(background=20.0)
+    c2d -shift -20.0 -thresh 0 0 0 1 | cut -f3 -d' '
+
+    >>> print image_voxel_count_wrapper(voxel_sum=True)
+    c2d -shift - -thresh 0 0 0 1 -voxel-sum | cut -f3 -d' '
+
+    >>> print image_voxel_count_wrapper(voxel_integral=True)
+    c2d -shift - -thresh 0 0 0 1 -voxel-integral | cut -f3 -d' '
+
+
+    And all of them combined
+
+    >>> print image_voxel_count_wrapper(dimension=3, image='image.nii.gz',
+    ... background=255, voxel_sum=True)
+    c3d image.nii.gz -shift -255 -thresh 0 0 0 1 -voxel-sum | cut -f3 -d' '
+
+    """
+
+    _template = """c{dimension}d {image} -shift -{background} \
+        -thresh 0 0 0 1 {voxel_sum} {voxel_integral} | cut -f3 -d' ' """
+
+    _parameters = {
+        'dimension': pos_parameters.value_parameter('dimension', 2),
+        'image': pos_parameters.filename_parameter('image', False),
+        'background' : pos_parameters.value_parameter('shift', 0, '{_value}'),
+        'voxel_sum' : pos_parameters.boolean_parameter('voxel-sum', None, str_template='-{_name}'),
+        'voxel_integral' : pos_parameters.boolean_parameter('voxel-integral', None, str_template='-{_name}')
+    }
+
+
+if __name__ == 'possum.pos_wrappers':
     import doctest
     doctest.testmod()
