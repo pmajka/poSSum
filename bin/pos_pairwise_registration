@@ -22,22 +22,6 @@ FixedParameters: 0 0
 """
 
 
-class image_voxel_count_wrapper(pos_wrappers.generic_wrapper):
-    """
-    """
-
-    _template = """c{dimension}d {image} -shift -{background} \
-        -thresh 0 0 0 1 {voxel_sum} {voxel_integral} | cut -f3 -d' ' """
-
-    _parameters = {
-        'dimension': pos_parameters.value_parameter('dimension', 2),
-        'image': pos_parameters.filename_parameter('image', False),
-        'background' : pos_parameters.value_parameter('shift', 0, '{_value}'),
-        'voxel_sum' : pos_parameters.boolean_parameter('voxel-sum', None, str_template='-{_name}'),
-        'voxel_integral' : pos_parameters.boolean_parameter('voxel-integral', None, str_template='-{_name}')
-    }
-
-
 class pairwiseRegistration(output_volume_workflow):
     """
     Pairwise slice to slice registration script.
@@ -241,7 +225,7 @@ class pairwiseRegistration(output_volume_workflow):
         # Iterate over all reference slices and detect the number of voxels per
         # slice.
         for fixed_index in self._slice_assignment.values():
-            command = image_voxel_count_wrapper(
+            command = pos_wrappers.image_voxel_count_wrapper(
                 image = self.f['fixed_gray'](idx=fixed_index),
                 background = self.options.resliceBackgorund,
                 voxel_sum = True)
@@ -290,7 +274,7 @@ class pairwiseRegistration(output_volume_workflow):
         # Iterate over all moving slices and detect the number of voxels per
         # slice.
         for moving_index in self._slice_assignment.keys():
-            command = image_voxel_count_wrapper(
+            command = pos_wrappers.image_voxel_count_wrapper(
                 image = self.f['moving_gray'](idx=moving_index),
                 background = self.options.resliceBackgorund,
                 voxel_sum = True)
