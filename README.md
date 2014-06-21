@@ -111,9 +111,9 @@ And the required python modules::
     sudo easy_install -U config
     sudo easy_install -U networkx
 
-Install the ImageMagick package::
+Install the ImageMagick and parallel packages::
 
-    sudo apt-get install imagemagick
+    sudo apt-get install imagemagick parallel
 
 Install packages required for the Itk installation::
 
