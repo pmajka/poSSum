@@ -352,8 +352,8 @@ class sequential_alignment(output_volume_workflow):
             self._generate_identity_transformation(\
                 self.f['part_transf'](mIdx=moving_slice_index,
                                       fIdx=fixed_slice_index))
-            self._logger.info("Blank moving slice found. f=%d,m=%d ." % \
-                              moving_slice_index, fixed_slice_index)
+            self._logger.info("Blank moving slice found. f=%d, m=%d ." % \
+                              (moving_slice_index, fixed_slice_index))
             self._logger.info("An identity transform will be applied.")
             return False
 

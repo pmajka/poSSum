@@ -129,7 +129,7 @@ As described below::
      wget http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.1.tar.gz/download -O InsightToolkit-4.3.1.tar.gz
      tar -xvvzf InsightToolkit-4.3.1.tar.gz
      mkdir -p InsightToolkit-4.3.1-build && cd InsightToolkit-4.3.1-build
-     cmake ../InsightToolkit-4.3.1
+     ccmake ../InsightToolkit-4.3.1
 
 Setup the cmake so the python wrappings will be installed::
 
