@@ -1,7 +1,5 @@
 set -x
 
-WORK_DIR=/dev/shm/mdt_test_circle/
-
 mu=128
 sigma=16
 n=10

@@ -19,6 +19,14 @@ from possum import pos_parameters
 from possum import pos_wrappers
 
 
+IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0
+#Transform 0
+Transform: MatrixOffsetTransformBase_double_2_2
+Parameters: 1 0 0 1 0 0
+FixedParameters: 0 0
+"""
+
+
 class sequential_alignment(output_volume_workflow):
     """
     """
@@ -50,7 +58,6 @@ class sequential_alignment(output_volume_workflow):
     __IMAGE_DIMENSION = 2
     __HISTOGRAM_MATCHING = True
     __MI_SAMPLES = 16000
-    __ANTS_AFFINE_GRADIENT_DESCENT = [0.5, 0.95, 1.e-4, 1.e-4]
     __VOL_STACK_SLICE_SPACING = 1
 
     def _initializeOptions(self):
@@ -183,6 +190,33 @@ class sequential_alignment(output_volume_workflow):
                                    slice_filename)
                 sys.exit(1)
 
+        # Ok, now we have to perform the same operation for the moving slices.
+        # The idea is to locate the blank moving images. For these slices there
+        # is no need to calculate any transformation (singe the are blank
+        # anyway). Thus, a identity transformation is created for the blank
+        # moving slices.
+        self._logger.debug("Searching for blank images.")
+
+        # Iterate over all reference slices and detect the number of voxels per
+        # slice.
+        self._slices_voxel_counts = {}
+
+        # Iterate over all moving slices and detect the number of voxels per
+        # slice.
+        for slice_index in self.options.slice_range:
+            command = pos_wrappers.image_voxel_count_wrapper(
+                image = self.f['raw_image'](idx=slice_index),
+                background = self.options.resliceBackgorund,
+                voxel_sum = True)
+            vox_count = float(command()['stdout'].strip())
+            self._slices_voxel_counts[slice_index] = vox_count
+
+    def _generate_identity_transformation(self, filename):
+        """
+        Generated an two dimensional identity transformation.
+        """
+        open(filename, 'w').write(IDENTITY_TRANSFORM_STRING)
+
     def _generate_source_slices(self):
         """
         Generate source slices for the registration purposes. Both grayscale
@@ -244,6 +278,7 @@ class sequential_alignment(output_volume_workflow):
         # Calculate affine transformation for each slices pair
         commands = map(lambda x: self._get_partial_transform(*x),
             partial_transformation_pairs)
+        commands = filter(None, commands)
         self._logger.info("Executing the transformation commands.")
         self.execute(commands)
 
@@ -305,8 +340,22 @@ class sequential_alignment(output_volume_workflow):
         :param fixed_slice_index: fixed slice index
         :type fixed_slice_index: int
 
-        :return: Registration command wrapper.
+        :return: Registration command wrapper or False if given pair of
+        sections will not be registered.
         """
+
+        # Verify if both images contain actual image. If they do, proceed
+        # normally. If a blank image has occured, generate an identity
+        # transformation for this given pair of images.
+        if self._slices_voxel_counts[moving_slice_index] == 0 or \
+           self._slices_voxel_counts[fixed_slice_index] == 0:
+            self._generate_identity_transformation(\
+                self.f['part_transf'](mIdx=moving_slice_index,
+                                      fIdx=fixed_slice_index))
+            self._logger.info("Blank moving slice found. f=%d, m=%d ." % \
+                              (moving_slice_index, fixed_slice_index))
+            self._logger.info("An identity transform will be applied.")
+            return False
 
         # Define the registration settings: image-to-image metric and its
         # parameter, number of iterations, output naming, type of the affine
@@ -345,7 +394,6 @@ class sequential_alignment(output_volume_workflow):
             histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
             miOption=[metric_parameter, self.__MI_SAMPLES],
             allMetricsConverge=None,
-            affineGradientDescent=self.__ANTS_AFFINE_GRADIENT_DESCENT,
             affineMetricType=affine_metric_type)
 
         # Return the registration command.
