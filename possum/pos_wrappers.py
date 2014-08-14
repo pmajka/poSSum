@@ -88,14 +88,14 @@ class touch_wrapper(generic_wrapper):
     >>> print touch_wrapper()
     touch
 
-    >>> p=touch_wrapper(files=['file1.txt'])
+    >>> p = touch_wrapper(files=['file1.txt'])
     >>> p #doctest: +ELLIPSIS
     <possum.pos_wrappers.touch_wrapper object at 0x...>
 
     >>> print p
     touch file1.txt
 
-    >>> p=touch_wrapper(files=['file1.txt', 'file2.txt'])
+    >>> p = touch_wrapper(files=['file1.txt', 'file2.txt'])
     >>> print p
     touch file1.txt file2.txt
 
@@ -128,14 +128,151 @@ class touch_wrapper(generic_wrapper):
 
 
 class mkdir_wrapper(generic_wrapper):
+    """
+     A very simple ``mkdir`` bash command wrapper with default
+     -p option.
+
+    :param dir_list: A list of directories to to create. Even if you're creating
+                  only a single directory you have to still pass it as a list.
+    :type files: list of strings
+    
+    >>> mkdir_wrapper
+    <class 'possum.pos_wrappers.mkdir_wrapper'>
+
+    >>> mkdir_wrapper() #doctest: +ELLIPSIS
+    <possum.pos_wrappers.mkdir_wrapper object at 0x...>
+
+    >>> print mkdir_wrapper()
+    mkdir -p
+
+    >>> p = mkdir_wrapper(dir_list=['dir1'])
+    >>> p #doctest: +ELLIPSIS
+    <possum.pos_wrappers.mkdir_wrapper object at 0x...>
+
+    >>> print p
+    mkdir -p dir1
+
+    >>> p = mkdir_wrapper(dir_list=['dir1', 'dir2'])
+    >>> print p
+    mkdir -p dir1 dir2
+
+    >>> print p.updateParameters({"dir_list":[]})
+    mkdir -p
+
+    >>> print p.updateParameters({"dir_list":"a_poorly_provided_parameter"})
+    mkdir -p a _ p o o r l y _ p r o v i d e d _ p a r a m e t e r
+
+    >>> print p.updateParameters({"dir_list":["dir1","dir2", "dir"]})
+    mkdir -p dir1 dir2 dir
+    
+    >>> print p.updateParameters({"dir_list":None})
+    mkdir -p
+
+    >>> print p.updateParameters({"dir_list":True})
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "pos_wrappers.py", line 46, in __str__
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_wrappers.py", line 46, in <lambda>
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_parameters.py", line 38, in __str__
+        return self._serialize()
+      File "pos_parameters.py", line 231, in _serialize
+        self._list = self._delimiter.join(map(str, self.value))
+    TypeError: argument 2 to map() must support iteration
+
+    >>> print p.updateParameters({"dir_list":2})
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "pos_wrappers.py", line 46, in __str__
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_wrappers.py", line 46, in <lambda>
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_parameters.py", line 38, in __str__
+        return self._serialize()
+      File "pos_parameters.py", line 231, in _serialize
+        self._list = self._delimiter.join(map(str, self.value))
+    TypeError: argument 2 to map() must support iteration
+    """
+    
     _template = """mkdir -p {dir_list}"""
 
     _parameters = {
         'dir_list': list_parameter('dir_list', [], str_template='{_list}')
     }
+    
+    
 
 
 class rmdir_wrapper(generic_wrapper):
+    """
+     A very simple ``rm`` bash command wrapper with default
+     -rfv options.
+
+    :param dir_list: A list of directories to remove. Even if you're removing
+                  only a single directory you have to still pass it as a list.
+    :type files: list of strings
+    
+    >>> rmdir_wrapper
+    <class 'possum.pos_wrappers.rmdir_wrapper'>
+
+    >>> rmdir_wrapper() #doctest: +ELLIPSIS
+    <possum.pos_wrappers.rmdir_wrapper object at 0x...>
+
+    >>> print rmdir_wrapper()
+    rm -rfv
+
+    >>> p = rmdir_wrapper(dir_list=['dir1'])
+    >>> p #doctest: +ELLIPSIS
+    <possum.pos_wrappers.rmdir_wrapper object at 0x...>
+
+    >>> print p
+    rm -rfv dir1
+
+    >>> p = rmdir_wrapper(dir_list=['dir1', 'dir2'])
+    >>> print p
+    rm -rfv dir1 dir2
+
+    >>> print p.updateParameters({"dir_list":[]})
+    rm -rfv
+
+    >>> print p.updateParameters({"dir_list":"a_poorly_provided_parameter"})
+    rm -rfv a _ p o o r l y _ p r o v i d e d _ p a r a m e t e r
+
+    >>> print p.updateParameters({"dir_list":["dir1","dir2", "dir"]})
+    rm -rfv dir1 dir2 dir
+    
+    >>> print p.updateParameters({"dir_list":None})
+    rm -rfv
+
+    >>> print p.updateParameters({"dir_list":True})
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "pos_wrappers.py", line 46, in __str__
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_wrappers.py", line 46, in <lambda>
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_parameters.py", line 38, in __str__
+        return self._serialize()
+      File "pos_parameters.py", line 231, in _serialize
+        self._list = self._delimiter.join(map(str, self.value))
+    TypeError: argument 2 to map() must support iteration
+
+    >>> print p.updateParameters({"dir_list":2})
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "pos_wrappers.py", line 46, in __str__
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_wrappers.py", line 46, in <lambda>
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_parameters.py", line 38, in __str__
+        return self._serialize()
+      File "pos_parameters.py", line 231, in _serialize
+        self._list = self._delimiter.join(map(str, self.value))
+    TypeError: argument 2 to map() must support iteration
+    """
+    
+
     _template = """rm -rfv {dir_list}"""
 
     _parameters = {
@@ -144,6 +281,76 @@ class rmdir_wrapper(generic_wrapper):
 
 
 class copy_wrapper(generic_wrapper):
+    """
+    A very simple ``cp`` bash command wrapper with default
+     -rfv options.
+
+    :param source: A list of files to copy. Even if you're copying
+                  only a single you have to still pass the argument
+                  as a list.
+    :type files: list of strings
+    
+    :param target: A path to destination where you want to copy source(s)
+    :type files: string
+    
+    >>> copy_wrapper
+    <class 'possum.pos_wrappers.copy_wrapper'>
+
+    >>> copy_wrapper() #doctest: +ELLIPSIS
+    <possum.pos_wrappers.copy_wrapper object at 0x...>
+
+    >>> print copy_wrapper()
+    cp -rfv
+
+    >>> p = copy_wrapper(source=['source_file1'], target='destination_dir')
+    >>> p #doctest: +ELLIPSIS
+    <possum.pos_wrappers.copy_wrapper object at 0x...>
+
+    >>> print p
+    cp -rfv source_file1 destination_dir
+
+    >>> p = copy_wrapper(source=['source_file1', 'source_file2'], target='destination_dir')
+    >>> print p
+    cp -rfv source_file1 source_file2 destination_dir
+
+    >>> print p.updateParameters({"source":[], "target":''})
+    cp -rfv
+
+    >>> print p.updateParameters({"source":"a_poorly_provided_parameter", "target":''})
+    cp -rfv a _ p o o r l y _ p r o v i d e d _ p a r a m e t e r
+
+    >>> print p.updateParameters({"source":["dir1","dir2", "dir"], "target":'destination_dir'})
+    cp -rfv dir1 dir2 dir destination_dir
+    
+    >>> print p.updateParameters({"source":None, "target":None})
+    cp -rfv
+
+    >>> print p.updateParameters({"source":True, "target":True})
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "pos_wrappers.py", line 46, in __str__
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_wrappers.py", line 46, in <lambda>
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_parameters.py", line 38, in __str__
+        return self._serialize()
+      File "pos_parameters.py", line 231, in _serialize
+        self._list = self._delimiter.join(map(str, self.value))
+    TypeError: argument 2 to map() must support iteration
+
+    >>> print p.updateParameters({"source":2, "target":2})
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "pos_wrappers.py", line 46, in __str__
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_wrappers.py", line 46, in <lambda>
+        replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
+      File "pos_parameters.py", line 38, in __str__
+        return self._serialize()
+      File "pos_parameters.py", line 231, in _serialize
+        self._list = self._delimiter.join(map(str, self.value))
+    TypeError: argument 2 to map() must support iteration
+    """
     _template = """cp -rfv {source} {target}"""
 
     _parameters = {
@@ -153,8 +360,51 @@ class copy_wrapper(generic_wrapper):
 
 
 class compress_wrapper(generic_wrapper):
-    _template = """tar -cvvzf {archive_filename}.tgz {pathname}"""
+    """
+    A very simple ``tar`` bash command wrapper with default
+     -cvvzf options.
 
+    :param archive_filename: A pathname to archive you want to create.
+    :type files: string
+    
+    :param pathname: A path to a source file which you want to compress.
+    :type files: string
+    
+    >>> compress_wrapper
+    <class 'possum.pos_wrappers.compress_wrapper'>
+
+    >>> compress_wrapper() #doctest: +ELLIPSIS
+    <possum.pos_wrappers.compress_wrapper object at 0x...>
+
+    >>> print compress_wrapper()
+    tar -cvvzf .tgz
+
+    >>> p = compress_wrapper(archive_filename='archive_file_name', \
+                                pathname='file_to_compress')
+    >>> p #doctest: +ELLIPSIS
+    <possum.pos_wrappers.compress_wrapper object at 0x...>
+
+    >>> print p
+    tar -cvvzf archive_file_name.tgz file_to_compress
+
+    >>> p = compress_wrapper(archive_filename='', \
+                        pathname='file_to_compress')
+    >>> print p
+    tar -cvvzf .tgz file_to_compress
+
+    >>> print p.updateParameters({"archive_filename":'', "pathname":''})
+    tar -cvvzf .tgz
+    
+    >>> print p.updateParameters({"archive_filename":None, "pathname":None})
+    tar -cvvzf .tgz
+
+    >>> print p.updateParameters({"archive_filename":True, "pathname":True})
+    tar -cvvzf True.tgz True
+    
+    """
+    
+    _template = """tar -cvvzf {archive_filename}.tgz {pathname}"""
+    
     _parameters = {
         'archive_filename': filename_parameter('archive_filename', None),
         'pathname': filename_parameter('pathname', None),
