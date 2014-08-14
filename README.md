@@ -104,20 +104,20 @@ Install the necessary packages
 
 NumpPy, SciPy and Sphinx packages::
 
-    sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools
+    sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools parallel
 
 And the required python modules::
 
     sudo easy_install -U config
     sudo easy_install -U networkx
 
-Install the ImageMagick package::
+Install the ImageMagick and parallel packages::
 
-    sudo apt-get install imagemagick
+    sudo apt-get install imagemagick parallel
 
 Install packages required for the Itk installation::
 
-    sudo apt-get install build-essential ccmake cmake-curses-gui
+    sudo apt-get install build-essential cmake-curses-gui
 
 
 Install InsightToolkit
@@ -129,7 +129,7 @@ As described below::
      wget http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.1.tar.gz/download -O InsightToolkit-4.3.1.tar.gz
      tar -xvvzf InsightToolkit-4.3.1.tar.gz
      mkdir -p InsightToolkit-4.3.1-build && cd InsightToolkit-4.3.1-build
-     cmake ../InsightToolkit-4.3.1
+     ccmake ../InsightToolkit-4.3.1
 
 Setup the cmake so the python wrappings will be installed::
 
@@ -140,6 +140,7 @@ Setup the cmake so the python wrappings will be installed::
     INSTALL_WRAP_ITK_COMPATIBILITY   ON
     ITKV3_COMPATIBILITY              ON
     ITK_BUILD_ALL_MODULES            ON
+    ITK_USE_REVIEW                   ON 
     ITK_USE_SYSTEM_SWIG              OFF
     ITK_WRAP_DIMS                    2;3
     ITK_WRAP_DOC                     OFF
@@ -166,7 +167,7 @@ Setup the cmake so the python wrappings will be installed::
     ITK_WRAP_signed_short            ON
     ITK_WRAP_unsigned_char           ON
     ITK_WRAP_unsigned_long           OFF
-    ITK_WRAP_unsigned_short          OFF
+    ITK_WRAP_unsigned_short          ON
     ITK_WRAP_vector_double           ON
     ITK_WRAP_vector_float            ON
     SWIG_DIR                         /home/test/InsightToolkit-4.3.1-build/Wrapping/Generators/SwigInterface/swig/share/swig/2
@@ -192,8 +193,8 @@ As described below::
     export PYTHONPATH=${PYTHONPATH}:InsightToolkit-4.3.1-build/lib/
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:InsightToolkit-4.3.1-build/lib/
 
-    export PATH=$PATH:ANTs-1.9.v4-Linux/
-    export PATH=$PATH:c3d-1.0.0-Linux-x86_64/
+    export PATH=$PATH:ANTs-1.9.v4-Linux/bin/
+    export PATH=$PATH:c3d-1.0.0-Linux-x86_64/bin/
 
 Install git so the actual framework could be downloaded::
 

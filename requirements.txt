@@ -1,0 +1,4 @@
+config>=0.3.9
+networkx>=1.6
+numpy
+scipy
