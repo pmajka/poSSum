@@ -387,7 +387,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
         parser.add_option('--inputFilename', '-i', dest='inputFilename',
             type='str', default=None,
-            help='Input filename. See the detailed workflow description for the detailed criteria on the ptoper input file type.')
+            help='Input filename. See the detailed workflow description for the detailed criteria on the proper input file type.')
 
         parser.add_option('--grayscaleOutputImage', '-g',
             dest='grayscaleOutputImage', type='str', default=None,
