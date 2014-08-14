@@ -30,10 +30,10 @@ class run_tests(TestCommand):
         import doctest
 
         verbose_flag = False
-        print doctest.testmod(possum.pos_wrappers, verbose=verbose_flag)
-        print doctest.testmod(possum.pos_parameters, verbose=verbose_flag)
-        print doctest.testmod(possum.pos_wrapper_skel, verbose=verbose_flag)
-        print doctest.testmod(possum.pos_common, verbose=verbose_flag)
+        doctest.testmod(possum.pos_wrappers, verbose=verbose_flag)
+        doctest.testmod(possum.pos_parameters, verbose=verbose_flag)
+        doctest.testmod(possum.pos_wrapper_skel, verbose=verbose_flag)
+        doctest.testmod(possum.pos_common, verbose=verbose_flag)
 
 
 setup(

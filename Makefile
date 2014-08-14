@@ -11,6 +11,7 @@ help:
 
 clean: clean-build clean-pyc
 	rm -fr htmlcov/
+	rm -rf docs/build
 
 clean-build:
 	rm -fr build/
@@ -32,9 +33,7 @@ coverage:
 	open htmlcov/index.html
 
 docs:
-#	rm -f docs/pykCSD.rst
-#	rm -f docs/modules.rst
-#	sphinx-apidoc -o docs/ pykCSD
+#	sphinx-apidoc -o docs/ possum
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	firefox docs/build/html/index.html
