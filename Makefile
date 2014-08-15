@@ -30,7 +30,7 @@ coverage:
 	coverage run --source possum setup.py test
 	coverage report -m
 	coverage html
-	open htmlcov/index.html
+	firefox htmlcov/index.html
 
 docs:
 #	sphinx-apidoc -o docs/ possum

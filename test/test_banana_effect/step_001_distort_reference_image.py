@@ -131,7 +131,7 @@ def write_itk_matrix_transformation_to_file(transformation, filename):
         transform_writer = itk.TransformFileWriterTemplate.D.New()
     else:
         transform_writer = itk.TransformFileWriter.New()
-    
+
     transform_writer.SetInput(transformation)
     transform_writer.SetFileName(filename)
     transform_writer.Update()

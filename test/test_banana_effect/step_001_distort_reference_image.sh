@@ -6,7 +6,6 @@ source header.sh
 # Process the raw MR image into something on which we will
 # be working on
 # ---------------------------------------------------------
-
 pos_stack_reorient \
     -i ${INPUT_FILE} \
     -o ${PHANTOM_FILE} \
@@ -14,7 +13,7 @@ pos_stack_reorient \
     --orientationCode RAS \
     --flipAxes 0 1 1 \
     --setOrigin 0 0 0 
-    
+
 c3d ${PHANTOM_FILE} ${PHANTOM_FILE} \
         -clip 0 255 \
         -reslice-itk ${TRANSFORMATION} \
@@ -22,12 +21,12 @@ c3d ${PHANTOM_FILE} ${PHANTOM_FILE} \
         -origin 0x0x0mm \
         -type uchar -o ${PHANTOM_FILE} \
 
-#if [ ! -f ${PHANTOM_FILE} ];
-#then
+if [ ! -f ${PHANTOM_MASK} ]
+then
     c3d ${PHANTOM_FILE}\
         -thresh 20 255 1 0 \
         -type uchar -o ${PHANTOM_MASK}
-#fi
+fi
 
 c3d ${PHANTOM_FILE} ${PHANTOM_MASK} -times \
     -type uchar -o ${PHANTOM_MASKED}

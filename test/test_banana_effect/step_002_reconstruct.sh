@@ -109,18 +109,18 @@ c3d coarse_to_fine.nii.gz reference_image.nii.gz \
     -scale -1 -add -dup -times -sqrt \
     -o reconstruction_discrepancy.nii.gz
 
-# Cleaning up
+# ---------------------------------------------------------
+# Validate md5 sums of the obtained files
+# ---------------------------------------------------------
+md5sum -c test_banana_effect.md5
 
-rm -rv   002_distorted_data\
-         003_shape_prior_sections \
-         004_distorted_sections \
-         005_pairwise_alignment \
-         006_sections_to_shape_prior \
-         007_sequential_alignment/ \
-         008_coarse_to_fine \
-         001_phantom/phantom.nii.gz \
-         001_phantom/phantom_mask.nii.gz \
-         001_phantom/phantom_masked.nii.gz \
-         sequential_alignment_s-0_e-199_r-110_ROI-None_Resize-None_Color-red_Median-None_Metric-MI_MetricOpt-32_Affine-True_eps-1_lam0.00outROI-None_gray.nii.gz
-         
+# ---------------------------------------------------------
+# At the very end prove that coarse-to-fine reconstruction
+# gave better results than just the pairwise alignment
+# ---------------------------------------------------------
 
+c3d reference_image.nii.gz sections_to_shape_prior.nii.gz -msq
+# Should give MSQ = 60.0968
+
+c3d coarse_to_fine.nii.gz reference_image.nii.gz -msq
+# Should give:  MSQ = 45.9809

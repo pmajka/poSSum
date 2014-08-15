@@ -29,7 +29,7 @@ OV_ORIENTATION_CODE='RAS'
 OV_TYPE='uchar'
 OV_ORIGIN='0 0 0'
 OV_SPACING='1 1 1'
-OV_FLIP='0 1 1'
+OV_FLIP='0 0 0'
 
 OV_SETTINGS_SHORT="--permutation ${OV_PERMUTATION} --flipAxes ${OV_FLIP} --setSpacing ${OV_SPACING}  --setOrigin ${OV_ORIGIN} --setType ${OV_TYPE} --orientationCode ${OV_ORIENTATION_CODE}"
 OV_SETTINGS=" --outputVolumeSpacing ${OV_SPACING} --outputVolumeOrigin ${OV_ORIGIN} --outputVolumeOrientationCode ${OV_ORIENTATION_CODE}  --outputVolumePermutationOrder ${OV_PERMUTATION} --outputVolumeScalarType ${OV_TYPE} --setFlip ${OV_FLIP}"

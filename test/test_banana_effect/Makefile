@@ -13,6 +13,5 @@ clean:
 	coarse_to_fine.nii.gz \
 	reference_image.nii.gz \
 	shape_prior.nii.gz \
-	reconstruction_discrepancy.nii.gz \
-	test_banana_effect.md5
+	reconstruction_discrepancy.nii.gz
 	
