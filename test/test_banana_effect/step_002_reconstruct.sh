@@ -4,6 +4,13 @@ source header.sh
 
 
 # ---------------------------------------------------------
+# Copy the reference images to the main directory, just for
+# conveninece.
+
+cp -v ${PHANTOM_MASKED} reference_image.nii.gz
+cp -v ${PHANTOM_MASK} shape_prior.nii.gz
+
+# ---------------------------------------------------------
 # Slice the distorted image and the shape prior
 # ---------------------------------------------------------
 

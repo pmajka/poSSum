@@ -72,7 +72,4 @@ pos_stack_reorient \
     --stackingOptions ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \
     ${OV_SETTINGS_SHORT}
 
-cp -v ${PHANTOM_MASKED} reference_image.nii.gz
-cp -v ${PHANTOM_MASK} shape_prior.nii.gz
-
 rm -rfv 002_distorted_data  
