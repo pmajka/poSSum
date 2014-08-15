@@ -9,7 +9,8 @@ import os
 import pos_common
 
 print os.environ
-if os.environ.get('TRAVIS') is not 'true':
+print os.environ.get('TRAVIS')
+if os.environ.get('TRAVIS') != 'true':
     import pos_itk_core
 
 import pos_parameters
