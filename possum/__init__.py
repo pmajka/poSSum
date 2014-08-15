@@ -8,8 +8,6 @@ import os
 
 import pos_common
 
-print os.environ
-print os.environ.get('TRAVIS')
 if os.environ.get('TRAVIS') != 'true':
     import pos_itk_core
 
