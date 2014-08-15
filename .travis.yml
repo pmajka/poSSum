@@ -7,8 +7,15 @@ virtualenv:
   
 before_install:
 - sudo apt-get install build-essential python-dev python-numpy python-setuptools imagemagick python-scipy build-essential cmake-curses-gui imagemagick parallel
+
 install: pip install -r requirements.txt
-script: python setup.py test
+
+script:
+  - python setup.py test
+  - make coverage-gather
+
+after_success:
+  coveralls
 
 branches:
   only:
