@@ -117,17 +117,17 @@ c3d coarse_to_fine.nii.gz reference_image.nii.gz \
     -o reconstruction_discrepancy.nii.gz
 
 # ---------------------------------------------------------
-# Validate md5 sums of the obtained files
-# ---------------------------------------------------------
-md5sum -c test_banana_effect.md5
-
-# ---------------------------------------------------------
 # At the very end prove that coarse-to-fine reconstruction
 # gave better results than just the pairwise alignment
 # ---------------------------------------------------------
 
-c3d reference_image.nii.gz sections_to_shape_prior.nii.gz -msq
+c3d reference_image.nii.gz sections_to_shape_prior.nii.gz -msq > discrepancy_measurements.txt
 # Should give MSQ = 55.3536
 
-c3d coarse_to_fine.nii.gz reference_image.nii.gz -msq
+c3d coarse_to_fine.nii.gz reference_image.nii.gz -msq >> discrepancy_measurements.txt
 # Should give: MSQ = 38.7323
+
+# ---------------------------------------------------------
+# Validate md5 sums of the obtained files
+# ---------------------------------------------------------
+md5sum -c test_banana_effect.md5

@@ -15,6 +15,7 @@ clean:
 	shape_prior.nii.gz \
 	reconstruction_discrepancy.nii.gz \
 	sequential_alignment_s-0_*.nii.gz \
+	discrepancy_measurements.txt \
 	002_distorted_data \
 	003_shape_prior_sections \
 	004_distorted_sections \
