@@ -4,8 +4,8 @@ poSSum volumetric reconstruction framework
 ===========================================================
 
 
-.. image:: https://travis-ci.org/pmajka/poSSum.svg?branch=master
-        :target: https://travis-ci.org/pmajka/poSSum
+[![Build Status](https://travis-ci.org/pmajka/poSSum.svg?branch=master)](https://travis-ci.org/pmajka/poSSum)
+
 
 Overview
 ========
