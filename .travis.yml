@@ -1,24 +1,15 @@
 language: python
 python:
 - '2.7'
+
 virtualenv:
   system_site_packages: true
+  
 before_install:
 - sudo apt-get install build-essential python-dev python-numpy python-setuptools imagemagick python-scipy build-essential cmake-curses-gui imagemagick parallel
-- cd ${HOME} &&  wget http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.1.tar.gz/download -O InsightToolkit-4.3.1.tar.gz && tar -xzf InsightToolkit-4.3.1.tar.gz
-- mkdir -p InsightToolkit-4.3.1-build && cd InsightToolkit-4.3.1-build
-- cmake ../InsightToolkit-4.3.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=ON  -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=OFF -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=OFF -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON || true
-- cmake ../InsightToolkit-4.3.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=ON  -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=OFF -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=OFF -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON || true && make
-- export PYTHONPATH=${PYTHONPATH}:${HOME}/InsightToolkit-4.3.1-build/Wrapping/Generators/Python
-- export PYTHONPATH=${PYTHONPATH}:${HOME}/InsightToolkit-4.3.1-build/lib/
-- export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/InsightToolkit-4.3.1-build/lib/
 install: pip install -r requirements.txt
 script: python setup.py test
 
 branches:
   only:
-    - master 
-
-cache:
-  directories:
-  - ${HOME}/InsightToolkit-4.3.1-build
+    - master
