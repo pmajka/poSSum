@@ -127,7 +127,7 @@ md5sum -c test_banana_effect.md5
 # ---------------------------------------------------------
 
 c3d reference_image.nii.gz sections_to_shape_prior.nii.gz -msq
-# Should give MSQ = 60.0968
+# Should give MSQ = 55.3536
 
 c3d coarse_to_fine.nii.gz reference_image.nii.gz -msq
-# Should give:  MSQ = 45.9809
+# Should give: MSQ = 38.7323
