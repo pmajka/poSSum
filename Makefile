@@ -26,14 +26,15 @@ clean-pyc:
 test:
 	python setup.py test
 
-coverage:
-	coverage run --source possum setup.py test
+coverage-gather:
+	coverage run --source possum.__init__ --source possum.deformable_histology_iterations,possum.pos_common,possum.pos_deformable_wrappers,possum.pos_parameters,possum.pos_wrapper_skel,possum.pos_wrappers setup.py test
+
+coverage: coverage-gather
 	coverage report -m
 	coverage html
-	open htmlcov/index.html
+	firefox htmlcov/index.html
 
 docs:
-#	sphinx-apidoc -o docs/ possum
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	firefox docs/build/html/index.html
