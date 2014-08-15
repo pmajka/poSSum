@@ -27,7 +27,7 @@ test:
 	python setup.py test
 
 coverage-gather:
-	coverage run --source possum.__init__ --source possum.deformable_histology_iterations,possum.pos_common,possum.pos_deformable_wrappers,possum.pos_parameters,possum.pos_wrapper_skel,possum.pos_wrappers setup.py test
+	coverage run --source possum.__init__,possum.deformable_histology_iterations,possum.pos_common,possum.pos_deformable_wrappers,possum.pos_parameters,possum.pos_wrapper_skel,possum.pos_wrappers setup.py test
 
 coverage: coverage-gather
 	coverage report -m
