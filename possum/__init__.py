@@ -4,8 +4,12 @@
 
 __version__ = '0.16.0'
 
+import os
+
 import pos_common
-import pos_itk_core
+
+if os.environ.get('TRAVIS') is not 'true':
+    import pos_itk_core
 
 import pos_parameters
 import pos_wrapper_skel
