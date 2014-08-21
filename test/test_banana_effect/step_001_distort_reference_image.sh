@@ -24,9 +24,9 @@ c3d ${PHANTOM_FILE} ${PHANTOM_FILE} \
 
 #if [ ! -f ${PHANTOM_FILE} ];
 #then
-    c3d ${PHANTOM_FILE}\
-        -thresh 20 255 1 0 \
-        -type uchar -o ${PHANTOM_MASK}
+    #~ c3d ${PHANTOM_FILE}\
+        #~ -thresh 20 255 1 0 \
+        #~ -type uchar -o ${PHANTOM_MASK}
 #fi
 
 c3d ${PHANTOM_FILE} ${PHANTOM_MASK} -times \
