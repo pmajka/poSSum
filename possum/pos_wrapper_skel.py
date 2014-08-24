@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
 
+
 import sys, os
 import subprocess as sub
 import multiprocessing
@@ -13,6 +14,7 @@ from optparse import OptionParser, OptionGroup
 import pos_common
 import pos_wrappers
 
+
 class generic_workflow(object):
     """
     A generic command-line workflow class. Workflow should be understood as a
@@ -21,7 +23,22 @@ class generic_workflow(object):
     The workflow / pipeline may consist of different stages use a numbser of
     different files, etc. The reason for this class is to use command line tools
     which functionality cannot be achieved in any other way.
+
+    >>> options, args = generic_workflow.parseArgs()
+    >>> options.dryRun = True
+
+    >>> w = generic_workflow(options, args) #doctest: +ELLIPSIS
+    Executing: mkdir -p /dev/shm/generic_workflow_...
+    <BLANKLINE>
+    <BLANKLINE>
+
+    >>> w.execute(["qweq","qweqw"])
+    qweq
+    qweqw
+
+    >>> w.execute("qwe")
     """
+
     # Define the name for GNU parallel executeble name.
     __PARALLEL_EXECUTABLE_NAME="parallel"
 
