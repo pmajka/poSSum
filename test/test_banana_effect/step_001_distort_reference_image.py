@@ -22,8 +22,6 @@ def read_itk_image(image_filename):
 
     :return: Itk image object
     :rtype: `itk.Image`
-
-    TODO: Move this function to the pos_itk_core.
     """
 
     # Autodetect the image type, instanciate approperiate reader type, load and
@@ -46,8 +44,6 @@ def write_itk_image(image_to_save, filename):
 
     :param filename: Filename to store the image.
     :type filename: str
-
-    TODO: Move this function to the pos_itk_core.
     """
     writer = itk.ImageFileWriter[image_to_save].New()
     writer.SetInput(image_to_save)
@@ -76,9 +72,6 @@ def reslice_image(transforms, moving_image, reference_image=None, interpolator=N
     iterable of aproperiate type and size. Be carefull here. Segfault will
     surely occur in case of incompatibility.
     :type default_pixel_value: int, float or tupe
-
-    TODO: Document interpolator
-    TODO: Document process of composing transformations.O
     """
 
     # Instanciate composite transform which will handle all the partial
