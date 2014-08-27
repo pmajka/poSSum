@@ -117,6 +117,6 @@ def flatten(lst):
         else:
                 yield x
 
-if __name__ == '__main__':
+if __name__ == 'possum.pos_common':
     import doctest
     doctest.testmod()

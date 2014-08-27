@@ -1,0 +1,7 @@
+b06ed10ec49a4a4a04f6213723db3841  coarse_to_fine.nii.gz
+18a03f23cc6a500b27d86751df5ce74c  distorted_stack.nii.gz
+68743d7f6bd91a71216aecb70500b5a2  reference_image.nii.gz
+c4ce9f7aa2d1a632b11e4bcf5c4df2b0  sections_to_shape_prior.nii.gz
+ae27055b53aaa555bfa900c0f7d90dde  sequential_alignment.nii.gz
+61622e9011e458c52e44065e708555c1  shape_prior.nii.gz
+7e2117f6f86449dea3abe604057a9245  discrepancy_measurements.txt

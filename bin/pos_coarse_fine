@@ -85,10 +85,10 @@ class coarse_to_fine_transformation_merger(generic_workflow):
             self.options.slice_range)
 
         for transf_filename in filenames_to_check:
-            self._logger.debug("Checking for image: %workflow.", transf_filename)
+            self._logger.debug("Checking for image: %s.", transf_filename)
 
             if not os.path.isfile(transf_filename):
-                self._logger.error("File does not exist: %workflow. Exiting",
+                self._logger.error("File does not exist: %s. Exiting",
                     transf_filename)
                 sys.exit(1)
 

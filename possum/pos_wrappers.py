@@ -135,7 +135,7 @@ class mkdir_wrapper(generic_wrapper):
     :param dir_list: A list of directories to to create. Even if you're creating
                   only a single directory you have to still pass it as a list.
     :type files: list of strings
-    
+
     >>> mkdir_wrapper
     <class 'possum.pos_wrappers.mkdir_wrapper'>
 
@@ -164,7 +164,7 @@ class mkdir_wrapper(generic_wrapper):
 
     >>> print p.updateParameters({"dir_list":["dir1","dir2", "dir"]})
     mkdir -p dir1 dir2 dir
-    
+
     >>> print p.updateParameters({"dir_list":None})
     mkdir -p
 
@@ -194,14 +194,14 @@ class mkdir_wrapper(generic_wrapper):
         self._list = self._delimiter.join(map(str, self.value))
     TypeError: argument 2 to map() must support iteration
     """
-    
+
     _template = """mkdir -p {dir_list}"""
 
     _parameters = {
         'dir_list': list_parameter('dir_list', [], str_template='{_list}')
     }
-    
-    
+
+
 
 
 class rmdir_wrapper(generic_wrapper):
@@ -212,7 +212,7 @@ class rmdir_wrapper(generic_wrapper):
     :param dir_list: A list of directories to remove. Even if you're removing
                   only a single directory you have to still pass it as a list.
     :type files: list of strings
-    
+
     >>> rmdir_wrapper
     <class 'possum.pos_wrappers.rmdir_wrapper'>
 
@@ -241,7 +241,7 @@ class rmdir_wrapper(generic_wrapper):
 
     >>> print p.updateParameters({"dir_list":["dir1","dir2", "dir"]})
     rm -rfv dir1 dir2 dir
-    
+
     >>> print p.updateParameters({"dir_list":None})
     rm -rfv
 
@@ -271,7 +271,7 @@ class rmdir_wrapper(generic_wrapper):
         self._list = self._delimiter.join(map(str, self.value))
     TypeError: argument 2 to map() must support iteration
     """
-    
+
 
     _template = """rm -rfv {dir_list}"""
 
@@ -289,10 +289,10 @@ class copy_wrapper(generic_wrapper):
                   only a single you have to still pass the argument
                   as a list.
     :type files: list of strings
-    
+
     :param target: A path to destination where you want to copy source(s)
     :type files: string
-    
+
     >>> copy_wrapper
     <class 'possum.pos_wrappers.copy_wrapper'>
 
@@ -321,7 +321,7 @@ class copy_wrapper(generic_wrapper):
 
     >>> print p.updateParameters({"source":["dir1","dir2", "dir"], "target":'destination_dir'})
     cp -rfv dir1 dir2 dir destination_dir
-    
+
     >>> print p.updateParameters({"source":None, "target":None})
     cp -rfv
 
@@ -366,10 +366,10 @@ class compress_wrapper(generic_wrapper):
 
     :param archive_filename: A pathname to archive you want to create.
     :type files: string
-    
+
     :param pathname: A path to a source file which you want to compress.
     :type files: string
-    
+
     >>> compress_wrapper
     <class 'possum.pos_wrappers.compress_wrapper'>
 
@@ -394,17 +394,17 @@ class compress_wrapper(generic_wrapper):
 
     >>> print p.updateParameters({"archive_filename":'', "pathname":''})
     tar -cvvzf .tgz
-    
+
     >>> print p.updateParameters({"archive_filename":None, "pathname":None})
     tar -cvvzf .tgz
 
     >>> print p.updateParameters({"archive_filename":True, "pathname":True})
     tar -cvvzf True.tgz True
-    
+
     """
-    
+
     _template = """tar -cvvzf {archive_filename}.tgz {pathname}"""
-    
+
     _parameters = {
         'archive_filename': filename_parameter('archive_filename', None),
         'pathname': filename_parameter('pathname', None),
