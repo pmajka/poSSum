@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-NO_OF_BANANA=5
+NO_OF_BANANA=3
 # Master banana = 1
 
 # Define some important filenames         
