@@ -9,9 +9,7 @@ source header.sh
 # Setup the filenames and the directories.
 DIR_COARSE_ALIGNMENT=calculations/
 DIR_PAIRWISE_ITERATION=iteration/
-FILE_REFERENCE_MASK=001_phantom_master/phantom_masked.nii.gz
 VOL_RGB_SLICE_TO_SLICE_MASKED=distorted_stack.nii.gz
-
 
 # Set the number of the pairwise iterations
 # (presumably, the more the better. Not proven, though.)
@@ -149,14 +147,18 @@ antsApplyTransforms -d 3 \
      
 rm -rfv ${DIR_COARSE_ALIGNMENT}
 rm -rfv 001_phantom
-cp 001_phantom_master/phantom_masked.nii.gz reference.nii.gz
+cp -v ${PHANTOM_MASKED} reference.nii.gz
 
+
+# ---------------------------------------------------------
+# Just simply measure the dicrepancy between the the 
+# reconstructed image and the reference one.
 # ---------------------------------------------------------
 
 c3d reference.nii.gz final_reconstruction.nii.gz -msq > discrepancy_measurements.txt
-# Should give MSQ = 55.3536
+# Should give MSQ = 186, verified later by the md5 checksum.
 
-# ---------------------------------------------------------
+# --------------------------------------------------------
 # Validate md5 sums of the obtained files
-# ---------------------------------------------------------
+# --------------------------------------------------------
 md5sum -c test_banana_pairwise.md5

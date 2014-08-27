@@ -9,6 +9,7 @@ PHANTOM_FILE=001_phantom/phantom.nii.gz
 PHANTOM_MASK=001_phantom/phantom_mask.nii.gz
 PHANTOM_MASKED=001_phantom/phantom_masked.nii.gz
 SEGMENTATION_FILE=000_raw_data/raw_segmentation.nii.gz
+FILE_REFERENCE_MASK=001_phantom_master/phantom_masked.nii.gz
 MASK_FILE=001_phantom/mask.nii.gz
 
 # Indexing in arrays -> [NO_OF_BANANA - 1]
