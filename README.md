@@ -23,11 +23,7 @@ For the exact installation steps, check the `installation procedure` section bel
 Requirements and dependencies
 -----------------------------
 
-<<<<<<< HEAD
 In order to make the poSSum framework working, several dependencies have to be
-=======
-In order to make the poSSum framework working, several dependencies has to be
->>>>>>> b6826c5ac6f547a97ec5b951a8cd4fe194aba449
 satisfied. Below one can find the list of dependencies with a brief instruction
 on installing the individual dependencies.
 
