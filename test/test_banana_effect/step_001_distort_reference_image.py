@@ -45,6 +45,7 @@ def write_itk_image(image_to_save, filename):
     :param filename: Filename to store the image.
     :type filename: str
     """
+
     writer = itk.ImageFileWriter[image_to_save].New()
     writer.SetInput(image_to_save)
     writer.SetFileName(filename)

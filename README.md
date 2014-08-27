@@ -3,9 +3,9 @@
 poSSum volumetric reconstruction framework
 ===========================================================
 
-
 [![Build Status](https://travis-ci.org/pmajka/poSSum.svg?branch=master)](https://travis-ci.org/pmajka/poSSum) [![Coverage Status](https://coveralls.io/repos/pmajka/poSSum/badge.png?branch=master)](https://coveralls.io/r/pmajka/poSSum?branch=master)
 
+=======
 Overview
 ========
 
@@ -23,7 +23,11 @@ For the exact installation steps, check the `installation procedure` section bel
 Requirements and dependencies
 -----------------------------
 
+<<<<<<< HEAD
 In order to make the poSSum framework working, several dependencies have to be
+=======
+In order to make the poSSum framework working, several dependencies has to be
+>>>>>>> b6826c5ac6f547a97ec5b951a8cd4fe194aba449
 satisfied. Below one can find the list of dependencies with a brief instruction
 on installing the individual dependencies.
 

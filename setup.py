@@ -35,7 +35,6 @@ class run_tests(TestCommand):
         print doctest.testmod(possum.pos_wrapper_skel, verbose=verbose_flag)
         print doctest.testmod(possum.pos_common, verbose=verbose_flag)
 
-
 setup(
     name='possum-reconstruction',
     version=possum.__version__,
