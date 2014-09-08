@@ -1,3 +1,12 @@
+#==============================================================================
+#description     :This makefile carries out all necessary calculations
+#                :related to the 'test_banana_effect' test
+#author          :Konrad Solarz, Piotr Majka
+#date            :2014-08-29
+#usage           :make all
+#==============================================================================
+
+
 all: coarse_to_fine.nii.gz
 
 distorted_stack.nii.gz:

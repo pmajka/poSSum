@@ -112,6 +112,7 @@ And the required python modules::
 
     sudo easy_install -U config
     sudo easy_install -U networkx
+    sudo easy_install coverage
 
 Install the ImageMagick and parallel packages::
 

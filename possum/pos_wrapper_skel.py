@@ -32,11 +32,44 @@ class generic_workflow(object):
     <BLANKLINE>
     <BLANKLINE>
 
-    >>> w.execute(["qweq","qweqw"])
-    qweq
-    qweqw
+    >>> w.execute(["some command", "another command"])
+    some command
+    another command
 
-    >>> w.execute("qwe")
+    >>> w.execute(["a batch comprising only one command"])
+    a batch comprising only one command
+
+    >>> w.execute("Bad_usage")
+    B
+    a
+    d
+    _
+    u
+    s
+    a
+    g
+    e
+
+    You have to provide some argument, at least one
+    >>> w.execute()
+    Traceback (most recent call last):
+    TypeError: execute() takes at least 2 arguments (1 given)
+
+    All arguments are mapped to strings
+    >>> w.execute(1)
+    1
+
+    >>> w.execute([1, 2.3, False, None])
+    1
+    2.3
+    False
+    None
+
+    # Now let's test the ability of the workflow to compress its own
+    # workflow directory.
+    >>> w.options.archiveWorkDir = "/some/directory/to/archive/stuff/"
+    >>> w._archive_workflow() #doctest: +ELLIPSIS
+    tar -cvvzf /some/directory/to/archive/stuff/generic_workflow_...tgz /dev/shm/generic_workflow_...
     """
 
     # Define the name for GNU parallel executeble name.
@@ -302,15 +335,21 @@ class generic_workflow(object):
         as the archive may be really (by which I mean really big). Be prepared
         for gigabytes.
         """
-        arvhive_filename = os.path.join(self.options.archiveWorkDir,
+        archive_filename = os.path.join(self.options.archiveWorkDir,
                                         self.options.jobId)
         self._logger.info("Archiving the job directory to: %s",\
-                          arvhive_filename)
+                          archive_filename)
 
         compress_command = pos_wrappers.compress_wrapper(
-            archive_filename = arvhive_filename,
+            archive_filename = archive_filename,
             pathname = self.options.workdir)
-        compress_command()
+
+        # Well, sometimes you don't want to execute the archive command
+        # esspecially when not other command was executed.
+        if not self.options.dryRun:
+            compress_command()
+        else:
+            print compress_command
 
     def _clean_up(self):
         """
