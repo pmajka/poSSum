@@ -7,6 +7,8 @@ __version__ = '0.16.0'
 import os
 
 import pos_common
+import pos_color
+import pos_segmentation_parser
 
 if os.environ.get('TRAVIS') != 'true':
     import pos_itk_core
