@@ -203,4 +203,12 @@ Install git so the actual framework could be downloaded::
 
     sudo apt-get install git-core
 
+
+Installation screencast
+-------------------------
+
+You may also want to check out the screencast showing how to install the framework ::
+
+    http://youtu.be/j89KxyluiCM
+
 Starting with the fresh system installation: window 160x50.
