@@ -38,6 +38,7 @@ class sequential_alignment(output_volume_workflow):
         'part_naming': pos_parameters.filename('part_naming', work_dir='02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_'),
         'part_transf': pos_parameters.filename('part_transf', work_dir='02_transforms', str_template='tr_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
         'comp_transf': pos_parameters.filename('comp_transf', work_dir='02_transforms', str_template='ct_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
+        'transf_center': pos_parameters.filename('transf_center', work_dir='10_centre_of_gravity', str_template='cog_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
         'comp_transf_mask': pos_parameters.filename('comp_transf_mask', work_dir='02_transforms', str_template='ct_*_Affine.txt'),
         'resliced_gray': pos_parameters.filename('resliced_gray', work_dir='04_gray_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_gray_mask': pos_parameters.filename('resliced_gray_mask', work_dir='04_gray_resliced', str_template='%04d.nii.gz'),
@@ -240,6 +241,7 @@ class sequential_alignment(output_volume_workflow):
                 registration_resize=self.options.registrationResize,
                 registration_color=self.options.registrationColor,
                 median_filter_radius=self.options.medianFilterRadius,
+                invert_grayscale=self.options.invertMultichannel,
                 invert_multichannel=self.options.invertMultichannel)
             commands.append(copy.deepcopy(command))
 
@@ -275,12 +277,56 @@ class sequential_alignment(output_volume_workflow):
         partial_transformation_pairs =\
             list(flatten(partial_transformation_pairs))
 
+        # If user decided to prealign the images by their centre of gravity
+        # an additional series of transformations has to be carried out.
+        if self.options.enableMomentsAlignment:
+            commands = map(lambda x: self._get_cog_alignment(*x),
+                partial_transformation_pairs)
+            commands = filter(None, commands)
+
+            self._logger.info("Executing the centre of gravity transforms.")
+            self.execute(commands)
+
         # Calculate affine transformation for each slices pair
         commands = map(lambda x: self._get_partial_transform(*x),
             partial_transformation_pairs)
         commands = filter(None, commands)
         self._logger.info("Executing the transformation commands.")
         self.execute(commands)
+
+    def _get_cog_alignment(self, moving_slice_index, fixed_slice_index):
+        """
+        Get a single partial transform which computes a transformation of a
+        given moving slice into a fixed slice by the images' centres of
+        gravity.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+
+        :param fixed_slice_index: fixed slice index
+        :type fixed_slice_index: int
+
+        :return: Registration command wrapper or False if given pair of
+        sections will not be registered.
+        """
+
+        if self._slices_voxel_counts[moving_slice_index] <= 0.0005 or \
+           self._slices_voxel_counts[fixed_slice_index] <= 0.0005:
+            self._generate_identity_transformation(\
+                self.f['transf_center'](mIdx=moving_slice_index,
+                                      fIdx=fixed_slice_index))
+            self._logger.info("Blank moving slice found. f=%d,m=%d ." % \
+                              (moving_slice_index, fixed_slice_index))
+            self._logger.info("An identity transform will be applied.")
+            return False
+
+        cog_transform_getter = pos_wrappers.align_by_center_of_gravity(
+            fixed_image = self.f['src_gray'](idx=fixed_slice_index),
+            moving_image = self.f['src_gray'](idx=moving_slice_index),
+            output_transformation = \
+                    self.f['transf_center'](mIdx=moving_slice_index,
+                                            fIdx=fixed_slice_index))
+        return copy.deepcopy(cog_transform_getter)
 
     def _calculate_composite_transforms(self):
         """
@@ -371,6 +417,14 @@ class sequential_alignment(output_volume_workflow):
         # to make a true/false string out of boolean value but ...
         use_rigid_transformation = str(self.options.useRigidAffine).lower()
 
+        # Ok, next we need to incorporate the centre-of-gravity prealignment
+        # information if a user decided to switch on the prealignment step.
+        initial_affine = None
+        if self.options.enableMomentsAlignment:
+            initial_affine = \
+            self.f['transf_center'](mIdx=moving_slice_index,
+                                    fIdx=fixed_slice_index)
+
         # Define the image-to-image metric.
         metrics = []
         metric = pos_wrappers.ants_intensity_meric(
@@ -391,6 +445,7 @@ class sequential_alignment(output_volume_workflow):
             continueAffine=None,
             rigidAffine=use_rigid_transformation,
             imageMetrics=metrics,
+            initialAffine=initial_affine,
             histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
             miOption=[metric_parameter, self.__MI_SAMPLES],
             allMetricsConverge=None,
@@ -818,6 +873,12 @@ class sequential_alignment(output_volume_workflow):
             help='Supress transformation calculation')
         registration_options.add_option('--disable-transformations', default=True,
             dest='enableTransformations', action='store_false')
+        registration_options.add_option('--enable-moments', default=False,
+            dest='enableMomentsAlignment', action='store_true',
+            help='Enable prealigning the images by their centre of gravity. Note that the images have to have dark (0) background with a bright (positive) content.')
+        registration_options.add_option('--disable-moments', default=False,
+            dest='enableMomentsAlignment', action='store_false',
+            help='Enable prealigning the images by their centre of gravity. Note that the images have to have dark (0) background with a bright (positive) content.')
 
         registration_options.add_option('--transformationsDirectory', default=False,
             dest='transformationsDirectory', type="str",

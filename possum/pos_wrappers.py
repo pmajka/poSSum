@@ -1745,6 +1745,43 @@ class image_voxel_count_wrapper(generic_wrapper):
         'voxel_integral' : pos_parameters.boolean_parameter('voxel-integral', None, str_template='-{_name}')
     }
 
+class align_by_center_of_gravity(generic_wrapper):
+    """
+    Calculated a transformation between two images so that the images' centres
+    of gravity matches.
+
+    >>> align_by_center_of_gravity
+    <class '__main__.align_by_center_of_gravity'>
+
+    >>> align_by_center_of_gravity() #doctest: +ELLIPSIS
+    <__main__.align_by_center_of_gravity object at 0x...>
+
+    >>> print align_by_center_of_gravity()
+    pos_align_by_moments.py
+
+    >>> p = align_by_center_of_gravity(fixed_image="fixed.nii.gz",
+    ... moving_image="moving.nii.gz", output_transformation="output.txt")
+    >>> print p
+    pos_align_by_moments.py --fixedImage fixed.nii.gz --movingImage moving.nii.gz --transformationFileName output.txt
+
+    >>> print p.updateParameters({"fixed_image": None})
+    pos_align_by_moments.py --movingImage moving.nii.gz --transformationFileName output.txt
+
+    >>> print p.updateParameters({"moving_image": None})
+    pos_align_by_moments.py --transformationFileName output.txt
+
+    >>> print p.updateParameters({"moving_image": "m.nii.gz", "fixed_image": "f.nii.gz"})
+    pos_align_by_moments.py --fixedImage f.nii.gz --movingImage m.nii.gz --transformationFileName output.txt
+    """
+
+    _template = """pos_align_by_moments.py {fixed_image} {moving_image} {output_transformation}"""
+
+    _parameters = {
+        'fixed_image': pos_parameters.filename_parameter('fixed_image', None, str_template="--fixedImage {_value}"),
+        'moving_image': pos_parameters.filename_parameter('moving_image', None, str_template="--movingImage {_value}"),
+        'output_transformation': pos_parameters.filename_parameter('output_transformation', None, str_template="--transformationFileName {_value}"),
+    }
+
 
 if __name__ == 'possum.pos_wrappers':
     import doctest

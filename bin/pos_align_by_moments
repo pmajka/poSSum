@@ -1,0 +1,158 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*
+
+import sys
+import itk
+
+import pos_wrapper_skel
+import pos_itk_core
+import pos_itk_transforms
+
+class align_by_centre_of_gravity(pos_wrapper_skel.enclosed_workflow):
+    """
+    Class which calculates transformation from a moving image to a fixed images
+    so that their centres of mass overlap. The computed transformation is a
+    two dimensional, translational transformation.
+
+    This kind of prealignment os often required prior to the actual
+    reconstruction (registration) since it often happens that the sections of
+    the images are not overlapping altogether. Not only it causes the
+    registration not to converge but also even not to initialize properly.
+    That is why a prealignment step is so much of use.
+
+    .. note::
+
+        An important technicality is that the prealignment is based on the
+        images' first-order moments. Because of that it is of extreme
+        importance to maintain the image background to be black (with values
+        close to zero) while the foreground comprises intensities far from
+        zero. Please do have that in mind.
+
+
+    What I have not realised (althought I definitely should have) is that
+    prealigning the images greatly reduced the time required to perform the
+    actual affine registration. The improvement might be as much as an order of
+    magnitude!
+    """
+
+    def _validate_options(self):
+        super(self.__class__, self)._initializeOptions()
+
+        assert self.options.fixedImage is not None,\
+            self._logger.error("No fixed image provided (-f ....). Plese supply a fixed image and try again.")
+
+        assert self.options.movingImage is not None,\
+            self._logger.error("No moving image provided (-m ....). Plese supply a moving image and try again.")
+
+        assert self.options.transformationFileName is not None,\
+            self._logger.error("No output transformation filename provided (-t ....).")
+
+    def launch(self):
+        # Execute the parents before-execution activities
+        super(self.__class__, self)._pre_launch()
+
+        # At the very beginning, determine input image type to configure the
+        # reader.
+        reference_filename = self.options.fixedImage
+        moving_filename = self.options.movingImage
+        output_transform_filename = self.options.transformationFileName
+
+        # Determine types of both: moving and fixed (reference) images:
+        self._fixed_image_type =\
+            pos_itk_core.autodetect_file_type(reference_filename)
+        self._moving_image_type =\
+            pos_itk_core.autodetect_file_type(moving_filename)
+
+        self._output_image_type = self._fixed_image_type
+
+        self._logger.info("Determined fixed image type: %s",
+                          self._fixed_image_type)
+        self._logger.info("Determined moving (and output) image type: %s",
+                          self._moving_image_type)
+
+        self._logger.info("Determined slices' image type: %s",
+                          self._output_image_type)
+
+        # Read both, fixed and moving images:
+        self._logger.debug("Reading fixed image %s", reference_filename)
+        self._fixed_image_reader = itk.ImageFileReader[self._fixed_image_type].New()
+        self._fixed_image_reader.SetFileName(reference_filename)
+        self._fixed_image_reader.Update()
+
+        self._logger.debug("Reading moving image %s", moving_filename)
+        self._moving_image_reader = itk.ImageFileReader[self._moving_image_type].New()
+        self._moving_image_reader.SetFileName(moving_filename)
+        self._moving_image_reader.Update()
+
+        # It is required that both images are of the same dimension!
+        assert self._fixed_image_reader.GetOutput().GetImageDimension() == \
+               self._moving_image_reader.GetOutput().GetImageDimension(),\
+            self._logger.error("The images are not of the same dimension!. Cannot proceed.")
+        # Well, if the images are of the same dimension then store the value:
+        self._image_dim = self._moving_image_reader.GetOutput().GetImageDimension()
+
+
+        # Calculate the image moments:
+        self._logger.debug("Calculating the centre of gravity %s")
+
+        fixed_image_moments = itk.ImageMomentsCalculator[self._fixed_image_type].New()
+        fixed_image_moments.SetImage(self._fixed_image_reader.GetOutput())
+        fixed_image_moments.Compute()
+
+        moving_image_moments = itk.ImageMomentsCalculator[self._moving_image_type].New()
+        moving_image_moments.SetImage(self._moving_image_reader.GetOutput())
+        moving_image_moments.Compute()
+
+        # Define moving -> fixed image transformation based on the
+        # moments. The code below makes sure that both: Images and
+        # volumes.
+        self._logger.debug("Calculating transformation...")
+        if self._image_dim == 2:
+            center = itk.Euler2DTransform.New()
+        elif self._image_dim == 3:
+            center = itk.Euler3DTransform.New()
+
+        center_fixed = fixed_image_moments.GetCenterOfGravity()
+        center_moving = moving_image_moments.GetCenterOfGravity()
+        center.SetTranslation(center_moving - center_fixed)
+
+        # Well, at the end of the day it would be useful to actually store
+        # the transformation :) Let's do it then.
+        self._logger.debug("Exporting the transformation parameters to a text file %s",
+            self.options.transformationFileName)
+        transform_writer = itk.TransformFileWriterTemplate.D.New()
+        transform_writer.SetInput(center)
+        transform_writer.SetFileName(output_transform_filename)
+        transform_writer.Update()
+
+        if self.options.outpuImage is not None:
+            resliced = pos_itk_transforms.reslice_image([center],
+                self._moving_image_reader.GetOutput(),
+                self._fixed_image_reader.GetOutput())
+            pos_itk_transforms.write_itk_image(
+                resliced, self.options.outpuImage)
+
+        # Run parent's post execution activities
+        super(self.__class__, self)._post_launch()
+
+    @staticmethod
+    def parseArgs():
+        usage_string = "python pos_align_by_center_of_gravity.py "
+        parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
+
+        parser.add_option('--fixedImage', '-f', dest='fixedImage', type='str',
+                default=None, help='Fixed image (target of the alignment).')
+        parser.add_option('--movingImage', '-m', dest='movingImage', type='str',
+                default=None, help='Moving image image (image to be aligned).')
+        parser.add_option('--outpuImage', '-o', dest='outpuImage', type='str',
+                default=None, help='Optional argument. Name of the output resliced moving image.')
+        parser.add_option('--transformationFileName', '-t', dest='transformationFileName', type='str',
+                default=None, help='Filename of the output transformation.')
+
+        (options, args) = parser.parse_args()
+        return (options, args)
+
+if __name__ == '__main__':
+    options, args = align_by_centre_of_gravity.parseArgs()
+    workflow = align_by_centre_of_gravity(options, args)
+    workflow.launch()

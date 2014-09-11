@@ -49,7 +49,7 @@ setup(
     description='three dimensional image reconstruction from serial sections.',
     long_description=long_description,
     packages=['possum','bin'],
-    scripts=['bin/pos_coarse_fine', 'bin/pos_deformable_histology_reconstruction', 'bin/pos_pairwise_registration', 'bin/pos_reorder_volume', 'bin/pos_sequential_alignment', 'bin/pos_slice_preprocess', 'bin/pos_slice_volume', 'bin/pos_stack_reorient', 'bin/pos_stack_warp_image_multi_transform'],
+    scripts=['bin/pos_align_by_moments', 'bin/pos_coarse_fine', 'bin/pos_deformable_histology_reconstruction', 'bin/pos_pairwise_registration', 'bin/pos_reorder_volume', 'bin/pos_sequential_alignment', 'bin/pos_slice_preprocess', 'bin/pos_slice_volume', 'bin/pos_stack_reorient', 'bin/pos_stack_warp_image_multi_transform'],
     include_package_data=True,
     platforms='Linux',
     test_suite='possum.test.test_possum',
