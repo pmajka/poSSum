@@ -1774,7 +1774,7 @@ class align_by_center_of_gravity(generic_wrapper):
     pos_align_by_moments.py --fixedImage f.nii.gz --movingImage m.nii.gz --transformationFileName output.txt
     """
 
-    _template = """pos_align_by_moments.py {fixed_image} {moving_image} {output_transformation}"""
+    _template = """pos_align_by_moments {fixed_image} {moving_image} {output_transformation}"""
 
     _parameters = {
         'fixed_image': pos_parameters.filename_parameter('fixed_image', None, str_template="--fixedImage {_value}"),

@@ -12,6 +12,7 @@ import pos_segmentation_parser
 
 if os.environ.get('TRAVIS') != 'true':
     import pos_itk_core
+    import pos_itk_transforms
 
 import pos_parameters
 import pos_wrapper_skel

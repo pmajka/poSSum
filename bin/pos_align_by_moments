@@ -4,11 +4,12 @@
 import sys
 import itk
 
-import pos_wrapper_skel
-import pos_itk_core
-import pos_itk_transforms
+from possum.pos_wrapper_skel import enclosed_workflow
+import possum.pos_wrapper_skel
+import possum.pos_itk_core
+import possum.pos_itk_transforms
 
-class align_by_centre_of_gravity(pos_wrapper_skel.enclosed_workflow):
+class align_by_centre_of_gravity(enclosed_workflow):
     """
     Class which calculates transformation from a moving image to a fixed images
     so that their centres of mass overlap. The computed transformation is a
@@ -59,9 +60,9 @@ class align_by_centre_of_gravity(pos_wrapper_skel.enclosed_workflow):
 
         # Determine types of both: moving and fixed (reference) images:
         self._fixed_image_type =\
-            pos_itk_core.autodetect_file_type(reference_filename)
+            possum.pos_itk_core.autodetect_file_type(reference_filename)
         self._moving_image_type =\
-            pos_itk_core.autodetect_file_type(moving_filename)
+            possum.pos_itk_core.autodetect_file_type(moving_filename)
 
         self._output_image_type = self._fixed_image_type
 
@@ -138,7 +139,7 @@ class align_by_centre_of_gravity(pos_wrapper_skel.enclosed_workflow):
     @staticmethod
     def parseArgs():
         usage_string = "python pos_align_by_center_of_gravity.py "
-        parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
+        parser = possum.pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--fixedImage', '-f', dest='fixedImage', type='str',
                 default=None, help='Fixed image (target of the alignment).')
