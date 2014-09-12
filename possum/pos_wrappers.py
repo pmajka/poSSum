@@ -1751,10 +1751,10 @@ class align_by_center_of_gravity(generic_wrapper):
     of gravity matches.
 
     >>> align_by_center_of_gravity
-    <class '__main__.align_by_center_of_gravity'>
+    <class 'possum.pos_wrappers.align_by_center_of_gravity'>
 
     >>> align_by_center_of_gravity() #doctest: +ELLIPSIS
-    <__main__.align_by_center_of_gravity object at 0x...>
+    <possum.pos_wrappers.align_by_center_of_gravity object at 0x...>
 
     >>> print align_by_center_of_gravity()
     pos_align_by_moments.py
