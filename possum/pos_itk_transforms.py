@@ -124,6 +124,7 @@ def load_warp_field_transform_from_file(warp_filed_filename):
     :paran warp_filed_filename: filename of the image containing the displacement field.
     :type warp_filed_filename: str
     """
+
     warp_image_type = pos_itk_core.autodetect_file_type(warp_filed_filename)
     dimension = warp_image_type.GetImageDimension()
 
@@ -229,6 +230,7 @@ def write_itk_image(image_to_save, filename):
     :param filename: Filename to store the image.
     :type filename: str
     """
+
     writer = itk.ImageFileWriter[image_to_save].New()
     writer.SetInput(image_to_save)
     writer.SetFileName(filename)

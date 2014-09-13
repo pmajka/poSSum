@@ -1757,21 +1757,21 @@ class align_by_center_of_gravity(generic_wrapper):
     <possum.pos_wrappers.align_by_center_of_gravity object at 0x...>
 
     >>> print align_by_center_of_gravity()
-    pos_align_by_moments.py
+    pos_align_by_moments
 
     >>> p = align_by_center_of_gravity(fixed_image="fixed.nii.gz",
     ... moving_image="moving.nii.gz", output_transformation="output.txt")
     >>> print p
-    pos_align_by_moments.py --fixedImage fixed.nii.gz --movingImage moving.nii.gz --transformationFileName output.txt
+    pos_align_by_moments --fixedImage fixed.nii.gz --movingImage moving.nii.gz --transformationFileName output.txt
 
     >>> print p.updateParameters({"fixed_image": None})
-    pos_align_by_moments.py --movingImage moving.nii.gz --transformationFileName output.txt
+    pos_align_by_moments --movingImage moving.nii.gz --transformationFileName output.txt
 
     >>> print p.updateParameters({"moving_image": None})
-    pos_align_by_moments.py --transformationFileName output.txt
+    pos_align_by_moments --transformationFileName output.txt
 
     >>> print p.updateParameters({"moving_image": "m.nii.gz", "fixed_image": "f.nii.gz"})
-    pos_align_by_moments.py --fixedImage f.nii.gz --movingImage m.nii.gz --transformationFileName output.txt
+    pos_align_by_moments --fixedImage f.nii.gz --movingImage m.nii.gz --transformationFileName output.txt
     """
 
     _template = """pos_align_by_moments {fixed_image} {moving_image} {output_transformation}"""
