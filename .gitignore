@@ -2,3 +2,6 @@ docs/build/*
 docs/source/.ropeproject/*
 .ropeproject/*
 .coverage
+*.swp
+*.*~
+*~
