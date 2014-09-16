@@ -2,6 +2,11 @@ import csv
 from pos_color import pos_color
 
 
+__author__ = "Konrad Solarz, Piotr Majka"
+__maintainer__ = "Piotr Majka"
+__email__ = "pmajka@nencki.gov.pl"
+
+
 class snap_label(object):
 
     def __init__(self, idx, (r, g, b), transparency, label_visibility,
