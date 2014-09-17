@@ -89,19 +89,19 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             self.options.inputVolumeWeight = float(self.options.inputVolume[0])
             self.options.inputVolume = self.options.inputVolume[1]
             self._logger.info("Selected input volume: %s, assigned weight: %f ." %
-                self.options.inputVolume, self.options.inputVolumeWeight)
+                (self.options.inputVolume, self.options.inputVolumeWeight))
 
         if self.options.outlineVolume:
             self.options.outlineVolumeWeight = float(self.options.outlineVolume[0])
             self.options.outlineVolume = self.options.outlineVolume[1]
             self._logger.info("Selected outline volume: %s, assigned weight: %f ." %
-                self.options.outlineVolume, self.options.outlineVolumeWeight)
+                (self.options.outlineVolume, self.options.outlineVolumeWeight))
 
         if self.options.referenceVolume:
             self.options.referenceVolumeWeight = float(self.options.referenceVolume[0])
             self.options.referenceVolume = self.options.referenceVolume[1]
             self._logger.info("Selected reference volume: %s, assigned weight: %f ." %
-                self.options.referenceVolume, self.options.referenceVolumeWeight)
+                (self.options.referenceVolume, self.options.referenceVolumeWeight))
 
         if self.options.maskedVolume:
             self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])
