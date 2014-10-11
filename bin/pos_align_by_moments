@@ -121,7 +121,17 @@ class align_by_centre_of_gravity(enclosed_workflow):
         # the transformation :) Let's do it then.
         self._logger.debug("Exporting the transformation parameters to a text file %s",
             self.options.transformationFileName)
-        transform_writer = itk.TransformFileWriterTemplate.D.New()
+
+        # TODO: Explain WTF?
+        # http://www.itk.org/Wiki/ITK/Examples/IO/TransformFileReader
+        # http://review.source.kitware.com/#/c/14293/1
+        if (itk.Version.GetITKMajorVersion() == 4 and
+            itk.Version.GetITKMinorVersion() >= 5) or \
+            (itk.Version.GetITKMajorVersion() > 4):
+            transform_writer = itk.TransformFileWriterTemplate.D.New()
+        else:
+            transform_writer = itk.TransformFileWriter.New()
+
         transform_writer.SetInput(center)
         transform_writer.SetFileName(output_transform_filename)
         transform_writer.Update()

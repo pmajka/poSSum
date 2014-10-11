@@ -280,8 +280,14 @@ class generic_workflow(object):
                 open(command_filename, 'w').write("\n".join(map(str, commands)))
                 self._logger.info("Saving command file: %s", command_filename)
 
-                command_str = 'parallel -a %s -k -j %d ' %\
+                cluster_file = os.path.join(os.getenv("HOME"), '.pos_cluster')
+                if os.path.isfile(cluster_file):
+                    command_str = 'parallel --sshloginfile %s -a %s -k -j %d --env PATH --env PYTHONPATH --env LD_LIBRARY_PATH --workdir %s' %\
+                        (cluster_file, command_filename, self.options.cpuNo, os.getcwd())
+                else:
+                    command_str = 'parallel -a %s -k -j %d' %\
                         (command_filename, self.options.cpuNo)
+
                 self._logger.debug("Executing: %s", command_str)
 
                 # Tested against execution of multiple commands

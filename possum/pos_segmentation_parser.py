@@ -394,8 +394,6 @@ class snap_label_description(object):
 
         >>> os.remove("/tmp/whs_0.6.2.zip")
         >>> os.remove('/tmp/whs_0.6.2_lut.txt')
-
-
         """
 
         # When list of labels is not provided, an empty dictionary
