@@ -192,11 +192,11 @@ As described below::
 
     find InsightToolkit-4.3.1-build/ -name "*.pth" | xargs cat
     export PYTHONPATH=${PYTHONPATH}:/home/test/InsightToolkit-4.3.1-build/Wrapping/Generators/Python
-    export PYTHONPATH=${PYTHONPATH}:InsightToolkit-4.3.1-build/lib/
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:InsightToolkit-4.3.1-build/lib/
+    export PYTHONPATH=${PYTHONPATH}:/home/test/InsightToolkit-4.3.1-build/lib/
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/test/InsightToolkit-4.3.1-build/lib/
 
-    export PATH=$PATH:ANTs-1.9.v4-Linux/bin/
-    export PATH=$PATH:c3d-1.0.0-Linux-x86_64/bin/
+    export PATH=$PATH:/home/test/ANTs-1.9.v4-Linux/bin/
+    export PATH=$PATH:/home/test/c3d-1.0.0-Linux-x86_64/bin/
 
 Install git so the actual framework could be downloaded::
 
