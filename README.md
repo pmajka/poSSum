@@ -185,6 +185,8 @@ Install ANTS, Convert 3d and setup the paths
 
 As described below::
 
+
+    cd
     wget http://heanet.dl.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.tar.gz -O ANTs-1.9.v4-Linux.tar.gz
     wget http://skylink.dl.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz -O c3d-nightly-Linux-x86_64.tar.gz
     tar -xvvzf ANTs-1.9.v4-Linux.tar.gz
