@@ -5,13 +5,44 @@ poSSum volumetric reconstruction framework
 
 [![Build Status](https://travis-ci.org/pmajka/poSSum.svg?branch=master)](https://travis-ci.org/pmajka/poSSum) [![Coverage Status](https://coveralls.io/repos/pmajka/poSSum/badge.png?branch=master)](https://coveralls.io/r/pmajka/poSSum?branch=master)
 
-=======
+========
 Overview
 ========
 
 The poSSum framework is a set of scripts and workflows which purpose it to
 reconstruct the volumetric datasets based on series of serial sections of
 different modality and quality.
+
+
+Preconfigured VM
+================
+
+If you would like to start using the poSSum framework immediately
+without necessity of installation and configuration, you are strongly 
+encouraged to download preconfigured virtual machine.
+
+The appliance can be imported to VirtualBox software
+(https://www.virtualbox.org/) which operates on multiple operating systems
+including Windows, OSX and Linux. Note however, that the file
+to download is a substantial one:  about 10GB.
+
+You can download the poSSum preconfigured virtual machine
+using the link below:
+xxxxxxxxxxxxxxxxxxxxxxxx
+
+Should you have any problem with importing the virtual appliance,
+please refer to the VirtualBox documentation:
+
+http://docs.oracle.com/cd/E26217_01/E26796/html/qs-import-vm.html
+http://www.virtualbox.org/manual/ch01.html#ovf
+
+or other online resources, e.g:
+http://www.maketecheasier.com/import-export-ova-files-in-virtualbox/
+
+Note that all usernames and passwords (including the root passord) are: testuser
+Also, please let the VM have at least 4GB of memory (8GB recommended) 
+and 4CPUs (however, the more the better).
+
 
 
 Installation
@@ -193,11 +224,11 @@ As described below::
 
     find InsightToolkit-4.3.1-build/ -name "*.pth" | xargs cat
     export PYTHONPATH=${PYTHONPATH}:/home/test/InsightToolkit-4.3.1-build/Wrapping/Generators/Python
-    export PYTHONPATH=${PYTHONPATH}:InsightToolkit-4.3.1-build/lib/
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:InsightToolkit-4.3.1-build/lib/
+    export PYTHONPATH=${PYTHONPATH}:/home/test/InsightToolkit-4.3.1-build/lib/
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/test/InsightToolkit-4.3.1-build/lib/
 
-    export PATH=$PATH:ANTs-1.9.v4-Linux/bin/
-    export PATH=$PATH:c3d-1.0.0-Linux-x86_64/bin/
+    export PATH=$PATH:/home/test/ANTs-1.9.v4-Linux/bin/
+    export PATH=$PATH:/home/test/c3d-1.0.0-Linux-x86_64/bin/
 
 Install git so the actual framework could be downloaded::
 

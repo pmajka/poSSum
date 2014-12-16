@@ -125,7 +125,7 @@ def load_warp_field_transform_from_file(warp_filed_filename):
     :type warp_filed_filename: str
     """
 
-    warp_image_type = pos_itk_core.autodetect_file_type(warp_filed_filename)
+    warp_image_type = possum.pos_itk_core.autodetect_file_type(warp_filed_filename)
     dimension = warp_image_type.GetImageDimension()
 
     warp_image_reader = itk.ImageFileReader[warp_image_type].New()
@@ -211,7 +211,7 @@ def read_itk_image(image_filename):
 
     # Autodetect the image type, instanciate approperiate reader type, load and
     # return the image.
-    image_type = pos_itk_core.autodetect_file_type(image_filename)
+    image_type = possum.pos_itk_core.autodetect_file_type(image_filename)
     image_reader = itk.ImageFileReader[image_type].New()
     image_reader.SetFileName(image_filename)
     image_reader.Update()

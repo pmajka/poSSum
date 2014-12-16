@@ -1,14 +1,12 @@
 #!/usr/bin/python
 
+import csv
+from sys import argv
 import networkx as nx
-from numpy import ones, concatenate, array
-from collections import defaultdict
+import numpy as np
+from numpy import ones, concatenate
 from math import ceil, sqrt
 import matplotlib.pyplot as plt
-import csv
-import numpy as np
-from sys import argv
-
 
 def weightFunction(mdx, fdx, similarity_measure, l):
     return (1.0 + similarity_measure) * abs(mdx - fdx) * (1.0 + l) ** (abs(mdx - fdx))
