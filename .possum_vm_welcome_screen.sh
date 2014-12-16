@@ -11,8 +11,8 @@ cat <<InputComesFromHERE
     | |                                      
     |_|  Piotr Majka <p.majka@nencki.gov.pl>
 
-      Volumetric reconstruction framework
-      Framework version: ${possum_version}
+      Volumetric Reconstruction Framework
+      version. ${possum_version}
 
 Type possum_test to conduct a basic sanity checks
 of the famework.
@@ -20,8 +20,12 @@ of the famework.
 You can find the most recent code snapshot on:
 https://github.com/pmajka/poSSum
 
+To update the code to the most recent developmental
+version simply type: possum_update
+
 You can find the most recent version of the VM on:
-xxxx
+http://doc.3dbar.org/possum/possum_vm.tgz
+
 InputComesFromHERE
 
 # One should append the lines below to the .bashrc file
@@ -36,6 +40,13 @@ InputComesFromHERE
 
 #   cd ${possum_dir}
 #   python setup.py test
+#   cd 
+#   }
+
+#   function possum_update {
+
+#   cd ${possum_dir}
+#   git pull origin develop && git checkout develop
 #   cd 
 #   }
 
