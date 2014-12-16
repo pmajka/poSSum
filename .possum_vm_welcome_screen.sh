@@ -27,6 +27,7 @@ xxxx
 InputComesFromHERE
 
 # One should append the lines below to the .bashrc file
+
 #   function possum_test {
 
 #   echo ""
@@ -40,7 +41,15 @@ InputComesFromHERE
 #   cd 
 #   }
 
-#   possum_vm_filename=`find ~ -name .possum_vm_welcome_screen.sh`
+#   if [ -e ${HOME}/.possum_cache ]
+#   then
+#       possum_vm_filename=`cat ${HOME}/.possum_cache`
+#   else
+#       find ${HOME} ~ -name .possum_vm_welcome_screen.sh | head -n 1 > ${HOME}/.possum_cache
+#       possum_vm_filename=`cat ${HOME}/.possum_cache`
+#   fi
+
 #   possum_dir=`dirname ${possum_vm_filename}`
 #   possum_version=`grep __version__ ${possum_dir}/possum/__init__.py | cut -f2 -d = | tr -d " '"`
 #   source ${possum_vm_filename}
+#   cd ${possum_dir} && source setenv.sh && cd
