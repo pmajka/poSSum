@@ -1,8 +1,6 @@
 #!/bin/bash -xe
 
-#TODO: Describe the purpose of this file
-
-#clear
+clear
 cat <<InputComesFromHERE
                  _____ _____                 
                 / ____/ ____|                
