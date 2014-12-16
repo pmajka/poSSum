@@ -16,13 +16,10 @@ cat <<InputComesFromHERE
 
 Type possum_test to conduct a basic sanity checks
 of the famework.
-
 You can find the most recent code snapshot on:
 https://github.com/pmajka/poSSum
-
 To update the code to the most recent developmental
-version simply type: possum_update
-
+version simply type: possum_update .
 You can find the most recent version of the VM on:
 http://doc.3dbar.org/possum/possum_vm.tgz
 
@@ -32,23 +29,64 @@ InputComesFromHERE
 
 #   function possum_test {
 
-#   echo ""
-#   echo ".------------------------------------------."
-#   echo "|         Conducting the tests             |"
-#   echo "*------------------------------------------*"
-#   echo ""
+#       echo ""
+#       echo ".------------------------------------------."
+#       echo "|         Conducting the tests             |"
+#       echo "*------------------------------------------*"
+#       echo ""
 
-#   cd ${possum_dir}
-#   python setup.py test
-#   cd 
+#       cd ${possum_dir}
+#       python setup.py test
+#       cd 
 #   }
+
 
 #   function possum_update {
 
-#   cd ${possum_dir}
-#   git pull origin develop && git checkout develop
-#   cd 
+#       cd ${possum_dir}
+#       git pull origin && git checkout develop
+#       cd 
 #   }
+
+
+#   function possum_build_examples {
+#       echo "Note that bulding the examples may take"
+#       echo "up to serveral hours depending on the VM settings."
+#       echo "Press C-c to break."
+#       sleep 1 && echo "5"
+#       sleep 1 && echo "4"
+#       sleep 1 && echo "3"
+#       sleep 1 && echo "2"
+#       sleep 1 && echo "1"
+#       sleep 1 && echo "0"
+
+#       cd ${possum_dir}/test/test_stack_sections/
+#       make clean && make
+
+#       cd ${possum_dir}/test/test_slice_preprocess/
+#       bash test_slice_preprocess.sh
+
+#       cd ${possum_dir}/test/test_pos_reorder_volume/
+#       make -i
+
+#       cd ${possum_dir}/test/test_pos_pairwise_alignment_rigid/
+#       bash test_pos_pairwise_alignment_rigid.sh
+
+#       cd ${possum_dir}/test/test_pos_pairwise_alignment_ellipses/
+#       bash test_pos_pairwise_alignment_ellipses.sh 
+
+#       cd ${possum_dir}/test/test_banana_pairwise/
+#       make
+
+#       cd ${possum_dir}/test/test_banana_effect/
+#       make
+
+#       cd ${possum_dir}/test/test_bananas_and_graphs/
+#       make
+
+#       cd
+#   }
+
 
 #   if [ -e ${HOME}/.possum_cache ]
 #   then
