@@ -21,4 +21,5 @@ clean:
 	rm -vrf  \
 		stacked_axial_exmaple.nii.gz \
 		stacked_coronal_exmaple.nii.gz \
-		stacked_sagital_exmaple.nii.gz
+		stacked_sagital_exmaple.nii.gz \
+		stacked_coronal_exmaple_downsampled.nii.gz
