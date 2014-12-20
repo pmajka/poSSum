@@ -6,7 +6,10 @@
 #usage           :make all
 #==============================================================================
 
-all: step1 step2 step3 step4
+all: step0 step1 step2 step3 step4
+
+step0:
+	bash -x step_000_download_tutorial_dataset.sh
 
 step1:
 	bash -x step_001_initialize_workflow.sh
