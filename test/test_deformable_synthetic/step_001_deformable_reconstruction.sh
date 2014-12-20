@@ -25,7 +25,7 @@ pos_deformable_histology_reconstruction \
     --planeSpacing ${SOURCE_SPACING} \
     --startSlice ${IDX_FIRST_SLICE} \
     --endSlice ${IDX_LAST_SLICE} \
-    --iterations 8 \
+    --iterations 12 \
     --neighbourhood 1 \
     --outputNaming output_ \
     --antsImageMetric CC \
