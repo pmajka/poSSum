@@ -37,9 +37,8 @@ pos_deformable_histology_reconstruction \
     --stackFinalDeformation \
     --workDir ${DIR_DEFORMABLE_RECONSTRUCTION} 
     
-#   --cleanup
-
 cp -v ${DIR_DEFORMABLE_RECONSTRUCTION}/08_intermediate_results/intermediate_output__0007.nii.gz \
       deformable_reconstruction_result.nii.gz
 
 rm -rfv input_for_deformable_reconstruction.nii.gz
+rm -rf ${DIR_DEFORMABLE_RECONSTRUCTION}
