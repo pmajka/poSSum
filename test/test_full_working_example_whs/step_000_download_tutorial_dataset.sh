@@ -18,4 +18,5 @@ else
     wget ${DATASET_URL} -O ${DATASET_FILENAME}
 fi
 
-md5sum -c ${DATASET_FILENAME}.md5 && tar -xvvzf ${DATASET_FILENAME} 
+md5sum -c ${DATASET_FILENAME}.md5 && tar -xvvzf ${DATASET_FILENAME}
+mv whs_small/* . && rm -rf whs_small
