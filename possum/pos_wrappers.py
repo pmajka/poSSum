@@ -202,8 +202,6 @@ class mkdir_wrapper(generic_wrapper):
     }
 
 
-
-
 class rmdir_wrapper(generic_wrapper):
     """
      A very simple ``rm`` bash command wrapper with default
@@ -428,6 +426,13 @@ class ants_registration(generic_wrapper):
 
         1. ANTs-1.9.v4-Linux
         2. ANTs-1.9.x-Linux
+
+    >>> metric = ants_intensity_meric(fixed_image='f.nii.gz', moving_image='m.nii.gz')
+    >>> wrapper = ants_registration(imageMetrics=[metric], outputNaming="test_")
+    >>> wrapper() # doctest: +ELLIPSIS
+    Executing: ...
+
+    #TODO: Check the port output
     """
 
     _template = """ANTS {dimension} \
@@ -468,10 +473,10 @@ class ants_registration(generic_wrapper):
 
     def __call__(self, *args, **kwargs):
         execution = super(self.__class__, self).__call__(*args, **kwargs)
-        execution['port']['deformable_list'] = [str(self.p['outputNaming']) + 'Warp.nii.gz']
+        execution['port']['deformable_list'] = [str(self.p['outputNaming'].value) + 'Warp.nii.gz']
 
         if self.p['affineIterations']:
-            execution['port']['affine_list'] = [str(self.p['outputNaming']) + 'Affine.txt']
+            execution['port']['affine_list'] = [str(self.p['outputNaming'].value) + 'Affine.txt']
 
         execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
 
@@ -591,6 +596,8 @@ class ants_intensity_meric(generic_wrapper):
     >>> print p.updateParameters({"metric":"MI"})
     -m MI[f.nii.gz,m.nii.gz,0.5,1]
 
+    >>> p.value = None
+
     """
     _template = "-m {metric}[{fixed_image},{moving_image},{weight},{parameter}]"
 
@@ -697,6 +704,11 @@ class ants_point_set_estimation_metric(generic_wrapper):
     <possum.pos_wrappers.ants_point_set_estimation_metric object at 0x...>
     >>> print p
     -m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,0.1,True]
+
+    >>> p.value = None
+    >>> p.value == '-m PSE[fixed.nii.gz,moving.nii.gz,fixed_points.nii.gz,moving_points.nii.gz,0.5,0.1,True]'
+    True
+
     """
 
     _template = "-m PSE[{fixed_image},{moving_image},{fixed_points},{moving_points},{weight},{point_set_percentage}{point_set_sigma}{boundary_points_only}]"
@@ -863,6 +875,28 @@ class ants_compose_multi_transform(generic_wrapper):
 
 class ants_average_images(generic_wrapper):
     """
+    >>> ants_average_images
+    <class 'possum.pos_wrappers.ants_average_images'>
+
+    >>> ants_average_images() #doctest: +ELLIPSIS
+    <possum.pos_wrappers.ants_average_images object at 0x...>
+
+    >>> str(ants_average_images._parameters['dimension']) == '2'
+    True
+
+    >>> str(ants_average_images._parameters['normalize']) == ''
+    True
+
+    >>> str(ants_average_images._parameters['input_images']) == ''
+    True
+
+    >>> str(ants_average_images._parameters['output_image']) == ''
+    True
+
+    >>> wrapper = ants_average_images()
+    >>> wrapper() # doctest: +ELLIPSIS
+    Executing: ...
+
     """
     _template = """AverageImages {dimension} {output_image} {normalize} {input_images}"""
 
