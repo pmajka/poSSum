@@ -216,8 +216,10 @@ And then make the build::
 Install ANTS, Convert 3d and setup the paths
 ----------------------------------------------
 
-As described below::
+As described below (provided that `/home/test/` is you home ddirectory)::
 
+
+    cd
     wget http://heanet.dl.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.tar.gz -O ANTs-1.9.v4-Linux.tar.gz
     wget http://skylink.dl.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz -O c3d-nightly-Linux-x86_64.tar.gz
     tar -xvvzf ANTs-1.9.v4-Linux.tar.gz
@@ -235,7 +237,13 @@ Install git so the actual framework could be downloaded::
 
     sudo apt-get install git-core
 
+Then simply clone the repository and set up the environmental variables::
 
+    cd && git clone https://github.com/pmajka/poSSum.git
+    cd poSSum && source setenv.sh 
+    
+The framework should be ready to use.
+    
 Installation screencast
 -------------------------
 
@@ -243,4 +251,6 @@ You may also want to check out the screencast showing how to install the framewo
 
     http://youtu.be/j89KxyluiCM
 
+<!---
 Starting with the fresh system installation: window 160x50.
+-->
