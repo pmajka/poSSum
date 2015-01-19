@@ -65,11 +65,53 @@ class generic_workflow(object):
     False
     None
 
+
     # Now let's test the ability of the workflow to compress its own
     # workflow directory.
     >>> w.options.archiveWorkDir = "/some/directory/to/archive/stuff/"
     >>> w._archive_workflow() #doctest: +ELLIPSIS
     tar -cvvzf /some/directory/to/archive/stuff/generic_workflow_...tgz /dev/shm/generic_workflow_...
+
+
+    # Ok, let's remove the existing workflow object and create a new one with
+    # slightly more settings. First of all, these settings cause the workflow
+    # to use the local /tmp/ directory instead or the shared RAM memoru of the
+    # system. Note that this is still machine-local directory and is not
+    # shared between different execution nodes. This only replaces the
+    # /dev/shm/ with the /tmp/ directory and that's it.
+
+    # The next change is that the dry run option is actually turned on so the
+    # commands will be actually executed not only printed. This may cause a lot
+    # of mess - but hey - that's what you call testing!
+    >>> options, args = generic_workflow.parseArgs()
+    >>> options.disableSharedMemory = True
+    >>> options.dryRun = False
+    >>> options.cleanup = True
+    >>> options.archiveWorkDir = "/tmp/"
+
+    >>> w = generic_workflow(options, args) #doctest: +ELLIPSIS
+    Executing: mkdir -p /tmp/generic_workflow_...
+    <BLANKLINE>
+    <BLANKLINE>
+
+    # To test out the execution routines one has to actually execute some
+    # commands therefore below we execute a command which does not produce any
+    # output.
+    >>> w.execute(["sleep 1"]) ==  ('', '')
+    True
+
+    # Now we test archiving and cleanup routines by manually executing a pre
+    # and postlaunch methods. In the meanwhile we want to test the archiving
+    # feature as well
+    >>> w._pre_launch()
+    >>> w._post_launch() #doctest: +ELLIPSIS
+    Executing: tar -cvvzf /tmp/generic_workflow_....tgz /tmp/generic_workflow_...
+    ...
+    Executing: rm -rfv /tmp/generic_workflow_...
+    removed `/tmp/generic_workflow_...'
+    removed directory: `/tmp/generic_workflow_...'
+    <BLANKLINE>
+
     """
 
     # Define the name for GNU parallel executeble name.
@@ -242,7 +284,7 @@ class generic_workflow(object):
         return pos_wrappers.rmdir_wrapper(dir_list=[path])()
 
     @staticmethod
-    def _basesame(path, withExtension=False):
+    def _basename(path, withExtension=False):
         return pos_common.get_basename(path, withExtension)
 
     def execute(self, commands, parallel=True):
@@ -298,7 +340,9 @@ class generic_workflow(object):
                 self._logger.debug("Last commands stderr: %s", stderr)
                 return stdout, stderr
             else:
-                return map(lambda x: x(), commands)
+                #TODO: Make this better. This is very, very bad thing
+                # to use os.system!
+                return map(lambda x: os.system(x), commands)
         else:
             print "\n".join(map(str, commands))
 
@@ -343,6 +387,9 @@ class generic_workflow(object):
         """
         archive_filename = os.path.join(self.options.archiveWorkDir,
                                         self.options.jobId)
+
+        self._logger.info("Archive basename: %s", \
+                          generic_workflow._basename(archive_filename))
         self._logger.info("Archiving the job directory to: %s",\
                           archive_filename)
 
@@ -414,6 +461,17 @@ class output_volume_workflow(generic_workflow):
     outputs. It handles additional command line parameters for defining the
     origin, spacing, orientation, type, anatomical orientation and many many
     other.
+
+    >>> options, args = output_volume_workflow.parseArgs()
+    >>> options.parallel = False
+
+    >>> w = output_volume_workflow(options, args) #doctest: +ELLIPSIS
+    Executing: mkdir -p /dev/shm/output_volume_workflow_...
+    <BLANKLINE>
+    <BLANKLINE>
+
+    >>> print w.execute(["sleep 1"], parallel=False) == [0]
+    True
     """
 
     __output_vol_command_line_args_help = {}
@@ -500,6 +558,9 @@ class enclosed_workflow(generic_workflow):
     working directories and which do not store temponary data aduring processing.
     It has disabled some features regarding jobdirs, parallel execution,
     cleaning up the working directories, etc.
+
+    >>> options, args = enclosed_workflow.parseArgs()
+    >>> w = enclosed_workflow(options, args) #doctest: +ELLIPSIS
     """
     def _initializeOptions(self):
         super(enclosed_workflow, self)._initializeOptions()
@@ -514,6 +575,6 @@ class enclosed_workflow(generic_workflow):
         self.options.cleanup = False
         self.options.cpuNo = 1
 
-if __name__ == '__main__':
+if __name__ == 'possum.pos_wrapper_skel':
     import doctest
     doctest.testmod()

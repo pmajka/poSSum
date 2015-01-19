@@ -24,16 +24,17 @@ encouraged to download preconfigured virtual machine.
 The appliance can be imported to VirtualBox software
 (https://www.virtualbox.org/) which operates on multiple operating systems
 including Windows, OSX and Linux. Note however, that the file
-to download is a substantial one:  about 10GB.
+to download is a substantial one:  about 2GB.
 
 You can download the poSSum preconfigured virtual machine
 using the link below:
-xxxxxxxxxxxxxxxxxxxxxxxx
+http://doc.3dbar.org/possum/possum_framework_vm.ova
 
 Should you have any problem with importing the virtual appliance,
 please refer to the VirtualBox documentation:
 
 http://docs.oracle.com/cd/E26217_01/E26796/html/qs-import-vm.html
+
 http://www.virtualbox.org/manual/ch01.html#ovf
 
 or other online resources, e.g:
