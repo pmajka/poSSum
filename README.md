@@ -24,7 +24,7 @@ encouraged to download preconfigured virtual machine.
 The appliance can be imported to VirtualBox software
 (https://www.virtualbox.org/) which operates on multiple operating systems
 including Windows, OSX and Linux. Note however, that the file
-to download is a substantial one:  about 2GB.
+to download is a substantial one: about 2GB. Have also in mind that, although we're trying to keep the VM updated, the environment installed on th VM might be slightly behind the current develop branch of the framework. You have to update it on your own.
 
 You can download the poSSum preconfigured virtual machine
 using the link below:
