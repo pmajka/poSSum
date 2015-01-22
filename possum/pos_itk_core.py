@@ -250,7 +250,7 @@ def resample_image_filter(input_image, scaling_factor, default_value=0,
     logger.info("   + Computed final origin: %s", str(origin_post))
 
     # Set the image sizes, spacing, origins and image direction matrix:
-    resample_filter.SetSize(post_size)
+    resample_filter.SetSize(map(int,post_size))
     resample_filter.SetOutputSpacing(post_spacing)
     resample_filter.SetOutputOrigin(origin_post)
     resample_filter.SetOutputDirection(input_image.GetDirection())

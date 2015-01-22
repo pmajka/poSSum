@@ -25,7 +25,8 @@ http://doc.3dbar.org/possum/possum_vm.tgz
 
 InputComesFromHERE
 
-# One should append the lines below to the .bashrc file
+##One should append the lines below to the .bashrc file
+##cat .possum_vm_welcome_screen.sh | grep '#'  | tail -n +2 | sed 's/^.//'
 
 #   function possum_test {
 
