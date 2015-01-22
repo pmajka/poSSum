@@ -316,12 +316,13 @@ class generic_workflow(object):
         # executed serially or parallelly. In the latter case, all the commands
         # are dumped into a file and executed with the GNU parallel.
         if not self.options.dryRun:
-            if parallel:
-                command_filename = \
-                    os.path.join(self.options.workdir, str(time.time()))
-                open(command_filename, 'w').write("\n".join(map(str, commands)))
-                self._logger.info("Saving command file: %s", command_filename)
 
+            command_filename = \
+                os.path.join(self.options.workdir, str(time.time()))
+            open(command_filename, 'w').write("\n".join(map(str, commands)))
+            self._logger.info("Saving command file: %s", command_filename)
+
+            if parallel:
                 cluster_file = os.path.join(os.getenv("HOME"), '.pos_cluster')
                 if os.path.isfile(cluster_file):
                     command_str = 'parallel --sshloginfile %s -a %s -k -j %d --env PATH --env PYTHONPATH --env LD_LIBRARY_PATH --workdir %s' %\
@@ -329,20 +330,21 @@ class generic_workflow(object):
                 else:
                     command_str = 'parallel -a %s -k -j %d' %\
                         (command_filename, self.options.cpuNo)
-
-                self._logger.debug("Executing: %s", command_str)
-
-                # Tested against execution of multiple commands
-                stdout, stderr =  sub.Popen(command_str,
-                                    stdout=sub.PIPE, stderr=sub.PIPE,
-                                    shell=True, close_fds=True).communicate()
-                self._logger.debug("Last commands stdout: %s", stdout)
-                self._logger.debug("Last commands stderr: %s", stderr)
-                return stdout, stderr
             else:
-                #TODO: Make this better. This is very, very bad thing
-                # to use os.system!
-                return map(lambda x: os.system(x), commands)
+                command_str = 'bash -x %s' % command_filename
+
+            self._logger.debug("Executing: %s", command_str)
+
+            # Tested against execution of multiple commands
+            stdout, stderr =  sub.Popen(command_str,
+                                stdout=sub.PIPE, stderr=sub.PIPE,
+                                shell=True, close_fds=True).communicate()
+
+            self._logger.debug("Last commands stdout: %s", stdout)
+            self._logger.debug("Last commands stderr: %s", stderr)
+
+            return stdout, stderr
+
         else:
             print "\n".join(map(str, commands))
 
@@ -470,8 +472,12 @@ class output_volume_workflow(generic_workflow):
     <BLANKLINE>
     <BLANKLINE>
 
-    >>> print w.execute(["sleep 1"], parallel=False) == [0]
+    >>> print w.execute(["sleep 1"], parallel=False)[0] == ''
     True
+
+    >>> print w.execute(["sleep 1"], parallel=False)[1].strip() == "+ sleep 1"
+    True
+
     """
 
     __output_vol_command_line_args_help = {}
