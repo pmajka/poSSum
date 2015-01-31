@@ -32,11 +32,86 @@ class generic_workflow(object):
     <BLANKLINE>
     <BLANKLINE>
 
-    >>> w.execute(["qweq","qweqw"])
-    qweq
-    qweqw
+    >>> w.execute(["some command", "another command"])
+    some command
+    another command
 
-    >>> w.execute("qwe")
+    >>> w.execute(["a batch comprising only one command"])
+    a batch comprising only one command
+
+    >>> w.execute("Bad_usage")
+    B
+    a
+    d
+    _
+    u
+    s
+    a
+    g
+    e
+
+    You have to provide some argument, at least one
+    >>> w.execute()
+    Traceback (most recent call last):
+    TypeError: execute() takes at least 2 arguments (1 given)
+
+    All arguments are mapped to strings
+    >>> w.execute(1)
+    1
+
+    >>> w.execute([1, 2.3, False, None])
+    1
+    2.3
+    False
+    None
+
+
+    # Now let's test the ability of the workflow to compress its own
+    # workflow directory.
+    >>> w.options.archiveWorkDir = "/some/directory/to/archive/stuff/"
+    >>> w._archive_workflow() #doctest: +ELLIPSIS
+    tar -cvvzf /some/directory/to/archive/stuff/generic_workflow_...tgz /dev/shm/generic_workflow_...
+
+
+    # Ok, let's remove the existing workflow object and create a new one with
+    # slightly more settings. First of all, these settings cause the workflow
+    # to use the local /tmp/ directory instead or the shared RAM memoru of the
+    # system. Note that this is still machine-local directory and is not
+    # shared between different execution nodes. This only replaces the
+    # /dev/shm/ with the /tmp/ directory and that's it.
+
+    # The next change is that the dry run option is actually turned on so the
+    # commands will be actually executed not only printed. This may cause a lot
+    # of mess - but hey - that's what you call testing!
+    >>> options, args = generic_workflow.parseArgs()
+    >>> options.disableSharedMemory = True
+    >>> options.dryRun = False
+    >>> options.cleanup = True
+    >>> options.archiveWorkDir = "/tmp/"
+
+    >>> w = generic_workflow(options, args) #doctest: +ELLIPSIS
+    Executing: mkdir -p /tmp/generic_workflow_...
+    <BLANKLINE>
+    <BLANKLINE>
+
+    # To test out the execution routines one has to actually execute some
+    # commands therefore below we execute a command which does not produce any
+    # output.
+    >>> w.execute(["sleep 1"]) ==  ('', '')
+    True
+
+    # Now we test archiving and cleanup routines by manually executing a pre
+    # and postlaunch methods. In the meanwhile we want to test the archiving
+    # feature as well
+    >>> w._pre_launch()
+    >>> w._post_launch() #doctest: +ELLIPSIS
+    Executing: tar -cvvzf /tmp/generic_workflow_....tgz /tmp/generic_workflow_...
+    ...
+    Executing: rm -rfv /tmp/generic_workflow_...
+    removed `/tmp/generic_workflow_...'
+    removed directory: `/tmp/generic_workflow_...'
+    <BLANKLINE>
+
     """
 
     # Define the name for GNU parallel executeble name.
@@ -209,7 +284,7 @@ class generic_workflow(object):
         return pos_wrappers.rmdir_wrapper(dir_list=[path])()
 
     @staticmethod
-    def _basesame(path, withExtension=False):
+    def _basename(path, withExtension=False):
         return pos_common.get_basename(path, withExtension)
 
     def execute(self, commands, parallel=True):
@@ -241,25 +316,35 @@ class generic_workflow(object):
         # executed serially or parallelly. In the latter case, all the commands
         # are dumped into a file and executed with the GNU parallel.
         if not self.options.dryRun:
+
+            command_filename = \
+                os.path.join(self.options.workdir, str(time.time()))
+            open(command_filename, 'w').write("\n".join(map(str, commands)))
+            self._logger.info("Saving command file: %s", command_filename)
+
             if parallel:
-                command_filename = \
-                    os.path.join(self.options.workdir, str(time.time()))
-                open(command_filename, 'w').write("\n".join(map(str, commands)))
-                self._logger.info("Saving command file: %s", command_filename)
-
-                command_str = 'parallel -a %s -k -j %d ' %\
+                cluster_file = os.path.join(os.getenv("HOME"), '.pos_cluster')
+                if os.path.isfile(cluster_file):
+                    command_str = 'parallel --sshloginfile %s -a %s -k -j %d --env PATH --env PYTHONPATH --env LD_LIBRARY_PATH --workdir %s' %\
+                        (cluster_file, command_filename, self.options.cpuNo, os.getcwd())
+                else:
+                    command_str = 'parallel -a %s -k -j %d' %\
                         (command_filename, self.options.cpuNo)
-                self._logger.debug("Executing: %s", command_str)
-
-                # Tested against execution of multiple commands
-                stdout, stderr =  sub.Popen(command_str,
-                                    stdout=sub.PIPE, stderr=sub.PIPE,
-                                    shell=True, close_fds=True).communicate()
-                self._logger.debug("Last commands stdout: %s", stdout)
-                self._logger.debug("Last commands stderr: %s", stderr)
-                return stdout, stderr
             else:
-                return map(lambda x: x(), commands)
+                command_str = 'bash -x %s' % command_filename
+
+            self._logger.debug("Executing: %s", command_str)
+
+            # Tested against execution of multiple commands
+            stdout, stderr =  sub.Popen(command_str,
+                                stdout=sub.PIPE, stderr=sub.PIPE,
+                                shell=True, close_fds=True).communicate()
+
+            self._logger.debug("Last commands stdout: %s", stdout)
+            self._logger.debug("Last commands stderr: %s", stderr)
+
+            return stdout, stderr
+
         else:
             print "\n".join(map(str, commands))
 
@@ -302,15 +387,24 @@ class generic_workflow(object):
         as the archive may be really (by which I mean really big). Be prepared
         for gigabytes.
         """
-        arvhive_filename = os.path.join(self.options.archiveWorkDir,
+        archive_filename = os.path.join(self.options.archiveWorkDir,
                                         self.options.jobId)
+
+        self._logger.info("Archive basename: %s", \
+                          generic_workflow._basename(archive_filename))
         self._logger.info("Archiving the job directory to: %s",\
-                          arvhive_filename)
+                          archive_filename)
 
         compress_command = pos_wrappers.compress_wrapper(
-            archive_filename = arvhive_filename,
+            archive_filename = archive_filename,
             pathname = self.options.workdir)
-        compress_command()
+
+        # Well, sometimes you don't want to execute the archive command
+        # esspecially when not other command was executed.
+        if not self.options.dryRun:
+            compress_command()
+        else:
+            print compress_command
 
     def _clean_up(self):
         """
@@ -369,6 +463,21 @@ class output_volume_workflow(generic_workflow):
     outputs. It handles additional command line parameters for defining the
     origin, spacing, orientation, type, anatomical orientation and many many
     other.
+
+    >>> options, args = output_volume_workflow.parseArgs()
+    >>> options.parallel = False
+
+    >>> w = output_volume_workflow(options, args) #doctest: +ELLIPSIS
+    Executing: mkdir -p /dev/shm/output_volume_workflow_...
+    <BLANKLINE>
+    <BLANKLINE>
+
+    >>> print w.execute(["sleep 1"], parallel=False)[0] == ''
+    True
+
+    >>> print w.execute(["sleep 1"], parallel=False)[1].strip() == "+ sleep 1"
+    True
+
     """
 
     __output_vol_command_line_args_help = {}
@@ -455,6 +564,9 @@ class enclosed_workflow(generic_workflow):
     working directories and which do not store temponary data aduring processing.
     It has disabled some features regarding jobdirs, parallel execution,
     cleaning up the working directories, etc.
+
+    >>> options, args = enclosed_workflow.parseArgs()
+    >>> w = enclosed_workflow(options, args) #doctest: +ELLIPSIS
     """
     def _initializeOptions(self):
         super(enclosed_workflow, self)._initializeOptions()
@@ -469,6 +581,6 @@ class enclosed_workflow(generic_workflow):
         self.options.cleanup = False
         self.options.cpuNo = 1
 
-if __name__ == '__main__':
+if __name__ == 'possum.pos_wrapper_skel':
     import doctest
     doctest.testmod()

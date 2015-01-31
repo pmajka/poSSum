@@ -81,6 +81,15 @@ def which(program):
 
     :param program: The executable name to test
     :type program: str
+
+    >>> which("nonexistent_executable") == None
+    True
+
+    >>> which("ls") != None
+    True
+
+    >>> which("/bin/ls") == "/bin/ls"
+    True
     """
 
     def is_exe(fpath):

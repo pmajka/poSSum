@@ -39,8 +39,8 @@ c3d ${PHANTOM_FILE} ${PHANTOM_MASK} -times \
 #--------------------------------------------------------------------
 
 # Generate the distortions
-python step_001_distort_reference_image.py \
-       step_001_distort_reference_image.cfg
+# python step_001_distort_reference_image.py \
+#       step_001_distort_reference_image.cfg
 
 # Extract the 2d sections from the 3d image
 pos_slice_volume \

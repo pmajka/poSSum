@@ -40,6 +40,7 @@ class pairwiseRegistration(output_volume_workflow):
 
         'transf_naming' : pos_parameters.filename('transf_naming', work_dir = '11_transforms', str_template='tr_m{mIdx:04d}_'),
         'transf_file' : pos_parameters.filename('transf_file', work_dir = '11_transforms', str_template='tr_m{mIdx:04d}_Affine.txt'),
+        'transf_center': pos_parameters.filename('transf_center', work_dir='10_centre_of_gravity', str_template='cog_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
 
         'resliced_gray' : pos_parameters.filename('resliced_gray', work_dir = '21_gray_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_gray_mask' : pos_parameters.filename('resliced_gray_mask', work_dir = '21_gray_resliced', str_template='%04d.nii.gz'),
@@ -445,6 +446,19 @@ class pairwiseRegistration(output_volume_workflow):
         self._logger.info("Generating moving slices. Done.")
 
     def _calculate_transforms(self):
+        # If user decided to prealign the images by their centre of gravity
+        # an additional series of transformations has to be carried out.
+        commands = []
+        if self.options.enableMomentsAlignment:
+            for moving_slice, fixed_slice in self._slice_assignment.items():
+                if not os.path.isfile(self.f['transf_file'](mIdx=moving_slice)):
+                    commands.append(self._get_cog_alignment(moving_slice,
+                                                            fixed_slice))
+            commands = filter(None, commands)
+
+            self._logger.info("Executing the centre of gravity transforms.")
+            self.execute(commands)
+
         commands = []
         for moving_slice, fixed_slice in self._slice_assignment.items():
             transform_command = self._calculate_single_transform(moving_slice, fixed_slice)
@@ -452,6 +466,30 @@ class pairwiseRegistration(output_volume_workflow):
                 commands.append(transform_command)
 
         self.execute(commands)
+
+    def _get_cog_alignment(self, moving_slice_index, fixed_slice_index):
+        """
+        Get a single partial transform which computes a transformation of a
+        given moving slice into a fixed slice by the images' centres of
+        gravity.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+
+        :param fixed_slice_index: fixed slice index
+        :type fixed_slice_index: int
+
+        :return: Registration command wrapper or False if given pair of
+        sections will not be registered.
+        """
+
+        cog_transform_getter = pos_wrappers.align_by_center_of_gravity(
+            fixed_image = self.f['fixed_gray'](idx=fixed_slice_index),
+            moving_image = self.f['moving_gray'](idx=moving_slice_index),
+            output_transformation = \
+                    self.f['transf_center'](mIdx=moving_slice_index,
+                                            fIdx=fixed_slice_index))
+        return copy.deepcopy(cog_transform_getter)
 
     def _calculate_single_transform(self, moving_slice_index, fixed_slice_index):
         """
@@ -470,6 +508,9 @@ class pairwiseRegistration(output_volume_workflow):
         affine_iterations = self.__AFFINE_ITERATIONS
         output_naming = self.f['transf_naming'](mIdx=moving_slice_index,
                                                 fIdx=fixed_slice_index)
+
+        # Yeah, I know this is not the most optimal way
+        # to make a true/false string out of boolean value but ...
         use_rigid_transformation = str(self.options.useRigidAffine).lower()
 
         # Define the image-to-image metric.
@@ -482,6 +523,14 @@ class pairwiseRegistration(output_volume_workflow):
             parameter=metric_parameter)
         metrics.append(copy.deepcopy(metric))
 
+        # Ok, next we need to incorporate the centre-of-gravity prealignment
+        # information if a user decided to switch on the prealignment step.
+        initial_affine = None
+        if self.options.enableMomentsAlignment:
+            initial_affine = \
+            self.f['transf_center'](mIdx=moving_slice_index,
+                                    fIdx=fixed_slice_index)
+
         # Define the registration framework for 2D images,
         # without the deformable registration step, etc.
         registration = pos_wrappers.ants_registration(
@@ -492,6 +541,7 @@ class pairwiseRegistration(output_volume_workflow):
             continueAffine=None,
             rigidAffine=use_rigid_transformation,
             imageMetrics=metrics,
+            initialAffine=initial_affine,
             histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
             miOption=[metric_parameter, self.__MI_SAMPLES],
             allMetricsConverge=None,
@@ -913,6 +963,12 @@ class pairwiseRegistration(output_volume_workflow):
                 dest='outputVolumesDirectory', action='store',
                 help='Store output volumes in given directory instead of using default one.')
 
+        parser.add_option('--enable-moments', default=False,
+            dest='enableMomentsAlignment', action='store_true',
+            help='Enable prealigning the images by their centre of gravity. Note that the images have to have dark (0) background with a bright (positive) content.')
+        parser.add_option('--disable-moments', default=False,
+            dest='enableMomentsAlignment', action='store_false',
+            help='Enable prealigning the images by their centre of gravity. Note that the images have to have dark (0) background with a bright (positive) content.')
         parser.add_option('--antsImageMetric', default='MI',
                 type='str', dest='antsImageMetric',
                 help='ANTS image to image metric. See ANTS documentation.')

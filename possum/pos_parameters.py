@@ -32,12 +32,30 @@ class generic_parameter(object):
             self._str_template = str_template
 
     def _serialize(self):
+        """
+        >>> p = generic_parameter("test_generic_parameters")
+        >>> p #doctest: +ELLIPSIS
+        <possum.pos_parameters.generic_parameter object at 0x...>
+
+        >>> print p
+        Traceback (most recent call last):
+        NotImplementedError: Reimplement this method in a subclass
+        """
         raise NotImplementedError, "Reimplement this method in a subclass"
 
     def __str__(self):
         return self._serialize()
 
     def _validate(self):
+        """
+        >>> p = generic_parameter("test_generic_parameters")
+        >>> p #doctest: +ELLIPSIS
+        <possum.pos_parameters.generic_parameter object at 0x...>
+
+        >>> p._validate()
+        Traceback (most recent call last):
+        NotImplementedError: Reimplement this method in a subclass
+        """
         raise NotImplementedError, "Reimplement this method in a subclass"
 
     def _set_value(self, value):
@@ -575,6 +593,17 @@ class filename(generic_parameter):
         return os.path.join(self.job_dir, self.work_dir)
 
     def _set_base_dir(self, value):
+        """
+        Well, this function should never be used,
+        but it should be tested out, nonetheless.
+
+        >>> f = filename("a_test_filename")
+        >>> f # doctest: +ELLIPSIS
+        <possum.pos_parameters.filename object at 0x...>
+
+        >>> f.base_dir = "this will not change anything"
+        """
+
         pass
 
     def updateParameters(self, parameters):

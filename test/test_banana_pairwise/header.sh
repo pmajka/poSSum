@@ -5,12 +5,12 @@ NO_OF_BANANA=3
 
 # Define some important filenames         
 INPUT_FILE=000_raw_data/20140612_142959t2tsevflisos006a1001.nii.gz
-PHANTOM_FILE=001_phantom/phantom.nii.gz
-PHANTOM_MASK=001_phantom/phantom_mask.nii.gz
-PHANTOM_MASKED=001_phantom/phantom_masked.nii.gz
+PHANTOM_FILE=001_phantom_master/phantom.nii.gz
+PHANTOM_MASK=001_phantom_master/phantom_mask.nii.gz
+PHANTOM_MASKED=001_phantom_master/phantom_masked.nii.gz
 SEGMENTATION_FILE=000_raw_data/raw_segmentation.nii.gz
 FILE_REFERENCE_MASK=001_phantom_master/phantom_masked.nii.gz
-MASK_FILE=001_phantom/mask.nii.gz
+MASK_FILE=001_phantom_master/mask.nii.gz
 
 # Indexing in arrays -> [NO_OF_BANANA - 1]
 
