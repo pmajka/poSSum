@@ -2,7 +2,7 @@
 
 """
 
-__version__ = '0.78.0'
+__version__ = '0.9.0'
 
 import os
 
