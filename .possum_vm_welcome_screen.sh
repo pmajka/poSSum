@@ -21,7 +21,7 @@ https://github.com/pmajka/poSSum
 To update the code to the most recent developmental
 version simply type: possum_update .
 You can find the most recent version of the VM on:
-http://doc.3dbar.org/possum/possum_vm.tgz
+http://doc.3dbar.org/possum/possum_framework_vm.ova
 
 InputComesFromHERE
 
