@@ -252,4 +252,58 @@ You may also want to check out the screencast showing how to install the framewo
 
 <!---
 Starting with the fresh system installation: window 160x50.
+
+#http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso
+#-------------------------------------------------------------------------
+
+sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools parallel
+sudo easy_install -U config
+sudo easy_install -U networkx
+sudo apt-get install imagemagick parallel
+sudo apt-get install build-essential cmake-curses-gui
+cd
+
+#-------------------------------------------------------------------------
+
+cmake ../InsightToolkit-4.6.0 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=OFF -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=OFF -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON
+
+cmake ../InsightToolkit-4.3.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=OFF -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=OFF -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON
+
+sudo apt-get install htop
+make -j4
+
+#------------------------------------------------------------------------
+
+cd
+wget http://heanet.dl.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.tar.gz -O ANTs-1.9.v4-Linux.tar.gz
+wget http://skylink.dl.sourceforge.net/project/c3d/c3d/Nightly/c3d-nightly-Linux-x86_64.tar.gz -O c3d-nightly-Linux-x86_64.tar.gz
+tar -xvvzf ANTs-1.9.v4-Linux.tar.gz
+tar -xvvzf c3d-nightly-Linux-x86_64.tar.gz
+
+find InsightToolkit-4.3.1-build/ -name "*.pth" | xargs cat
+
+export PYTHONPATH=${PYTHONPATH}:${USERNAME}/InsightToolkit-4.3.1-build/Wrapping/Generators/Python
+export PYTHONPATH=${PYTHONPATH}:${USERNAME}/InsightToolkit-4.3.1-build/lib/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${USERNAME}/
+export PATH=$PATH:${USERNAME}/ANTs-1.9.v4-Linux/bin/
+export PATH=$PATH:${USERNAME}/c3d-1.0.0-Linux-x86_64/bin/
+export PATH=$PATH:/home/testuser/c3d-1.0.0-Linux-x86_64/bin/
+
+#------------------------------------------------------------------------
+
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install ssh
+
+export PYTHONPATH=${PYTHONPATH}:/home/testuser/InsightToolkit-4.3.1-build/Wrapping/Generators/Python
+export PYTHONPATH=${PYTHONPATH}:/home/testuser/InsightToolkit-4.3.1-build/lib/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/testuser/InsightToolkit-4.3.1-build/lib/
+export PATH=$PATH:/home/testuser/ANTs-1.9.v4-Linux/bin/
+export PATH=$PATH:/home/testuser/c3d-1.0.0-Linux-x86_64/bin/
+
+sudo apt-get install git-core
+
+rm -rfv
+git clone https://github.com/pmajka/poSSum.git
+cd poSSum/ && cat .possum_vm_welcome_screen.sh | grep '#'  | tail -n +2 | sed 's/^.//'  >> ~/.bashrc
 -->
