@@ -132,8 +132,16 @@ def load_warp_field_transform_from_file(warp_filed_filename):
     warp_image_reader.SetFileName(warp_filed_filename)
     warp_image_reader.Update()
 
+    desired_warp_image_type = \
+        itk.Image[(itk.Vector[itk.D, dimension], dimension)]
+
+    cast_to_double = itk.VectorCastImageFilter[
+        warp_image_type, desired_warp_image_type].New()
+    cast_to_double.SetInput(warp_image_reader.GetOutput())
+    cast_to_double.Update()
+
     warp_transform = itk.DisplacementFieldTransform[(itk.D, dimension)].New()
-    warp_transform.SetDisplacementField(warp_image_reader.GetOutput())
+    warp_transform.SetDisplacementField(cast_to_double.GetOutput())
 
     return warp_transform
 
