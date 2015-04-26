@@ -106,7 +106,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         if self.options.maskedVolume:
             self.options.maskedVolumeWeight = float(self.options.maskedVolume[0])
             self.options.maskedVolume = self.options.maskedVolume[1]
-            self._logger.info("Applying a custom slice maask: %s ." %
+            self._logger.info("Applying a custom slice mask: %s ." %
                 self.options.maskedVolume)
 
     def _get_prepare_volume_command_template(self):
