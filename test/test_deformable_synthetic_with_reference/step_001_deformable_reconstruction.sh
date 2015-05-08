@@ -3,6 +3,19 @@
 # -------------------------------------------------------------------
 # At this stage the only step that left is the deformbale reconstruction
 # which is carried out below.
+
+# This particular test utilizes a reference volume '--referenceVolume'
+# which is used as an additional metric to drive the registration.
+# The reference volume remains constant all the time (the reference 
+# section does not change over the course of the iteration).
+#
+# The number next to the reference volume filename is the weight
+# of this particular metric.
+#
+# For the purpose of the registration the CC metric is used throghout
+# the reconstruction process. Bear that in mind when choosing the
+# reference volume.
+#  
 # Note that the image which is an input for the reconstruction has
 # a sampling of 1x1x1mm which is required for the deformable registration
 # routines. Spacing of a different order of magnitude (e.g. 0.01 or 10)
