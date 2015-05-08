@@ -4,6 +4,7 @@ import os
 
 """
 
+
 class generic_parameter(object):
     """
     The generic parameter object represents a logic piece of a shell command
@@ -80,6 +81,7 @@ class generic_parameter(object):
     template = property(_get_str_template, _set_str_template)
     name = property(_get_name, _set_name)
 
+
 class boolean_parameter(generic_parameter):
     """
     >>> p=boolean_parameter('parameter')
@@ -109,9 +111,10 @@ class boolean_parameter(generic_parameter):
 
     def _serialize(self):
         if self.value is not None:
-             return self._str_template.format(**self.__dict__)
+            return self._str_template.format(**self.__dict__)
         else:
             return ""
+
 
 class switch_parameter(boolean_parameter):
     """
@@ -179,17 +182,20 @@ class string_parameter(generic_parameter):
         else:
             return ""
 
+
 class filename_parameter(string_parameter):
     """
-    This class is designed to be used as a filename.
-    When creating filename parameter this class should be used instead of generic class :class:`string_parameter`.
+    This class is designed to be used as a filename.  When creating filename
+    parameter this class should be used instead of generic class
+    :class:`string_parameter`.
     """
     _str_template = "{_value}"
 
 
 class value_parameter(string_parameter):
     """
-    This class sould be used to handle any string parameter. This class should be used instead
+    This class sould be used to handle any string parameter. This class should
+    be used instead
     """
     _str_template = "{_value}"
 
@@ -198,10 +204,10 @@ class list_parameter(generic_parameter):
     """
 
     A generic class for storing list parameters. The class accepts a list as a
-    value.  During serialization, the list is mapped to string and joined with a
-    delimiter. The default delimiter is a space. Note that only strings can be
-    delimiters. Passing other types (such as ints, floats or other lists) will
-    cause exceptions.
+    value.  During serialization, the list is mapped to string and joined with
+    a delimiter. The default delimiter is a space. Note that only strings can
+    be delimiters. Passing other types (such as ints, floats or other lists)
+    will cause exceptions.
 
     >>> p=list_parameter()
     Traceback (most recent call last):
@@ -304,6 +310,7 @@ class ants_specific_parameter(generic_parameter):
 
         return retStr
 
+
 class ants_transformation_parameter(ants_specific_parameter):
     """
     >>> ants_transformation_parameter
@@ -397,27 +404,30 @@ class filename(generic_parameter):
     filename according to prvided arguments.
 
     The only legal way of invocating this class is the one shown with above.
-    Following parameters are required to make this class behave properly: :py:attr:`name`,
-    :py:attr:`job_dir`, :py:attr:`work_dir`, :py:attr:`str_template`.
+    Following parameters are required to make this class behave properly:
+    :py:attr:`name`, :py:attr:`job_dir`, :py:attr:`work_dir`,
+    :py:attr:`str_template`.
 
-    :param name: Required but very rarely used in real applications. One can use
-        it by putting `{_name}` string into the :py:attr:`str_template`. Actually it's legacy
-        parameter from the parrent class.
+    :param name: Required but very rarely used in real applications. One can
+    use it by putting `{_name}` string into the :py:attr:`str_template`.
+    Actually it's legacy parameter from the parrent class.
     :type name: str
 
-    :param value: Required, defaults to ``None``, Can be used in file name
-        by putting `{_value}` into :py:attr:`str_template`. Can be an empty string but not ``None``
+    :param value: Required, defaults to ``None``, Can be used in file name by
+    putting `{_value}` into :py:attr:`str_template`. Can be an empty string but
+    not ``None``
     :type value: any serializable object
 
-    :param job_dir: Required. home directory of given workflow. Can be an empty string but not ``None``
+    :param job_dir: Required. home directory of given workflow. Can be an empty
+        string but not ``None``
     :type job_dir: str
 
     :param work_dir: directory of the file,
     :type work_dir: str
 
     :param str_template: filename template without any paths, just the
-        filename's basename (with extension). Parameters are processed according
-        to python `.format` function. Cannot be empty or ``None``.
+      filename's basename (with extension). Parameters are processed according
+      to python `.format` function. Cannot be empty or ``None``.
     :type str_template: str
 
     """

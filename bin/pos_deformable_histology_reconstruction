@@ -6,8 +6,9 @@ A framework for performing deformable reconstruction of smooth and acurate
 volumetric reconstructions from 2d slices.
 """
 
-import os, sys
-from optparse import OptionParser, OptionGroup
+import os
+import sys
+from optparse import OptionGroup
 import copy
 
 from possum import pos_wrappers
@@ -16,7 +17,7 @@ from possum import pos_parameters
 from possum.pos_wrapper_skel import output_volume_workflow
 from possum.deformable_histology_iterations import deformable_reconstruction_iteration
 
-from possum.pos_deformable_wrappers import preprocess_slice_volume,\
+from possum.pos_deformable_wrappers import preprocess_slice_volume, \
     convert_slice_image, convert_slice_image_grayscale
 
 
@@ -27,40 +28,40 @@ class deformable_reconstruction_workflow(output_volume_workflow):
     """
 
     _f = {
-         # Initial grayscale slices
-        'init_slice': pos_parameters.filename('init_slice', work_dir = '01_init_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_slice_naming': pos_parameters.filename('init_slice_naming', work_dir = '01_init_slices', str_template = '%04d.nii.gz'),
+        # Initial grayscale slices
+        'init_slice': pos_parameters.filename('init_slice', work_dir='01_init_slices', str_template='{idx:04d}.nii.gz'),
+        'init_slice_naming': pos_parameters.filename('init_slice_naming', work_dir='01_init_slices', str_template='%04d.nii.gz'),
         # Initial outline mask
-        'init_outline': pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_outline_naming': pos_parameters.filename('init_outline_naming', work_dir = '02_outline_slices', str_template = '%04d.nii.gz'),
+        'init_outline': pos_parameters.filename('init_outline_naming', work_dir='02_outline_slices', str_template='{idx:04d}.nii.gz'),
+        'init_outline_naming': pos_parameters.filename('init_outline_naming', work_dir='02_outline_slices', str_template='%04d.nii.gz'),
         # Initial custom outlier mask
-        'init_custom': pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '{idx:04d}.nii.gz'),
-        'init_custom_naming': pos_parameters.filename('init_custom_naming', work_dir = '04_custom_slices', str_template = '%04d.nii.gz'),
+        'init_custom': pos_parameters.filename('init_custom_naming', work_dir='04_custom_slices', str_template='{idx:04d}.nii.gz'),
+        'init_custom_naming': pos_parameters.filename('init_custom_naming', work_dir='04_custom_slices', str_template='%04d.nii.gz'),
         # Initial external reference images
-        'ref_custom' : pos_parameters.filename('ref_custom_naming', work_dir = '03_reference_slices', str_template = '{idx:04d}.nii.gz'),
-        'ref_custom_naming': pos_parameters.filename('ref_custom_naming', work_dir = '03_reference_slices', str_template = '%04d.nii.gz'),
+        'ref_custom': pos_parameters.filename('ref_custom_naming', work_dir='03_reference_slices', str_template='{idx:04d}.nii.gz'),
+        'ref_custom_naming': pos_parameters.filename('ref_custom_naming', work_dir='03_reference_slices', str_template='%04d.nii.gz'),
         # Iteration
-        'iteration': pos_parameters.filename('iteraltion', work_dir = '05_iterations',  str_template = '{iter:04d}'),
-        'iteration_out_naming': pos_parameters.filename('iteration_out_naming', work_dir = '05_iterations', str_template = '{iter:04d}/11_transformations/{idx:04d}'),
-        'iteration_transform': pos_parameters.filename('iteration_transform', work_dir = '05_iterations', str_template =  '{iter:04d}/11_transformations/{idx:04d}Warp.nii.gz'),
-        'iteration_resliced': pos_parameters.filename('iteration_resliced' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/'),
-        'iteration_resliced_slice': pos_parameters.filename('iteration_resliced_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/21_resliced/{idx:04d}.nii.gz'),
-        'iteration_resliced_outline': pos_parameters.filename('iteration_resliced_outline' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/'),
-        'iteration_resliced_outline_slice': pos_parameters.filename('iteration_resliced_outline_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/22_resliced_outline/{idx:04d}.nii.gz'),
-        'iteration_resliced_custom': pos_parameters.filename('iteration_resliced_custom' , work_dir = '05_iterations', str_template  = '{iter:04d}/24_resliced_custom/'),
-        'iteration_resliced_custom_slice': pos_parameters.filename('iteration_resliced_custom_slice' , work_dir = '05_iterations', str_template  = '{iter:04d}/24_resliced_custom/{idx:04d}.nii.gz'),
-        'inter_res': pos_parameters.filename('inter_res',  work_dir = '08_intermediate_results', str_template = ''),
-        'inter_res_gray_vol': pos_parameters.filename('inter_res_gray_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_{iter:04d}.nii.gz'),
-        'inter_res_outline_vol': pos_parameters.filename('inter_res_outline_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_outline_{iter:04d}.nii.gz'),
-        'inter_res_custom_vol': pos_parameters.filename('inter_res_custom_vol',   work_dir = '08_intermediate_results', str_template = 'intermediate_{output_naming}_cmask_{iter:04d}.nii.gz'),
-        'final_deformations': pos_parameters.filename('final_deformations',   work_dir = '09_final_deformation', str_template = '{idx:04d}.nii.gz'),
-        'rescaled_deformations': pos_parameters.filename('rescaled_deformations',   work_dir = '10_rescaled_deformation', str_template = '{idx:04d}.nii.gz'),
-        'rescaled_source': pos_parameters.filename('rescaled_source',   work_dir = '11_rescaled_source', str_template = '{idx:04d}.nii.gz'),
-        'iteration_stack_mask': pos_parameters.filename('iteration_stack_mask', work_dir = '05_iterations', str_template = '{iter:04d}/21_resliced/%04d.nii.gz'),
-        'iteration_stack_outline': pos_parameters.filename('iteration_stack_outline', work_dir = '05_iterations', str_template = '{iter:04d}/22_resliced_outline/%04d.nii.gz'),
-        'iteration_stack_cmask': pos_parameters.filename('iteration_stack_cmask', work_dir = '05_iterations', str_template = '{iter:04d}/24_resliced_custom/%04d.nii.gz'),
+        'iteration': pos_parameters.filename('iteraltion', work_dir='05_iterations',  str_template='{iter:04d}'),
+        'iteration_out_naming': pos_parameters.filename('iteration_out_naming', work_dir='05_iterations', str_template='{iter:04d}/11_transformations/{idx:04d}'),
+        'iteration_transform': pos_parameters.filename('iteration_transform', work_dir='05_iterations', str_template='{iter:04d}/11_transformations/{idx:04d}Warp.nii.gz'),
+        'iteration_resliced': pos_parameters.filename('iteration_resliced', work_dir='05_iterations', str_template='{iter:04d}/21_resliced/'),
+        'iteration_resliced_slice': pos_parameters.filename('iteration_resliced_slice', work_dir='05_iterations', str_template='{iter:04d}/21_resliced/{idx:04d}.nii.gz'),
+        'iteration_resliced_outline': pos_parameters.filename('iteration_resliced_outline', work_dir='05_iterations', str_template='{iter:04d}/22_resliced_outline/'),
+        'iteration_resliced_outline_slice': pos_parameters.filename('iteration_resliced_outline_slice', work_dir='05_iterations', str_template='{iter:04d}/22_resliced_outline/{idx:04d}.nii.gz'),
+        'iteration_resliced_custom': pos_parameters.filename('iteration_resliced_custom', work_dir='05_iterations', str_template='{iter:04d}/24_resliced_custom/'),
+        'iteration_resliced_custom_slice': pos_parameters.filename('iteration_resliced_custom_slice', work_dir='05_iterations', str_template='{iter:04d}/24_resliced_custom/{idx:04d}.nii.gz'),
+        'inter_res': pos_parameters.filename('inter_res',  work_dir='08_intermediate_results', str_template=''),
+        'inter_res_gray_vol': pos_parameters.filename('inter_res_gray_vol', work_dir='08_intermediate_results', str_template='intermediate_{output_naming}_{iter:04d}.nii.gz'),
+        'inter_res_outline_vol': pos_parameters.filename('inter_res_outline_vol', work_dir='08_intermediate_results', str_template='intermediate_{output_naming}_outline_{iter:04d}.nii.gz'),
+        'inter_res_custom_vol': pos_parameters.filename('inter_res_custom_vol', work_dir='08_intermediate_results', str_template='intermediate_{output_naming}_cmask_{iter:04d}.nii.gz'),
+        'final_deformations': pos_parameters.filename('final_deformations', work_dir='09_final_deformation', str_template='{idx:04d}.nii.gz'),
+        'rescaled_deformations': pos_parameters.filename('rescaled_deformations', work_dir='10_rescaled_deformation', str_template='{idx:04d}.nii.gz'),
+        'rescaled_source': pos_parameters.filename('rescaled_source', work_dir='11_rescaled_source', str_template='{idx:04d}.nii.gz'),
+        'iteration_stack_mask': pos_parameters.filename('iteration_stack_mask', work_dir='05_iterations', str_template='{iter:04d}/21_resliced/%04d.nii.gz'),
+        'iteration_stack_outline': pos_parameters.filename('iteration_stack_outline', work_dir='05_iterations', str_template='{iter:04d}/22_resliced_outline/%04d.nii.gz'),
+        'iteration_stack_cmask': pos_parameters.filename('iteration_stack_cmask', work_dir='05_iterations', str_template='{iter:04d}/24_resliced_custom/%04d.nii.gz'),
         # Analysis
-        'warp_field_visualization' : pos_parameters.filename('warp_field_visualization', work_dir = '15_deformation_analysis', str_template = '{idx:04d}.png')
+        'warp_field_visualization' : pos_parameters.filename('warp_field_visualization', work_dir='15_deformation_analysis', str_template='{idx:04d}.png')
         }
 
     _usage = ""
@@ -517,7 +518,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
                 help='Stack filnal deformation fileld.')
 
         regSettings = \
-                OptionGroup(parser, 'Registration setttings.')
+            OptionGroup(parser, 'Registration setttings.')
 
         regSettings.add_option('--antsImageMetric', default='CC',
                 type='str', dest='antsImageMetric',

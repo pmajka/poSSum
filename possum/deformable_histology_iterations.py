@@ -19,17 +19,18 @@ from pos_deformable_wrappers import blank_slice_deformation_wrapper
     fields.
 """
 
+
 class deformable_reconstruction_iteration(generic_workflow):
     _f = {
-        'src_slice'  : pos_parameters.filename('src_slice',  work_dir = '00_src_slices',      str_template =  '{idx:04d}.nii.gz'),
-        'processed'  : pos_parameters.filename('processed',  work_dir = '01_process_slices',  str_template =  '{idx:04d}.nii.gz'),
-        'outline'    : pos_parameters.filename('outline',    work_dir = '02_outline',         str_template =  '{idx:04d}.nii.gz'),
-        'poutline'   : pos_parameters.filename('poutline',   work_dir = '03_poutline',        str_template =  '{idx:04d}.nii.gz'),
-        'cmask'      : pos_parameters.filename('cmask',      work_dir = '04_cmask',           str_template =  '{idx:04d}.nii.gz'),
-        'pcmask'     : pos_parameters.filename('pcmask',     work_dir = '05_pcmask',          str_template =  '{idx:04d}.nii.gz'),
-        'transform'  : pos_parameters.filename('transform',  work_dir = '11_transformations', str_template =  '{idx:04d}Warp.nii.gz'),
-        'out_naming' : pos_parameters.filename('out_naming', work_dir = '11_transformations', str_template = '{idx:04d}'),
-        'resliced'   : pos_parameters.filename('resliced',   work_dir = '21_resliced',        str_template = '{idx:04d}.nii.gz'),
+        'src_slice'  : pos_parameters.filename('src_slice',  work_dir='00_src_slices',      str_template='{idx:04d}.nii.gz'),
+        'processed'  : pos_parameters.filename('processed',  work_dir='01_process_slices',  str_template='{idx:04d}.nii.gz'),
+        'outline'    : pos_parameters.filename('outline',    work_dir='02_outline',         str_template='{idx:04d}.nii.gz'),
+        'poutline'   : pos_parameters.filename('poutline',   work_dir='03_poutline',        str_template='{idx:04d}.nii.gz'),
+        'cmask'      : pos_parameters.filename('cmask',      work_dir='04_cmask',           str_template='{idx:04d}.nii.gz'),
+        'pcmask'     : pos_parameters.filename('pcmask',     work_dir='05_pcmask',          str_template='{idx:04d}.nii.gz'),
+        'transform'  : pos_parameters.filename('transform',  work_dir='11_transformations', str_template='{idx:04d}Warp.nii.gz'),
+        'out_naming' : pos_parameters.filename('out_naming', work_dir='11_transformations', str_template='{idx:04d}'),
+        'resliced'   : pos_parameters.filename('resliced',   work_dir='21_resliced',        str_template='{idx:04d}.nii.gz'),
         'resliced_outline' : pos_parameters.filename('resliced_outline', work_dir='22_resliced_outline', str_template='{idx:04d}.nii.gz'),
         'resliced_custom' : pos_parameters.filename('resliced_custom', work_dir='24_resliced_custom', str_template='{idx:04d}.nii.gz')
         }
@@ -280,13 +281,13 @@ class deformable_reconstruction_iteration(generic_workflow):
             metrics  = []
             j_data = self.masked_registraion.get(i, None)
 
-            if j_data == None:
+            if j_data is None:
                 fixed_image_type = 'processed'
-                fixed_outline_type='poutline'
+                fixed_outline_type = 'poutline'
                 mask_image = None
-                j=i
+                j = i
                 r_metric, parameter, iterations, transf_grad, reg_type, reg_ammount =\
-                        self._get_default_reg_settings()
+                    self._get_default_reg_settings()
 
             else:
                 fixed_image_type = 'src_slice'
