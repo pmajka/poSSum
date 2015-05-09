@@ -1,6 +1,6 @@
 
 
-poSSum volumetric reconstruction framework
+Possum volumetric reconstruction framework
 ===========================================================
 
 [![Build Status](https://travis-ci.org/pmajka/poSSum.svg?branch=master)](https://travis-ci.org/pmajka/poSSum) [![Coverage Status](https://coveralls.io/repos/pmajka/poSSum/badge.svg?branch=master)](https://coveralls.io/r/pmajka/poSSum?branch=master)
@@ -8,7 +8,7 @@ poSSum volumetric reconstruction framework
 Overview
 ========
 
-The poSSum framework is a set of scripts and workflows which purpose it to
+The Possum framework is a set of scripts and workflows which purpose it to
 reconstruct the volumetric datasets based on series of serial sections of
 different modality and quality.
 
@@ -16,7 +16,7 @@ different modality and quality.
 Preconfigured VM
 ================
 
-If you would like to start using the poSSum framework immediately
+If you would like to start using the Possum framework immediately
 without necessity of installation and configuration, you are strongly 
 encouraged to download preconfigured virtual machine.
 
@@ -54,7 +54,7 @@ For the exact installation steps, check the `installation procedure` section bel
 Requirements and dependencies
 -----------------------------
 
-In order to make the poSSum framework working, several dependencies have to be
+In order to make the Possum framework working, several dependencies have to be
 satisfied. Below one can find the list of dependencies with a brief instruction
 on installing the individual dependencies.
 
@@ -73,11 +73,11 @@ Only the system locale were altered.
 InsightToolkit 4.3.1
 --------------------
 
-The poSSum framework requires the InsightToolkit (ITK, http://www.itk.org/)
+The Possum framework requires the InsightToolkit (ITK, http://www.itk.org/)
 image processing library. PosSSum was created and tested using ITK 4.3.1
 (http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.1.tar.gz/download)
 thus this ITK version is recommended. Due to rapid development of the ITK
-framework it is not guaranteed (although quite likely) that the poSSum will work
+framework it is not guaranteed (although quite likely) that the Possum will work
 with newer as well as with some of the older ITK versions.
 
 In order to install the InsightToolkit one has to perform the steps described on
