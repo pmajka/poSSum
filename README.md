@@ -9,7 +9,7 @@ Overview
 ========
 
 
-Possum volumetric reconstruction framework which provides a~selection of 2D to 3D image reconstruction routines allowing one to build workflows tailored to one's specific requirements.
+Possum volumetric reconstruction framework which provides a selection of 2D to 3D image reconstruction routines allowing one to build workflows tailored to one's specific requirements.
 The main components include routines for reconstruction with or without using external reference and solutions for typical issues encountered during the reconstruction process, such as propagation of the registration errors due to distorted sections.
 
 
