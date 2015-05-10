@@ -8,9 +8,9 @@ Possum volumetric reconstruction framework
 Overview
 ========
 
-The Possum framework is a set of scripts and workflows which purpose it to
-reconstruct the volumetric datasets based on series of serial sections of
-different modality and quality.
+
+Possum volumetric reconstruction framework which provides a~selection of 2D to 3D image reconstruction routines allowing one to build workflows tailored to one's specific requirements.
+The main components include routines for reconstruction with or without using external reference and solutions for typical issues encountered during the reconstruction process, such as propagation of the registration errors due to distorted sections.
 
 
 Preconfigured VM
@@ -23,25 +23,22 @@ encouraged to download preconfigured virtual machine.
 The appliance can be imported to VirtualBox software
 (https://www.virtualbox.org/) which operates on multiple operating systems
 including Windows, OSX and Linux. Note however, that the file
-to download is a substantial one: about 2GB. Have also in mind that, although we're trying to keep the VM updated, the environment installed on th VM might be slightly behind the current develop branch of the framework. You have to update it on your own.
+to download is a substantial one: about 2GB. Have also in mind that, although we are trying to keep the VM up to date, the environment installed on the VM might be slightly behind the current develop branch of the framework. You will have to update it on your own.
 
-You can download the poSSum preconfigured virtual machine
-using the link below:
+You can download the Possum preconfigured virtual machine using the link below:
 http://doc.3dbar.org/possum/possum_framework_vm.ova
 
 Should you have any problem with importing the virtual appliance,
 please refer to the VirtualBox documentation:
 
 http://docs.oracle.com/cd/E26217_01/E26796/html/qs-import-vm.html
-
 http://www.virtualbox.org/manual/ch01.html#ovf
 
 or other online resources, e.g:
 http://www.maketecheasier.com/import-export-ova-files-in-virtualbox/
 
 Note that all usernames and passwords (including the root passord) are: testuser
-Also, please let the VM have at least 4GB of memory (8GB recommended) 
-and 4CPUs (however, the more the better).
+Also, please let the VM have at least 4GB of memory (8GB recommended)  and 4CPUs (however, the more the better).
 
 
 
@@ -106,7 +103,7 @@ Advanced Normalization Tools
 The Advanced Normalization Tools (or shortly ANTS) is an image normalization and
 registration framework which provides reliable and algorithms for image
 registration. ANTS binaries may be downloaded from the ANTS website: http://stnava.github.io/ANTs/,
-The posSSum framework was tested with ANTS v3 as well as ANTS v4.
+The Possum framework was tested with ANTS v3 as well as ANTS v4.
 
 
 Convert 3D and ItkSnap tool
