@@ -9,35 +9,33 @@ Overview
 ========
 
 
-Possum volumetric reconstruction framework which provides a selection of 2D to 3D image reconstruction routines allowing one to build workflows tailored to one's specific requirements.
+Possum volumetric reconstruction framework provides a selection of 2D to 3D image reconstruction routines allowing one to build workflows tailored to one's specific requirements.
 The main components include routines for reconstruction with or without using external reference and solutions for typical issues encountered during the reconstruction process, such as propagation of the registration errors due to distorted sections.
 
 
-Preconfigured VM
-================
+Preconfigured virtual machine (VM)
+==================================
 
 If you would like to start using the Possum framework immediately
-without necessity of installation and configuration, you are strongly 
+without installing the software from the source, you are strongly 
 encouraged to download preconfigured virtual machine.
 
-The appliance can be imported to VirtualBox software
+The appliance can be imported into VirtualBox software
 (https://www.virtualbox.org/) which operates on multiple operating systems
 including Windows, OSX and Linux. Note however, that the file
-to download is a substantial one: about 2GB. Have also in mind that, although we are trying to keep the VM up to date, the environment installed on the VM might be slightly behind the current develop branch of the framework. You will have to update it on your own.
+to download is a substantial one: about 2GB. Have also in mind that, although we are trying to keep the virtual machine up to date, the environment installed on the VM might be slightly behind the current release branch of the framework. You will have to update it on your own.
 
 You can download the Possum preconfigured virtual machine using the link below:
 http://doc.3dbar.org/possum/possum_framework_vm.ova
 
 Should you have any problem with importing the virtual appliance,
 please refer to the VirtualBox documentation:
-
 http://docs.oracle.com/cd/E26217_01/E26796/html/qs-import-vm.html
 http://www.virtualbox.org/manual/ch01.html#ovf
-
 or other online resources, e.g:
 http://www.maketecheasier.com/import-export-ova-files-in-virtualbox/
 
-Note that all usernames and passwords (including the root passord) are: testuser
+Note that all usernames and passwords (including the root passord) are: `testuser`
 Also, please let the VM have at least 4GB of memory (8GB recommended)  and 4CPUs (however, the more the better).
 
 
@@ -45,15 +43,8 @@ Also, please let the VM have at least 4GB of memory (8GB recommended)  and 4CPUs
 Installation
 ============
 
-Below one can find the description of the dependencies.
+Below one can find the description of the framework's dependencies.
 For the exact installation steps, check the `installation procedure` section below.
-
-Requirements and dependencies
------------------------------
-
-In order to make the Possum framework working, several dependencies have to be
-satisfied. Below one can find the list of dependencies with a brief instruction
-on installing the individual dependencies.
 
 
 Operating system
@@ -63,15 +54,14 @@ Installation was tested using the Ubuntu 12.04 server, amd64 version::
 
     http://releases.ubuntu.com/12.04/ubuntu-12.04.4-server-amd64.iso
 
-The system was installed with the default settings.
-Only the system locale were altered.
+The system was installed with the default settings. Only the system locale were altered.
 
 
 InsightToolkit 4.3.1
 --------------------
 
 The Possum framework requires the InsightToolkit (ITK, http://www.itk.org/)
-image processing library. PosSSum was created and tested using ITK 4.3.1
+image processing library. Possum was implemented and tested with ITK 4.3.1
 (http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.1.tar.gz/download)
 thus this ITK version is recommended. Due to rapid development of the ITK
 framework it is not guaranteed (although quite likely) that the Possum will work
@@ -87,14 +77,14 @@ the ITK website (http://www.itk.org/Wiki/ITK/Complete_Setup):
 
   3. Run cmake or ccmake and provide compilation settings. Make sure that
      the listed parameters are set as shown below. Basically this build
-     the itk with a python wrappers and support for different types of
+     the ITK with a Python wrappers and support for different types of
      RGB images which are not included by default. Follow the instructions
-     from http://www.itk.org/Wiki/ITK/Python_Wrapping to compile itk with
+     from http://www.itk.org/Wiki/ITK/Python_Wrapping to compile ITK with
      python wrapping.
 
   4. Make the build. Note that the build process usually takes a long
      time (a couple of hours) to complete. It is a good idea to leave
-     the compilation as a overnight task and be patient.
+     the compilation as a overnight task and to be patient.
 
 
 Advanced Normalization Tools
@@ -109,8 +99,8 @@ The Possum framework was tested with ANTS v3 as well as ANTS v4.
 Convert 3D and ItkSnap tool
 ---------------------------
 
-Convert 3D (crucial) and ItkSnap (not crucial but extremely useful).
-Visit the http://www.itksnap.org/ in order to get both, the Convert 3D
+Convert 3D (necessary) and ItkSnap (not crucial but extremely useful).
+Visit the `http://www.itksnap.org/` in order to get both, the Convert 3D
 as well as the ItkSnap.
 
 
@@ -134,7 +124,7 @@ Install the necessary packages
 
 NumpPy, SciPy and Sphinx packages::
 
-    sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools parallel
+    sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools
 
 And the required python modules::
 
