@@ -9,6 +9,7 @@ import possum.pos_wrapper_skel
 import possum.pos_itk_core
 import possum.pos_itk_transforms
 
+
 class align_by_centre_of_gravity(enclosed_workflow):
     """
     Class which calculates transformation from a moving image to a fixed images
