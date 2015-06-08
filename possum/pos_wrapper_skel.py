@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*
 
 
-import sys, os
+import sys
+import os
 import subprocess as sub
 import multiprocessing
 
@@ -21,8 +22,8 @@ class generic_workflow(object):
     configurable pipeline with a configurable execution settings.
 
     The workflow / pipeline may consist of different stages use a numbser of
-    different files, etc. The reason for this class is to use command line tools
-    which functionality cannot be achieved in any other way.
+    different files, etc. The reason for this class is to use command line
+    tools which functionality cannot be achieved in any other way.
 
     >>> options, args = generic_workflow.parseArgs()
     >>> options.dryRun = True
@@ -115,12 +116,12 @@ class generic_workflow(object):
     """
 
     # Define the name for GNU parallel executeble name.
-    __PARALLEL_EXECUTABLE_NAME="parallel"
+    __PARALLEL_EXECUTABLE_NAME = "parallel"
 
     # _f is a dictionary holding definitions of files beeing a part of the
     # workflow. The purpose of this dictionary is to be able to easily access
-    # and utilize filenames (from each stage of the workflow). You're gonna like
-    # it.
+    # and utilize filenames (from each stage of the workflow). You're gonna
+    # like it.
     _f = {}
 
     # Override this attribute in the inherited classes.
@@ -183,12 +184,12 @@ class generic_workflow(object):
         provided) is processed automatically.
         """
 
-        # What the heck is a "specimen ID"? It is supposed to be at least single
-        # value which will allow to assign an instance of the workflow to
-        # particual animal. When you have multiple animals they can get confused
-        # easily. In the future, specimen ID, will act as database ID for given
-        # specimen. Thus, it is hardcoded to not allow any computations without
-        # this ID. Simple as it is.
+        # What the heck is a "specimen ID"? It is supposed to be at least
+        # single value which will allow to assign an instance of the workflow
+        # to particual animal. When you have multiple animals they can get
+        # confused easily. In the future, specimen ID, will act as database ID
+        # for given specimen. Thus, it is hardcoded to not allow any
+        # computations without this ID. Simple as it is.
 
         # We need to check if the GNU parallel of availeble. If it's not, we
         # cannot perform parallel computations.
@@ -214,8 +215,8 @@ class generic_workflow(object):
 
     def _validate_options(self):
         """
-        A generic command line options validation function. Should be customized
-        in subclasses. A lot of assertions is expected to be here!
+        A generic command line options validation function. Should be
+        customized in subclasses. A lot of assertions is expected to be here!
         """
         pass
 
@@ -223,13 +224,13 @@ class generic_workflow(object):
         """
         """
         # The directiories in the dictionary below are the potential working
-        # dirs for the workflow. The 'sharedbf' is used when given mashine
-        # has a ramdisk, otherwise 'tempbf'. These are the default locations for
+        # dirs for the workflow. The 'sharedbf' is used when given mashine has
+        # a ramdisk, otherwise 'tempbf'. These are the default locations for
         # the workdir. Typically, the working directory location is a custom
         # one.
         _dirTemplates = {
-                'sharedbf': '/dev/shm/',
-                'tempbf'  : '/tmp/'}
+            'sharedbf': '/dev/shm/',
+            'tempbf': '/tmp/'}
 
         # Sometimes we just don't want create any work_dir (e.g. out workflow
         # is done without creating any files. When 'workdir' command line
@@ -260,7 +261,8 @@ class generic_workflow(object):
             v.job_dir = self.options.workdir
 
         # And, as a last point, just create the directories.
-        dirs_to_create = list(set(map(lambda v: v.base_dir, self.f.itervalues())))
+        dirs_to_create = list(set(map(lambda v: v.base_dir,
+                                      self.f.itervalues())))
         map(self._ensureDir, dirs_to_create)
 
     def _ensureDir(self, path):
@@ -336,7 +338,7 @@ class generic_workflow(object):
             self._logger.debug("Executing: %s", command_str)
 
             # Tested against execution of multiple commands
-            stdout, stderr =  sub.Popen(command_str,
+            stdout, stderr = sub.Popen(command_str,
                                 stdout=sub.PIPE, stderr=sub.PIPE,
                                 shell=True, close_fds=True).communicate()
 
@@ -390,14 +392,14 @@ class generic_workflow(object):
         archive_filename = os.path.join(self.options.archiveWorkDir,
                                         self.options.jobId)
 
-        self._logger.info("Archive basename: %s", \
+        self._logger.info("Archive basename: %s",
                           generic_workflow._basename(archive_filename))
-        self._logger.info("Archiving the job directory to: %s",\
+        self._logger.info("Archiving the job directory to: %s",
                           archive_filename)
 
         compress_command = pos_wrappers.compress_wrapper(
-            archive_filename = archive_filename,
-            pathname = self.options.workdir)
+            archive_filename=archive_filename,
+            pathname=self.options.workdir)
 
         # Well, sometimes you don't want to execute the archive command
         # esspecially when not other command was executed.
@@ -457,6 +459,7 @@ class generic_workflow(object):
         (options, args) = parser.parse_args()
         return (options, args)
 
+
 class output_volume_workflow(generic_workflow):
     """
     This class is designed to support workflows providing volume as one of the
@@ -493,11 +496,11 @@ float | double. The default type, unlike in Convert3d is char."""
 required (e.g. '0.5 0.5 0.5'). The spacing is assumed to be provided in
 milimeters. The defaults spacing is 1x1x1mm."""
     __output_vol_command_line_args_help['outputVolumeResample'] =\
-"""Requests additional resampling of the output volume. The resampling is applied
-_before_ settting the output spacing. The resampling settings are provided as
-three positive float values corresponding to the resampling factor (e.g. 0.25
-1.0 0.75). Watch out when combining this whith other parameters like setting
-spacing. By default there is no resampling."""
+"""Requests additional resampling of the output volume. The resampling is
+applied _before_ settting the output spacing. The resampling settings are
+provided as three positive float values corresponding to the resampling factor
+(e.g. 0.25 1.0 0.75). Watch out when combining this whith other parameters like
+setting spacing. By default there is no resampling."""
     __output_vol_command_line_args_help['outputVolumePermutationOrder'] =\
 """Apply axes permutation. Permutation has to be provided as sequence of 3
 integers separated by space. Identity (0,1,2) permutation is a default one."""
@@ -512,9 +515,9 @@ physical coordinate system run as follows: x from (L)eft to (R)ight, y from
 is copied from Convert3D documentation:
 http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation)"""
     __output_vol_command_line_args_help['setInterpolation'] =\
-"""Specifies the interpolation method for resampling the output volume. Be default
-the linear interpolation is set. The other allowed values are: NearestNeighbor
-| Linear | Cubic | Sinc | Gaussian."""
+"""Specifies the interpolation method for resampling the output volume. Be
+default the linear interpolation is set. The other allowed values are:
+    NearestNeighbor | Linear | Cubic | Sinc | Gaussian."""
     __output_vol_command_line_args_help['setFlip'] =\
 """Select axes to flip. Selection has to be provided as sequence of three
 numbers. E.g. \'0 0 1\' will flip the z axis."""
@@ -526,20 +529,21 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
 
         outputVolumeSettings = \
             OptionGroup(parser, 'Output volumes settings')
-        outputVolumeSettings.add_option('--outputVolumeOrigin', dest='outputVolumeOrigin',
-            default=[0.,0.,0.], action='store', type='float', nargs =3,
+        outputVolumeSettings.add_option('--outputVolumeOrigin',
+            dest='outputVolumeOrigin',
+            default=[0., 0., 0.], action='store', type='float', nargs=3,
             help=cls.__output_vol_command_line_args_help['outputVolumeOrigin'])
         outputVolumeSettings.add_option('--outputVolumeScalarType', default='uchar',
             type='choice', dest='outputVolumeScalarType',
             choices=['char','uchar','short','ushort','int','uint','float','double'],
             help=cls.__output_vol_command_line_args_help['outputVolumeScalarType'])
-        outputVolumeSettings.add_option('--outputVolumeSpacing', default=[1,1,1],
+        outputVolumeSettings.add_option('--outputVolumeSpacing', default=[1, 1, 1],
             type='float', nargs=3, dest='outputVolumeSpacing',
             help=cls.__output_vol_command_line_args_help['outputVolumeSpacing'])
         outputVolumeSettings.add_option('--outputVolumeResample',
             dest='outputVolumeResample', type='float', nargs=3, default=None,
             help=cls.__output_vol_command_line_args_help['outputVolumeResample'])
-        outputVolumeSettings.add_option('--outputVolumePermutationOrder', default=[0,1,2],
+        outputVolumeSettings.add_option('--outputVolumePermutationOrder', default=[0, 1, 2],
             type='int', nargs=3, dest='outputVolumePermutationOrder',
             help=cls.__output_vol_command_line_args_help['outputVolumePermutationOrder'])
         outputVolumeSettings.add_option('--outputVolumeOrientationCode',
@@ -560,10 +564,10 @@ class enclosed_workflow(generic_workflow):
     """
     A base for workflows not utilizing temporary direcotries.
 
-    This workflow is deditacted for pipelines that don't use
-    working directories and which do not store temponary data aduring processing.
-    It has disabled some features regarding jobdirs, parallel execution,
-    cleaning up the working directories, etc.
+    This workflow is deditacted for pipelines that don't use working
+    directories and which do not store temponary data aduring processing. It
+    has disabled some features regarding jobdirs, parallel execution, cleaning
+    up the working directories, etc.
 
     >>> options, args = enclosed_workflow.parseArgs()
     >>> w = enclosed_workflow(options, args) #doctest: +ELLIPSIS
