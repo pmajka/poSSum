@@ -80,6 +80,8 @@ def round_custom(value, level=_DEFAULT_PADDING_ROUNDING):
 
     :return: `value` rounded up to nearest multiple of `level`
     :rtype: int
+
+    #TODO: doctest
     """
 
     return math.ceil(value / level + 1) * level
@@ -95,6 +97,8 @@ def md5sum(filename):
 
     :return: md5 sum of the `filename`
     :rtype: str
+
+    TODO: Doctest - temp file with some content
     """
 
     md5 = hashlib.md5()
@@ -115,6 +119,8 @@ def read_image_size(filename):
 
     :return: tuple containing the width and height of the image.
     :rtype: (int, int)
+
+    TODO: Doctest - temp file with predefined size
     """
 
     image = Image.open(filename)
@@ -215,7 +221,7 @@ class worksheet_manager(object):
         self._workbook_writer = xlutils.copy.copy(self._workbook)
 
         # Create a dictionary for all the slices within given file
-        # This is the MOST IMPORTANT data structure within this class.
+        # This is the MOST IMPORTANT data structure in this class.
         self._images = {}
 
     def process(self):
@@ -231,7 +237,7 @@ class worksheet_manager(object):
     def load_settings_from_workbook(self):
         """
         Load those data from the workbook which are common for all the images.
-        These could be e.g. masking options, stack size, etc. Anyway we need
+        These could be e.g. masking options, stack size, etc. Anyway, we need
         them before we start processing the individial images.
 
         In other words -- extract metadata not associated with individual
