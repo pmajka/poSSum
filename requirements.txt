@@ -3,3 +3,5 @@ networkx>=1.6
 numpy
 scipy
 coveralls
+xlrd>=0.9.3
+xlutils>=1.7.1
