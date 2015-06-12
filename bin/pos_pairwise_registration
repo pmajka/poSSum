@@ -13,7 +13,7 @@ from optparse import OptionGroup
 from possum import pos_wrappers, pos_parameters
 from possum.pos_wrapper_skel import output_volume_workflow
 
-
+# TODO: Put this const into some common settings module
 IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0
 #Transform 0
 Transform: MatrixOffsetTransformBase_double_2_2
@@ -28,32 +28,34 @@ class pairwiseRegistration(output_volume_workflow):
     """
 
     _f = {
-        'fixed_raw_image' : pos_parameters.filename('fixed_raw_image', work_dir = '99_override_this', str_template = '{idx:04d}.nii.gz'),
-        'moving_raw_image' : pos_parameters.filename('moving_raw_image', work_dir = '99_override_this', str_template = '{idx:04d}.nii.gz'),
+        'fixed_raw_image': pos_parameters.filename('fixed_raw_image', work_dir='99_override_this', str_template='{idx:04d}.nii.gz'),
+        'moving_raw_image': pos_parameters.filename('moving_raw_image', work_dir='99_override_this', str_template='{idx:04d}.nii.gz'),
+        'landmarks_fixed': pos_parameters.filename('landmarks_fixed', work_dir='99_override_this', str_template='{idx:04d}.nii.gz'),
+        'landmarks_moving': pos_parameters.filename('landmarks_moving', work_dir='99_override_this', str_template='{idx:04d}.nii.gz'),
 
-        'moving_gray' : pos_parameters.filename('src_gray', work_dir = '00_moving_gray', str_template='{idx:04d}.nii.gz'),
-        'moving_color' : pos_parameters.filename('src_color', work_dir = '01_moving_color', str_template='{idx:04d}.nii.gz'),
-        'fixed_gray' : pos_parameters.filename('fixed_gray', work_dir = '02_fixed_gray', str_template='{idx:04d}.nii.gz'),
-        'fixed_color' : pos_parameters.filename('fixed_color', work_dir = '03_fixed_color', str_template='{idx:04d}.nii.gz'),
-        'additional_gray' : pos_parameters.filename('additional_gray', work_dir = '04_additional_gray', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
-        'additional_color' : pos_parameters.filename('additional_color', work_dir = '05_additional_color', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
+        'moving_gray': pos_parameters.filename('src_gray', work_dir='00_moving_gray', str_template='{idx:04d}.nii.gz'),
+        'moving_color': pos_parameters.filename('src_color', work_dir='01_moving_color', str_template='{idx:04d}.nii.gz'),
+        'fixed_gray': pos_parameters.filename('fixed_gray', work_dir='02_fixed_gray', str_template='{idx:04d}.nii.gz'),
+        'fixed_color': pos_parameters.filename('fixed_color', work_dir='03_fixed_color', str_template='{idx:04d}.nii.gz'),
+        'additional_gray': pos_parameters.filename('additional_gray', work_dir='04_additional_gray', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
+        'additional_color': pos_parameters.filename('additional_color', work_dir='05_additional_color', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
 
-        'transf_naming' : pos_parameters.filename('transf_naming', work_dir = '11_transforms', str_template='tr_m{mIdx:04d}_'),
-        'transf_file' : pos_parameters.filename('transf_file', work_dir = '11_transforms', str_template='tr_m{mIdx:04d}_Affine.txt'),
+        'transf_naming': pos_parameters.filename('transf_naming', work_dir='11_transforms', str_template='tr_m{mIdx:04d}_'),
+        'transf_file': pos_parameters.filename('transf_file', work_dir='11_transforms', str_template='tr_m{mIdx:04d}_Affine.txt'),
         'transf_center': pos_parameters.filename('transf_center', work_dir='10_centre_of_gravity', str_template='cog_m{mIdx:04d}_f{fIdx:04d}_Affine.txt'),
 
-        'resliced_gray' : pos_parameters.filename('resliced_gray', work_dir = '21_gray_resliced', str_template='{idx:04d}.nii.gz'),
-        'resliced_gray_mask' : pos_parameters.filename('resliced_gray_mask', work_dir = '21_gray_resliced', str_template='%04d.nii.gz'),
-        'resliced_color' : pos_parameters.filename('resliced_color', work_dir = '23_resliced_color', str_template='{idx:04d}.nii.gz'),
-        'resliced_color_mask' : pos_parameters.filename('resliced_color_mask', work_dir = '23_resliced_color', str_template='%04d.nii.gz'),
-        'resliced_add_gray' : pos_parameters.filename('resliced_add_gray', work_dir = '25_resliced_add_gray', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
-        'resliced_add_gray_mask' : pos_parameters.filename('resliced_add_gray_mask', work_dir = '25_resliced_add_gray', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
-        'resliced_add_color' : pos_parameters.filename('resliced_add_color', work_dir = '27_resliced_add_color', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
-        'resliced_add_color_mask' : pos_parameters.filename('resliced_add_color_mask', work_dir = '27_resliced_add_color', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
+        'resliced_gray': pos_parameters.filename('resliced_gray', work_dir='21_gray_resliced', str_template='{idx:04d}.nii.gz'),
+        'resliced_gray_mask': pos_parameters.filename('resliced_gray_mask', work_dir='21_gray_resliced', str_template='%04d.nii.gz'),
+        'resliced_color': pos_parameters.filename('resliced_color', work_dir='23_resliced_color', str_template='{idx:04d}.nii.gz'),
+        'resliced_color_mask': pos_parameters.filename('resliced_color_mask', work_dir='23_resliced_color', str_template='%04d.nii.gz'),
+        'resliced_add_gray': pos_parameters.filename('resliced_add_gray', work_dir='25_resliced_add_gray', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
+        'resliced_add_gray_mask': pos_parameters.filename('resliced_add_gray_mask', work_dir='25_resliced_add_gray', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
+        'resliced_add_color': pos_parameters.filename('resliced_add_color', work_dir='27_resliced_add_color', str_template='stack_{stack_id:02d}_slice_{idx:04d}.nii.gz'),
+        'resliced_add_color_mask': pos_parameters.filename('resliced_add_color_mask', work_dir='27_resliced_add_color', str_template='stack_{stack_id:02d}_slice_%04d.nii.gz'),
 
-        'out_volume_gray' : pos_parameters.filename('out_volume_gray', work_dir = '31_output_volumes', str_template='{fname}_gray.nii.gz'),
-        'out_volume_color' : pos_parameters.filename('out_volume_color', work_dir = '31_output_volumes', str_template='{fname}_color.nii.gz'),
-        'out_volume_color_add' : pos_parameters.filename('out_volume_color_add', work_dir = '31_output_volumes', str_template='additional_stack_{stack_id:02d}_{fname}_color.nii.gz')
+        'out_volume_gray': pos_parameters.filename('out_volume_gray', work_dir='31_output_volumes', str_template='{fname}_gray.nii.gz'),
+        'out_volume_color': pos_parameters.filename('out_volume_color', work_dir='31_output_volumes', str_template='{fname}_color.nii.gz'),
+        'out_volume_color_add': pos_parameters.filename('out_volume_color_add', work_dir='31_output_volumes', str_template='additional_stack_{stack_id:02d}_{fname}_color.nii.gz')
          }
 
     # Define the magic numbers:
@@ -82,6 +84,41 @@ class pairwiseRegistration(output_volume_workflow):
         assert self.options.movingImagesDir, \
             self._logger.error("No moving input images directory is provided. Please provide the input images directory (--movingImagesDir)")
 
+        # Note that it is ok to set both, the fixed and moving imags
+        # directories to the same directories. When this is usefull? Well,
+        # It is not very usefull by itself as the transformations which will be
+        # calculated woulfd be simply identity transformations or
+        # transformations close to an identity transformations. However, If you
+        # provide non 1:1 indides mapping you will cause to align the images in
+        # a given stack to some other images from the same stack. I can't think
+        # of any applications using this trick but it is doable and pretty
+        # clever in my opinion. Secon application of this trick of
+        # --fixedImagesDir --movingImagesDir is when you use landmarks to drive
+        # the registration (to be implemented - remove this remark once this is
+        # implemented). In this situation the fixed image stack is not really
+        # usefull as the registration will be driven by landmarks and the fixed
+        # image stack will be used onlu as a reference image for reslicing
+        # (which might be useful). If you a) use landmarks to drive the
+        # registration and b) reslice the moving images in the space of the
+        # moving image itself then the fixed image stack is redundant and you
+        # should do --fixedImagesDir = --movingImagesDir.
+
+        assert (type(self.options.fixedLandmarksDir) == \
+                type(self.options.movingLandmarksDir)), \
+            self._logger.error("Inconsistent source landmarks settings. One set of landmarks is provided while the other set of landmarks is not provided. Please verify and try again.")
+
+        # Ok, of both both landmarks directories are set or not set (in any way
+        # -- defined in an consisten way) then we can set the "using landmarks"
+        # flag to be able determine if the reconstruction is landmarks or
+        # intensity driven.
+        if self.options.fixedLandmarksDir is not None:
+            self._landmark_registration = True
+            self._logger.debug("Using landmark images to drive the registration.")
+            self._logger.debug("Moments prealignment will not be used regardless the command line settings.")
+        else:
+            self._landmark_registration = False
+            self._logger.debug("Using intensity images to drive the registration.")
+
     def _load_slice_assignment(self):
         """
         Load the fixed image index to moving image index assignent. Such an
@@ -107,7 +144,7 @@ class pairwiseRegistration(output_volume_workflow):
         # fixed image is automatically generated.
         if not image_pairs_filename:
             self._logger.debug(
-            "No slice assignment file was provided. Using pairwise assignment.")
+            "No slice assignment file was provided. Using 1:1 pairwise assignment.")
             self._slice_assignment = \
                 dict(zip(self.options.movingSlicesRange,
                          self.options.fixedSlicesRange))
@@ -151,6 +188,8 @@ class pairwiseRegistration(output_volume_workflow):
         # directory by the actual images directory.
         self.f['fixed_raw_image'].override_dir = self.options.fixedImagesDir
         self.f['moving_raw_image'].override_dir = self.options.movingImagesDir
+        self.f['landmarks_fixed'].override_dir = self.options.fixedLandmarksDir
+        self.f['landmarks_moving'].override_dir = self.options.movingLandmarksDir
 
         # Override transformation directory
         if self.options.transformationsDirectory is not False:
@@ -192,6 +231,15 @@ class pairwiseRegistration(output_volume_workflow):
         filenames_to_check += map(lambda x: self.f['fixed_raw_image'](idx=x),
                                  self.options.fixedSlicesRange)
 
+        if self.options.fixedLandmarksDir is not None and \
+           self.options.movingLandmarksDir is not None:
+            filenames_to_check += \
+                    map(lambda x: self.f['landmarks_fixed'](idx=x),
+                        self.options.movingSlicesRange)
+            filenames_to_check += \
+                    map(lambda x: self.f['landmarks_moving'](idx=x),
+                        self.options.fixedSlicesRange)
+
         for slice_filename in filenames_to_check:
             self._logger.debug("Checking for image: %s.", slice_filename)
 
@@ -227,9 +275,9 @@ class pairwiseRegistration(output_volume_workflow):
         # slice.
         for fixed_index in self._slice_assignment.values():
             command = pos_wrappers.image_voxel_count_wrapper(
-                image = self.f['fixed_gray'](idx=fixed_index),
-                background = self.options.resliceBackgorund,
-                voxel_sum = True)
+                image=self.f['fixed_gray'](idx=fixed_index),
+                background=self.options.resliceBackgorund,
+                voxel_sum=True)
             vox_count = float(command()['stdout'].strip())
             ref_slice_voxel_counts.append(vox_count)
 
@@ -276,9 +324,9 @@ class pairwiseRegistration(output_volume_workflow):
         # slice.
         for moving_index in self._slice_assignment.keys():
             command = pos_wrappers.image_voxel_count_wrapper(
-                image = self.f['moving_gray'](idx=moving_index),
-                background = self.options.resliceBackgorund,
-                voxel_sum = True)
+                image=self.f['moving_gray'](idx=moving_index),
+                background=self.options.resliceBackgorund,
+                voxel_sum=True)
             vox_count = float(command()['stdout'].strip())
             mov_slice_voxel_counts.append(vox_count)
 
@@ -354,7 +402,10 @@ class pairwiseRegistration(output_volume_workflow):
         # Generate transforms. This step may be switched off by providing
         # aproperiate command line parameter.
         if self.options.skipTranasformGeneration is not True:
-            self._calculate_transforms()
+            if self._landmark_registration:
+                self._calculate_landmarks_transforms()
+            else:
+                self._calculate_transforms()
 
         # Reslice the input slices according to the generated transforms.
         # This step may be skipped by providing approperiate command line
@@ -467,6 +518,57 @@ class pairwiseRegistration(output_volume_workflow):
 
         self.execute(commands)
 
+    def _calculate_landmarks_transforms(self):
+        """
+        TODO: Put documentation here
+        """
+
+        commands = []
+        for moving_slice, fixed_slice in self._slice_assignment.items():
+            transform_command = \
+                self._calculate_transform_from_landmarks(\
+                                    moving_slice, fixed_slice)
+            if not os.path.isfile(self.f['transf_file'](mIdx=moving_slice)):
+                commands.append(transform_command)
+
+        self.execute(commands)
+
+    def _calculate_transform_from_landmarks(self, moving_slice_index,
+                                            fixed_slice_index):
+        """
+        Generates a affine or rigd transformation (dependin on the provided
+        command line parameters) using landmark images. This method of
+        generating transformations is used when the reconstruction process
+        relies on landmarks rather than the images itself.
+
+        :param moving_slice_index: moving slice index
+        :type moving_slice_index: int
+
+        :param fixed_slice_index: fixed slice index
+        :type fixed_slice_index: int
+
+        :return: Registration command wrapper or False if given pair of
+        sections will not be or cannot be registered registered.
+        :rtype: :object:`bool` or :class:`pos_wrappers.generic_wrapper`
+        """
+
+        # Get the type of the landmarks-based affine transformation based
+        # on the rigid / affine settings provided via the command line
+        # note that the self.options.useRigidAffine in an bool object
+        # which is a cubclass of int.
+        transform_type = ["affine", "rigid"][self.options.useRigidAffine]
+        transform_type = {"affine": '12', "rigid": '6'}[transform_type]
+
+        landmark_transform_getter = \
+            pos_wrappers.get_affine_from_landmarks_wrapper(
+            fixed_image=self.f['landmarks_fixed'](idx=fixed_slice_index),
+            moving_image=self.f['landmarks_moving'](idx=moving_slice_index),
+            transformation_type=transform_type,
+            output_transformation=\
+                    self.f['transf_file'](mIdx=moving_slice_index,
+                                            fIdx=fixed_slice_index))
+        return copy.deepcopy(landmark_transform_getter)
+
     def _get_cog_alignment(self, moving_slice_index, fixed_slice_index):
         """
         Get a single partial transform which computes a transformation of a
@@ -499,6 +601,7 @@ class pairwiseRegistration(output_volume_workflow):
         :param moving_slice_index: fixes slice index
         :type moving_slice_index: int
         """
+
         # Define the registration settings: image-to-image metric and its
         # parameter, number of iterations, output naming, type of the affine
         # transformation.
@@ -901,6 +1004,10 @@ class pairwiseRegistration(output_volume_workflow):
             type='str', dest='fixedImagesDir', help='')
         parser.add_option('--movingImagesDir', default=None,
             type='str', dest='movingImagesDir', help='')
+        parser.add_option('--fixedLandmarksDir', default=None,
+            type='str', dest='fixedLandmarksDir', help='TODO')
+        parser.add_option('--movingLandmarksDir', default=None,
+            type='str', dest='movingLandmarksDir', help='TODO')
 
         parser.add_option('--imagePairsAssignmentFile', default=None,
             type='str', dest='imagePairsAssignmentFile', help='File carrying assignment of a fixed image to corresponding moving image.')
@@ -913,10 +1020,10 @@ class pairwiseRegistration(output_volume_workflow):
 
         parser.add_option('--fixedImageResize',  default=None,
             type='float', dest='fixedImageResize',
-            action='store', nargs = 1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
+            action='store', nargs=1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
         parser.add_option('--movingImageResize', default=None,
             type='float', dest='movingImageResize',
-            action='store', nargs = 1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
+            action='store', nargs=1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
 
         parser.add_option('--registrationColorChannelMovingImage', default='blue',
             type='str', dest='registrationColorChannelMovingImage',

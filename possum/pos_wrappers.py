@@ -1696,6 +1696,7 @@ class merge_components(generic_wrapper):
         'other_files_remove': pos_parameters.list_parameter('other_files_remove', [], str_template='{_list}')
         }
 
+
 class image_voxel_count_wrapper(generic_wrapper):
     """
     Determines the amount (sum or integral) of non-background pixels in the
@@ -1779,9 +1780,10 @@ class image_voxel_count_wrapper(generic_wrapper):
         'voxel_integral' : pos_parameters.boolean_parameter('voxel-integral', None, str_template='-{_name}')
     }
 
+
 class align_by_center_of_gravity(generic_wrapper):
     """
-    Calculated a transformation between two images so that the images' centres
+    Calculates a transformation between two images so that the images' centres
     of gravity matches.
 
     >>> align_by_center_of_gravity
@@ -1814,6 +1816,32 @@ class align_by_center_of_gravity(generic_wrapper):
         'fixed_image': pos_parameters.filename_parameter('fixed_image', None, str_template="--fixedImage {_value}"),
         'moving_image': pos_parameters.filename_parameter('moving_image', None, str_template="--movingImage {_value}"),
         'output_transformation': pos_parameters.filename_parameter('output_transformation', None, str_template="--transformationFileName {_value}"),
+    }
+
+
+class get_affine_from_landmarks_wrapper(generic_wrapper):
+    """
+    Wrapper for ANTSUseLandmarkImagesToGetAffineTransform from the ANTS
+    package. Calculates affine or rigid transformation based on set of two
+    landmarks images. The landmarks images are assumed to be inexed images the
+    same physical space as the images to register. Both images has to have the
+    same set of landmarks defined.
+
+    TODO: DOC
+    TODO: Explain yourself why the wrapper is so f*ckin messy.
+    """
+
+    _template = """c3d {fixed_image} {moving_image} -alm {transformation_type} {output_transformation} && \
+        c3d_affine_tool {output_transformation} -oitk {output_transformation} && \
+        sed -i s/MatrixOffsetTransformBase_double_3_3/MatrixOffsetTransformBase_double_2_2/ {output_transformation} && \
+        awk 'NR==1 {{print $0}} NR==2 {{print $0}} NR==3 {{print $0}} NR==4 {{print $1,$2,$3,$5,$6,$11,$12}} NR==5 {{print $1,$2,$3}}' < {output_transformation} > {output_transformation}.txt && \
+        mv {output_transformation}.txt {output_transformation}"""
+
+    _parameters = {
+        'fixed_image': pos_parameters.filename_parameter('fixed_image', None, str_template="{_value}"),
+        'moving_image': pos_parameters.filename_parameter('moving_image', None, str_template="{_value}"),
+        'transformation_type': pos_parameters.string_parameter('transformation_type', 'rigid', str_template="{_value}"),
+        'output_transformation': pos_parameters.filename_parameter('output_transformation', None, str_template="{_value}"),
     }
 
 
