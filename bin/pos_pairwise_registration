@@ -12,6 +12,7 @@ from optparse import OptionGroup
 
 from possum import pos_wrappers, pos_parameters
 from possum.pos_wrapper_skel import output_volume_workflow
+from possum.pos_common import r
 
 # TODO: Put this const into some common settings module
 IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0
@@ -72,17 +73,23 @@ class pairwiseRegistration(output_volume_workflow):
         # Ok, the first thing to check is to make sure that both slice ranges
         # are provided: the moving slice range and the fixed slice range
         assert self.options.fixedSlicesRange, \
-            self._logger.error("Fixed slices range (`--fixedSlicesRange`) is obligatory. Please provide the fixed slices range. ")
+            self._logger.error(r("Fixed slices range (`--fixedSlicesRange`) \
+            is obligatory. Please provide the fixed slices range. "))
 
         assert self.options.movingSlicesRange, \
-            self._logger.error("Moving range parameters (`--movingSlicesRange`) are required. Please provide the moving slices range. ")
+            self._logger.error(r("Moving range parameters \
+            (`--movingSlicesRange`) are required. Please provide \
+            the moving slices range."))
 
         # Validate, if an input images directory is provided,
         # Obviously, we need to load the images in order to process them.
         assert self.options.fixedImagesDir, \
-            self._logger.error("No fixed input images directory is provided. Please provide the input images directory (--fixedImagesDir)")
+            self._logger.error(r("No fixed input images directory is provided.\
+            Please provide the input images directory (--fixedImagesDir)"))
         assert self.options.movingImagesDir, \
-            self._logger.error("No moving input images directory is provided. Please provide the input images directory (--movingImagesDir)")
+            self._logger.error(r("No moving input images directory is\
+            provided. Please provide the input images directory \
+            (--movingImagesDir)"))
 
         # Note that it is ok to set both, the fixed and moving imags
         # directories to the same directories. When this is usefull? Well,
@@ -105,7 +112,9 @@ class pairwiseRegistration(output_volume_workflow):
 
         assert (type(self.options.fixedLandmarksDir) == \
                 type(self.options.movingLandmarksDir)), \
-            self._logger.error("Inconsistent source landmarks settings. One set of landmarks is provided while the other set of landmarks is not provided. Please verify and try again.")
+            self._logger.error(r("Inconsistent source landmarks settings.\
+            One set of landmarks is provided while the other set of\
+            landmarks is not provided. Please verify and try again."))
 
         # Ok, of both both landmarks directories are set or not set (in any way
         # -- defined in an consisten way) then we can set the "using landmarks"
@@ -114,7 +123,8 @@ class pairwiseRegistration(output_volume_workflow):
         if self.options.fixedLandmarksDir is not None:
             self._landmark_registration = True
             self._logger.debug("Using landmark images to drive the registration.")
-            self._logger.debug("Moments prealignment will not be used regardless the command line settings.")
+            self._logger.debug(r("Moments prealignment will NOT be used\
+            regardless the command line settings."))
         else:
             self._landmark_registration = False
             self._logger.debug("Using intensity images to drive the registration.")
@@ -265,7 +275,8 @@ class pairwiseRegistration(output_volume_workflow):
 
         # Repair indexes of moving slices for which a blank reference slice was
         # defined:
-        self._logger.debug("Correcting slice to slice assignment for those moving slice for which a blank reference slice was assigned.")
+        self._logger.debug(r("Correcting slice to slice assignment for\
+        those moving slice for which a blank reference slice was assigned."))
 
         # This array will collect all the number of non-blank voxels for each
         # slice.
@@ -520,7 +531,13 @@ class pairwiseRegistration(output_volume_workflow):
 
     def _calculate_landmarks_transforms(self):
         """
-        TODO: Put documentation here
+        Calculates the 2d rigid / affine transformations based on the provided
+        landmark images instead of typical intensity based coregistration.
+        This method is used automatically when the landmark images are
+        provided.
+
+        :return: None
+        :rtype: None
         """
 
         commands = []
@@ -1000,10 +1017,6 @@ class pairwiseRegistration(output_volume_workflow):
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
 
-        def help_desc_shortener(desc):
-            return " ".join(desc.split())
-        r = help_desc_shortener
-
 
         parser.add_option('--fixedImagesDir', default=None,
             type='str', dest='fixedImagesDir', help=r('Directory containing \
@@ -1028,7 +1041,8 @@ class pairwiseRegistration(output_volume_workflow):
             "--disable-moments".'))
 
         parser.add_option('--imagePairsAssignmentFile', default=None,
-            type='str', dest='imagePairsAssignmentFile', help='File carrying assignment of a fixed image to corresponding moving image.')
+            type='str', dest='imagePairsAssignmentFile',
+            help='File carrying assignment of a fixed image to corresponding moving image.')
         parser.add_option('--movingSlicesRange', default=None,
             type='int', dest='movingSlicesRange', nargs = 2,
             help='Range of moving slices (for preprocessing). By default the same as fixed slice range.')
