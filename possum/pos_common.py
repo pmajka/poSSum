@@ -108,6 +108,7 @@ def which(program):
 
     return None
 
+
 def flatten(lst):
     """
     >>> list(flatten([10,11,[20,21]]))
@@ -125,6 +126,39 @@ def flatten(lst):
                 yield x
         else:
                 yield x
+
+
+def remove_multiple_spaces_from_string(string):
+    """
+    In the provided ``string`` replaced all instances of multiple spaces with
+    only a single space. Additionally strips the string before removing
+    the spaces.
+
+    :param string: String to remove spaces from
+    :type string: str
+
+    :return: String in which all multiple spaced in a row were replaced with a
+             single space character.
+    :rtype: str
+
+    >>> print remove_multiple_spaces_from_string("          A test   string")
+    A test string
+
+    >>> print remove_multiple_spaces_from_string("  A test   string  ")
+    A test string
+
+    >>> print remove_multiple_spaces_from_string("A test   string")
+    A test string
+
+    """
+    return " ".join(string.strip().split())
+
+"""
+Here we just create an alias we do not have to import the function using its
+full name which is long and therefore difficult to use in the codpe.
+"""
+r = remove_multiple_spaces_from_string
+
 
 if __name__ == 'possum.pos_common':
     import doctest
