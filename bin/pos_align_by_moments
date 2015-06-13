@@ -95,7 +95,7 @@ class align_by_centre_of_gravity(enclosed_workflow):
 
 
         # Calculate the image moments:
-        self._logger.debug("Calculating the centre of gravity %s")
+        self._logger.debug("Calculating the centre of gravity.")
 
         fixed_image_moments = itk.ImageMomentsCalculator[self._fixed_image_type].New()
         fixed_image_moments.SetImage(self._fixed_image_reader.GetOutput())
@@ -149,7 +149,7 @@ class align_by_centre_of_gravity(enclosed_workflow):
 
     @staticmethod
     def parseArgs():
-        usage_string = "python pos_align_by_center_of_gravity.py "
+        usage_string = "python pos_align_by_center_of_gravity.py "   # TODO: Update the usage string
         parser = possum.pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--fixedImage', '-f', dest='fixedImage', type='str',
