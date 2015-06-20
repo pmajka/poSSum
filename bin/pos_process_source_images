@@ -29,6 +29,7 @@ the following procedures are carried out:
 import os
 import copy
 import time
+
 from optparse import OptionGroup
 
 from possum import pos_parameters
@@ -202,9 +203,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             images and the downsampled images after reconstruction. The glitch
             is that the downsampled images have origin which is not 0,0 but
             (pixel spacing)/2 in both directions. This happens because the
-            resampling is performed in an itk way so it slightly influentes the
+            resampling is performed in an itk way so it slightly influences the
             spacing. Anyway, the systematic discrepancy is half of the
-            downsampled pixel size.
+            downsampled pixel size so it should be acceptable.
 
         """
 
@@ -235,8 +236,10 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
     slicing_planes_settings = {
         "saggital": {'permutation': [2, 0, 1], 'flip': [0, 0, 0], 'axis': 0},
-        "coronal" : {'permutation': [0, 2, 1], 'flip': [0, 0, 0], 'axis': 1},
-        "axial"  : {'permutation': [0, 1 ,2], 'flip': [0, 0, 0], 'axis': 2}}
+        "sagital": {'permutation': [2, 0, 1], 'flip': [0, 0, 0], 'axis': 0},
+        "coronal": {'permutation': [0, 2, 1], 'flip': [0, 0, 0], 'axis': 1},
+        "axial": {'permutation': [0, 1 ,2], 'flip': [0, 0, 0], 'axis': 2},
+        "horizontal": {'permutation': [0, 1 ,2], 'flip': [0, 0, 0], 'axis': 2}}
 
     __DEFAULT_VOLUME_ORIENTATION_CODE = "RAS"
 
@@ -489,6 +492,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
           displayed on the image. This can be different than the initial
           section pfilename due to section replacement features.
         :type input_filename: str
+        TODO: What is returned
         """
 
         annotation = ""
@@ -503,7 +507,11 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             annotation += "\n"
 
         annotation += "The fullsized image was downsampled to approx. " + \
-                str(image.process_resolution) + " mm/px.\n"
+                str(image.process_resolution) + " mm/px "
+
+        if image.rotation:
+            annotation += "And then rotated by " + str(image.rotation) + "deg."
+        annotation += "\n"
 
         if image.horizontal_flip and image.vertical_flip:
             annotation += "The image was flipped horizontally (up-down) and vertically (left-right)"
@@ -543,7 +551,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # from a single image. See the docstrings from details.
         commands = []
         for index, image in self.w._images.items():
-            # Get the native resolution per images as it can be different for
+            # Get the native resolution per image as it can be different for
             # each individual slice images (imagine that some of them could be
             # high resolution version and some other might be downsampled
             # versions or something of this manner.
