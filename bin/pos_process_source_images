@@ -854,7 +854,38 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header += "DIR_REF_TO_SLICE_MASK=%s/\n" % \
             self.f['seq_ref_to_slice_mask'].base_dir
 
+        header += "\n\n"
+        header += "# Functions for slicing input stack into sections and \n"
+        header += "# stacking back into 3D image. Useful in all intermediate\n"
+        header += "# stacking back into volumetric form.\n\n"
+
+        header += "hd_split_volume ()\n"
+        header += "{\n"
+        header += "    VOLUME=$1\n"
+        header += "    OUTPUT_DIR=`mktemp -d`\n"
         header += "\n"
+        header += "    pos_slice_volume \\\n"
+        header += "        -i ${VOLUME} \\\n"
+        header += "        -o ${OUTPUT_DIR}/%04d.nii.gz \\\n"
+        header += "        --shiftIndexes ${IDX_FIRST_SLICE} \\\n"
+        header += "        -s ${SLICING_PLANE_INDEX} > /dev/null 2>&1 \n"
+        header += "    \n"
+        header += "    echo ${OUTPUT_DIR}\n"
+        header += "}\n"
+        header += "\n"
+
+        header += "hd_stack_sections ()\n"
+        header += "{\n"
+        header += "    INPUT_DIR=$1\n"
+        header += "    OUTPUT_VOLUME=$2\n"
+        header += "\n"
+        header += "    pos_stack_reorient \\\n"
+        header += "        -i ${INPUT_DIR}/%04d.nii.gz \\\n"
+        header += "        -o ${OUTPUT_VOLUME} \\\n"
+        header += "        --stackingOptions ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \\\n"
+        header += "        ${OUTPUT_VOLUME_PROPERTIES}  > /dev/null 2>&1 \n"
+        header += "     rm -rfv ${INPUT_DIR} \n"
+        header += "}\n"
 
         # Ok, now just save the string into a file.
         open(self.options.headerFile, 'w').write(header)
