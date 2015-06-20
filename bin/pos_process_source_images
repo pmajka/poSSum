@@ -338,7 +338,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
     def _process_reference(self):
         """
-
         Process the reference images. The reference processing rutine consists
         of the following activities:
 
@@ -441,7 +440,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             2. Full resoultion mask of the input image with extended canvas.
 
         """
-
         commands = []
 
         for index, image in self.w._images.items():
@@ -478,54 +476,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             commands.append(copy.copy(command))
 
         self.execute(commands)
-
-    def _get_image_annotation(self, image, input_filename):
-        """
-        Generate section annotation string. The purpose of the annotation
-        is to provide an information regarding the section which is embeded
-        directly on the section. Thus, it can be easily percieved.
-
-        :param image: image description object
-        :type image: `pos_input_data_preprocessor.input_image`
-
-        :param input_filename: filename of the actual section which is
-          displayed on the image. This can be different than the initial
-          section pfilename due to section replacement features.
-        :type input_filename: str
-        TODO: What is returned
-        """
-
-        annotation = ""
-        annotation += "(" + str(image.image_index) + "), "
-        annotation += "input filename: " + input_filename + ", "
-        annotation += "(resolution: " + str(image.image_resolution) + " mm/px).\n"
-
-        if image.replacement_index:
-            annotation += "Originally, this section was should be: " \
-                + str(image.image_name) + " but was replaced."
-        else:
-            annotation += "\n"
-
-        annotation += "The fullsized image was downsampled to approx. " + \
-                str(image.process_resolution) + " mm/px "
-
-        if image.rotation:
-            annotation += "And then rotated by " + str(image.rotation) + "deg."
-        annotation += "\n"
-
-        if image.horizontal_flip and image.vertical_flip:
-            annotation += "The image was flipped horizontally (up-down) and vertically (left-right)"
-        elif image.horizontal_flip:
-            annotation += "The image was flipped horizontally (up-down)."
-        elif image.vertical_flip:
-            annotation += "The image was flipped vertically (left-right)."
-
-        annotation += "\n"
-
-        annotation += "The input image was padded to %d, %d pixels before resampling." % \
-            tuple(image.padded_size)
-
-        return annotation
 
     def _to_niftis(self):
         """
@@ -1211,4 +1161,3 @@ if __name__ == '__main__':
     options, args = volume_reconstruction_preprocessor.parseArgs()
     workflow = volume_reconstruction_preprocessor(options, args)
     workflow.launch()
-
