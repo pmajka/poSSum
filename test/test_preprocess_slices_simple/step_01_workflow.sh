@@ -1,5 +1,22 @@
 #!/bin/bash -xe
 
+# -------------------------------------------------------------------
+# This example shows how to use the image preprocessing script
+# which uses an XLS spreadsheet process a set of input sections in
+# a typical image format (png, tif, jpg, anything which is well
+# supported by the ImageMagick into a 3D stack used by
+# the reconstruction workflows.
+#
+# The XLS spreadsheet contains metadata related to the individual
+# images as well as the whole image stack. The individual serctions are
+# processed into a 3D stack and all relevant information is embeded into the 3D
+# stack (e.g. spacing, origin, anatomical directions, order of the sections,
+# replacement, rotation flipping and what not.)
+# 
+# The script creates also a rudimentary mask based on the median filtering
+# followed by a naive thresholding. It works suprisingly well.
+
+
 specimen_id=brainmaps_s40
 
 DIR_RAW_SLICES=00_source_sections
@@ -26,6 +43,7 @@ tar -xvvzf 00_source_sections.tgz
 # Download the image stack to reconstruct. In case it is not already
 # downloaded.
 #--------------------------------------------------------------------
+
 for section in `cat sections_to_download`
 do
     if [ ! -f  ${DIR_RAW_SLICES}/${section}.jpg ]; then
@@ -33,6 +51,11 @@ do
             -O ${DIR_RAW_SLICES}/${section}.jpg 
     fi
 done 
+
+
+# ------------------------------------------------------------------
+# And now the main part: Starting the image preprocessing script.
+# ------------------------------------------------------------------
 
 pos_process_source_images \
      --loglevel=DEBUG \
@@ -59,9 +82,11 @@ pos_process_source_images \
      \
      --disable-reference
 
+
 #--------------------------------------------------------------------
 # Only now we can load the actual header file
 #--------------------------------------------------------------------
+
 source header.sh
 
 
@@ -71,5 +96,6 @@ source header.sh
 # sections and then stack it back into 3D image.
 # Sound silly but it is suprisingly usefull.
 #--------------------------------------------------------------------
+
 tempdir=`hd_split_volume ${VOL_RGB_MASKED}`
 hd_stack_sections ${tempdir} rgb_stack-sectioned_and_stacked_back.nii.gz
