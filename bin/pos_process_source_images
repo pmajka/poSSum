@@ -45,7 +45,7 @@ class input_image_padding(pos_wrappers.generic_wrapper):
     """
     """
 
-    _template = """convert {input_image} {background} {rotation}\
+    _template = """convert {input_image} {negate} {background} {rotation}\
     {horizontal_flip} {vertical_flip} {gravity} {extent} \
     \( +clone -write {full_size_output} \
          {color_channel} {median} -separate \
@@ -54,6 +54,7 @@ class input_image_padding(pos_wrappers.generic_wrapper):
 
     _parameters = {
         'input_image': pos_parameters.filename_parameter('input_image', None),
+        'negate': pos_parameters.string_parameter('negate', None, "-{_name}"),
         'background': pos_parameters.string_parameter('background', "white", "-{_name} {_value}"),
         'gravity': pos_parameters.string_parameter('gravity', "NorthWest", "-{_name} {_value}"),
         'extent': pos_parameters.vector_parameter('extent', None, "-{_name} {_list}"),
@@ -463,7 +464,9 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             # and we cannot pass False. It's ugly. I know that.
             command = input_image_padding(
                 input_image=source_image_filename,
+                negate=self.options.NegateInputImages,
                 extent=image.padded_size,
+                background=self.options.canvasBackground,
                 rotation=image.rotation,
                 horizontal_flip=[None, True][int(image.horizontal_flip)],
                 vertical_flip=[None, True][int(image.vertical_flip)],
@@ -1105,6 +1108,8 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         source_processing.add_option('--disable-process-source-images', default=False,
             dest='doProcessSourceImages', action='store_false')
 
+        source_processing.add_option('--negate-input-images', default=False,
+            dest='NegateInputImages', action='store_true')
         source_processing.add_option('--canvas-gravity', default="NorthWest",
             dest='canvasGravity', action='store', type="choice",
             choices=["NorthWest","Center"],
