@@ -1108,7 +1108,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         source_processing.add_option('--disable-process-source-images', default=False,
             dest='doProcessSourceImages', action='store_false')
 
-        source_processing.add_option('--negate-input-images', default=False,
+        source_processing.add_option('--negate-input-images', default=None,
             dest='NegateInputImages', action='store_true')
         source_processing.add_option('--canvas-gravity', default="NorthWest",
             dest='canvasGravity', action='store', type="choice",
