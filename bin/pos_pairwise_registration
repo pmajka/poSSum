@@ -1025,19 +1025,19 @@ class pairwiseRegistration(output_volume_workflow):
             regardless the registration mode (intensity images / landmarks).'))
         parser.add_option('--movingImagesDir', default=None,
             type='str', dest='movingImagesDir', help='')
-        parser.add_option('--fixedLandmarksDir', default=None,
+        parser.add_option('--fixed-landmarks-directory', default=None,
             type='str', dest='fixedLandmarksDir', help=r('Directory with \
             landmarks images for the registration. Using this option switches \
             the registration mode to use landmarks instead of intensity images.\
             The landmarks has to match the intensity images.\
-            Use with "--movingLandmarksDir" only. Forces \
+            Use with "--moving-landmarks-directory" only. Forces \
             "--disable-moments".'))
-        parser.add_option('--movingLandmarksDir', default=None,
+        parser.add_option('--moving-landmarks-directory', default=None,
             type='str', dest='movingLandmarksDir', help=r('Directory with \
             landmarks images for the registration. Using this option switches \
             the registration mode to use landmarks instead of intensity images.\
             The landmarks has to match the intensity images.\
-            Use with "--fixedLandmarksDir" only. Forces \
+            Use with "--fixed-landmarks-directory" only. Forces \
             "--disable-moments".'))
 
         parser.add_option('--imagePairsAssignmentFile', default=None,

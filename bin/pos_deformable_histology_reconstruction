@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*
 
 """
-A framework for performing deformable reconstruction of smooth and acurate
-volumetric reconstructions from 2d slices.
 """
 
 import os
@@ -23,8 +21,6 @@ from possum.pos_deformable_wrappers import preprocess_slice_volume, \
 
 class deformable_reconstruction_workflow(output_volume_workflow):
     """
-    A framework for performing deformable reconstruction of histological volumes
-    based on histological slices. The framework combines:
     """
 
     _f = {
@@ -411,9 +407,10 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
     def _get_stack_intermediate_command(self):
         """
-        Helper function for stakcing resliced slices from intermediate stages
-        of processing.
+        Helper function for stacking resliced slices after completing
+        an iteration.
         """
+
         iteration = self.current_iteration
 
         stack_grayscale = pos_wrappers.stack_and_reorient_wrapper(
