@@ -159,7 +159,8 @@ class stack_histogram_matching(output_volume_workflow):
 
         # The user can supply the sections of reference intensity in arbitrary
         # order. They have to be sorted before we can do anyting with them.
-        self.options.referenceSections = sorted(self.options.referenceSections)
+        self.options.referenceSections = \
+            sorted(self.options.referenceSections)
         ref = self.options.referenceSections
 
         # Now we can nicely generate tuples of (lower, upper) pairs of
@@ -182,8 +183,8 @@ class stack_histogram_matching(output_volume_workflow):
         # Print out all the weights, also for the sole purpose of debugging:
         for image_index in sorted(self._weights.keys()):
             (wl, wu), (il, iu) = self._weights[image_index]
-            self._logger.info(r("Image %d will be matched with image %d (%f), and image %d (%f)."),\
-                image_index, il, wl, iu, wu)
+            self._logger.info(r("Image %d will be matched with image \
+                %d (%f), and image %d (%f)."), image_index, il, wl, iu, wu)
 
     def _calculate_weights(self, image_index):
         """
