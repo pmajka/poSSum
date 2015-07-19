@@ -651,6 +651,15 @@ class pairwiseRegistration(output_volume_workflow):
             self.f['transf_center'](mIdx=moving_slice_index,
                                     fIdx=fixed_slice_index)
 
+        # If there is a affine gradient descent command line parameter \
+        # provided it has to be preprocessed before providing it
+        # to the command line wapper.
+        if self.options.affineGradientDescent is None:
+            gradient_descent_option = None
+        else:
+            gradient_descent_option = \
+                self.options.affineGradientDescent
+
         # Define the registration framework for 2D images,
         # without the deformable registration step, etc.
         registration = pos_wrappers.ants_registration(
@@ -664,6 +673,7 @@ class pairwiseRegistration(output_volume_workflow):
             initialAffine=initial_affine,
             histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
             miOption=[metric_parameter, self.__MI_SAMPLES],
+            affineGradientDescent=gradient_descent_option,
             allMetricsConverge=None,
             affineMetricType=affine_metric_type)
 
@@ -1084,23 +1094,23 @@ class pairwiseRegistration(output_volume_workflow):
             help='ROI of the output volume - in respect to registration ROI.')
 
         parser.add_option('--skipPreprocessing', default=False,
-                dest='skipPreprocessing', action='store_const', const=True,
-                help='Supress preprocessing images.')
+            dest='skipPreprocessing', action='store_const', const=True,
+            help='Supress preprocessing images.')
         parser.add_option('--skipGrayReslice', default=False,
-                dest='skipGrayReslice', action='store_const', const=True,
-                help='Supress generating grayscale volume')
+            dest='skipGrayReslice', action='store_const', const=True,
+            help='Supress generating grayscale volume')
         parser.add_option('--skipColorReslice', default=False,
-                dest='skipColorReslice', action='store_const', const=True,
-                help='Supress generating RGB volume.')
+            dest='skipColorReslice', action='store_const', const=True,
+            help='Supress generating RGB volume.')
         parser.add_option('--skipTransformGeneration', default=False,
-                dest='skipTranasformGeneration', action='store_const', const=True,
-                help='Supress generating transforms.')
+            dest='skipTranasformGeneration', action='store_const', const=True,
+            help='Supress generating transforms.')
         parser.add_option('--skipOutputVolumes', default=False,
-                dest='skipOutputVolumes', action='store_const', const=True,
-                help='Supress generating volumes.')
+            dest='skipOutputVolumes', action='store_const', const=True,
+            help='Supress generating volumes.')
         parser.add_option('--outputVolumesDirectory', default=None,
-                dest='outputVolumesDirectory', action='store',
-                help='Store output volumes in given directory instead of using default one.')
+            dest='outputVolumesDirectory', action='store',
+            help='Store output volumes in given directory instead of using default one.')
 
         parser.add_option('--enable-moments', default=False,
             dest='enableMomentsAlignment', action='store_true',
@@ -1113,17 +1123,23 @@ class pairwiseRegistration(output_volume_workflow):
             Note that the images have to have dark (0) background with \
             a bright (positive) content.'))
         parser.add_option('--antsImageMetric', default='MI',
-                type='str', dest='antsImageMetric',
-                help='ANTS image to image metric. See ANTS documentation.')
+            type='str', dest='antsImageMetric',
+            help='ANTS image to image metric. See ANTS documentation.')
         parser.add_option('--useRigidAffine', default=False,
-                dest='useRigidAffine', action='store_const', const=True,
-                help='Use rigid affine transformation. By default affine transformation is used to drive the registration ')
+            dest='useRigidAffine', action='store_const', const=True,
+            help=r('Use rigid affine transformation. By default affine \
+            transformation is used to drive the registration '))
         parser.add_option('--antsImageMetricOpt', default=32,
-                type='int', dest='antsImageMetricOpt',
-                help='Parameter of ANTS i2i metric.')
+            type='int', dest='antsImageMetricOpt',
+            help='Parameter of ANTS i2i metric.')
+        parser.add_option('--affineGradientDescent', default=None,
+                type='float', dest='affineGradientDescent', nargs=4,
+                help=r('Grandient descent step coefficients. Values are \
+                passed directly to ANTS as \
+                "--affine-gradient-descent-option".))
         parser.add_option('--transformationsDirectory', default=None,
-                dest='transformationsDirectory', action='store',
-                help='Store transformations in given directory instead of using default one.')
+            dest='transformationsDirectory', action='store',
+            help='Store transformations in given directory instead of using default one.')
         parser.add_option('--grayscaleVolumeFilename', default=False,
             dest='grayscaleVolumeFilename', type='str',
             help='Filename for the output grayscale volume')

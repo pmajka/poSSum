@@ -425,6 +425,15 @@ class sequential_alignment(output_volume_workflow):
             self.f['transf_center'](mIdx=moving_slice_index,
                                     fIdx=fixed_slice_index)
 
+        # If there is a affine gradient descent command line parameter \
+        # provided it has to be preprocessed before providing it
+        # to the command line wapper.
+        if self.options.affineGradientDescent is None:
+            gradient_descent_option = None
+        else:
+            gradient_descent_option = \
+                self.options.affineGradientDescent
+
         # Define the image-to-image metric.
         metrics = []
         metric = pos_wrappers.ants_intensity_meric(
@@ -448,6 +457,7 @@ class sequential_alignment(output_volume_workflow):
             initialAffine=initial_affine,
             histogramMatching=str(self.__HISTOGRAM_MATCHING).lower(),
             miOption=[metric_parameter, self.__MI_SAMPLES],
+            affineGradientDescent=gradient_descent_option,
             allMetricsConverge=None,
             affineMetricType=affine_metric_type)
 
@@ -895,6 +905,9 @@ class sequential_alignment(output_volume_workflow):
         registration_options.add_option('--antsImageMetricOpt', default=32,
             type='int', dest='antsImageMetricOpt',
             help='Parameter of ANTS i2i metric. Makes a sense only when provided metric can be customized.')
+        registration_options.add_option('--affineGradientDescent', default=None,
+                type='float', dest='affineGradientDescent', nargs=4,
+                help='Grandient descent optimizers coefficients.')
         registration_options.add_option('--graphEdgeLambda', default=0.0,
             dest='graphEdgeLambda', action='store', type="float",
             help='Provedes lambda value for the graph edges generation.')
