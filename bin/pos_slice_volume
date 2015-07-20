@@ -209,6 +209,17 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         usage_string = "pos_slice_volume -i <input_filename> [options]"
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
+        parser.add_option('--input-image', '-i', dest='input_image',
+            type='str', default=None, metavar="FILENAME",
+            help='Input filename.')
+        parser.add_option('--output-filenames-offset',
+            dest='output_filenames_offset', type='int',
+            default=0, help=r('Shift output file numbers by given value \
+            (has to be integer).'))
+        parser.add_option('--sliceAxisIndex', '-s',
+            dest='sliceAxisIndex', type='int',
+            default=0,
+            help='Index of the slicing axis.')
         parser.add_option('--file-series-format', '-o',
             dest='file_series_format', type='str',
             default='%04d.png',
@@ -218,17 +229,6 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
             default=None,
             help=r('Indexes of the slices to extract defined as \
             parameters of the python range function.'))
-        parser.add_option('--sliceAxisIndex', '-s',
-            dest='sliceAxisIndex', type='int',
-            default=0,
-            help='Index of the slicing axis.')
-        parser.add_option('--input-image', '-i', dest='input_image',
-            type='str', default=None, metavar="FILENAME",
-            help='Input filename.')
-        parser.add_option('--output-filenames-offset',
-            dest='output_filenames_offset', type='int',
-            default=0, help=r('Shift output file numbers by given value \
-            (has to be integer).'))
         parser.add_option('--extract-roi', default=None,
             type='int', dest='extract_roi',  nargs=4, metavar='ox, oy, sx, sy',
             help=r('Extract given region of interest instead of the whole \
