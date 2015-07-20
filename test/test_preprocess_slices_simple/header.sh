@@ -66,7 +66,7 @@ hd_split_volume ()
     pos_slice_volume \
         -i ${VOLUME} \
         -o ${OUTPUT_DIR}/%04d.nii.gz \
-        --shiftIndexes ${IDX_FIRST_SLICE} \
+        --output-filenames-offset ${IDX_FIRST_SLICE} \
         -s ${SLICING_PLANE_INDEX} > /dev/null 2>&1 
     
     echo ${OUTPUT_DIR}

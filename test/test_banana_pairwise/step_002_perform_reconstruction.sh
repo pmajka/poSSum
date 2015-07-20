@@ -104,7 +104,7 @@ do
             -i ${OUTPUT_NAMING}deformed.nii.gz \
             -o ${DIR_REF}/%04d.nii.gz \
             -s ${SLICING_PLANE_INDEX} \
-            --shiftIndexes ${IDX_FIRST_SLICE}
+            --output-filenames-offset ${IDX_FIRST_SLICE}
         
         for j in `seq ${IDX_FIRST_SLICE} 1 ${IDX_LAST_SLICE}`
         do

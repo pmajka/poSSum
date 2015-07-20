@@ -15,7 +15,7 @@ All supported features in one invocation::
                        -s 1
     [start, end, step] -r 20 50 1
                        -o /some/path/prefix_%04d_suffix.ext
-                       --shiftIndexes 1
+                       --output-filenames-offset 1
     [ox, oy, sx, sy]   --extract-roi 20 30 50 50
 
 
@@ -78,7 +78,7 @@ Altering the output sections' indexes
 
 Sometimes, one will need to shift the indexes of the output slices, for
 instance, save slice 0 as file 5, slice 5 as slice 10 and so on (e.g. to match
-some other series). This effect may be achieved by issuing ``--shiftIndexes
+some other series). This effect may be achieved by issuing ``--output-filenames-offset
 <int>`` switch which shifts the output naming by provided number (either
 positive or negative). As you may guess the default value is zero which means
 that this parameter has no influence::

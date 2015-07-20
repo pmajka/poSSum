@@ -21,10 +21,12 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         super(self.__class__, self)._initializeOptions()
 
         assert self.options.sliceAxisIndex in [0, 1, 2],\
-            self._logger.error("The slicing plane has to be either 0, 1 or 2.")
+            self._logger.error(r("The slicing plane has to be either \
+                                 0, 1 or 2."))
 
         assert self.options.input_image is not None,\
-            self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
+            self._logger.error(r("No input provided (-i ....). Plese supply \
+            input filename and try again."))
 
     def launch(self):
         # Execute the parents before-execution activities
@@ -56,7 +58,8 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         # Checking if the provided file IS a volume -- it has to be exactly
         # three dimensional, no more, no less!
         assert len(self._source_largest_region.GetSize()) == 3, \
-            self._logger.error("The provided file is not three dimensional. Plase provide a 3D one.")
+            self._logger.error(r("The provided file is not three \
+            dimensional. Plase provide a 3D one."))
 
         # Define slicing region (in its initial form)
         self._define_slicing_region()
@@ -153,9 +156,9 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
 
         if self.options.sliceRange is None:
             self._logger.debug(r("No custom slice range provided. Extracting \
-                                 all slices in given plane."))
-            self._logger.debug(r("Selecting slices from LargestPossibleRegion: %s",
-                          self._source_largest_region))
+                all slices in given plane."))
+            self._logger.debug(r("Selecting slices from \
+                LargestPossibleRegion: %s", self._source_largest_region))
 
             # Grab indexes of all slices in slicing plane
             self._slicingRange = range(0, max_slice_number)
@@ -163,10 +166,10 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         else:
             # Check if the requested slices are within the volume size:
             assert self.options.sliceRange[1] <= max_slice_number,\
-                self._logger.error("Index of the last slice (%d)\
-                                   is higher that maximum number of slices within\
-                                   given slicing plane (%d).",
-                        self.options.sliceRange[1], max_slice_number)
+                self._logger.error(r("Index of the last slice (%d)\
+                            is higher that maximum number of slices within\
+                            given slicing plane (%d).",
+                        self.options.sliceRange[1], max_slice_number))
 
             # Get only those sliced that user wants to.
             self._slicingRange = range(*self.options.sliceRange)
@@ -186,13 +189,13 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         self._logger.debug("Region to extract: %s", self._new_region)
 
         # Now, get the output filename. Filename depends on the slice
-        # region_index :)
-        # Ok, this is a bit dirty hack. If we want the output image which name
-        # does not depend on the slice index, we need to handle type error:
+        # region_index :) Ok, this is a bit dirty hack. If we want the output
+        # image which name does not depend on the slice index, we need to
+        # handle type error:
         try:
             filename = \
                 self.options.file_series_format \
-                % (slice_index + self.options.shiftIndexes, )
+                % (slice_index + self.options.output_filenames_offset, )
         except TypeError:
             filename = self.options.file_series_format
 
@@ -222,7 +225,8 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         parser.add_option('--input-image', '-i', dest='input_image',
             type='str', default=None, metavar="FILENAME",
             help='Input filename.')
-        parser.add_option('--shiftIndexes', dest='shiftIndexes', type='int',
+        parser.add_option('--output-filenames-offset',
+            dest='output_filenames_offset', type='int',
             default=0, help=r('Shift output file numbers by given value \
             (has to be integer).'))
         parser.add_option('--extract-roi', default=None,

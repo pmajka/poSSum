@@ -870,7 +870,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header += "    pos_slice_volume \\\n"
         header += "        -i ${VOLUME} \\\n"
         header += "        -o ${OUTPUT_DIR}/%04d.nii.gz \\\n"
-        header += "        --shiftIndexes ${IDX_FIRST_SLICE} \\\n"
+        header += "        --output-filenames-offset ${IDX_FIRST_SLICE} \\\n"
         header += "        -s ${SLICING_PLANE_INDEX} > /dev/null 2>&1 \n"
         header += "    \n"
         header += "    echo ${OUTPUT_DIR}\n"
