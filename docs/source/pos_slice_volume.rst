@@ -62,10 +62,10 @@ So far, the extracted slices were saved using default output naming scheme
 which is ``%04d.png``. One can use any valid naming scheme which should
 include output path as well as output filename scheme. E.g. to save the
 extracted slices in home directory, using ``slice_`` prefix, pad the output number
-to three digits and save slices as jpegs, the ``--outputImagesFormat`` or ``-o``
+to three digits and save slices as jpegs, the ``--file-series-format`` or ``-o``
 parameter should be the following (**remember - use** ``%d`` **format!**)::
 
-    pos_slice_vol.py -i filename.nii.gz --outputImagesFormat /home/user/slice_%03d.jpg
+    pos_slice_vol.py -i filename.nii.gz --file-series-format /home/user/slice_%03d.jpg
 
 Note that the output format has to support the input image type. For instance,
 if the input file has a ``float`` data type, saving extracted slices as PNGs will

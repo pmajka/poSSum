@@ -189,10 +189,10 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         # does not depend on the slice index, we need to handle type error:
         try:
             filename = \
-                self.options.outputImagesFormat \
+                self.options.file_series_format \
                 % (slice_index + self.options.shiftIndexes, )
         except TypeError:
-            filename = self.options.outputImagesFormat
+            filename = self.options.file_series_format
 
         self._logger.info("Saving slice %d to: %s", slice_index, filename)
         self._extract_slice.SetExtractionRegion(self._new_region)
@@ -201,11 +201,11 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
 
     @staticmethod
     def parseArgs():
-        usage_string = "python pos_slice_volume.py  -i <input_filename> [options]"
+        usage_string = "pos_slice_volume -i <input_filename> [options]"
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
-        parser.add_option('--outputImagesFormat', '-o',
-                        dest='outputImagesFormat', type='str',
+        parser.add_option('--file-series-format', '-o',
+                        dest='file_series_format', type='str',
                         default='%04d.png',
                         help='Filename format for the the output images.')
         parser.add_option('--sliceRange', '-r',
