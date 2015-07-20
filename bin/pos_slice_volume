@@ -11,6 +11,7 @@ from possum import pos_wrapper_skel
 from possum import pos_itk_core
 from possum.pos_common import r
 
+
 class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
     """
     Class which purpose is to extract a slice(s) from 3d volume. So much buzzz
@@ -152,7 +153,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         # First, we extract the number of slices in the volume in the provided
         # slicing plane.
         max_slice_number = self._source_largest_region.GetSize()\
-                                [self.options.sliceAxisIndex]
+            [self.options.sliceAxisIndex]
 
         if self.options.sliceRange is None:
             self._logger.debug(r("No custom slice range provided. Extracting \
