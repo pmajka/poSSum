@@ -16,7 +16,7 @@ All supported features in one invocation::
     [start, end, step] -r 20 50 1
                        -o /some/path/prefix_%04d_suffix.ext
                        --shiftIndexes 1
-    [ox, oy, sx, sy]   --extractionROI 20 30 50 50
+    [ox, oy, sx, sy]   --extract-roi 20 30 50 50
 
 
 Simple usage example
@@ -90,11 +90,11 @@ Extracting particular region
 ----------------------------
 
 Another possibility of manipulation of the slices is extraction of the
-subregion from the whole slice. This may be achieved by using ``--extractionROI``
+subregion from the whole slice. This may be achieved by using ``--extract-roi``
 switch. The switch accepts four integer parameters, the first two values
 denotes the origin of the extraction (in pixels) while the other two -- the
 size of the extracted region. E.g.::
 
-    pos_slice_vol.py -i filename.nii.gz --extractionROI 40 100 50 50
+    pos_slice_vol.py -i filename.nii.gz --extract-roi 40 100 50 50
 
 Will extract the square slice of 50x50 pixel that originates in pixel (40,100).
