@@ -9,6 +9,7 @@ import itk
 
 from possum import pos_wrapper_skel
 from possum import pos_itk_core
+from possum.pos_common import r
 
 class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
     """
@@ -22,7 +23,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         assert self.options.sliceAxisIndex in [0, 1, 2],\
             self._logger.error("The slicing plane has to be either 0, 1 or 2.")
 
-        assert self.options.inputFileName is not None,\
+        assert self.options.input_image is not None,\
             self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
 
     def launch(self):
@@ -31,7 +32,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
 
         # At the very beginning, determine input image type to configure the
         # reader.
-        input_filename = self.options.inputFileName
+        input_filename = self.options.input_image
         self._input_image_type =\
             pos_itk_core.autodetect_file_type(input_filename)
         self._output_image_type =\
@@ -151,9 +152,10 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
                                 [self.options.sliceAxisIndex]
 
         if self.options.sliceRange is None:
-            self._logger.debug("No custom slice range provided. Extracting all slices in given plane.")
-            self._logger.debug("Selecting slices from LargestPossibleRegion: %s",
-                          self._source_largest_region)
+            self._logger.debug(r("No custom slice range provided. Extracting \
+                                 all slices in given plane."))
+            self._logger.debug(r("Selecting slices from LargestPossibleRegion: %s",
+                          self._source_largest_region))
 
             # Grab indexes of all slices in slicing plane
             self._slicingRange = range(0, max_slice_number)
@@ -205,24 +207,27 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
         parser.add_option('--file-series-format', '-o',
-                        dest='file_series_format', type='str',
-                        default='%04d.png',
-                        help='Filename format for the the output images.')
+            dest='file_series_format', type='str',
+            default='%04d.png',
+            help='Filename format for the the output images.')
         parser.add_option('--sliceRange', '-r',
-                        dest='sliceRange', type='int',  nargs=3,
-                        default=None,
-                        help='Indexes of the slices to extract defined as parameters of the python range function.')
+            dest='sliceRange', type='int',  nargs=3,
+            default=None,
+            help=r('Indexes of the slices to extract defined as \
+            parameters of the python range function.'))
         parser.add_option('--sliceAxisIndex', '-s',
-                        dest='sliceAxisIndex', type='int',
-                        default=0,
-                        help='Index of the slicing axis.')
-        parser.add_option('--inputFileName', '-i', dest='inputFileName', type='str',
-                default=None, help='File that is going to be sliced.')
+            dest='sliceAxisIndex', type='int',
+            default=0,
+            help='Index of the slicing axis.')
+        parser.add_option('--input-image', '-i', dest='input_image', type='str',
+            default=None, help='File that is going to be sliced.')
         parser.add_option('--shiftIndexes', dest='shiftIndexes', type='int',
-                default=0, help='Shift output file numbers by given value (has to be integer).')
+            default=0, help=r('Shift output file numbers by given value \
+            (has to be integer).'))
         parser.add_option('--extractionROI', default=None,
-                            type='int', dest='extractionROI',  nargs=4,
-                            help='ROI of the input image used for registration (ox, oy, sx, sy).')
+            type='int', dest='extractionROI',  nargs=4,
+            help=r('ROI of the input image used for registration \
+            (ox, oy, sx, sy).'))
 
         (options, args) = parser.parse_args()
         return (options, args)
