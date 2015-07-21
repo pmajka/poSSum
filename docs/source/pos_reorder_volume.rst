@@ -16,7 +16,7 @@ All supported features in one invocation (an example) ::
     pos_reorder_volume.py  -i input.nii.gz \
                             -o output.nii.gz\
     [filename]              --mapping mapping_file.txt\
-    [allowed values: 1,2,3] --sliceAxisIndex 1
+    [allowed values: 1,2,3] --slicing-direction 1
 
 
 Simple usage example

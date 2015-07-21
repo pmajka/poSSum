@@ -21,7 +21,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
     def _validate_options(self):
         super(self.__class__, self)._initializeOptions()
 
-        assert self.options.sliceAxisIndex in [0, 1, 2],\
+        assert self.options.slicing-direction in [0, 1, 2],\
             self._logger.error(r("The slicing plane has to be either \
                                  0, 1 or 2."))
 
@@ -123,7 +123,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
                     " ".join(map(str, reg_definition)))
 
             indexes_left = range(3)
-            indexes_left.pop(self.options.sliceAxisIndex)
+            indexes_left.pop(self.options.slicing-direction)
             slice_size[indexes_left[0]] = reg_definition[2]
             slice_size[indexes_left[1]] = reg_definition[3]
 
@@ -132,7 +132,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
 
         # And now I reset the dimension in the slicing axis. So simple in
         # comparision with numpy:
-        slice_size[self.options.sliceAxisIndex] = 0
+        slice_size[self.options.slicing-direction] = 0
 
         # Finally I can put the size into region object.
         self._new_region.SetSize(slice_size)
@@ -153,7 +153,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         # First, we extract the number of slices in the volume in the provided
         # slicing plane.
         max_slice_number = self._source_largest_region.GetSize()\
-            [self.options.sliceAxisIndex]
+            [self.options.slicing-direction]
 
         if self.options.sliceRange is None:
             self._logger.debug(r("No custom slice range provided. Extracting \
@@ -186,7 +186,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         :param slice_index: index of the slice to be extracted.
         """
         self._logger.debug("Extracing slice: %d", slice_index)
-        self._new_region.SetIndex(self.options.sliceAxisIndex, slice_index)
+        self._new_region.SetIndex(self.options.slicing-direction, slice_index)
         self._logger.debug("Region to extract: %s", self._new_region)
 
         # Now, get the output filename. Filename depends on the slice
@@ -217,8 +217,8 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
             dest='output_filenames_offset', type='int',
             default=0, help=r('Shift output file numbers by given value \
             (has to be integer).'))
-        parser.add_option('--sliceAxisIndex', '-s',
-            dest='sliceAxisIndex', type='int',
+        parser.add_option('--slicing-direction', '-s',
+            dest='slicing-direction', type='int',
             default=0,
             help='Index of the slicing axis.')
         parser.add_option('--file-series-format', '-o',

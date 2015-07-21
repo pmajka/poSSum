@@ -35,7 +35,7 @@ Slicing along particular axis
 -----------------------------
 
 The code sample above will slice the ``filename.nii.gz`` according to the default
-settings. In order to select a particular slicing plane use ``--sliceAxisIndex``
+settings. In order to select a particular slicing plane use ``--slicing-direction``
 or ``-s`` switch::
 
     pos_slice_vol.py -i filename.nii.gz -s <slicing_plane=0,1,2>
@@ -83,7 +83,7 @@ some other series). This effect may be achieved by issuing ``--output-filenames-
 positive or negative). As you may guess the default value is zero which means
 that this parameter has no influence::
 
-    pos_slice_vol.py -i filename.nii.gz --sliceAxisIndex 5
+    pos_slice_vol.py -i filename.nii.gz --slicing-direction 5
 
 
 Extracting particular region

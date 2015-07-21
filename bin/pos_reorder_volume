@@ -33,7 +33,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         # Well, that's simple: the script only accepts 0,1,2 as image slicing
         # plane.
-        assert self.options.sliceAxisIndex in [0, 1, 2],\
+        assert self.options.slicing-direction in [0, 1, 2],\
             self._logger.error("The slicing plane has to be either 0, 1 or 2.")
 
         # And we DO require an input image.
@@ -86,13 +86,13 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # Define the mapping keys. These keys denote slices indexes in the
         # target image. Note that we start from 1.
         mapping_keys =\
-            range(1, self._image_shape[self.options.sliceAxisIndex] + 1)
+            range(1, self._image_shape[self.options.slicing-direction] + 1)
 
         # Define mapping values by permuting the ordered list. These values
         # denote the slices' indexes of the source image. Note that we start
         # from 1.
         mapping_values =\
-            range(1, self._image_shape[self.options.sliceAxisIndex] + 1)
+            range(1, self._image_shape[self.options.slicing-direction] + 1)
         random.shuffle(mapping_values)
 
         # Compose the keys and the values into a dictionary.
@@ -132,7 +132,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # Get the length of the mapping.
         mapping_length = len(self._reorder_mapping.keys())
         slicing_plane_length =\
-            self._image_shape[self.options.sliceAxisIndex]
+            self._image_shape[self.options.slicing-direction]
 
         # Assert the length of the mapping
         assert mapping_length == slicing_plane_length,\
@@ -212,7 +212,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
             processed_channel = pos_itk_core.reorder_volume(
                 extract_filter.GetOutput(),
-                self._reorder_mapping, self.options.sliceAxisIndex)
+                self._reorder_mapping, self.options.slicing-direction)
             processed_components.append(processed_channel)
 
             self._logger.debug("Finished processing %d.", channel_idx)
@@ -241,7 +241,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         processed_channel = pos_itk_core.reorder_volume(
             self._image_reader.GetOutput(),
-            self._reorder_mapping, self.options.sliceAxisIndex)
+            self._reorder_mapping, self.options.slicing-direction)
         self._logger.debug("Exiting grayscale workflow.")
 
         # At the end, save the image.
@@ -281,7 +281,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
                 """Required: output image filename."""
         __output_vol_command_line_args_help['mapping'] =\
                 """A mapping file for driving the reordering process."""
-        __output_vol_command_line_args_help['sliceAxisIndex'] =\
+        __output_vol_command_line_args_help['slicing-direction'] =\
                 """A index of the axis along which the slices will be reordered. The only allowed values are 0, 1, 2. The default value is 0."""
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
@@ -294,9 +294,9 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         parser.add_option('--mapping', dest='mapping',
                 type='str', default=None,
                 help=__output_vol_command_line_args_help['mapping'])
-        parser.add_option('--sliceAxisIndex', '-s', dest='sliceAxisIndex',
+        parser.add_option('--slicing-direction', '-s', dest='slicing-direction',
                 type='int', default=0,
-                help=__output_vol_command_line_args_help['sliceAxisIndex'])
+                help=__output_vol_command_line_args_help['slicing-direction'])
 
         (options, args) = parser.parse_args()
         return (options, args)
