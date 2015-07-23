@@ -8,6 +8,7 @@ A script for stacking slices and reorienting volumes.
 import itk
 from possum import pos_wrapper_skel
 from possum import pos_itk_core
+from possum.pos_common import r
 
 
 class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
@@ -20,20 +21,24 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
 
     def _validate_options(self):
         assert self.options.inputFile,\
-            self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
+            self._logger.error(r("No input provided (-i ....). Plese supply \
+                                 input filename and try again."))
 
         assert self.options.inputFile,\
-            self._logger.error("No output filename is provided (-o ....). Plese supply the output filename and try again.")
+            self._logger.error(r("No output filename is provided (-o ....). \
+                            Plese supply the output filename and try again."))
 
     def launch(self):
         # Ok, if the image stacking is enabled, create the input volume
         # by stacking the input image stack. Otherwise just load the
         # input volume in the regular manner.
         if self.options.stackingOptions:
-            self._logger.info("Input volume will be generated from the image stack.")
+            self._logger.info(r("Input volume will be generated \
+                                from the image stack."))
             self._stack_input_slices()
         else:
-            self._logger.info("Input volume will be loaded from the volume file.")
+            self._logger.info(r("Input volume will be loaded from \
+                                the volume file."))
             self._load_input_volume()
 
         # After executing the code above, the input volume is loaded and ready
@@ -77,9 +82,9 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             compose = itk.ComposeImageFilter[
                 self.rgb_out_component_type,
                 self._input_type].New(
-                    Input1 = processed_components[0],
-                    Input2 = processed_components[1],
-                    Input3 = processed_components[2])
+                    Input1=processed_components[0],
+                    Input2=processed_components[1],
+                    Input3=processed_components[2])
             processed_image = compose.GetOutput()
 
         else:
@@ -92,8 +97,8 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
 
         # After processing the input volume, save it.
         self._logger.info("Writing the processed file to: %s.",
-                          self.options.outputFile)
-        self._writer=itk.ImageFileWriter[processed_image].New()
+            self.options.outputFile)
+        self._writer = itk.ImageFileWriter[processed_image].New()
         self._writer.SetFileName(self.options.outputFile)
         self._writer.SetInput(processed_image)
         self._writer.Update()
@@ -160,7 +165,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
 
         # Resample the image, if required
         if self.options.resample:
-            last_image = pos_itk_core.resample_image_filter(\
+            last_image = pos_itk_core.resample_image_filter(
                 change_information.GetOutput(),
                 self.options.resample,
                 interpolation=self.options.interpolation)
@@ -170,7 +175,8 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             self._logger.debug("Casting the ouput image to: %s.",
                                self.options.setType)
 
-            cast_to_type = pos_itk_core.get_cast_image_type_from_string(self.options.setType)
+            cast_to_type = pos_itk_core.get_cast_image_type_from_string(
+                    self.options.setType)
             cast_image = itk.CastImageFilter[last_image, cast_to_type].New()
             cast_image.SetInput(last_image)
             cast_image.Update()
@@ -193,7 +199,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         # has to have the same image type as the first file.
         slice_type = pos_itk_core.autodetect_file_type(first_slice)
         self._input_type = pos_itk_core.types_increased_dimensions[slice_type]
-        self._logger.info("Detrmined input image type: %s",\
+        self._logger.info("Detrmined input image type: %s",
                           self._input_type)
 
         # As the image type of the first slice is determined, the proper
@@ -267,9 +273,11 @@ spacing. By default there is no resampling."""
 """Select axes to flip. Selection has to be provided as sequence of three
 numbers. E.g. \'0 0 1\' will flip the z axis."""
         __output_vol_command_line_args_help['flipAroundOrigin'] =\
-"""Determines of the flipping will be performed around origin. False by default."""
+"""Determines of the flipping will be performed around origin.
+False by default."""
         __output_vol_command_line_args_help['stackingOptions'] =\
-"""Image stacking options: first slice, last slice, slice increment. Three integers are required."""
+"""Image stacking options: first slice, last slice, slice increment.
+Three integers are required."""
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
@@ -292,13 +300,13 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         parser.add_option('--permutation', default=[0, 1, 2],
             type='int', nargs=3, dest='permutation',
             help=__output_vol_command_line_args_help['permutation'])
-        parser.add_option('--outputVolumePermutationOrder', default=[0,1,2],
-            type='int', nargs=3, dest='permutation',
+        parser.add_option('--outputVolumePermutationOrder',
+            default=[0, 1, 2], type='int', nargs=3, dest='permutation',
             help=__output_vol_command_line_args_help['permutation'])
-        parser.add_option('--flipAxes', default=[0,0,0],
+        parser.add_option('--flipAxes', default=[0, 0, 0],
             type='int', nargs=3, dest='flipAxes',
             help=__output_vol_command_line_args_help['setFlip'])
-        parser.add_option('--setFlip', default=[0,0,0],
+        parser.add_option('--setFlip', default=[0, 0, 0],
             type='int', nargs=3, dest='flipAxes',
             help=__output_vol_command_line_args_help['setFlip'])
         parser.add_option('--flipAroundOrigin', default=False,
@@ -313,15 +321,18 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         parser.add_option('--setOrigin', dest='setOrigin', type='float',
             nargs=3, default=None,
             help=__output_vol_command_line_args_help['setOrigin'])
-        parser.add_option('--outputVolumeOrigin', dest='setOrigin', type='float',
-            nargs=3, default=None,
+        parser.add_option('--outputVolumeOrigin', dest='setOrigin',
+            type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setOrigin'])
-        parser.add_option('--setType', dest='setType', type='str', default=None,
+        parser.add_option('--setType', dest='setType',
+            type='str', default=None,
             help=__output_vol_command_line_args_help['setType'])
-        parser.add_option('--orientationCode', dest='orientationCode', type='str',
-            default=None, help=__output_vol_command_line_args_help['orientationCode'])
-        parser.add_option('--outputVolumeOrientationCode', dest='orientationCode', type='str',
-            default=None, help=__output_vol_command_line_args_help['orientationCode'])
+        parser.add_option('--orientationCode', dest='orientationCode',
+            type='str', default=None,
+            help=__output_vol_command_line_args_help['orientationCode'])
+        parser.add_option('--outputVolumeOrientationCode',
+            dest='orientationCode', type='str', default=None,
+            help=__output_vol_command_line_args_help['orientationCode'])
 
         return parser
 
