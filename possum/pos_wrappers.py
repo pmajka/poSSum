@@ -1123,7 +1123,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
 
             >>> boolean_parameter = [None, True][int(value)] #doctest: +SKIP
 
-        Yes, it is tricky and yes, is should be chenged.
+        Yes, it is tricky and yes, is should be changed.
 
 
     >>> alignment_preprocessor_wrapper
@@ -1817,6 +1817,123 @@ class align_by_center_of_gravity(generic_wrapper):
         'moving_image': pos_parameters.filename_parameter('moving_image', None, str_template="--movingImage {_value}"),
         'output_transformation': pos_parameters.filename_parameter('output_transformation', None, str_template="--transformationFileName {_value}"),
     }
+
+
+class slice_volume_wrapper(generic_wrapper):
+    """
+    Wrapper for the pos_slice_volume script. Provides basic functionality of
+    the full script.
+
+    >>> slice_volume_wrapper
+    <class 'possum.pos_wrappers.slice_volume_wrapper'>
+
+    >>> slice_volume_wrapper() #doctest: +ELLIPSIS
+    <possum.pos_wrappers.slice_volume_wrapper object at 0x...>
+
+    >>> print slice_volume_wrapper()
+    pos_slice_volume -i -o "%04d.nii.gz" -s 1 -r 1
+
+    Checking default parameteres values:
+
+    >>> print slice_volume_wrapper._parameters['input_image']
+    <BLANKLINE>
+
+    >>> print slice_volume_wrapper._parameters['output_naming']
+    %04d.nii.gz
+
+    >>> print slice_volume_wrapper._parameters['slicing_axis']
+    1
+
+    >>> print slice_volume_wrapper._parameters['start_slice']
+    <BLANKLINE>
+
+    >>> print slice_volume_wrapper._parameters['end_slice']
+    <BLANKLINE>
+
+    >>> print slice_volume_wrapper._parameters['step']
+    1
+
+    >>> print slice_volume_wrapper._parameters['shift_indexes']
+    <BLANKLINE>
+
+
+    Checking robustness of the parameters dictionary:
+
+    >>> p = slice_volume_wrapper(input_image="input.nii.gz",
+    ... output_naming="%04d.nii.gz", slicing_axis=1, start_slice=0,
+    ... end_slice=100)
+    >>> print p
+    pos_slice_volume -i input.nii.gz -o "%04d.nii.gz" -s 1 -r 0 100 1
+
+    >>> p = slice_volume_wrapper(input_image="input.nii.gz",
+    ... output_naming="%04d.nii.gz", slicing_axis=1, start_slice=0,
+    ... end_slice=100, shift_indexes=-10)
+    >>> print p
+    pos_slice_volume -i input.nii.gz -o "%04d.nii.gz" -s 1 -r 0 100 1 --output-filenames-offset -10
+
+    >>> p = slice_volume_wrapper(input_image="input.nii.gz",
+    ... output_naming="%04d.nii.gz", slicing_axis=1,
+    ... end_slice=100, shift_indexes=-10)
+    >>> print p
+    pos_slice_volume -i input.nii.gz -o "%04d.nii.gz" -s 1 -r 100 1 --output-filenames-offset -10
+
+    >>> p = slice_volume_wrapper()
+    >>> print p
+    pos_slice_volume -i -o "%04d.nii.gz" -s 1 -r 1
+
+    >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
+    Traceback (most recent call last):
+    KeyError: 'parameter_that_does_not_exist'
+
+    >>> print p.updateParameters({"input_image": "input_image.nii.gz"})
+    pos_slice_volume -i input_image.nii.gz -o "%04d.nii.gz" -s 1 -r 1
+
+    >>> print p.updateParameters({"output_naming":
+    ... "output_directory/%04d.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_volume -i input_image.nii.gz -o "output_directory/%04d.nii.gz" -s 1 -r 1
+
+    >>> print p.updateParameters({"slicing_axis": 2, "start_slice": 50,
+    ... "end_slice": 100, "step": 2}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_volume -i input_image.nii.gz -o "output_directory/%04d.nii.gz" -s 2 -r 50 100 2
+
+    >>> print p.updateParameters({"shift_indexes": 1})
+    pos_slice_volume -i input_image.nii.gz -o "output_directory/%04d.nii.gz" -s 2 -r 50 100 2 --output-filenames-offset 1
+
+    Nonsense / empty parameters are allowed as well:
+
+    >>> print p.updateParameters({"shift_indexes": range(10)})
+    pos_slice_volume -i input_image.nii.gz -o "output_directory/%04d.nii.gz" -s 2 -r 50 100 2 --output-filenames-offset [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    >>> print p.updateParameters({"input_image": 2 + 4}) #doctest: +NORMALIZE_WHITESPACE
+    pos_slice_volume -i 6 -o "output_directory/%04d.nii.gz" -s 2 -r 50 100 2 --output-filenames-offset [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    >>> print p.updateParameters({"input_image": None, "shift_indexes": None})
+    pos_slice_volume -i -o "output_directory/%04d.nii.gz" -s 2 -r 50 100 2
+
+    That's new: make all the paramters none and see what will happen:
+
+    >>> none_parameters_dict =  dict(map(lambda k: (k, None),
+    ... slice_volume_wrapper._parameters.keys()))
+    >>> print p.updateParameters(none_parameters_dict)
+    pos_slice_volume -i -o "" -s -r
+    """
+
+    _template = """pos_slice_volume \
+            -i {input_image} \
+            -o "{output_naming}" \
+            -s {slicing_axis} \
+            -r {start_slice} {end_slice} {step} \
+            {shift_indexes}"""
+
+    _parameters = { \
+            'input_image' : filename_parameter('input_image', None),
+            'output_naming' : filename_parameter('output_naming', "%04d.nii.gz"),
+            'slicing_axis' : value_parameter('slicing_axis', 1),
+            'start_slice' : value_parameter('start_slice', None),
+            'end_slice' : value_parameter('end_slice', None),
+            'step' : value_parameter('step', 1),
+            'shift_indexes' : value_parameter('output-filenames-offset', None, str_template="--{_name} {_value}")
+            }
 
 
 class get_affine_from_landmarks_wrapper(generic_wrapper):
