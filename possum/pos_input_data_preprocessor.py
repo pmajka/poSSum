@@ -97,8 +97,6 @@ def md5sum(filename):
 
     :return: md5 sum of the `filename`
     :rtype: str
-
-    TODO: Doctest - temp file with some content
     """
 
     md5 = hashlib.md5()
