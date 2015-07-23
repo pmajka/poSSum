@@ -155,7 +155,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
         max_slice_number = self._source_largest_region.GetSize()\
             [self.options.slicing_axis]
 
-        if self.options.sliceRange is None:
+        if self.options.slicing_range is None:
             self._logger.debug(r("No custom slice range provided. Extracting \
                 all slices in given plane."))
             self._logger.debug(r("Selecting slices from \
@@ -166,14 +166,14 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
 
         else:
             # Check if the requested slices are within the volume size:
-            assert self.options.sliceRange[1] <= max_slice_number,\
+            assert self.options.slicing_range[1] <= max_slice_number,\
                 self._logger.error(r("Index of the last slice (%d)\
                             is higher that maximum number of slices within\
                             given slicing plane (%d).",
-                        self.options.sliceRange[1], max_slice_number))
+                        self.options.slicing_range[1], max_slice_number))
 
             # Get only those sliced that user wants to.
-            self._slicingRange = range(*self.options.sliceRange)
+            self._slicingRange = range(*self.options.slicing_range)
 
         self._logger.info("Selected slices: %s",
                           " ".join(map(str, self._slicingRange)))
@@ -225,8 +225,8 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
             dest='file_series_format', type='str',
             default='%04d.png',
             help='Filename format for the the output images.')
-        parser.add_option('--sliceRange', '-r',
-            dest='sliceRange', type='int',  nargs=3,
+        parser.add_option('--slicing-range', '-r',
+            dest='slicing_range', type='int',  nargs=3,
             default=None,
             help=r('Indexes of the slices to extract defined as \
             parameters of the python range function.'))

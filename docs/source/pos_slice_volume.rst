@@ -47,10 +47,10 @@ Extracting certain range
 One can also select a particular range of slices to extract. Note the range has
 to be within image's limit - it cannot exceed the actual number of slices in
 given plane, otherwise, an error will occur. The slicing range works like
-python :py:func:`range` function. Use either ``--sliceRange`` or ``-r`` switch to
+python :py:func:`range` function. Use either ``--slicing-range`` or ``-r`` switch to
 set slices to extract, e.g. ::
 
-    pos_slice_vol.py -i filename.nii.gz -s 1 --sliceRange 0 20 1
+    pos_slice_vol.py -i filename.nii.gz -s 1 --slicing-range 0 20 1
 
 Will extract the first twenty slices of the Y (second) axis.
 
