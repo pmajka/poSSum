@@ -127,5 +127,5 @@ Utilizes typical options::
             --useRigidAffine \
             --loglevel DEBUG \
             --output-volume-spacing 0.02 0.02 0.06 \
-            --dryRun
+            --dry-run
 

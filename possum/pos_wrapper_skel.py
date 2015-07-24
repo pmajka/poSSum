@@ -438,7 +438,7 @@ class generic_workflow(object):
         workflowSettings.add_option('--specimenId', default=None,
                 dest='specimenId', action='store', type='str',
                 help='Identifier of the specimen. Providing the ID is obligatory. Script will not run without providing specimen ID.')
-        workflowSettings.add_option('--dryRun', default=False,
+        workflowSettings.add_option('--dry-run', default=False,
                 action='store_const', const=True, dest='dryRun',
                 help='Prints the commands to stdout instead of executing them')
         workflowSettings.add_option('--cpus', default=None,
