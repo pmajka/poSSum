@@ -1048,7 +1048,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
     >>> print stack_and_reorient_wrapper() #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i -o --permutation 0 1 2 \
-        --orientationCode RAS --setType uchar \
+        --orientation RAS --setType uchar \
         --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
     >>> p=stack_and_reorient_wrapper()
@@ -1058,18 +1058,18 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
     >>> print p.updateParameters({"stack_mask":"%04d.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o --permutation 0 1 2 \
-        --orientationCode RAS --setType uchar --setSpacing 1.0 1.0 1.0 \
+        --orientation RAS --setType uchar --setSpacing 1.0 1.0 1.0 \
         --setOrigin 0 0 0
 
     >>> print p.updateParameters({"slice_start":"%04d.nii.gz",
     ... "slice_end" : 20, "slice_start" : 1, "slice_step":1}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o --stacking-range 1 20 1 \
-        --permutation 0 1 2  --orientationCode RAS  --setType uchar \
+        --permutation 0 1 2  --orientation RAS  --setType uchar \
         --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
     >>> print p.updateParameters({"output_volume_fn": "output.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o output.nii.gz \
-      --stacking-range 1 20 1 --permutation 0 1 2 --orientationCode RAS \
+      --stacking-range 1 20 1 --permutation 0 1 2 --orientation RAS \
       --setType uchar --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
     >>> print p.updateParameters({"output_type": "ushort",
@@ -1078,7 +1078,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
     ... "permutation_order" : [2, 1, 0], "resample": [0.5, 2.0, 3.0],
     ... "orientation_code" : "RAS"}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o output.nii.gz --stacking-range 1 20 1\
-      --permutation 2 1 0 --orientationCode RAS --setType ushort\
+      --permutation 2 1 0 --orientation RAS --setType ushort\
       --setSpacing 0.5 0.5 0.5 --setOrigin 1 1 1 --interpolation Cubic\
       --resample 0.5 2.0 3.0
     """
@@ -1089,7 +1089,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
         {slice_start} {slice_end} {slice_step} \
         --permutation {permutation_order} \
         {flip_axes} \
-        --orientationCode {orientation_code} \
+        --orientation {orientation_code} \
         --setType {output_type} \
         --setSpacing {spacing} \
         --setOrigin {origin} \

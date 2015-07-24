@@ -23,7 +23,7 @@ OV_ORIGIN='0 0 0'
 OV_SPACING="${SOURCE_SPACING} ${SOURCE_SPACING} ${SECTION_THICKNESS}"
 OV_FLIP='0 0 0'
 
-OV_SETTINGS_SHORT="--permutation ${OV_PERMUTATION} --flipAxes ${OV_FLIP} --setSpacing ${OV_SPACING}  --setOrigin ${OV_ORIGIN} --setType ${OV_TYPE} --orientationCode ${OV_ORIENTATION_CODE}"
+OV_SETTINGS_SHORT="--permutation ${OV_PERMUTATION} --flipAxes ${OV_FLIP} --setSpacing ${OV_SPACING}  --setOrigin ${OV_ORIGIN} --setType ${OV_TYPE} --orientation ${OV_ORIENTATION_CODE}"
 OV_SETTINGS=" --outputVolumeSpacing ${OV_SPACING} --outputVolumeOrigin ${OV_ORIGIN} --outputVolumeOrientationCode ${OV_ORIENTATION_CODE}  --outputVolumePermutationOrder ${OV_PERMUTATION} --outputVolumeScalarType ${OV_TYPE} --setFlip ${OV_FLIP}"
 
 # Setup input and output filenames

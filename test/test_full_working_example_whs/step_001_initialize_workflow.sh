@@ -78,7 +78,7 @@ c3d ${DIR_REFERENCE}/atlas_fullsize.nii.gz \
 
 pos_stack_reorient \
     -i ${DIR_REFERENCE}/atlas.nii.gz \
-    --orientationCode RAS \
+    --orientation RAS \
     -o ${REFERENCE_VOLUME} \
     --flipAxes 1 1 1 \
     --setOrigin 0 0 0 \

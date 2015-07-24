@@ -10,7 +10,7 @@ pos_stack_reorient \
     -i ${INPUT_FILE} \
     -o ${PHANTOM_FILE} \
     --permutation 1 2 0 \
-    --orientationCode RAS \
+    --orientation RAS \
     --flipAxes 0 1 1 \
     --setOrigin 0 0 0 
 

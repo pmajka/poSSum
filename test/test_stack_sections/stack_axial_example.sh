@@ -22,7 +22,7 @@ pos_stack_reorient \
     -o stacked_axial_exmaple.nii.gz \
     --stacking-range 1020 1300 5 \
     --permutation 0 1 2 \
-    --orientationCode RAS \
+    --orientation RAS \
     --setOrigin 0 0 0 \
     --flipAxes 0 1 0 \
     --setSpacing 1.0 1.0 3.5 \

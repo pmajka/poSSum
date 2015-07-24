@@ -31,7 +31,7 @@ pos_stack_reorient \
     -o stacked_coronal_exmaple.nii.gz \
     --stacking-range 0 106 1 \
     --permutation 0 2 1 \
-    --orientationCode RAS \
+    --orientation RAS \
     --setOrigin 0 0 0 \
     --flipAxes 0 1 0 \
     --setSpacing 0.15 0.3 0.15 \
@@ -44,7 +44,7 @@ pos_stack_reorient \
     -o stacked_coronal_exmaple_downsampled.nii.gz \
     --stacking-range 0 106 1 \
     --permutation 0 2 1 \
-    --orientationCode RAS \
+    --orientation RAS \
     --setOrigin 0 0 0 \
     --flipAxes 0 1 0 \
     --resample 0.5 0.5 0.5 \

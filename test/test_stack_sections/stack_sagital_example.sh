@@ -31,7 +31,7 @@ pos_stack_reorient \
     -o stacked_sagital_exmaple.nii.gz \
     --stacking-range 0 55 1 \
     --permutation 2 0 1 \
-    --orientationCode RAS \
+    --orientation RAS \
     --setOrigin 0 0 0 \
     --flipAxes 0 1 0 \
     --setSpacing 0.25 0.05 0.05 \

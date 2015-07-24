@@ -9,7 +9,7 @@ Usage summary
 All supported features in one invocation ::
 
    pos_stack_reorient.py -i input_file.nii.gz \
-        RAS code           --orientationCode ras \
+        RAS code           --orientation ras \
       string, see -h       --interpolation NearestNeighbor \
    [float float float]     --resample 0.5 0.5 0.5 \
    permutation of 0 1 2    --permutation 2 1 0 \
