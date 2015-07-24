@@ -297,38 +297,26 @@ Three integers are required."""
         parser.add_option('--resample', default=None,
             type='float', nargs=3, dest='resample',
             help=__output_vol_command_line_args_help['resample'])
-        parser.add_option('--permutation', default=[0, 1, 2],
-            type='int', nargs=3, dest='permutation',
-            help=__output_vol_command_line_args_help['permutation'])
-        parser.add_option('--output-volume-orientation',
-            dest='orientationCode', type='str', default=None,
-            help=__output_vol_command_line_args_help['orientationCode'])
-        parser.add_option('--output-volume-permute-axes',
+        parser.add_option('--permutation', '--output-volume-permute-axes',
             default=[0, 1, 2], type='int', nargs=3, dest='permutation',
             help=__output_vol_command_line_args_help['permutation'])
-        parser.add_option('--output-volume-spacing',
-            dest='setSpacing', type='float', nargs=3, default=None,
-            help=__output_vol_command_line_args_help['setSpacing'])
-        parser.add_option('--output-volume-origin', dest='setOrigin',
-            type='float', nargs=3, default=None,
-            help=__output_vol_command_line_args_help['setOrigin'])
         parser.add_option('--flip', default=[0, 0, 0],
             type='int', nargs=3, dest='flipAxes',
             help=__output_vol_command_line_args_help['setFlip'])
         parser.add_option('--flip-around-origin', default=False,
             dest='flip_around_origin', action='store_const', const=True,
             help=__output_vol_command_line_args_help['flip_around_origin'])
-        parser.add_option('--spacing',
+        parser.add_option('--spacing', '--output-volume-spacing',
             dest='setSpacing', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setSpacing'])
-        parser.add_option('--origin', dest='setOrigin', type='float',
-            nargs=3, default=None,
+        parser.add_option('--origin', '--output-volume-origin',
+            dest='setOrigin', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setOrigin'])
         parser.add_option('--type', dest='setType',
             type='str', default=None,
             help=__output_vol_command_line_args_help['setType'])
-        parser.add_option('--orientation', dest='orientationCode',
-            type='str', default=None,
+        parser.add_option('--orientation', '--output-volume-orientation',
+            dest='orientationCode', type='str', default=None,
             help=__output_vol_command_line_args_help['orientationCode'])
 
         return parser
