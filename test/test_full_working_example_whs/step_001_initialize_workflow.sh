@@ -80,7 +80,7 @@ pos_stack_reorient \
     -i ${DIR_REFERENCE}/atlas.nii.gz \
     --orientation RAS \
     -o ${REFERENCE_VOLUME} \
-    --flipAxes 1 1 1 \
+    --flip 1 1 1 \
     --setOrigin 0 0 0 \
     --setType uchar
 

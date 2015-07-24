@@ -45,7 +45,7 @@ pos_stack_reorient \
     -o ${PHANTOM_MASKED} \
     --permutation 1 2 0 \
     --orientation RAS \
-    --flipAxes 0 1 0 \
+    --flip 0 1 0 \
     --setOrigin 0 0 0
     
 pos_stack_reorient \
@@ -53,7 +53,7 @@ pos_stack_reorient \
     -o ${PHANTOM_FILE} \
     --permutation 1 2 0 \
     --orientation RAS \
-    --flipAxes 0 1 0 \
+    --flip 0 1 0 \
     --setOrigin 0 0 0
     
 pos_stack_reorient \
@@ -61,7 +61,7 @@ pos_stack_reorient \
     -o ${PHANTOM_MASK} \
     --permutation 1 2 0 \
     --orientation RAS \
-    --flipAxes 0 1 0 \
+    --flip 0 1 0 \
     --setOrigin 0 0 0
 
 

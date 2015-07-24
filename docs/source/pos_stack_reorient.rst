@@ -13,7 +13,7 @@ All supported features in one invocation ::
       string, see -h       --interpolation NearestNeighbor \
    [float float float]     --resample 0.5 0.5 0.5 \
    permutation of 0 1 2    --permutation 2 1 0 \
-      [0-1 0-1 0-1]        --flipAxes 1 0 1 \
+      [0-1 0-1 0-1]        --flip 1 0 1 \
           bool             --flip-around-origin \
    [float float float]     --setSpacing 0.05 0.05 0.05 \
    [float float float]     --setOrigin 0 0 0 \

@@ -33,7 +33,7 @@ pos_stack_reorient \
     --permutation 2 0 1 \
     --orientation RAS \
     --setOrigin 0 0 0 \
-    --flipAxes 0 1 0 \
+    --flip 0 1 0 \
     --setSpacing 0.25 0.05 0.05 \
     --setType uchar \
     --loglevel DEBUG 

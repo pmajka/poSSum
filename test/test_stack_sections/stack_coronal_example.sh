@@ -33,7 +33,7 @@ pos_stack_reorient \
     --permutation 0 2 1 \
     --orientation RAS \
     --setOrigin 0 0 0 \
-    --flipAxes 0 1 0 \
+    --flip 0 1 0 \
     --setSpacing 0.15 0.3 0.15 \
     --interpolation linear \
     --setType uchar \
@@ -46,7 +46,7 @@ pos_stack_reorient \
     --permutation 0 2 1 \
     --orientation RAS \
     --setOrigin 0 0 0 \
-    --flipAxes 0 1 0 \
+    --flip 0 1 0 \
     --resample 0.5 0.5 0.5 \
     --setSpacing 0.3 0.6 0.3 \
     --interpolation linear \
