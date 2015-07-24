@@ -140,7 +140,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Do not inspect the input files if the script is run in the
         # trial mode
-        if self.options.dryRun is False:
+        if self.options.dry_run is False:
             self._inspect_input_data()
 
         if self.options.skipReslice is False:

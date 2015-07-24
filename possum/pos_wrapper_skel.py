@@ -26,7 +26,7 @@ class generic_workflow(object):
     tools which functionality cannot be achieved in any other way.
 
     >>> options, args = generic_workflow.parseArgs()
-    >>> options.dryRun = True
+    >>> options.dry_run = True
 
     >>> w = generic_workflow(options, args) #doctest: +ELLIPSIS
     Executing: mkdir -p /dev/shm/generic_workflow_...
@@ -86,7 +86,7 @@ class generic_workflow(object):
     # of mess - but hey - that's what you call testing!
     >>> options, args = generic_workflow.parseArgs()
     >>> options.disableSharedMemory = True
-    >>> options.dryRun = False
+    >>> options.dry_run = False
     >>> options.cleanup = True
     >>> options.archiveWorkDir = "/tmp/"
 
@@ -317,7 +317,7 @@ class generic_workflow(object):
         # In the regular execution mode (no dry-run) the commands can be
         # executed serially or parallelly. In the latter case, all the commands
         # are dumped into a file and executed with the GNU parallel.
-        if not self.options.dryRun:
+        if not self.options.dry_run:
 
             command_filename = \
                 os.path.join(self.options.workdir, str(time.time()))
@@ -403,7 +403,7 @@ class generic_workflow(object):
 
         # Well, sometimes you don't want to execute the archive command
         # esspecially when not other command was executed.
-        if not self.options.dryRun:
+        if not self.options.dry_run:
             compress_command()
         else:
             print compress_command
@@ -439,7 +439,7 @@ class generic_workflow(object):
                 dest='specimenId', action='store', type='str',
                 help='Identifier of the specimen. Providing the ID is obligatory. Script will not run without providing specimen ID.')
         workflowSettings.add_option('--dry-run', default=False,
-                action='store_const', const=True, dest='dryRun',
+                action='store_const', const=True, dest='dry_run',
                 help='Prints the commands to stdout instead of executing them')
         workflowSettings.add_option('--cpus', default=None,
                 type='int', dest='cpus',
@@ -577,12 +577,12 @@ class enclosed_workflow(generic_workflow):
         super(enclosed_workflow, self)._initializeOptions()
 
         # Force workdir to be 'skip' as we do not want to create
-        # A job directory for this script. Alse, we set dryRun and
+        # A job directory for this script. Alse, we set dry_run and
         # cleanup to false, as this workflow does not use any
         # directories. Everything is done iin the memory.
         # Moreover, we set cpuNo to 1 as it does not matter :)
         self.options.workdir = self._DO_NOT_CREATE_WORKDIR
-        self.options.dryRun = False
+        self.options.dry_run = False
         self.options.cleanup = False
         self.options.cpus = 1
 

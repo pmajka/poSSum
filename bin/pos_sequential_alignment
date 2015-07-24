@@ -139,7 +139,7 @@ class sequential_alignment(output_volume_workflow):
         # directory and all the input images exist. Note that the input image
         # inspection is performed in case of performing the actual
         # computations. In case of trial runs, no validation if performed.
-        if self.options.dryRun is not True:
+        if self.options.dry_run is not True:
             self._inspect_input_images()
 
         # Prepare the input slices. Both, grayscale and rgb slices are prepared

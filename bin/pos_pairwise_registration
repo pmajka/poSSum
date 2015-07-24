@@ -398,7 +398,7 @@ class pairwiseRegistration(output_volume_workflow):
         # the files to be coregistered do actually exist. However, the
         # verification is performed only when the script is executed in not in
         # `--druRun` mode:
-        if self.options.dryRun is False:
+        if self.options.dry_run is False:
             self._inspect_input_images()
 
         # The slice preprocessing may be skipped if required.
@@ -407,7 +407,7 @@ class pairwiseRegistration(output_volume_workflow):
             self._generate_moving_slices()
 
         # Elliminate blank reference slices.
-        if self.options.dryRun is False:
+        if self.options.dry_run is False:
             self._correct_slice_assignment()
 
         # Generate transforms. This step may be switched off by providing
