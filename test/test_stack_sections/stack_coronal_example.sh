@@ -36,7 +36,7 @@ pos_stack_reorient \
     --flip 0 1 0 \
     --spacing 0.15 0.3 0.15 \
     --interpolation linear \
-    --setType uchar \
+    --type uchar \
     --loglevel DEBUG 
 
 pos_stack_reorient \
@@ -50,6 +50,6 @@ pos_stack_reorient \
     --resample 0.5 0.5 0.5 \
     --spacing 0.3 0.6 0.3 \
     --interpolation linear \
-    --setType uchar \
+    --type uchar \
     --loglevel DEBUG 
 rm -rf *.jpg

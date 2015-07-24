@@ -35,7 +35,7 @@ pos_stack_reorient \
     --origin 0 0 0 \
     --flip 0 1 0 \
     --spacing 0.25 0.05 0.05 \
-    --setType uchar \
+    --type uchar \
     --loglevel DEBUG 
 rm -rf *.jpg
 

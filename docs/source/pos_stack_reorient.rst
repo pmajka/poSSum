@@ -17,7 +17,7 @@ All supported features in one invocation ::
           bool             --flip-around-origin \
    [float float float]     --spacing 0.05 0.05 0.05 \
    [float float float]     --origin 0 0 0 \
-                           --setType uchar
+                           --type uchar
 
 
 Introduction

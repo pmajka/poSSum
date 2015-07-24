@@ -82,7 +82,7 @@ pos_stack_reorient \
     -o ${REFERENCE_VOLUME} \
     --flip 1 1 1 \
     --origin 0 0 0 \
-    --setType uchar
+    --type uchar
 
 c3d ${REFERENCE_VOLUME} \
     -scale -1 -shift 255 \
