@@ -418,7 +418,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
                 slice_start=self.options.startSlice,
                 slice_end=self.options.endSlice,
                 slice_step=1,
-                permutation_order=self.options.outputVolumePermutationOrder,
+                permutation_order=self.options.output_volume_permute_axes,
                 orientation_code=self.options.outputVolumeOrientationCode,
                 output_type=self.options.output_volume_scalar_type,
                 spacing=self.options.output_volume_spacing,

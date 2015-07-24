@@ -501,7 +501,7 @@ applied _before_ settting the output spacing. The resampling settings are
 provided as three positive float values corresponding to the resampling factor
 (e.g. 0.25 1.0 0.75). Watch out when combining this whith other parameters like
 setting spacing. By default there is no resampling."""
-    __output_vol_command_line_args_help['outputVolumePermutationOrder'] =\
+    __output_vol_command_line_args_help['output_volume_permute_axes'] =\
 """Apply axes permutation. Permutation has to be provided as sequence of 3
 integers separated by space. Identity (0,1,2) permutation is a default one."""
     __output_vol_command_line_args_help['outputVolumeOrientationCode'] =\
@@ -544,8 +544,8 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
             dest='outputVolumeResample', type='float', nargs=3, default=None,
             help=cls.__output_vol_command_line_args_help['outputVolumeResample'])
         outputVolumeSettings.add_option('--output-volume-permute-axes', default=[0, 1, 2],
-            type='int', nargs=3, dest='outputVolumePermutationOrder',
-            help=cls.__output_vol_command_line_args_help['outputVolumePermutationOrder'])
+            type='int', nargs=3, dest='output_volume_permute_axes',
+            help=cls.__output_vol_command_line_args_help['output_volume_permute_axes'])
         outputVolumeSettings.add_option('--output-volume-orientation',
             dest='outputVolumeOrientationCode', type='str', default='RAS',
             help=cls.__output_vol_command_line_args_help['outputVolumeOrientationCode'])
