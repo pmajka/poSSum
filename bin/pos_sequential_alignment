@@ -769,7 +769,7 @@ class sequential_alignment(output_volume_workflow):
             spacing=self.options.output_volume_spacing,
             origin=self.options.outputVolumeOrigin,
             interpolation=self.options.setInterpolation,
-            resample=self.options.outputVolumeResample)
+            resample=self.options.output_volume_resample)
 
         # Return the created parser.
         return copy.deepcopy(command)

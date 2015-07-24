@@ -424,7 +424,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
                 spacing=self.options.output_volume_spacing,
                 origin=self.options.outputVolumeOrigin,
                 interpolation=self.options.setInterpolation,
-                resample=self.options.outputVolumeResample)
+                resample=self.options.output_volume_resample)
 
         return stack_grayscale
 

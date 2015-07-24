@@ -495,7 +495,7 @@ float | double. The default type, unlike in Convert3d is char."""
 """Sets the voxel spacing of the image.  A vector of three positive values is
 required (e.g. '0.5 0.5 0.5'). The spacing is assumed to be provided in
 milimeters. The defaults spacing is 1x1x1mm."""
-    __output_vol_command_line_args_help['outputVolumeResample'] =\
+    __output_vol_command_line_args_help['output_volume_resample'] =\
 """Requests additional resampling of the output volume. The resampling is
 applied _before_ settting the output spacing. The resampling settings are
 provided as three positive float values corresponding to the resampling factor
@@ -540,9 +540,9 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         outputVolumeSettings.add_option('--output-volume-spacing', default=[1, 1, 1],
             type='float', nargs=3, dest='output_volume_spacing',
             help=cls.__output_vol_command_line_args_help['output_volume_spacing'])
-        outputVolumeSettings.add_option('--outputVolumeResample',
-            dest='outputVolumeResample', type='float', nargs=3, default=None,
-            help=cls.__output_vol_command_line_args_help['outputVolumeResample'])
+        outputVolumeSettings.add_option('--output-volume-resample',
+            dest='output_volume_resample', type='float', nargs=3, default=None,
+            help=cls.__output_vol_command_line_args_help['output_volume_resample'])
         outputVolumeSettings.add_option('--output-volume-permute-axes', default=[0, 1, 2],
             type='int', nargs=3, dest='output_volume_permute_axes',
             help=cls.__output_vol_command_line_args_help['output_volume_permute_axes'])
