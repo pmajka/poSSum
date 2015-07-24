@@ -1136,7 +1136,7 @@ class pairwiseRegistration(output_volume_workflow):
                 type='float', dest='affineGradientDescent', nargs=4,
                 help=r('Grandient descent step coefficients. Values are \
                 passed directly to ANTS as \
-                "--affine-gradient-descent-option".))
+                "--affine-gradient-descent-option".'))
         parser.add_option('--transformationsDirectory', default=None,
             dest='transformationsDirectory', action='store',
             help='Store transformations in given directory instead of using default one.')
