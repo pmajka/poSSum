@@ -435,8 +435,8 @@ class generic_workflow(object):
         workflowSettings.add_option('--disable-shared-memory', default=False,
             dest='disable_shared_memory', action='store_const', const=True,
             help='Forces script to use hard drive to store the worklfow data instaed of using RAM disk.')
-        workflowSettings.add_option('--specimenId', default=None,
-                dest='specimenId', action='store', type='str',
+        workflowSettings.add_option('--specimen-id', default=None,
+                dest='specimen_id', action='store', type='str',
                 help='Identifier of the specimen. Providing the ID is obligatory. Script will not run without providing specimen ID.')
         workflowSettings.add_option('--dry-run', default=False,
                 action='store_const', const=True, dest='dry_run',
