@@ -74,7 +74,7 @@ The input image (images) have to comply with the specification below:
 
 .. note::
     The following options: ``--workDir``, ``--cleanup`` ``--disableSharedMemory``
-    ``--dryRun`` and ``--cpuNo`` have no use in this script. Please don't use
+    ``--dryRun`` and ``--cpus`` have no use in this script. Please don't use
     them.
 
 

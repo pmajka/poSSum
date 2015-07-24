@@ -148,9 +148,9 @@ class generic_workflow(object):
 
         # Get number of cpus for parallel processing.
         # Multiprocessing modlue is used to determine the number of cpus. This
-        # behavior can be overriden with --cpuNo switch.
-        if not self.options.cpuNo:
-            self.options.cpuNo = multiprocessing.cpu_count()
+        # behavior can be overriden with --cpus switch.
+        if not self.options.cpus:
+            self.options.cpus = multiprocessing.cpu_count()
 
         self._initializeLogging()
         self._initializeOptions()
@@ -194,7 +194,7 @@ class generic_workflow(object):
         # We need to check if the GNU parallel of availeble. If it's not, we
         # cannot perform parallel computations.
         if not pos_common.which(self.__PARALLEL_EXECUTABLE_NAME) and\
-           self.options.cpuNo > 1:
+           self.options.cpus > 1:
             self._logger.error("Parallel execution was selected but GNU parallel is not available!")
             sys.exit(1)
 
@@ -328,10 +328,10 @@ class generic_workflow(object):
                 cluster_file = os.path.join(os.getenv("HOME"), '.pos_cluster')
                 if os.path.isfile(cluster_file):
                     command_str = 'parallel --sshloginfile %s -a %s -k -j %d --env PATH --env PYTHONPATH --env LD_LIBRARY_PATH --workdir %s' %\
-                        (cluster_file, command_filename, self.options.cpuNo, os.getcwd())
+                        (cluster_file, command_filename, self.options.cpus, os.getcwd())
                 else:
                     command_str = 'parallel -a %s -k -j %d' %\
-                        (command_filename, self.options.cpuNo)
+                        (command_filename, self.options.cpus)
             else:
                 command_str = 'bash -x %s' % command_filename
 
@@ -441,8 +441,8 @@ class generic_workflow(object):
         workflowSettings.add_option('--dryRun', default=False,
                 action='store_const', const=True, dest='dryRun',
                 help='Prints the commands to stdout instead of executing them')
-        workflowSettings.add_option('--cpuNo', '-n', default=None,
-                type='int', dest='cpuNo',
+        workflowSettings.add_option('--cpus', default=None,
+                type='int', dest='cpus',
                 help='Set a number of CPUs for parallel processing. If skipped, the number of CPUs will be automatically detected.')
         workflowSettings.add_option('--archiveWorkDir',default=None,
                 type='str', dest='archiveWorkDir',
@@ -584,7 +584,7 @@ class enclosed_workflow(generic_workflow):
         self.options.workdir = self._DO_NOT_CREATE_WORKDIR
         self.options.dryRun = False
         self.options.cleanup = False
-        self.options.cpuNo = 1
+        self.options.cpus = 1
 
 if __name__ == 'possum.pos_wrapper_skel':
     import doctest
