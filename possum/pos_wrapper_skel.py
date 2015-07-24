@@ -484,7 +484,7 @@ class output_volume_workflow(generic_workflow):
     """
 
     __output_vol_command_line_args_help = {}
-    __output_vol_command_line_args_help['outputVolumeOrigin'] =\
+    __output_vol_command_line_args_help['output_volume_origin'] =\
 """Set the origin of the image --  the center of the voxel (0,0,0) in the image.
 Should be specified in millimeters. Default: 0,0,0."""
     __output_vol_command_line_args_help['output_volume_scalar_type'] =\
@@ -530,9 +530,9 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         outputVolumeSettings = \
             OptionGroup(parser, 'Output volumes settings')
         outputVolumeSettings.add_option('--output-volume-origin',
-            dest='outputVolumeOrigin',
+            dest='output_volume_origin',
             default=[0., 0., 0.], action='store', type='float', nargs=3,
-            help=cls.__output_vol_command_line_args_help['outputVolumeOrigin'])
+            help=cls.__output_vol_command_line_args_help['output_volume_origin'])
         outputVolumeSettings.add_option('--output-volume-scalar-type', default='uchar',
             type='choice', dest='output_volume_scalar_type',
             choices=['char','uchar','short','ushort','int','uint','float','double'],
