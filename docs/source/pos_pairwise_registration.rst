@@ -126,6 +126,6 @@ Utilizes typical options::
             --outputVolumesDirectory output_volumes_directory/ \
             --useRigidAffine \
             --loglevel DEBUG \
-            --outputVolumeSpacing 0.02 0.02 0.06 \
+            --output-volume-spacing 0.02 0.02 0.06 \
             --dryRun
 

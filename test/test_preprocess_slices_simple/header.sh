@@ -30,7 +30,7 @@ OUTPUT_VOLUME_PERMUTATION="0 2 1"
 OUTPUT_VOLUME_FLIPPING="0 0 0"
 OUTPUT_VOLUME_ORIENTATION="RAS"
 
-OUTPUT_VOLUME_PROPERTIES=" --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION} --outputVolumeSpacing ${OUTPUT_VOLUME_SPACING} --output-volume-permute-axes ${OUTPUT_VOLUME_PERMUTATION} --flip ${OUTPUT_VOLUME_FLIPPING} --outputVolumeOrigin ${OUTPUT_VOLUME_ORIGIN}"
+OUTPUT_VOLUME_PROPERTIES=" --outputVolumeOrientationCode ${OUTPUT_VOLUME_ORIENTATION} --output-volume-spacing ${OUTPUT_VOLUME_SPACING} --output-volume-permute-axes ${OUTPUT_VOLUME_PERMUTATION} --flip ${OUTPUT_VOLUME_FLIPPING} --outputVolumeOrigin ${OUTPUT_VOLUME_ORIGIN}"
 
 
 VOL_MASK=10_input_data/08_source_stacks/mask_stack.nii.gz

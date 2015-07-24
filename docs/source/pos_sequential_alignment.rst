@@ -50,7 +50,7 @@ Images in order Continous naming, Reference slice ::
             --useRigidAffine \
             --enableTransformations \
             --enableReslice \
-            --outputVolumeSpacing 0.02 0.02 0.06
+            --output-volume-spacing 0.02 0.02 0.06
 
 
 Description of the output files

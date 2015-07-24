@@ -306,7 +306,7 @@ Three integers are required."""
         parser.add_option('--output-volume-permute-axes',
             default=[0, 1, 2], type='int', nargs=3, dest='permutation',
             help=__output_vol_command_line_args_help['permutation'])
-        parser.add_option('--outputVolumeSpacing',
+        parser.add_option('--output-volume-spacing',
             dest='setSpacing', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setSpacing'])
         parser.add_option('--outputVolumeOrigin', dest='setOrigin',
