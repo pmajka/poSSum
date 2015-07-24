@@ -87,7 +87,7 @@ In order to stack a series of slices onto a volume, the following command
 has to be invoked::
 
     pos_stack_reorient.py -i prefix_%04d.png \
-                           --stackingOptions 0 100 1 \
+                           --stacking-range 0 100 1 \
                            -o output.nii.gz
 
 And that's it. The command above will stack a series of images (assuming that

@@ -29,7 +29,7 @@ unzip example_sagittal_sections.zip
 pos_stack_reorient \
     -i %04d.jpg \
     -o stacked_sagital_exmaple.nii.gz \
-    --stackingOptions 0 55 1 \
+    --stacking-range 0 55 1 \
     --permutation 2 0 1 \
     --orientationCode RAS \
     --setOrigin 0 0 0 \

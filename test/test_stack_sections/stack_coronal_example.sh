@@ -29,7 +29,7 @@ unzip example_coronal_sections.zip
 pos_stack_reorient \
     -i %04d.jpg \
     -o stacked_coronal_exmaple.nii.gz \
-    --stackingOptions 0 106 1 \
+    --stacking-range 0 106 1 \
     --permutation 0 2 1 \
     --orientationCode RAS \
     --setOrigin 0 0 0 \
@@ -42,7 +42,7 @@ pos_stack_reorient \
 pos_stack_reorient \
     -i %04d.jpg \
     -o stacked_coronal_exmaple_downsampled.nii.gz \
-    --stackingOptions 0 106 1 \
+    --stacking-range 0 106 1 \
     --permutation 0 2 1 \
     --orientationCode RAS \
     --setOrigin 0 0 0 \

@@ -885,7 +885,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header += "    pos_stack_reorient \\\n"
         header += "        -i ${INPUT_DIR}/%04d.nii.gz \\\n"
         header += "        -o ${OUTPUT_VOLUME} \\\n"
-        header += "        --stackingOptions ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \\\n"
+        header += "        --stacking-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \\\n"
         header += "        ${OUTPUT_VOLUME_PROPERTIES}  > /dev/null 2>&1 \n"
         header += "     rm -rfv ${INPUT_DIR} \n"
         header += "}\n"

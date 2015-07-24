@@ -80,7 +80,7 @@ hd_stack_sections ()
     pos_stack_reorient \
         -i ${INPUT_DIR}/%04d.nii.gz \
         -o ${OUTPUT_VOLUME} \
-        --stackingOptions ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \
+        --stacking-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \
         ${OUTPUT_VOLUME_PROPERTIES}  > /dev/null 2>&1 
      rm -rfv ${INPUT_DIR} 
 }

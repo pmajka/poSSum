@@ -20,7 +20,7 @@ unzip exmaple_axial_cuts.zip
 pos_stack_reorient \
     -i %04d.jpg \
     -o stacked_axial_exmaple.nii.gz \
-    --stackingOptions 1020 1300 5 \
+    --stacking-range 1020 1300 5 \
     --permutation 0 1 2 \
     --orientationCode RAS \
     --setOrigin 0 0 0 \

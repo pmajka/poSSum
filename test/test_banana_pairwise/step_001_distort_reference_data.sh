@@ -105,7 +105,7 @@ parallel -j 8 -k < 002_distorted_data/tempfile.txt
 pos_stack_reorient \
     -i "002_distorted_data/distorted_sections/%04d.nii.gz" \
     -o distorted_stack.nii.gz \
-    --stackingOptions ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \
+    --stacking-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \
     ${OV_SETTINGS_SHORT}
 
 rm -rfv 002_distorted_data  

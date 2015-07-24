@@ -27,12 +27,12 @@ done
 
 pos_stack_reorient \
     -i %04d.nii.gz \
-    --stackingOptions 0 99 1 \
+    --stacking-range 0 99 1 \
     -o deformed_stack.nii.gz
 
 pos_stack_reorient \
     -i w%04d.nii.gz \
-    --stackingOptions 0 99 1 \
+    --stacking-range 0 99 1 \
     -o initial_stack.nii.gz
 
 rm ????.nii.gz w????.nii.gz ????.png
