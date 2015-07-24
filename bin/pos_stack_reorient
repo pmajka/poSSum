@@ -32,7 +32,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         # Ok, if the image stacking is enabled, create the input volume
         # by stacking the input image stack. Otherwise just load the
         # input volume in the regular manner.
-        if self.options.stackingOptions:
+        if self.options.stacking_range:
             self._logger.info(r("Input volume will be generated \
                                 from the image stack."))
             self._stack_input_slices()
@@ -190,7 +190,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         """
         # This is a bit tricky. Few words of explanation are required.
         # First, assign the slices' indexes. Simple.
-        start, stop, step = tuple(self.options.stackingOptions)
+        start, stop, step = tuple(self.options.stacking_range)
 
         # Then, determine the filename for the first slice
         first_slice = self.options.input_image % (start,)
@@ -232,8 +232,8 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
     def _getCommandLineParser(cls):
         __output_vol_command_line_args_help = {}
         __output_vol_command_line_args_help['input_image'] =\
-"""Input volume filename (if no stackingOptions are provided) or input naming
-scheme (stackingOptions) are provided."""
+"""Input volume filename (if no stacking_range are provided) or input naming
+scheme (stacking_range) are provided."""
         __output_vol_command_line_args_help['output_image'] =\
 """Output volume filename."""
         __output_vol_command_line_args_help['orientationCode'] =\
@@ -275,7 +275,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         __output_vol_command_line_args_help['flipAroundOrigin'] =\
 """Determines of the flipping will be performed around origin.
 False by default."""
-        __output_vol_command_line_args_help['stackingOptions'] =\
+        __output_vol_command_line_args_help['stacking_range'] =\
 """Image stacking options: first slice, last slice, slice increment.
 Three integers are required."""
 
@@ -287,9 +287,9 @@ Three integers are required."""
         parser.add_option('--input-image', '-i', dest='input_image',
             type='str', default=None,
             help=__output_vol_command_line_args_help['input_image'])
-        parser.add_option('--stacking-range', dest='stackingOptions',
+        parser.add_option('--stacking-range', dest='stacking_range',
             type='int', default=None, nargs=3,
-            help=__output_vol_command_line_args_help['stackingOptions'])
+            help=__output_vol_command_line_args_help['stacking_range'])
 
         parser.add_option('--interpolation', default='linear',
             type='str', dest='interpolation',
