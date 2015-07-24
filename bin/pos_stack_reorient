@@ -315,7 +315,7 @@ Three integers are required."""
         parser.add_option('--flipAxes', default=[0, 0, 0],
             type='int', nargs=3, dest='flipAxes',
             help=__output_vol_command_line_args_help['setFlip'])
-        parser.add_option('--setFlip', default=[0, 0, 0],
+        parser.add_option('--flip', default=[0, 0, 0],
             type='int', nargs=3, dest='flipAxes',
             help=__output_vol_command_line_args_help['setFlip'])
         parser.add_option('--flip-around-origin', default=False,

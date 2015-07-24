@@ -809,7 +809,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             ('--outputVolumePermutationOrder', '${OUTPUT_VOLUME_PERMUTATION}'),
             ('--outputVolumeOrientationCode', '${OUTPUT_VOLUME_ORIENTATION}'),
             ('--outputVolumeOrigin', '${OUTPUT_VOLUME_ORIGIN}'),
-            ('--setFlip', '${OUTPUT_VOLUME_FLIPPING}')])
+            ('--flip', '${OUTPUT_VOLUME_FLIPPING}')])
 
         combined_vol_props = "OUTPUT_VOLUME_PROPERTIES=\""
         for k, v in output_volume_pairs.items():

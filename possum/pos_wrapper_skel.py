@@ -552,7 +552,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         outputVolumeSettings.add_option('--setInterpolation',
             dest='setInterpolation', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['setInterpolation'])
-        outputVolumeSettings.add_option('--setFlip',
+        outputVolumeSettings.add_option('--flip',
             dest='setFlip', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['setFlip'])
 
@@ -571,6 +571,7 @@ class enclosed_workflow(generic_workflow):
 
     >>> options, args = enclosed_workflow.parseArgs()
     >>> w = enclosed_workflow(options, args) #doctest: +ELLIPSIS
+
     """
     def _initializeOptions(self):
         super(enclosed_workflow, self)._initializeOptions()
