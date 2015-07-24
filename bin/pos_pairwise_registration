@@ -837,7 +837,7 @@ class pairwiseRegistration(output_volume_workflow):
             permutation_order=self.options.outputVolumePermutationOrder,
             orientation_code=self.options.outputVolumeOrientationCode,
             output_type=self.options.output_volume_scalar_type,
-            spacing=self.options.outputVolumeSpacing,
+            spacing=self.options.output_volume_spacing,
             origin=self.options.outputVolumeOrigin,
             interpolation=self.options.setInterpolation,
             resample=self.options.outputVolumeResample)

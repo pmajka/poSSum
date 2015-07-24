@@ -491,7 +491,7 @@ Should be specified in millimeters. Default: 0,0,0."""
 """Specifies the pixel type for the output image.  Data type for output volume's
 voxels. The allowed values are: char | uchar | short | ushort | int | uint |
 float | double. The default type, unlike in Convert3d is char."""
-    __output_vol_command_line_args_help['outputVolumeSpacing'] =\
+    __output_vol_command_line_args_help['output_volume_spacing'] =\
 """Sets the voxel spacing of the image.  A vector of three positive values is
 required (e.g. '0.5 0.5 0.5'). The spacing is assumed to be provided in
 milimeters. The defaults spacing is 1x1x1mm."""
@@ -538,8 +538,8 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
             choices=['char','uchar','short','ushort','int','uint','float','double'],
             help=cls.__output_vol_command_line_args_help['output_volume_scalar_type'])
         outputVolumeSettings.add_option('--output-volume-spacing', default=[1, 1, 1],
-            type='float', nargs=3, dest='outputVolumeSpacing',
-            help=cls.__output_vol_command_line_args_help['outputVolumeSpacing'])
+            type='float', nargs=3, dest='output_volume_spacing',
+            help=cls.__output_vol_command_line_args_help['output_volume_spacing'])
         outputVolumeSettings.add_option('--outputVolumeResample',
             dest='outputVolumeResample', type='float', nargs=3, default=None,
             help=cls.__output_vol_command_line_args_help['outputVolumeResample'])
