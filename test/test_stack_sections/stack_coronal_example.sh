@@ -32,7 +32,7 @@ pos_stack_reorient \
     --stacking-range 0 106 1 \
     --permutation 0 2 1 \
     --orientation RAS \
-    --setOrigin 0 0 0 \
+    --origin 0 0 0 \
     --flip 0 1 0 \
     --spacing 0.15 0.3 0.15 \
     --interpolation linear \
@@ -45,7 +45,7 @@ pos_stack_reorient \
     --stacking-range 0 106 1 \
     --permutation 0 2 1 \
     --orientation RAS \
-    --setOrigin 0 0 0 \
+    --origin 0 0 0 \
     --flip 0 1 0 \
     --resample 0.5 0.5 0.5 \
     --spacing 0.3 0.6 0.3 \

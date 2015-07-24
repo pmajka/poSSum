@@ -23,7 +23,7 @@ pos_stack_reorient \
     --stacking-range 1020 1300 5 \
     --permutation 0 1 2 \
     --orientation RAS \
-    --setOrigin 0 0 0 \
+    --origin 0 0 0 \
     --flip 0 1 0 \
     --spacing 1.0 1.0 3.5 \
     --setType uchar \

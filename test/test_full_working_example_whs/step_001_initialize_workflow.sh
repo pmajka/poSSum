@@ -81,7 +81,7 @@ pos_stack_reorient \
     --orientation RAS \
     -o ${REFERENCE_VOLUME} \
     --flip 1 1 1 \
-    --setOrigin 0 0 0 \
+    --origin 0 0 0 \
     --setType uchar
 
 c3d ${REFERENCE_VOLUME} \

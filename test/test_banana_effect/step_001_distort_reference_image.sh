@@ -12,7 +12,7 @@ pos_stack_reorient \
     --permutation 1 2 0 \
     --orientation RAS \
     --flip 0 1 1 \
-    --setOrigin 0 0 0 
+    --origin 0 0 0 
 
 c3d ${PHANTOM_FILE} ${PHANTOM_FILE} \
         -clip 0 255 \

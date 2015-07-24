@@ -321,7 +321,7 @@ Three integers are required."""
         parser.add_option('--spacing',
             dest='setSpacing', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setSpacing'])
-        parser.add_option('--setOrigin', dest='setOrigin', type='float',
+        parser.add_option('--origin', dest='setOrigin', type='float',
             nargs=3, default=None,
             help=__output_vol_command_line_args_help['setOrigin'])
         parser.add_option('--setType', dest='setType',
