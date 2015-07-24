@@ -201,10 +201,10 @@ class generic_workflow(object):
         # Job ID is another value for accointing and managing. Oppoosite to the
         # specimen ID, this one may not be explicitly stated. In that case, it
         # is generated automatically based on current data and PID.
-        if self.options.jobId is None:
-            self.options.jobId = self.__class__.__name__
-            self.options.jobId += datetime.datetime.now().strftime("_%Y-%m-%d-%H_%M-%S_")
-            self.options.jobId += str(os.getpid())
+        if self.options.job_id is None:
+            self.options.job_id = self.__class__.__name__
+            self.options.job_id += datetime.datetime.now().strftime("_%Y-%m-%d-%H_%M-%S_")
+            self.options.job_id += str(os.getpid())
 
     def _overrideDefaults(self):
         """
@@ -253,7 +253,7 @@ class generic_workflow(object):
         # When the working directory name IS provided we just use it.
         if not self.options.workdir:
             self.options.workdir =\
-                os.path.join(top_directory, self.options.jobId)
+                os.path.join(top_directory, self.options.job_id)
         self._ensureDir(self.options.workdir)
 
         # Assign path to work dir to all templates:
@@ -390,7 +390,7 @@ class generic_workflow(object):
         for gigabytes.
         """
         archive_filename = os.path.join(self.options.archive_work_dir,
-                                        self.options.jobId)
+                                        self.options.job_id)
 
         self._logger.info("Archive basename: %s",
                           generic_workflow._basename(archive_filename))
@@ -423,8 +423,8 @@ class generic_workflow(object):
         parser = OptionParser(usage=cls._usage)
 
         workflowSettings = OptionGroup(parser, 'General workflow settings')
-        workflowSettings.add_option('--jobId', '-j', dest='jobId', type='str',
-                default=None, help='Job identifier. An optional value identyfying this particular workflow. If ommited, the jobId will be generated automatically.')
+        workflowSettings.add_option('--job-id', '-j', dest='job_id', type='str',
+                default=None, help='Job identifier. An optional value identyfying this particular workflow. If ommited, the job_id will be generated automatically.')
         workflowSettings.add_option('--work-dir', '-d', dest='workdir', type='str',
                 default=None, help='Sets the working directory of the process. Overrides the "--disable-shared-memory" switch.')
         workflowSettings.add_option('--loglevel', dest='loglevel', type='str',
