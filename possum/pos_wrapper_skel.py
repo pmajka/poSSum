@@ -487,7 +487,7 @@ class output_volume_workflow(generic_workflow):
     __output_vol_command_line_args_help['outputVolumeOrigin'] =\
 """Set the origin of the image --  the center of the voxel (0,0,0) in the image.
 Should be specified in millimeters. Default: 0,0,0."""
-    __output_vol_command_line_args_help['outputVolumeScalarType'] =\
+    __output_vol_command_line_args_help['output_volume_scalar_type'] =\
 """Specifies the pixel type for the output image.  Data type for output volume's
 voxels. The allowed values are: char | uchar | short | ushort | int | uint |
 float | double. The default type, unlike in Convert3d is char."""
@@ -533,10 +533,10 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
             dest='outputVolumeOrigin',
             default=[0., 0., 0.], action='store', type='float', nargs=3,
             help=cls.__output_vol_command_line_args_help['outputVolumeOrigin'])
-        outputVolumeSettings.add_option('--outputVolumeScalarType', default='uchar',
-            type='choice', dest='outputVolumeScalarType',
+        outputVolumeSettings.add_option('--output-volume-scalar-type', default='uchar',
+            type='choice', dest='output_volume_scalar_type',
             choices=['char','uchar','short','ushort','int','uint','float','double'],
-            help=cls.__output_vol_command_line_args_help['outputVolumeScalarType'])
+            help=cls.__output_vol_command_line_args_help['output_volume_scalar_type'])
         outputVolumeSettings.add_option('--output-volume-spacing', default=[1, 1, 1],
             type='float', nargs=3, dest='outputVolumeSpacing',
             help=cls.__output_vol_command_line_args_help['outputVolumeSpacing'])
@@ -552,7 +552,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         outputVolumeSettings.add_option('--setInterpolation',
             dest='setInterpolation', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['setInterpolation'])
-        outputVolumeSettings.add_option('--flip',
+        outputVolumeSettings.add_option('--flip', '--output-volume-filp-axes',
             dest='setFlip', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['setFlip'])
 
