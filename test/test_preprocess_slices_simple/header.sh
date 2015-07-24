@@ -77,7 +77,7 @@ hd_stack_sections ()
     INPUT_DIR=$1
     OUTPUT_VOLUME=$2
 
-    pos_stack_reorient \
+    pos_stack_sections \
         -i ${INPUT_DIR}/%04d.nii.gz \
         -o ${OUTPUT_VOLUME} \
         --stacking-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \

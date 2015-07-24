@@ -995,7 +995,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
     """
     A wraper for a swiss army kife for reorienting, stacking, permuting and
     flipping input volumes. For more details please check manual for
-    `pos_stack_reorient` script.
+    `pos_stack_sections` script.
 
     .. note:: There are two obligatory parameters: `stack_mask` and
               `output_volume_fn`.
@@ -1047,7 +1047,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
     <BLANKLINE>
 
     >>> print stack_and_reorient_wrapper() #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient -i -o --permutation 0 1 2 \
+    pos_stack_sections -i -o --permutation 0 1 2 \
         --orientation RAS --type uchar \
         --spacing 1.0 1.0 1.0 --origin 0 0 0
 
@@ -1057,18 +1057,18 @@ class stack_and_reorient_wrapper(generic_wrapper):
     KeyError: 'parameter_that_does_not_exist'
 
     >>> print p.updateParameters({"stack_mask":"%04d.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient -i %04d.nii.gz -o --permutation 0 1 2 \
+    pos_stack_sections -i %04d.nii.gz -o --permutation 0 1 2 \
         --orientation RAS --type uchar --spacing 1.0 1.0 1.0 \
         --origin 0 0 0
 
     >>> print p.updateParameters({"slice_start":"%04d.nii.gz",
     ... "slice_end" : 20, "slice_start" : 1, "slice_step":1}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient -i %04d.nii.gz -o --stacking-range 1 20 1 \
+    pos_stack_sections -i %04d.nii.gz -o --stacking-range 1 20 1 \
         --permutation 0 1 2  --orientation RAS  --type uchar \
         --spacing 1.0 1.0 1.0 --origin 0 0 0
 
     >>> print p.updateParameters({"output_volume_fn": "output.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient -i %04d.nii.gz -o output.nii.gz \
+    pos_stack_sections -i %04d.nii.gz -o output.nii.gz \
       --stacking-range 1 20 1 --permutation 0 1 2 --orientation RAS \
       --type uchar --spacing 1.0 1.0 1.0 --origin 0 0 0
 
@@ -1077,13 +1077,13 @@ class stack_and_reorient_wrapper(generic_wrapper):
     ... "interpolation" : "Cubic",
     ... "permutation_order" : [2, 1, 0], "resample": [0.5, 2.0, 3.0],
     ... "orientation_code" : "RAS"}) #doctest: +NORMALIZE_WHITESPACE
-    pos_stack_reorient -i %04d.nii.gz -o output.nii.gz --stacking-range 1 20 1\
+    pos_stack_sections -i %04d.nii.gz -o output.nii.gz --stacking-range 1 20 1\
       --permutation 2 1 0 --orientation RAS --type ushort\
       --spacing 0.5 0.5 0.5 --origin 1 1 1 --interpolation Cubic\
       --resample 0.5 2.0 3.0
     """
 
-    _template = """pos_stack_reorient \
+    _template = """pos_stack_sections \
         -i {stack_mask} \
         -o {output_volume_fn} \
         {slice_start} {slice_end} {slice_step} \

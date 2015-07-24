@@ -76,7 +76,7 @@ c3d ${DIR_REFERENCE}/atlas_fullsize.nii.gz \
     -type uchar \
     -o ${DIR_REFERENCE}/atlas.nii.gz
 
-pos_stack_reorient \
+pos_stack_sections \
     -i ${DIR_REFERENCE}/atlas.nii.gz \
     --orientation RAS \
     -o ${REFERENCE_VOLUME} \

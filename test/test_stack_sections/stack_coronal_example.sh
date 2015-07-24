@@ -26,7 +26,7 @@
 
 rm -rf *.jpg
 unzip example_coronal_sections.zip
-pos_stack_reorient \
+pos_stack_sections \
     -i %04d.jpg \
     -o stacked_coronal_exmaple.nii.gz \
     --stacking-range 0 106 1 \
@@ -39,7 +39,7 @@ pos_stack_reorient \
     --type uchar \
     --loglevel DEBUG 
 
-pos_stack_reorient \
+pos_stack_sections \
     -i %04d.jpg \
     -o stacked_coronal_exmaple_downsampled.nii.gz \
     --stacking-range 0 106 1 \

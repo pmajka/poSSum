@@ -25,12 +25,12 @@ rm -rfv xwarp_${ii}.png ywarp_${ii}.png d${ii}.nii.gz
 
 done
 
-pos_stack_reorient \
+pos_stack_sections \
     -i %04d.nii.gz \
     --stacking-range 0 99 1 \
     -o deformed_stack.nii.gz
 
-pos_stack_reorient \
+pos_stack_sections \
     -i w%04d.nii.gz \
     --stacking-range 0 99 1 \
     -o initial_stack.nii.gz

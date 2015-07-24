@@ -8,7 +8,7 @@ Usage summary
 
 All supported features in one invocation ::
 
-   pos_stack_reorient.py -i input_file.nii.gz \
+   pos_stack_sections      -i input_file.nii.gz \
         RAS code           --orientation ras \
       string, see -h       --interpolation NearestNeighbor \
    [float float float]     --resample 0.5 0.5 0.5 \
@@ -86,7 +86,7 @@ A few detailed examples of the volume stacking and reorienting script.
 In order to stack a series of slices onto a volume, the following command
 has to be invoked::
 
-    pos_stack_reorient.py -i prefix_%04d.png \
+    pos_stack_sections     -i prefix_%04d.png \
                            --stacking-range 0 100 1 \
                            -o output.nii.gz
 

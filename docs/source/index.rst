@@ -12,7 +12,7 @@ PoSSum 3D image reconstruction framework by Piotr Majka (pmajka@nencki.gov.pl)
 Basic workflow building blocks:
 
 * :doc:`pos_slice_volume`
-* :doc:`pos_stack_reorient`
+* :doc:`pos_stack_sections`
 * :doc:`pos_slice_preprocess`
 * :doc:`pos_reorder_volume`
 

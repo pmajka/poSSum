@@ -6,7 +6,7 @@ source header.sh
 # Process the raw MR image into something on which we will
 # be working on
 # ---------------------------------------------------------
-pos_stack_reorient \
+pos_stack_sections \
     -i ${INPUT_FILE} \
     -o ${PHANTOM_FILE} \
     --permutation 1 2 0 \
@@ -66,7 +66,7 @@ done
 # the new volume in the same way as the reference volume is scaled
 # and oreinted.
 
-pos_stack_reorient \
+pos_stack_sections \
     -i "002_distorted_data/distorted_sections/%04d.nii.gz" \
     -o distorted_stack.nii.gz \
     --stacking-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \

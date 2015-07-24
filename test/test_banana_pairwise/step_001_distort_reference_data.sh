@@ -40,7 +40,7 @@ c3d ${INPUT_FILE} \
     -o ${PHANTOM_FILE}
     
 #reorientig phantom, mask and masked phantom    
-pos_stack_reorient \
+pos_stack_sections \
     -i ${PHANTOM_MASKED} \
     -o ${PHANTOM_MASKED} \
     --permutation 1 2 0 \
@@ -48,7 +48,7 @@ pos_stack_reorient \
     --flip 0 1 0 \
     --origin 0 0 0
     
-pos_stack_reorient \
+pos_stack_sections \
     -i ${PHANTOM_FILE} \
     -o ${PHANTOM_FILE} \
     --permutation 1 2 0 \
@@ -56,7 +56,7 @@ pos_stack_reorient \
     --flip 0 1 0 \
     --origin 0 0 0
     
-pos_stack_reorient \
+pos_stack_sections \
     -i ${PHANTOM_MASK} \
     -o ${PHANTOM_MASK} \
     --permutation 1 2 0 \
@@ -102,7 +102,7 @@ parallel -j 8 -k < 002_distorted_data/tempfile.txt
 #~ # the new volume in the same way as the reference volume is scaled
 #~ # and oriented.
 
-pos_stack_reorient \
+pos_stack_sections \
     -i "002_distorted_data/distorted_sections/%04d.nii.gz" \
     -o distorted_stack.nii.gz \
     --stacking-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 1 \

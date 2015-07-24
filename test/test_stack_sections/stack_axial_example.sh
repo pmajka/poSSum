@@ -17,7 +17,7 @@
 
 rm -rf *.jpg
 unzip exmaple_axial_cuts.zip
-pos_stack_reorient \
+pos_stack_sections \
     -i %04d.jpg \
     -o stacked_axial_exmaple.nii.gz \
     --stacking-range 1020 1300 5 \
