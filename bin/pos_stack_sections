@@ -11,6 +11,29 @@ from possum import pos_itk_core
 from possum.pos_common import r
 
 
+C_ORIENTATION_SETTINGS = {
+    "saggital": {
+        'output_volume_permute_axes': [2, 0, 1],
+        'output_volume_flip': [0, 0, 0],
+        'output_volume_orientation': 'RAS',
+        'axis': 0},
+    "coronal": {
+        'output_volume_permute_axes': [0, 2, 1],
+        'output_volume_flip': [0, 0, 0],
+        'output_volume_orientation': 'RAS',
+        'axis': 1},
+    "horizontal": {
+        'output_volume_permute_axes': [0, 1, 2],
+        'output_volume_flip': [0, 0, 0],
+        'output_volume_orientation': 'RAS',
+        'axis': 2},
+    "axial": {
+        'output_volume_permute_axes': [0, 1, 2],
+        'output_volume_flip': [0, 0, 0],
+        'output_volume_orientation': 'RAS',
+        'axis': 2}}
+
+
 class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
     """
     A swiss army knife for stacking slices and reorienting the volumes in
@@ -204,15 +227,15 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
 
         # As the image type of the first slice is determined, the proper
         # numeric series reader can be defined and utilized.
-        nameGenerator = itk.NumericSeriesFileNames.New()
-        nameGenerator.SetSeriesFormat(self.options.input_image)
-        nameGenerator.SetStartIndex(start)
-        nameGenerator.SetEndIndex(stop)
-        nameGenerator.SetIncrementIndex(step)
+        name_generator = itk.NumericSeriesFileNames.New()
+        name_generator.SetSeriesFormat(self.options.input_image)
+        name_generator.SetStartIndex(start)
+        name_generator.SetEndIndex(stop)
+        name_generator.SetIncrementIndex(step)
 
         # Then just read the slices.
         self._reader = itk.ImageSeriesReader[self._input_type].New()
-        self._reader.SetFileNames(nameGenerator.GetFileNames())
+        self._reader.SetFileNames(name_generator.GetFileNames())
         self._reader.Update()
 
     def _load_input_volume(self):
@@ -278,6 +301,13 @@ False by default."""
         __output_vol_command_line_args_help['stacking_range'] =\
 """Image stacking options: first slice, last slice, slice increment.
 Three integers are required."""
+        __output_vol_command_line_args_help['orientation_preset'] =\
+"""Use one of the orientation presets (saggital, coronal, horizontal) \
+to set up the orientation settings. Usefull when you don't want to \
+fill out the permutation, flipping and the rest of the settings. \
+When this options is used it overrides the '--output-volume-permute-axes',\
+'--output-volume-filp-axes' and '--output-volume-orientation',\
+parameters."""
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
@@ -318,6 +348,9 @@ Three integers are required."""
         parser.add_option('--orientation', '--output-volume-orientation',
             dest='output_volume_orientation', type='str', default=None,
             help=__output_vol_command_line_args_help['output_volume_orientation'])
+        parser.add_option('--use-orientation-preset',
+            dest='orientation_preset', type='str', default=None,
+            help=__output_vol_command_line_args_help['orientation_preset'])
 
         return parser
 
