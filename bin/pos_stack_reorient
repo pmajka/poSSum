@@ -281,15 +281,15 @@ Three integers are required."""
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
-        parser.add_option('--output-image', '-o', dest='output_image',
-            type='str', default=None,
-            help=__output_vol_command_line_args_help['output_image'])
         parser.add_option('--input-image', '-i', dest='input_image',
             type='str', default=None,
             help=__output_vol_command_line_args_help['input_image'])
         parser.add_option('--stacking-range', dest='stacking_range',
             type='int', default=None, nargs=3,
             help=__output_vol_command_line_args_help['stacking_range'])
+        parser.add_option('--output-image', '-o', dest='output_image',
+            type='str', default=None,
+            help=__output_vol_command_line_args_help['output_image'])
 
         parser.add_option('--interpolation', default='linear',
             type='str', dest='interpolation',
