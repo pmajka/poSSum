@@ -518,7 +518,7 @@ http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation)"""
 """Specifies the interpolation method for resampling the output volume. Be
 default the linear interpolation is set. The other allowed values are:
     NearestNeighbor | Linear | Cubic | Sinc | Gaussian."""
-    __output_vol_command_line_args_help['setFlip'] =\
+    __output_vol_command_line_args_help['output_volume_flip'] =\
 """Select axes to flip. Selection has to be provided as sequence of three
 numbers. E.g. \'0 0 1\' will flip the z axis."""
 
@@ -552,9 +552,9 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         outputVolumeSettings.add_option('--setInterpolation',
             dest='setInterpolation', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['setInterpolation'])
-        outputVolumeSettings.add_option('--flip', '--output-volume-filp-axes',
-            dest='setFlip', type='str', default=None,
-            help=cls.__output_vol_command_line_args_help['setFlip'])
+        outputVolumeSettings.add_option('--output-volume-filp-axes',
+            dest='output_volume_flip', type='str', default=None,
+            help=cls.__output_vol_command_line_args_help['output_volume_flip'])
 
         parser.add_option_group(outputVolumeSettings)
         return parser

@@ -269,7 +269,7 @@ _before_ settting the output spacing. The resampling settings are provided as
 three positive float values corresponding to the resampling factor (e.g. 0.25
 1.0 0.75). Watch out when combining this whith other parameters like setting
 spacing. By default there is no resampling."""
-        __output_vol_command_line_args_help['setFlip'] =\
+        __output_vol_command_line_args_help['flipAxes'] =\
 """Select axes to flip. Selection has to be provided as sequence of three
 numbers. E.g. \'0 0 1\' will flip the z axis."""
         __output_vol_command_line_args_help['flip_around_origin'] =\
@@ -302,7 +302,7 @@ Three integers are required."""
             help=__output_vol_command_line_args_help['permutation'])
         parser.add_option('--flip', '--output-volume-filp-axes',
             default=[0, 0, 0], type='int', nargs=3, dest='flipAxes',
-            help=__output_vol_command_line_args_help['setFlip'])
+            help=__output_vol_command_line_args_help['flipAxes'])
         parser.add_option('--flip-around-origin', default=False,
             dest='flip_around_origin', action='store_const', const=True,
             help=__output_vol_command_line_args_help['flip_around_origin'])
