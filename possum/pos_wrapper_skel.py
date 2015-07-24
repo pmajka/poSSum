@@ -85,7 +85,7 @@ class generic_workflow(object):
     # commands will be actually executed not only printed. This may cause a lot
     # of mess - but hey - that's what you call testing!
     >>> options, args = generic_workflow.parseArgs()
-    >>> options.disableSharedMemory = True
+    >>> options.disable_shared_memory = True
     >>> options.dry_run = False
     >>> options.cleanup = True
     >>> options.archiveWorkDir = "/tmp/"
@@ -243,7 +243,7 @@ class generic_workflow(object):
         # on given mashine, the regular /tmp/ directory is used to support the
         # computations.  The tmp directory can be also set manually to, e.g.,
         # directory shared among whole computer cluster.
-        if self.options.disableSharedMemory:
+        if self.options.disable_shared_memory:
             top_directory = _dirTemplates['tempbf']
         else:
             top_directory = _dirTemplates['sharedbf']
@@ -426,14 +426,14 @@ class generic_workflow(object):
         workflowSettings.add_option('--jobId', '-j', dest='jobId', type='str',
                 default=None, help='Job identifier. An optional value identyfying this particular workflow. If ommited, the jobId will be generated automatically.')
         workflowSettings.add_option('--workDir', '-d', dest='workdir', type='str',
-                default=None, help='Sets the working directory of the process. Overrides the "--disableSharedMemory" switch.')
+                default=None, help='Sets the working directory of the process. Overrides the "--disable-shared-memory" switch.')
         workflowSettings.add_option('--loglevel', dest='loglevel', type='str',
                 default='WARNING', help='Loglevel: CRITICAL | ERROR | WARNING | INFO | DEBUG')
         workflowSettings.add_option('--logFilename', dest='logFilename',
                 default=None, action='store', type='str',
                 help='Sets dumping the execution log file instead stderr')
-        workflowSettings.add_option('--disableSharedMemory', default=False,
-            dest='disableSharedMemory', action='store_const', const=True,
+        workflowSettings.add_option('--disable-shared-memory', default=False,
+            dest='disable_shared_memory', action='store_const', const=True,
             help='Forces script to use hard drive to store the worklfow data instaed of using RAM disk.')
         workflowSettings.add_option('--specimenId', default=None,
                 dest='specimenId', action='store', type='str',
