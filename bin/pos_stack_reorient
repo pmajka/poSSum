@@ -303,7 +303,7 @@ Three integers are required."""
         parser.add_option('--outputVolumeOrientationCode',
             dest='orientationCode', type='str', default=None,
             help=__output_vol_command_line_args_help['orientationCode'])
-        parser.add_option('--outputVolumePermutationOrder',
+        parser.add_option('--output-volume-permute-axes',
             default=[0, 1, 2], type='int', nargs=3, dest='permutation',
             help=__output_vol_command_line_args_help['permutation'])
         parser.add_option('--outputVolumeSpacing',

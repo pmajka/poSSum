@@ -543,7 +543,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         outputVolumeSettings.add_option('--outputVolumeResample',
             dest='outputVolumeResample', type='float', nargs=3, default=None,
             help=cls.__output_vol_command_line_args_help['outputVolumeResample'])
-        outputVolumeSettings.add_option('--outputVolumePermutationOrder', default=[0, 1, 2],
+        outputVolumeSettings.add_option('--output-volume-permute-axes', default=[0, 1, 2],
             type='int', nargs=3, dest='outputVolumePermutationOrder',
             help=cls.__output_vol_command_line_args_help['outputVolumePermutationOrder'])
         outputVolumeSettings.add_option('--outputVolumeOrientationCode',
