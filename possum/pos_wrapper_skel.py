@@ -164,11 +164,11 @@ class generic_workflow(object):
         either ethe default logging settings or customized logging settings
         according to provided command line paramteres.
         """
-        pos_common.setup_logging(self.options.logFilename,
+        pos_common.setup_logging(self.options.log_filename,
                       self.options.loglevel)
 
         logging.debug("Logging module initialized. Saving to: %s, Loglevel: %s",
-                      self.options.logFilename, self.options.loglevel)
+                      self.options.log_filename, self.options.loglevel)
 
         # Assign the the string that will identify all messages from this
         # script
@@ -429,7 +429,7 @@ class generic_workflow(object):
                 default=None, help='Sets the working directory of the process. Overrides the "--disable-shared-memory" switch.')
         workflowSettings.add_option('--loglevel', dest='loglevel', type='str',
                 default='WARNING', help='Loglevel: CRITICAL | ERROR | WARNING | INFO | DEBUG')
-        workflowSettings.add_option('--logFilename', dest='logFilename',
+        workflowSettings.add_option('--log-filename', dest='log_filename',
                 default=None, action='store', type='str',
                 help='Sets dumping the execution log file instead stderr')
         workflowSettings.add_option('--disable-shared-memory', default=False,
