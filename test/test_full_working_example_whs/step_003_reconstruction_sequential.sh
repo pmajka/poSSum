@@ -54,7 +54,7 @@ pos_sequential_alignment \
  --outputVolumesDirectory . \
      ${OV_SETTINGS} \
  --multichannelVolumeFilename sequential_alignment.nii.gz \
- --workDir ${DIR_SEQUENTIAL_ALIGNMENT} \
+ --work-dir ${DIR_SEQUENTIAL_ALIGNMENT} \
  --loglevel DEBUG \
  --cleanup
 

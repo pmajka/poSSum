@@ -120,7 +120,7 @@ do
 	done
 
 	pos_pairwise_registration \
-	    --workDir __pairwise__$iteration \
+	    --work-dir __pairwise__$iteration \
 	    --antsImageMetric CC \
 	    --movingSlicesRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
 	    --fixedSlicesRange  ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
@@ -182,7 +182,7 @@ pos_stack_warp_image_multi_transform \
     ${OV_SETTINGS} \
     --outputVolumesDirectory . \
     --volumeFilename rgb_after_pairwise.nii.gz \
-    --workDir __pairwise__rgb_after_pairwise \
+    --work-dir __pairwise__rgb_after_pairwise \
     --loglevel DEBUG \
     --cleanup
 

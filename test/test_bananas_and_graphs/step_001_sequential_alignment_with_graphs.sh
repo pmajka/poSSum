@@ -55,7 +55,7 @@ do
             ${OV_SETTINGS} \
         --grayscaleVolumeFilename grayscale_l${PARAM_LAMBDA}_e${PARAM_EPSILON}.nii.gz \
         --loglevel DEBUG \
-        --workDir __workdir_sequential_reconstruction__ \
+        --work-dir __workdir_sequential_reconstruction__ \
         --cleanup
 done
 

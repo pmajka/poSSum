@@ -49,7 +49,7 @@ pos_deformable_histology_reconstruction \
     --antsIterations 1000x1000x1000x1000 \
     --loglevel DEBUG \
     --stackFinalDeformation \
-    --workDir ${DIR_DEFORMABLE_RECONSTRUCTION} 
+    --work-dir ${DIR_DEFORMABLE_RECONSTRUCTION} 
     
 cp -v ${DIR_DEFORMABLE_RECONSTRUCTION}/08_intermediate_results/intermediate_output__0007.nii.gz \
       deformable_reconstruction_result.nii.gz

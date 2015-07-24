@@ -18,7 +18,7 @@ c3d sequential_alignment.nii.gz \
 
 pos_deformable_histology_reconstruction \
     --inputVolume 1 input_for_deformable_reconstruction.nii.gz \
-    --workDir ${DIR_DEFORMABLE_RECONSTRUCTION} \
+    --work-dir ${DIR_DEFORMABLE_RECONSTRUCTION} \
     --slicingPlane ${SLICING_PLANE_INDEX} \
     --planeSpacing ${SOURCE_SPACING} \
     --startSlice ${IDX_FIRST_SLICE} \
@@ -52,7 +52,7 @@ pos_stack_warp_image_multi_transform \
     --outputVolumesDirectory . \
     --volumeFilename final_image.nii.gz \
     --loglevel DEBUG \
-    --workDir __stack__final_image \
+    --work-dir __stack__final_image \
     --cleanup
 
 pos_stack_warp_image_multi_transform \
@@ -66,7 +66,7 @@ pos_stack_warp_image_multi_transform \
     --outputVolumesDirectory . \
     --volumeFilename final_image_mask.nii.gz \
     --loglevel DEBUG \
-    --workDir __stack__final_mask \
+    --work-dir __stack__final_mask \
     --cleanup
 
 pos_stack_warp_image_multi_transform \
@@ -79,7 +79,7 @@ pos_stack_warp_image_multi_transform \
     --outputVolumesDirectory . \
     --volumeFilename final_image_coarse_to_fine.nii.gz \
     --loglevel DEBUG \
-    --workDir __stack__final_image \
+    --work-dir __stack__final_image \
     --cleanup
 
 pos_stack_warp_image_multi_transform \
@@ -92,7 +92,7 @@ pos_stack_warp_image_multi_transform \
     --outputVolumesDirectory . \
     --volumeFilename final_image_mask_coarse_to_fine.nii.gz \
     --loglevel DEBUG \
-    --workDir __stack__final_mask \
+    --work-dir __stack__final_mask \
     --cleanup
 
 # -------------------------------------------------------------------

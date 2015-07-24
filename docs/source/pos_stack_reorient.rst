@@ -73,7 +73,7 @@ The input image (images) have to comply with the specification below:
 
 
 .. note::
-    The following options: ``--workDir``, ``--cleanup`` ``--disable-shared-memory``
+    The following options: ``--work-dir``, ``--cleanup`` ``--disable-shared-memory``
     ``--dry-run`` and ``--cpus`` have no use in this script. Please don't use
     them.
 

@@ -425,7 +425,7 @@ class generic_workflow(object):
         workflowSettings = OptionGroup(parser, 'General workflow settings')
         workflowSettings.add_option('--jobId', '-j', dest='jobId', type='str',
                 default=None, help='Job identifier. An optional value identyfying this particular workflow. If ommited, the jobId will be generated automatically.')
-        workflowSettings.add_option('--workDir', '-d', dest='workdir', type='str',
+        workflowSettings.add_option('--work-dir', '-d', dest='workdir', type='str',
                 default=None, help='Sets the working directory of the process. Overrides the "--disable-shared-memory" switch.')
         workflowSettings.add_option('--loglevel', dest='loglevel', type='str',
                 default='WARNING', help='Loglevel: CRITICAL | ERROR | WARNING | INFO | DEBUG')
