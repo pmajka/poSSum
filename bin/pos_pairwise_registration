@@ -835,7 +835,7 @@ class pairwiseRegistration(output_volume_workflow):
             slice_step=self.__VOL_STACK_SLICE_SPACING,
             output_volume_fn=output_filename,
             permutation_order=self.options.output_volume_permute_axes,
-            orientation_code=self.options.outputVolumeOrientationCode,
+            orientation_code=self.options.output_volume_orientation,
             output_type=self.options.output_volume_scalar_type,
             spacing=self.options.output_volume_spacing,
             origin=self.options.outputVolumeOrigin,

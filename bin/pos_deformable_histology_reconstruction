@@ -419,7 +419,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
                 slice_end=self.options.endSlice,
                 slice_step=1,
                 permutation_order=self.options.output_volume_permute_axes,
-                orientation_code=self.options.outputVolumeOrientationCode,
+                orientation_code=self.options.output_volume_orientation,
                 output_type=self.options.output_volume_scalar_type,
                 spacing=self.options.output_volume_spacing,
                 origin=self.options.outputVolumeOrigin,

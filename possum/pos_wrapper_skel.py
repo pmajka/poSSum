@@ -504,7 +504,7 @@ setting spacing. By default there is no resampling."""
     __output_vol_command_line_args_help['output_volume_permute_axes'] =\
 """Apply axes permutation. Permutation has to be provided as sequence of 3
 integers separated by space. Identity (0,1,2) permutation is a default one."""
-    __output_vol_command_line_args_help['outputVolumeOrientationCode'] =\
+    __output_vol_command_line_args_help['output_volume_orientation'] =\
 """Set the orientation of the image using one of 48 canonical orientations. The
 orientation describes the mapping from the voxel coordinate system (i,j,k) to
 the physical coordinate system (x,y,z). In the voxel coordinate system, i runs
@@ -547,8 +547,8 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
             type='int', nargs=3, dest='output_volume_permute_axes',
             help=cls.__output_vol_command_line_args_help['output_volume_permute_axes'])
         outputVolumeSettings.add_option('--output-volume-orientation',
-            dest='outputVolumeOrientationCode', type='str', default='RAS',
-            help=cls.__output_vol_command_line_args_help['outputVolumeOrientationCode'])
+            dest='output_volume_orientation', type='str', default='RAS',
+            help=cls.__output_vol_command_line_args_help['output_volume_orientation'])
         outputVolumeSettings.add_option('--setInterpolation',
             dest='setInterpolation', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['setInterpolation'])

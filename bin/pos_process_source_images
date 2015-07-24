@@ -615,7 +615,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             output_volume_fn=output_filename,
             permutation_order=self.permutation,
             flip_axes=self.flipping,
-            orientation_code=self.options.outputVolumeOrientationCode,
+            orientation_code=self.options.output_volume_orientation,
             spacing=self.output_volume_spacing,
             origin=self.output_volume_origin)
         return copy.copy(command)
