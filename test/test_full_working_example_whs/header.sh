@@ -24,7 +24,7 @@ OV_SPACING="${SOURCE_SPACING} ${SOURCE_SPACING} ${SECTION_THICKNESS}"
 OV_FLIP='0 0 0'
 
 OV_SETTINGS_SHORT="--permutation ${OV_PERMUTATION} --flip ${OV_FLIP} --spacing ${OV_SPACING}  --origin ${OV_ORIGIN} --type ${OV_TYPE} --orientation ${OV_ORIENTATION_CODE}"
-OV_SETTINGS=" --output-volume-spacing ${OV_SPACING} --output-volume-origin ${OV_ORIGIN} --outputVolumeOrientationCode ${OV_ORIENTATION_CODE}  --output-volume-permute-axes ${OV_PERMUTATION} --outputVolumeScalarType ${OV_TYPE} --flip ${OV_FLIP}"
+OV_SETTINGS=" --output-volume-spacing ${OV_SPACING} --output-volume-origin ${OV_ORIGIN} --output-volume-orientation ${OV_ORIENTATION_CODE}  --output-volume-permute-axes ${OV_PERMUTATION} --outputVolumeScalarType ${OV_TYPE} --flip ${OV_FLIP}"
 
 # Setup input and output filenames
 REFERENCE_VOLUME=input_for_reconstruction.nii.gz

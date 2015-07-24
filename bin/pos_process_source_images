@@ -807,7 +807,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         output_volume_pairs = dict([
             ('--output-volume-spacing', '${OUTPUT_VOLUME_SPACING}'),
             ('--output-volume-permute-axes', '${OUTPUT_VOLUME_PERMUTATION}'),
-            ('--outputVolumeOrientationCode', '${OUTPUT_VOLUME_ORIENTATION}'),
+            ('--output-volume-orientation', '${OUTPUT_VOLUME_ORIENTATION}'),
             ('--output-volume-origin', '${OUTPUT_VOLUME_ORIGIN}'),
             ('--flip', '${OUTPUT_VOLUME_FLIPPING}')])
 

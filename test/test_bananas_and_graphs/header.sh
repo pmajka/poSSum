@@ -16,4 +16,4 @@ OV_SPACING='1 1 1'
 OV_FLIP='0 1 1'
 
 OV_SETTINGS_SHORT="--permutation ${OV_PERMUTATION} --flip ${OV_FLIP} --spacing ${OV_SPACING}  --origin ${OV_ORIGIN} --type ${OV_TYPE} --orientation ${OV_ORIENTATION_CODE}"
-OV_SETTINGS=" --output-volume-spacing ${OV_SPACING} --output-volume-origin ${OV_ORIGIN} --outputVolumeOrientationCode ${OV_ORIENTATION_CODE}  --output-volume-permute-axes ${OV_PERMUTATION} --outputVolumeScalarType ${OV_TYPE} --flip ${OV_FLIP}"
+OV_SETTINGS=" --output-volume-spacing ${OV_SPACING} --output-volume-origin ${OV_ORIGIN} --output-volume-orientation ${OV_ORIENTATION_CODE}  --output-volume-permute-axes ${OV_PERMUTATION} --outputVolumeScalarType ${OV_TYPE} --flip ${OV_FLIP}"
