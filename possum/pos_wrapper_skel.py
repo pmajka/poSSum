@@ -529,7 +529,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
 
         outputVolumeSettings = \
             OptionGroup(parser, 'Output volumes settings')
-        outputVolumeSettings.add_option('--outputVolumeOrigin',
+        outputVolumeSettings.add_option('--output-volume-origin',
             dest='outputVolumeOrigin',
             default=[0., 0., 0.], action='store', type='float', nargs=3,
             help=cls.__output_vol_command_line_args_help['outputVolumeOrigin'])

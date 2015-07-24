@@ -309,7 +309,7 @@ Three integers are required."""
         parser.add_option('--output-volume-spacing',
             dest='setSpacing', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setSpacing'])
-        parser.add_option('--outputVolumeOrigin', dest='setOrigin',
+        parser.add_option('--output-volume-origin', dest='setOrigin',
             type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setOrigin'])
         parser.add_option('--flip', default=[0, 0, 0],

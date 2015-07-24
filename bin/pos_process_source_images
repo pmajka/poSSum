@@ -808,7 +808,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             ('--output-volume-spacing', '${OUTPUT_VOLUME_SPACING}'),
             ('--output-volume-permute-axes', '${OUTPUT_VOLUME_PERMUTATION}'),
             ('--outputVolumeOrientationCode', '${OUTPUT_VOLUME_ORIENTATION}'),
-            ('--outputVolumeOrigin', '${OUTPUT_VOLUME_ORIGIN}'),
+            ('--output-volume-origin', '${OUTPUT_VOLUME_ORIGIN}'),
             ('--flip', '${OUTPUT_VOLUME_FLIPPING}')])
 
         combined_vol_props = "OUTPUT_VOLUME_PROPERTIES=\""
