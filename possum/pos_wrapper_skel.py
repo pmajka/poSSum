@@ -69,7 +69,7 @@ class generic_workflow(object):
 
     # Now let's test the ability of the workflow to compress its own
     # workflow directory.
-    >>> w.options.archiveWorkDir = "/some/directory/to/archive/stuff/"
+    >>> w.options.archive_work_dir = "/some/directory/to/archive/stuff/"
     >>> w._archive_workflow() #doctest: +ELLIPSIS
     tar -cvvzf /some/directory/to/archive/stuff/generic_workflow_...tgz /dev/shm/generic_workflow_...
 
@@ -88,7 +88,7 @@ class generic_workflow(object):
     >>> options.disable_shared_memory = True
     >>> options.dry_run = False
     >>> options.cleanup = True
-    >>> options.archiveWorkDir = "/tmp/"
+    >>> options.archive_work_dir = "/tmp/"
 
     >>> w = generic_workflow(options, args) #doctest: +ELLIPSIS
     Executing: mkdir -p /tmp/generic_workflow_...
@@ -373,7 +373,7 @@ class generic_workflow(object):
         the job directory. If you want you can customize it so it will send you
         a notification email!
         """
-        if self.options.archiveWorkDir:
+        if self.options.archive_work_dir:
             self._archive_workflow()
 
         if self.options.cleanup:
@@ -383,13 +383,13 @@ class generic_workflow(object):
         """
         This method archived the workdir of the current workflow. The archive
         name taken from the JobDir option while the dir of the archive is
-        provided by the `archiveWorkDir` command line parameter.
+        provided by the `archive_work_dir` command line parameter.
 
         There's nothing much more to tell about this method... well, watch out
         as the archive may be really (by which I mean really big). Be prepared
         for gigabytes.
         """
-        archive_filename = os.path.join(self.options.archiveWorkDir,
+        archive_filename = os.path.join(self.options.archive_work_dir,
                                         self.options.jobId)
 
         self._logger.info("Archive basename: %s",
@@ -444,8 +444,8 @@ class generic_workflow(object):
         workflowSettings.add_option('--cpus', default=None,
                 type='int', dest='cpus',
                 help='Set a number of CPUs for parallel processing. If skipped, the number of CPUs will be automatically detected.')
-        workflowSettings.add_option('--archiveWorkDir',default=None,
-                type='str', dest='archiveWorkDir',
+        workflowSettings.add_option('--archive-work-dir',default=None,
+                type='str', dest='archive_work_dir',
                 help='Compresses (.tgz) and moves workdir to a given directory')
         workflowSettings.add_option('--cleanup', default=False,
                 dest='cleanup', action='store_const', const=True,
