@@ -236,6 +236,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
             help=r('Extract given region of interest instead of the whole \
             image. Required four integers: origin_x, origin_y, \
             size_x, size_y.'))
+#       print " ".join(map(lambda x: x.get_opt_string() + " "+ " ".join(x._short_opts), parser._get_all_options()))
 
         (options, args) = parser.parse_args()
         return (options, args)
