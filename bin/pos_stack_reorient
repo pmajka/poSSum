@@ -114,16 +114,16 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         # Permuting the input image, if required
         permute = itk.PermuteAxesImageFilter[input_image].New()
         permute.SetInput(input_image)
-        permute.SetOrder(self.options.permutation)
+        permute.SetOrder(self.options.output_volume_permute_axes)
         self._logger.debug("Setting the axes permutation to: %s.",
-                str(self.options.permutation))
+                str(self.options.output_volume_permute_axes))
 
         # Flipping the permuted volume
         flip = itk.FlipImageFilter[permute.GetOutput()].New()
         flip.SetInput(permute.GetOutput())
-        flip.SetFlipAxes(self.options.flip)
+        flip.SetFlipAxes(self.options.output_volume_flip)
         self._logger.debug("Applying the flip axis settings: %s.",
-                str(self.options.flip))
+                str(self.options.output_volume_flip))
 
         # Do we flip the axes around the origin?:
         if self.options.flip_around_origin:
@@ -138,20 +138,20 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             itk.ChangeInformationImageFilter[flip.GetOutput()].New()
         change_information.SetInput(flip.GetOutput())
 
-        if self.options.setOrigin:
+        if self.options.output_volume_origin:
             change_information.ChangeOriginOn()
-            change_information.SetOutputOrigin(self.options.setOrigin)
+            change_information.SetOutputOrigin(self.options.output_volume_origin)
             self._logger.debug("Changing the origin to: %s.",
-                str(self.options.setOrigin))
+                str(self.options.output_volume_origin))
 
-        if self.options.setSpacing:
+        if self.options.output_volume_spacing:
             change_information.ChangeSpacingOn()
-            change_information.SetOutputSpacing(self.options.setSpacing)
+            change_information.SetOutputSpacing(self.options.output_volume_spacing)
             self._logger.debug("Changing the spacing to: %s.",
-                str(self.options.setOrigin))
+                str(self.options.output_volume_origin))
 
-        if self.options.orientationCode:
-            ras_code = self.options.orientationCode.upper()
+        if self.options.output_volume_orientation:
+            ras_code = self.options.output_volume_orientation.upper()
             change_information.ChangeDirectionOn()
             code_matrix = pos_itk_core.get_itk_direction_matrix(ras_code)
             change_information.SetOutputDirection(code_matrix)
@@ -164,19 +164,19 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         last_image = change_information.GetOutput()
 
         # Resample the image, if required
-        if self.options.resample:
+        if self.options.output_volume_resample:
             last_image = pos_itk_core.resample_image_filter(
                 change_information.GetOutput(),
-                self.options.resample,
-                interpolation=self.options.interpolation)
+                self.options.output_volume_resample,
+                interpolation=self.options.output_volume_interpolation)
 
         # Assign anatomical orientation to the image.
-        if self.options.setType:
+        if self.options.output_volume_scalar_type:
             self._logger.debug("Casting the ouput image to: %s.",
-                               self.options.setType)
+                               self.options.output_volume_scalar_type)
 
             cast_to_type = pos_itk_core.get_cast_image_type_from_string(
-                    self.options.setType)
+                    self.options.output_volume_scalar_type)
             cast_image = itk.CastImageFilter[last_image, cast_to_type].New()
             cast_image.SetInput(last_image)
             cast_image.Update()
@@ -236,7 +236,7 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
 scheme (stacking_range) are provided."""
         __output_vol_command_line_args_help['output_image'] =\
 """Output volume filename."""
-        __output_vol_command_line_args_help['orientationCode'] =\
+        __output_vol_command_line_args_help['output_volume_orientation'] =\
 """Set the orientation of the image using one of 48 canonical orientations. The
 orientation describes the mapping from the voxel coordinate system (i,j,k) to
 the physical coordinate system (x,y,z). In the voxel coordinate system, i runs
@@ -246,30 +246,30 @@ physical coordinate system run as follows: x from (L)eft to (R)ight, y from
 (P)osterior to (A)nterior, z from (I)nferior to (S)uperior.  (the explanation
 is copied from Convert3D documentation:
 http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation)"""
-        __output_vol_command_line_args_help['setSpacing'] =\
+        __output_vol_command_line_args_help['output_volume_spacing'] =\
 """Sets the voxel spacing of the image.  A vector of three positive values is
 required (e.g. '0.5 0.5 0.5'). The spacing is assumed to be provided in
 milimeters. The defaults spacing is 1x1x1mm."""
-        __output_vol_command_line_args_help['setOrigin'] =\
+        __output_vol_command_line_args_help['output_volume_origin'] =\
 """Set the origin of the image --  the center of the voxel (0,0,0) in the image.
 Should be specified in millimeters. Default: 0,0,0."""
-        __output_vol_command_line_args_help['setType'] =\
+        __output_vol_command_line_args_help['output_volume_scalar_type'] =\
 """Specifies the pixel type for the output image.  Data type for output volume's
 voxels. The allowed values are: char | uchar | short | ushort | int | uint |
 float | double. The default type, unlike in Convert3d is char."""
-        __output_vol_command_line_args_help['interpolation'] =\
+        __output_vol_command_line_args_help['output_volume_interpolation'] =\
 """Specifies the interpolation method for resampling the output volume.
 Allowed options: NearestNeighbor|Linear. Default: linear"""
-        __output_vol_command_line_args_help['permutation'] =\
+        __output_vol_command_line_args_help['output_volume_permute_axes'] =\
 """Apply axes permutation. Permutation has to be provided as sequence of 3
 integers separated by space. Identity (0,1,2) permutation is a default one."""
-        __output_vol_command_line_args_help['resample'] =\
+        __output_vol_command_line_args_help['output_volume_resample'] =\
 """Requests additional resampling of the output volume. The resampling is applied
 _before_ settting the output spacing. The resampling settings are provided as
 three positive float values corresponding to the resampling factor (e.g. 0.25
 1.0 0.75). Watch out when combining this whith other parameters like setting
 spacing. By default there is no resampling."""
-        __output_vol_command_line_args_help['flip'] =\
+        __output_vol_command_line_args_help['output_volume_flip'] =\
 """Select axes to flip. Selection has to be provided as sequence of three
 numbers. E.g. \'0 0 1\' will flip the z axis."""
         __output_vol_command_line_args_help['flip_around_origin'] =\
@@ -292,32 +292,32 @@ Three integers are required."""
             help=__output_vol_command_line_args_help['output_image'])
 
         parser.add_option('--interpolation', default='linear',
-            type='str', dest='interpolation',
-            help=__output_vol_command_line_args_help['interpolation'])
+            type='str', dest='output_volume_interpolation',
+            help=__output_vol_command_line_args_help['output_volume_interpolation'])
         parser.add_option('--resample', '--output-volume-resample',
-            default=None, type='float', nargs=3, dest='resample',
-            help=__output_vol_command_line_args_help['resample'])
+            default=None, type='float', nargs=3, dest='output_volume_resample',
+            help=__output_vol_command_line_args_help['output_volume_resample'])
         parser.add_option('--permutation', '--output-volume-permute-axes',
-            default=[0, 1, 2], type='int', nargs=3, dest='permutation',
-            help=__output_vol_command_line_args_help['permutation'])
+            default=[0, 1, 2], type='int', nargs=3, dest='output_volume_permute_axes',
+            help=__output_vol_command_line_args_help['output_volume_permute_axes'])
         parser.add_option('--flip', '--output-volume-filp-axes',
-            default=[0, 0, 0], type='int', nargs=3, dest='flip',
-            help=__output_vol_command_line_args_help['flip'])
+            default=[0, 0, 0], type='int', nargs=3, dest='output_volume_flip',
+            help=__output_vol_command_line_args_help['output_volume_flip'])
         parser.add_option('--flip-around-origin', default=False,
             dest='flip_around_origin', action='store_const', const=True,
             help=__output_vol_command_line_args_help['flip_around_origin'])
         parser.add_option('--spacing', '--output-volume-spacing',
-            dest='setSpacing', type='float', nargs=3, default=None,
-            help=__output_vol_command_line_args_help['setSpacing'])
+            dest='output_volume_spacing', type='float', nargs=3, default=None,
+            help=__output_vol_command_line_args_help['output_volume_spacing'])
         parser.add_option('--origin', '--output-volume-origin',
-            dest='setOrigin', type='float', nargs=3, default=None,
-            help=__output_vol_command_line_args_help['setOrigin'])
+            dest='output_volume_origin', type='float', nargs=3, default=None,
+            help=__output_vol_command_line_args_help['output_volume_origin'])
         parser.add_option('--type', '--output-volume-scalar-type',
-            dest='setType', type='str', default=None,
-            help=__output_vol_command_line_args_help['setType'])
+            dest='output_volume_scalar_type', type='str', default=None,
+            help=__output_vol_command_line_args_help['output_volume_scalar_type'])
         parser.add_option('--orientation', '--output-volume-orientation',
-            dest='orientationCode', type='str', default=None,
-            help=__output_vol_command_line_args_help['orientationCode'])
+            dest='output_volume_orientation', type='str', default=None,
+            help=__output_vol_command_line_args_help['output_volume_orientation'])
 
         return parser
 
