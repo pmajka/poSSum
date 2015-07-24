@@ -126,12 +126,12 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
                 str(self.options.flipAxes))
 
         # Do we flip the axes around the origin?:
-        if self.options.flipAroundOrigin:
+        if self.options.flip_around_origin:
             flip.FlipAboutOriginOn()
         else:
             flip.FlipAboutOriginOff()
         self._logger.debug("Flip around origin? %s",
-                str(self.options.flipAroundOrigin))
+                str(self.options.flip_around_origin))
 
         # Changing the image information, if required
         change_information = \
@@ -272,7 +272,7 @@ spacing. By default there is no resampling."""
         __output_vol_command_line_args_help['setFlip'] =\
 """Select axes to flip. Selection has to be provided as sequence of three
 numbers. E.g. \'0 0 1\' will flip the z axis."""
-        __output_vol_command_line_args_help['flipAroundOrigin'] =\
+        __output_vol_command_line_args_help['flip_around_origin'] =\
 """Determines of the flipping will be performed around origin.
 False by default."""
         __output_vol_command_line_args_help['stacking_range'] =\
@@ -318,9 +318,9 @@ Three integers are required."""
         parser.add_option('--setFlip', default=[0, 0, 0],
             type='int', nargs=3, dest='flipAxes',
             help=__output_vol_command_line_args_help['setFlip'])
-        parser.add_option('--flipAroundOrigin', default=False,
-            dest='flipAroundOrigin', action='store_const', const=True,
-            help=__output_vol_command_line_args_help['flipAroundOrigin'])
+        parser.add_option('--flip-around-origin', default=False,
+            dest='flip_around_origin', action='store_const', const=True,
+            help=__output_vol_command_line_args_help['flip_around_origin'])
         parser.add_option('--setSpacing',
             dest='setSpacing', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setSpacing'])
