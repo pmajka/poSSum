@@ -514,7 +514,7 @@ physical coordinate system run as follows: x from (L)eft to (R)ight, y from
 (P)osterior to (A)nterior, z from (I)nferior to (S)uperior.  (the explanation
 is copied from Convert3D documentation:
 http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation)"""
-    __output_vol_command_line_args_help['setInterpolation'] =\
+    __output_vol_command_line_args_help['output_volume_interpolation'] =\
 """Specifies the interpolation method for resampling the output volume. Be
 default the linear interpolation is set. The other allowed values are:
     NearestNeighbor | Linear | Cubic | Sinc | Gaussian."""
@@ -550,8 +550,8 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
             dest='output_volume_orientation', type='str', default='RAS',
             help=cls.__output_vol_command_line_args_help['output_volume_orientation'])
         outputVolumeSettings.add_option('--output-volume-interpolation',
-            dest='setInterpolation', type='str', default=None,
-            help=cls.__output_vol_command_line_args_help['setInterpolation'])
+            dest='output_volume_interpolation', type='str', default=None,
+            help=cls.__output_vol_command_line_args_help['output_volume_interpolation'])
         outputVolumeSettings.add_option('--output-volume-filp-axes',
             dest='output_volume_flip', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['output_volume_flip'])

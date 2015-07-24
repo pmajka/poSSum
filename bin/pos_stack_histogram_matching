@@ -416,7 +416,7 @@ class stack_histogram_matching(output_volume_workflow):
             output_type=self.options.output_volume_scalar_type,
             spacing=self.options.output_volume_spacing,
             origin=self.options.output_volume_origin,
-            interpolation=self.options.setInterpolation,
+            interpolation=self.options.output_volume_interpolation,
             resample=self.options.output_volume_resample)
 
         # Return the created wrapper.
