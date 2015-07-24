@@ -1097,13 +1097,13 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
     _parameters = {
         'stack_mask': filename_parameter('stack_mask', None),
-        'slice_start': value_parameter('stackingOptions', None, str_template='--{_name} {_value}'),
+        'slice_start': value_parameter('stacking-range', None, str_template='--{_name} {_value}'),
         'slice_end': value_parameter('slice_end', None),
         'slice_step': value_parameter('slice_end', None),
         'output_volume_fn': filename_parameter('output_volume_fn', None),
         'permutation_order': list_parameter('permutation_order', [0, 1, 2], str_template='{_list}'),
         'orientation_code': string_parameter('orientation_code', 'RAS'),
-        'flip_axes': list_parameter('flipAxes', None, str_template='--{_name} {_list}'),
+        'flip_axes': list_parameter('flip', None, str_template='--{_name} {_list}'),
         'output_type': string_parameter('output_type', 'uchar'),
         'spacing': list_parameter('spacing', [1., 1., 1.], str_template='{_list}'),
         'origin': list_parameter('origin', [0, 0, 0], str_template='{_list}'),
