@@ -121,9 +121,9 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
         # Flipping the permuted volume
         flip = itk.FlipImageFilter[permute.GetOutput()].New()
         flip.SetInput(permute.GetOutput())
-        flip.SetFlipAxes(self.options.flipAxes)
+        flip.SetFlipAxes(self.options.flip)
         self._logger.debug("Applying the flip axis settings: %s.",
-                str(self.options.flipAxes))
+                str(self.options.flip))
 
         # Do we flip the axes around the origin?:
         if self.options.flip_around_origin:
@@ -269,7 +269,7 @@ _before_ settting the output spacing. The resampling settings are provided as
 three positive float values corresponding to the resampling factor (e.g. 0.25
 1.0 0.75). Watch out when combining this whith other parameters like setting
 spacing. By default there is no resampling."""
-        __output_vol_command_line_args_help['flipAxes'] =\
+        __output_vol_command_line_args_help['flip'] =\
 """Select axes to flip. Selection has to be provided as sequence of three
 numbers. E.g. \'0 0 1\' will flip the z axis."""
         __output_vol_command_line_args_help['flip_around_origin'] =\
@@ -301,8 +301,8 @@ Three integers are required."""
             default=[0, 1, 2], type='int', nargs=3, dest='permutation',
             help=__output_vol_command_line_args_help['permutation'])
         parser.add_option('--flip', '--output-volume-filp-axes',
-            default=[0, 0, 0], type='int', nargs=3, dest='flipAxes',
-            help=__output_vol_command_line_args_help['flipAxes'])
+            default=[0, 0, 0], type='int', nargs=3, dest='flip',
+            help=__output_vol_command_line_args_help['flip'])
         parser.add_option('--flip-around-origin', default=False,
             dest='flip_around_origin', action='store_const', const=True,
             help=__output_vol_command_line_args_help['flip_around_origin'])

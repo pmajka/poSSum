@@ -535,7 +535,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
             help=cls.__output_vol_command_line_args_help['output_volume_origin'])
         outputVolumeSettings.add_option('--output-volume-scalar-type', default='uchar',
             type='choice', dest='output_volume_scalar_type',
-            choices=['char','uchar','short','ushort','int','uint','float','double'],
+            choices=['char', 'uchar', 'short', 'ushort', 'int', 'uint', 'float', 'double'],
             help=cls.__output_vol_command_line_args_help['output_volume_scalar_type'])
         outputVolumeSettings.add_option('--output-volume-spacing', default=[1, 1, 1],
             type='float', nargs=3, dest='output_volume_spacing',
