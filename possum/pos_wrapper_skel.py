@@ -444,7 +444,7 @@ class generic_workflow(object):
         workflowSettings.add_option('--cpus', default=None,
                 type='int', dest='cpus',
                 help='Set a number of CPUs for parallel processing. If skipped, the number of CPUs will be automatically detected.')
-        workflowSettings.add_option('--archive-work-dir',default=None,
+        workflowSettings.add_option('--archive-work-dir', default=None,
                 type='str', dest='archive_work_dir',
                 help='Compresses (.tgz) and moves workdir to a given directory')
         workflowSettings.add_option('--cleanup', default=False,

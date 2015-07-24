@@ -312,7 +312,7 @@ Three integers are required."""
         parser.add_option('--origin', '--output-volume-origin',
             dest='setOrigin', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setOrigin'])
-        parser.add_option('--type', '--output-volume-type',
+        parser.add_option('--type', '--output-volume-scalar-type',
             dest='setType', type='str', default=None,
             help=__output_vol_command_line_args_help['setType'])
         parser.add_option('--orientation', '--output-volume-orientation',
