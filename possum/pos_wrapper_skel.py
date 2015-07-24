@@ -549,7 +549,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         outputVolumeSettings.add_option('--output-volume-orientation',
             dest='output_volume_orientation', type='str', default='RAS',
             help=cls.__output_vol_command_line_args_help['output_volume_orientation'])
-        outputVolumeSettings.add_option('--setInterpolation',
+        outputVolumeSettings.add_option('--output-volume-interpolation',
             dest='setInterpolation', type='str', default=None,
             help=cls.__output_vol_command_line_args_help['setInterpolation'])
         outputVolumeSettings.add_option('--output-volume-filp-axes',
