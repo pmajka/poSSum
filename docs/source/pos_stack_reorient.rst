@@ -15,7 +15,7 @@ All supported features in one invocation ::
    permutation of 0 1 2    --permutation 2 1 0 \
       [0-1 0-1 0-1]        --flip 1 0 1 \
           bool             --flip-around-origin \
-   [float float float]     --setSpacing 0.05 0.05 0.05 \
+   [float float float]     --spacing 0.05 0.05 0.05 \
    [float float float]     --setOrigin 0 0 0 \
                            --setType uchar
 

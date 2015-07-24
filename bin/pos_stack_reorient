@@ -318,7 +318,7 @@ Three integers are required."""
         parser.add_option('--flip-around-origin', default=False,
             dest='flip_around_origin', action='store_const', const=True,
             help=__output_vol_command_line_args_help['flip_around_origin'])
-        parser.add_option('--setSpacing',
+        parser.add_option('--spacing',
             dest='setSpacing', type='float', nargs=3, default=None,
             help=__output_vol_command_line_args_help['setSpacing'])
         parser.add_option('--setOrigin', dest='setOrigin', type='float',

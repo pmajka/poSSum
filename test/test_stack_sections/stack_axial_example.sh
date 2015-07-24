@@ -25,7 +25,7 @@ pos_stack_reorient \
     --orientation RAS \
     --setOrigin 0 0 0 \
     --flip 0 1 0 \
-    --setSpacing 1.0 1.0 3.5 \
+    --spacing 1.0 1.0 3.5 \
     --setType uchar \
     --loglevel DEBUG 
 rm -rf *.jpg

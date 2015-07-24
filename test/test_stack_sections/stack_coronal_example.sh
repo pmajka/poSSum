@@ -34,7 +34,7 @@ pos_stack_reorient \
     --orientation RAS \
     --setOrigin 0 0 0 \
     --flip 0 1 0 \
-    --setSpacing 0.15 0.3 0.15 \
+    --spacing 0.15 0.3 0.15 \
     --interpolation linear \
     --setType uchar \
     --loglevel DEBUG 
@@ -48,7 +48,7 @@ pos_stack_reorient \
     --setOrigin 0 0 0 \
     --flip 0 1 0 \
     --resample 0.5 0.5 0.5 \
-    --setSpacing 0.3 0.6 0.3 \
+    --spacing 0.3 0.6 0.3 \
     --interpolation linear \
     --setType uchar \
     --loglevel DEBUG 

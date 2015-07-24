@@ -1049,7 +1049,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
     >>> print stack_and_reorient_wrapper() #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i -o --permutation 0 1 2 \
         --orientation RAS --setType uchar \
-        --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+        --spacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
     >>> p=stack_and_reorient_wrapper()
     >>> p.updateParameters({"parameter_that_does_not_exist":0.5})
@@ -1058,19 +1058,19 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
     >>> print p.updateParameters({"stack_mask":"%04d.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o --permutation 0 1 2 \
-        --orientation RAS --setType uchar --setSpacing 1.0 1.0 1.0 \
+        --orientation RAS --setType uchar --spacing 1.0 1.0 1.0 \
         --setOrigin 0 0 0
 
     >>> print p.updateParameters({"slice_start":"%04d.nii.gz",
     ... "slice_end" : 20, "slice_start" : 1, "slice_step":1}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o --stacking-range 1 20 1 \
         --permutation 0 1 2  --orientation RAS  --setType uchar \
-        --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+        --spacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
     >>> print p.updateParameters({"output_volume_fn": "output.nii.gz"}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o output.nii.gz \
       --stacking-range 1 20 1 --permutation 0 1 2 --orientation RAS \
-      --setType uchar --setSpacing 1.0 1.0 1.0 --setOrigin 0 0 0
+      --setType uchar --spacing 1.0 1.0 1.0 --setOrigin 0 0 0
 
     >>> print p.updateParameters({"output_type": "ushort",
     ... "spacing" : [0.5, 0.5, 0.5], "origin" : [1, 1, 1],
@@ -1079,7 +1079,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
     ... "orientation_code" : "RAS"}) #doctest: +NORMALIZE_WHITESPACE
     pos_stack_reorient -i %04d.nii.gz -o output.nii.gz --stacking-range 1 20 1\
       --permutation 2 1 0 --orientation RAS --setType ushort\
-      --setSpacing 0.5 0.5 0.5 --setOrigin 1 1 1 --interpolation Cubic\
+      --spacing 0.5 0.5 0.5 --setOrigin 1 1 1 --interpolation Cubic\
       --resample 0.5 2.0 3.0
     """
 
@@ -1091,7 +1091,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
         {flip_axes} \
         --orientation {orientation_code} \
         --setType {output_type} \
-        --setSpacing {spacing} \
+        --spacing {spacing} \
         --setOrigin {origin} \
         {interpolation} {resample}"""
 
