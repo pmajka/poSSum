@@ -85,7 +85,9 @@ _pos_slice_volume()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    opts="--help -h --input-image -i --output-filenames-offset  --slicing-axis -s --file-series-format -o --slicing-range -r --extract-roi"
+    opts="--help -h --input-image -i --output-filenames-offset \
+        --slicing-axis -s --file-series-format -o \
+        --slicing-range -r --extract-roi"
 
     if [[ ${prev} == 'pos_slice_volume' ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
