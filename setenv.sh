@@ -25,3 +25,5 @@ POS_DIR=`pwd`
 export PYTHONPATH=$PYTHONPATH:${POS_DIR}
 export PATH=$PATH:${POS_DIR}/bin/
 echo "(+) The paths are set."
+
+source autocomplete.sh
