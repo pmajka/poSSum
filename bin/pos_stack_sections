@@ -15,23 +15,19 @@ C_ORIENTATION_SETTINGS = {
     "saggital": {
         'output_volume_permute_axes': [2, 0, 1],
         'output_volume_flip': [0, 0, 0],
-        'output_volume_orientation': 'RAS',
-        'axis': 0},
+        'output_volume_orientation': 'RAS'},
     "coronal": {
         'output_volume_permute_axes': [0, 2, 1],
         'output_volume_flip': [0, 0, 0],
-        'output_volume_orientation': 'RAS',
-        'axis': 1},
+        'output_volume_orientation': 'RAS'},
     "horizontal": {
         'output_volume_permute_axes': [0, 1, 2],
         'output_volume_flip': [0, 0, 0],
-        'output_volume_orientation': 'RAS',
-        'axis': 2},
+        'output_volume_orientation': 'RAS'},
     "axial": {
         'output_volume_permute_axes': [0, 1, 2],
         'output_volume_flip': [0, 0, 0],
-        'output_volume_orientation': 'RAS',
-        'axis': 2}}
+        'output_volume_orientation': 'RAS'}}
 
 
 class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
@@ -51,6 +47,29 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             self._logger.error(r("No output filename is provided (-o ....). \
                             Plese supply the output filename and try again."))
 
+    def _include_presets(self):
+        """
+        If user provided an orientation preset, this function will use the
+        settings from the preset to override other orientation settings
+        provided with the command line parameters. In other words, when preset
+        is provided it is superior to other settings.
+        """
+
+        if self.options.orientation_preset:
+            self._logger.info(r("A >%s< orientation settings preset is to \
+            be used. The presets' settings will override other orientation \
+            settings."), self.options.orientation_preset)
+
+            orientation_preset = \
+                C_ORIENTATION_SETTINGS[self.options.orientation_preset]
+
+            for k, v in orientation_preset.items():
+                prev_setting = getattr(self.options, k)
+                setattr(self.options, k, v)
+
+                self._logger.info(r("Replacing the %s setting: %s -> %s."),
+                str(k), prev_setting, str(v))
+
     def launch(self):
         # Ok, if the image stacking is enabled, create the input volume
         # by stacking the input image stack. Otherwise just load the
@@ -65,7 +84,8 @@ class reorient_image_wrokflow(pos_wrapper_skel.enclosed_workflow):
             self._load_input_volume()
 
         # After executing the code above, the input volume is loaded and ready
-        # to use.
+        # to use. Now we need to check if any preset is to be used.
+        self._include_presets()
 
         # First, determine the number of input image components to select
         # aproperiate workflow: either single- or multichannel.
@@ -307,7 +327,7 @@ to set up the orientation settings. Usefull when you don't want to \
 fill out the permutation, flipping and the rest of the settings. \
 When this options is used it overrides the '--output-volume-permute-axes',\
 '--output-volume-filp-axes' and '--output-volume-orientation',\
-parameters."""
+parameters. The allowed choices are: 'horizontal', 'coronal', 'saggital'."""
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
@@ -349,7 +369,8 @@ parameters."""
             dest='output_volume_orientation', type='str', default=None,
             help=__output_vol_command_line_args_help['output_volume_orientation'])
         parser.add_option('--use-orientation-preset',
-            dest='orientation_preset', type='str', default=None,
+            dest='orientation_preset', type='choice', default=None,
+            choices=['horizontal', 'coronal', 'saggital'],
             help=__output_vol_command_line_args_help['orientation_preset'])
 
         return parser
