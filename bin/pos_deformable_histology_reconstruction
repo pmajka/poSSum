@@ -398,7 +398,14 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         self.execute(commands)
 
         # And now the same for the inverse transformations, this time in
-        # reversed order.
+        # reversed order. The reason why we compose the inverse tranformations
+        # in a reverse order is that this is the correct way to do this :)
+        # And the reason why we want to use get the reverset transformations is
+        # that we would like to be able transform the data from in a
+        # unaligned -> aligned direction byt also in the the opposite
+        # direction. Thus, we need the invere transformation as well... bla
+        # bla bla...
+
         commands = []
         for i in range(start, end + 1):
             command = self._get_reslice_command(i, 'init_slice', 'iteration_resliced_slice',
@@ -511,86 +518,96 @@ class deformable_reconstruction_workflow(output_volume_workflow):
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
 
-        parser.add_option('--slicingPlane', default=1,
+        input_parameters = \
+            OptionGroup(parser, 'Input images and parameters.')
+
+        input_parameters.add_option('--slicingPlane', default=1,
             type='int', dest='slicingPlane',
             help=r('Index of the slicing plane. Default: 1. \
             Allowed values: 0,1,2'))
-        parser.add_option('--startSlice', default=0,
+        input_parameters.add_option('--startSlice', default=0,
             type='int', dest='startSlice',
             help='Index of the first slice of the stack')
-        parser.add_option('--endSlice', default=None,
+        input_parameters.add_option('--endSlice', default=None,
             type='int', dest='endSlice',
             help='Index of the last slice of the stack')
-        parser.add_option('--shiftFinalIndexes', default=0,
+        input_parameters.add_option('--shiftFinalIndexes', default=0,
             type='int', dest='shiftFinalIndexes',
             help='Shift indexes of the final warps and slices.')
-        parser.add_option('--neighbourhood', default=1, type='int',
+        input_parameters.add_option('--neighbourhood', default=1, type='int',
             dest='neighbourhood',
             help='Neighbourhood radius to which given slices will be aligned.')
-        parser.add_option('--iterations', default=10,
+        input_parameters.add_option('--iterations', default=10,
             type='int', dest='iterations',
             help='Number of iterations')
-        parser.add_option('--startFromIteration', default=0,
-            type='int', dest='startFromIteration',
-            help='Iteration number from which the calculations will start.')
-        parser.add_option('--inputVolume', '-i', default=None,
+        input_parameters.add_option('--inputVolume', '-i', default=None,
             type='str', dest='inputVolume', nargs=2,
             help=r('Input volume which undergoes smooth nonlinear \
             reconstruction.'))
-        parser.add_option('--outlineVolume', '-o', default=None,
+        input_parameters.add_option('--outlineVolume', '-o', default=None,
             type='str', dest='outlineVolume', nargs=2,
             help='Outline label driving the registration')
-        parser.add_option('--referenceVolume', '-r', default=None,
+        input_parameters.add_option('--referenceVolume', '-r', default=None,
             type='str', dest='referenceVolume', nargs=2,
             help='Reference volume to register slices to')
-        parser.add_option('--maskedVolume', '-m', default=None,
+        input_parameters.add_option('--maskedVolume', '-m', default=None,
             type='str', dest='maskedVolume', nargs=2,
             help='Custom slice mask for driving the registration')
-        parser.add_option('--maskedVolumeFile', default=None,
+        input_parameters.add_option('--maskedVolumeFile', default=None,
             type='str', dest='maskedVolumeFile',
             help=r('File determining fixed and moving slices for \
             custom registration.'))
-        parser.add_option('--registerSubset', default=None, type='str',
+        input_parameters.add_option('--registerSubset', default=None, type='str',
             dest='registerSubset',  help='registerSubset')
-        parser.add_option('--outputNaming', default="_", type='str',
+        input_parameters.add_option('--outputNaming', default="_", type='str',
             dest='outputNaming', help=r("Ouput naming scheme for all \
             the results"))
-        parser.add_option('--skipTransformations', default=False,
+
+        parser.add_option_group(input_parameters)
+
+        workflow_settings = \
+            OptionGroup(parser, 'Options for controlling the workflow.')
+
+        workflow_settings.add_option('--startFromIteration', default=0,
+            type='int', dest='startFromIteration',
+            help='Iteration number from which the calculations will start.')
+        workflow_settings.add_option('--skipTransformations', default=False,
             dest='skipTransformations', action='store_const', const=True,
             help='Skip transformations.')
-        parser.add_option('--skipSlicePreprocess', default=False,
+        workflow_settings.add_option('--skipSlicePreprocess', default=False,
             dest='skipSlicePreprocess', action='store_const', const=True,
             help='Skip slice preprocessing.')
-        parser.add_option('--stackFinalDeformation', default=False, const=True,
+        workflow_settings.add_option('--stackFinalDeformation', default=False, const=True,
             dest='stackFinalDeformation', action='store_const',
             help='Stack filnal deformation fileld.')
+        parser.add_option_group(workflow_settings)
 
-        regSettings = \
-            OptionGroup(parser, 'Registration setttings.')
+        registration_parameters = \
+            OptionGroup(parser, 'Registration parameters.')
 
-        regSettings.add_option('--antsImageMetric', default='CC',
+        registration_parameters.add_option('--antsImageMetric', default='CC',
             type='str', dest='antsImageMetric',
             help='ANTS image to image metric. See ANTS documentation.')
-        regSettings.add_option('--antsImageMetricOpt', default=8,
+        registration_parameters.add_option('--antsImageMetricOpt', default=8,
             type='int', dest='antsImageMetricOpt',
             help='Parameter of ANTS i2i metric.')
-        regSettings.add_option('--antsTransformation', default=0.15,
+        registration_parameters.add_option('--antsTransformation', default=0.15,
             type='float', dest='antsTransformation',
             help='Tranformations gradient step.')
-        regSettings.add_option('--antsRegularizationType', default='Gauss',
+        registration_parameters.add_option('--antsRegularizationType', default='Gauss',
             type='str', dest='antsRegularizationType',
             help='Ants regulatization type.')
-        regSettings.add_option('--antsRegularization', default=[3.0, 1.0],
+        registration_parameters.add_option('--antsRegularization', default=[3.0, 1.0],
             type='float', nargs=2, dest='antsRegularization',
             help='Ants regulatization.')
-        regSettings.add_option('--antsIterations', type='str',
+        registration_parameters.add_option('--antsIterations', type='str',
             default="1000x1000x1000x1000x1000", dest='antsIterations',
             help='Number of deformable registration iterations.')
-        regSettings.add_option('--planeSpacing', default=1.,
+        registration_parameters.add_option('--planeSpacing', default=1.,
             type='float', dest='planeSpacing',
             help='In plane pixel size. Assuming isotropic pixel size.')
 
-        parser.add_option_group(regSettings)
+        parser.add_option_group(registration_parameters)
 
         return parser
 
