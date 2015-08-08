@@ -4,104 +4,12 @@ import pickle
 from config import Config
 
 import itk
-from possum import pos_itk_core
+from possum import pos_itk_transforms
 
 # -----------------------------------------------
 # Load constatnts from the config file
 # -----------------------------------------------
 CONFIG = Config(file(sys.argv[1]))
-
-def read_itk_image(image_filename):
-    """
-    Loads the `image_filename` image.  Automatically detects the type of the
-    image and selects approperiate image loader to handle the image file. The
-    returned object is of `itk.Image` type.
-
-    :param image_filename: File to load
-    :type image_filename: str
-
-    :return: Itk image object
-    :rtype: `itk.Image`
-    """
-
-    # Autodetect the image type, instanciate approperiate reader type, load and
-    # return the image.
-    image_type = pos_itk_core.autodetect_file_type(image_filename)
-    image_reader = itk.ImageFileReader[image_type].New()
-    image_reader.SetFileName(image_filename)
-    image_reader.Update()
-
-    return image_reader.GetOutput()
-
-
-def write_itk_image(image_to_save, filename):
-    """
-    Writes the provided `image_to_save` into `filename`. Fairly simple wrapper
-    for the itk class `itk.ImageFileWriter`.
-
-    :param image_to_save: Image to be saved.
-    :type image_to_save: subclass of `itk.Image`.
-
-    :param filename: Filename to store the image.
-    :type filename: str
-    """
-
-    writer = itk.ImageFileWriter[image_to_save].New()
-    writer.SetInput(image_to_save)
-    writer.SetFileName(filename)
-    writer.Update()
-
-
-def reslice_image(transforms, moving_image, reference_image=None, interpolator=None, \
-        default_pixel_value=0):
-    """
-    Apply `transforms` to the `moving_image` an reslice to the `reference_image` space.
-
-    :param transforms: iterable of transformations to be applied. All
-    transformations are expected to be subclasses of the `itk.Transform` class.
-    :type transforms: list
-
-    :param moving_image: image to be resliced
-    :type moving_image: `itk.Image`
-
-    :param reference_image: Reference image for the reslicing process.
-    :type rewference_image: `itk.Image`
-
-    :param default_pixel_value: The default value of the pixel/voxel. Note that
-    the provided value has to be compatibile with the image type. E.g. int for
-    scalar integer, float for float data types and, for the vector images -- an
-    iterable of aproperiate type and size. Be carefull here. Segfault will
-    surely occur in case of incompatibility.
-    :type default_pixel_value: int, float or tupe
-    """
-
-    # Instanciate composite transform which will handle all the partial
-    # transformations.
-    composite_transform = \
-        itk.CompositeTransform[(itk.D, moving_image.GetImageDimension())].New()
-
-    # Fill the composite transformation with the partial transformations:
-    for transform in transforms:
-        composite_transform.AddTransform(transform)
-
-    # Assign the reference image, If there is no reference image provided, the
-    # moving image becomes a reference for itself.
-    if reference_image is None:
-        reference_image = moving_image
-
-    # Set up the resampling filter.
-    resample = itk.ResampleImageFilter[moving_image, reference_image].New()
-    resample.SetTransform(composite_transform)
-    resample.SetInput(moving_image)
-
-    resample.SetSize(reference_image.GetLargestPossibleRegion().GetSize())
-    resample.SetOutputOrigin(reference_image.GetOrigin())
-    resample.SetOutputSpacing(reference_image.GetSpacing())
-    resample.SetOutputDirection(reference_image.GetDirection())
-    resample.SetDefaultPixelValue(default_pixel_value)
-    resample.Update()
-
-    return resample.GetOutput()
 
 
 def write_itk_matrix_transformation_to_file(transformation, filename):
@@ -154,7 +62,7 @@ def get_random_rigid_2d_params(tmean, tsigma, rmean, rsigma):
 def apply_transformation_workflow(moving_file, output_file, output_transform_file=None):
     """
     """
-    moving_image = read_itk_image(moving_file)
+    moving_image = pos_itk_transforms.read_itk_image(moving_file)
 
     translation, rotation = get_random_rigid_3d_tranform_parameters(
         tmean=CONFIG['tmean'], tsigma=CONFIG['tsigma'],
@@ -172,9 +80,9 @@ def apply_transformation_workflow(moving_file, output_file, output_transform_fil
     phisycal_center = moving_image.TransformIndexToPhysicalPoint(center)
     vol_transform.SetCenter(phisycal_center)
 
-    resliced_image = reslice_image([vol_transform], moving_image,
-                default_pixel_value=CONFIG['default_pixel_value'])
-    write_itk_image(resliced_image, output_file)
+    resliced_image = pos_itk_transforms.reslice_image([vol_transform],
+        moving_image, default_pixel_value=CONFIG['default_pixel_value'])
+    pos_itk_transforms.write_itk_image(resliced_image, output_file)
 
     if output_transform_file:
         write_itk_matrix_transformation_to_file(vol_transform, output_transform_file)

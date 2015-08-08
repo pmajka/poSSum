@@ -159,7 +159,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
             self._logger.debug(r("No custom slice range provided. Extracting \
                 all slices in given plane."))
             self._logger.debug(r("Selecting slices from \
-                LargestPossibleRegion: %s", self._source_largest_region))
+                LargestPossibleRegion: %s"), self._source_largest_region)
 
             # Grab indexes of all slices in slicing plane
             self._slicingRange = range(0, max_slice_number)
@@ -169,8 +169,8 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
             assert self.options.slicing_range[1] <= max_slice_number,\
                 self._logger.error(r("Index of the last slice (%d)\
                             is higher that maximum number of slices within\
-                            given slicing plane (%d).",
-                        self.options.slicing_range[1], max_slice_number))
+                            given slicing plane (%d)."),
+                        self.options.slicing_range[1], max_slice_number)
 
             # Get only those sliced that user wants to.
             self._slicingRange = range(*self.options.slicing_range)

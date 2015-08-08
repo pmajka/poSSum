@@ -129,8 +129,6 @@ rm -rv   002_distorted_data\
          006_sections_to_shape_prior \
          007_sequential_alignment/ \
          008_coarse_to_fine \
-         001_phantom/phantom.nii.gz \
-         001_phantom/phantom_masked.nii.gz \
          sequential_alignment_s-0_e-199_r-110_ROI-None_Resize-None_Color-red_Median-None_Metric-MI_MetricOpt-32_Affine-True_eps-1_lam0.00outROI-None_gray.nii.gz
          
 c3d reference_image.nii.gz sections_to_shape_prior.nii.gz -msq > discrepancy_measurements.txt

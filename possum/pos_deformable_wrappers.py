@@ -34,29 +34,25 @@ class blank_slice_deformation_wrapper(pos_wrappers.generic_wrapper):
             }
 
 
-class convert_slice_image(pos_wrappers.generic_wrapper):
+class convert_slice_parent(pos_wrappers.generic_wrapper):
+    _template = """ -- stub -- """
+
+    _parameters = {
+            'dimension'     : value_parameter('dimension', 2),
+            'input_image'   : filename_parameter('input_image', None),
+            'output_image'  : filename_parameter('output_image', None),
+            'scaling'       : value_parameter('scaling', None, "-scale {_value}"),
+            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
+            }
+
+
+class convert_slice_image(convert_slice_parent):
     _template = """c{dimension}d -mcs {input_image}\
             -foreach {spacing} {scaling} -endfor \
             -omc {dimension} {output_image}"""
 
-    _parameters = {
-            'dimension'     : value_parameter('dimension', 2),
-            'input_image'   : filename_parameter('input_image', None),
-            'output_image'  : filename_parameter('output_image', None),
-            'scaling'       : value_parameter('scaling', None, "-scale {_value}"),
-            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
-            }
 
-
-class convert_slice_image_grayscale(pos_wrappers.generic_wrapper):
+class convert_slice_image_grayscale(convert_slice_parent):
     _template = """c{dimension}d {input_image}\
                     {spacing} {scaling}\
                    -o {output_image}"""
-
-    _parameters = {
-            'dimension'     : value_parameter('dimension', 2),
-            'input_image'   : filename_parameter('input_image', None),
-            'output_image'  : filename_parameter('output_image', None),
-            'scaling'       : value_parameter('scaling', None, "-scale {_value}"),
-            'spacing' : vector_parameter('spacing', None, '-spacing {_list}mm')
-            }

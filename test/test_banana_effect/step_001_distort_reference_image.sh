@@ -6,23 +6,25 @@ source header.sh
 # Process the raw MR image into something on which we will
 # be working on
 # ---------------------------------------------------------
-pos_stack_sections \
-    -i ${INPUT_FILE} \
-    -o ${PHANTOM_FILE} \
-    --permutation 1 2 0 \
-    --orientation RAS \
-    --flip 0 1 1 \
-    --origin 0 0 0 
-
-c3d ${PHANTOM_FILE} ${PHANTOM_FILE} \
-        -clip 0 255 \
-        -reslice-itk ${TRANSFORMATION} \
-        -region 140x0x60vox 60x200x150vox \
-        -origin 0x0x0mm \
-        -type uchar -o ${PHANTOM_FILE} \
-
-if [ ! -f ${PHANTOM_MASK} ]
+if [ ! -f ${PHANTOM_FILE} ]
 then
+    pos_stack_sections \
+        -i ${INPUT_FILE} \
+        -o ${PHANTOM_FILE} \
+        --permutation 1 2 0 \
+        --orientation RAS \
+        --flip 0 1 1 \
+        --origin 0 0 0 \
+        --loglevel DEBUG
+
+    c3d ${PHANTOM_FILE} ${PHANTOM_FILE} \
+            -stretch 0.0 0.0136729 0 255 \
+            -clip 0 255 \
+            -reslice-itk ${TRANSFORMATION} \
+            -region 140x0x60vox 60x200x150vox \
+            -origin 0x0x0mm \
+            -type uchar -o ${PHANTOM_FILE}
+
     c3d ${PHANTOM_FILE}\
         -thresh 20 255 1 0 \
         -type uchar -o ${PHANTOM_MASK}
@@ -30,7 +32,6 @@ fi
 
 c3d ${PHANTOM_FILE} ${PHANTOM_MASK} -times \
     -type uchar -o ${PHANTOM_MASKED}
-
 
 #--------------------------------------------------------------------
 # Generate a random series of rigid transformations it order to distort
