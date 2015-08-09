@@ -146,8 +146,6 @@ antsApplyTransforms -d 3 \
      -r ${FILE_REFERENCE_MASK}
      
 rm -rfv ${DIR_COARSE_ALIGNMENT}
-#rm -rfv 001_phantom
-#cp -v ${PHANTOM_MASKED} reference.nii.gz
 
 
 # ---------------------------------------------------------
