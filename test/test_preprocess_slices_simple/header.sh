@@ -1,7 +1,7 @@
 #!/bin/bash
 set -xe
 
-# Generation date: 20_06_2015_09-12-37
+# Generation date: 09_08_2015_13-45-12
 
 SPECIMEN_NAME=s40
 
@@ -30,7 +30,7 @@ OUTPUT_VOLUME_PERMUTATION="0 2 1"
 OUTPUT_VOLUME_FLIPPING="0 0 0"
 OUTPUT_VOLUME_ORIENTATION="RAS"
 
-OUTPUT_VOLUME_PROPERTIES=" --output-volume-orientation ${OUTPUT_VOLUME_ORIENTATION} --output-volume-spacing ${OUTPUT_VOLUME_SPACING} --output-volume-permute-axes ${OUTPUT_VOLUME_PERMUTATION} --flip ${OUTPUT_VOLUME_FLIPPING} --output-volume-origin ${OUTPUT_VOLUME_ORIGIN}"
+OUTPUT_VOLUME_PROPERTIES=" --output-volume-permute-axes ${OUTPUT_VOLUME_PERMUTATION} --output-volume-orientation ${OUTPUT_VOLUME_ORIENTATION} --output-volume-spacing ${OUTPUT_VOLUME_SPACING} --output-volume-origin ${OUTPUT_VOLUME_ORIGIN} --output-volume-filp-axes ${OUTPUT_VOLUME_FLIPPING}"
 
 
 VOL_MASK=10_input_data/08_source_stacks/mask_stack.nii.gz
