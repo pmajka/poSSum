@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*
 
 """
-Stack wrapper script.
-**************************
 
-`pos_stack_warp_image_multi_transform`, a workflow for warping a whole stack of images.
 """
 
 import os, sys
@@ -16,6 +13,7 @@ from possum.pos_wrapper_skel import output_volume_workflow
 from possum import pos_parameters
 from possum import pos_wrappers
 from possum.pos_itk_core import autodetect_file_type
+from possum.pos_common import r
 
 
 class stack_warp_image_multi_transform(output_volume_workflow):
@@ -46,7 +44,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Assert if the image stack is defined.
         assert self.options.sliceRange is not None,\
-            "The input image slice is not provided. Please supply the input image range: --sliceRange."
+            r("The input image slice is not provided. \
+              Please supply the input image range: --sliceRange.")
 
         # Range of images to register
         self._logger.debug("Setting the slice range.")
@@ -56,13 +55,15 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Assert if the transformation stack is defined.
         assert self.options.transformSpec is not None, \
-            "At least one transformation is required in the transformation chain. Please supply at least one --appendTransformation option"
+           r("At least one transformation is required in the \
+             transformation chain. Please supply at least one \
+             --appendTransformation option")
 
         # Since, in some, rare cases, the transformation indexing is different
         # than the actual slice indexing there is a possibility to specify a
-        # separate set of indexes for the transformation files.
-        # However, if such custom index set is not provided, both ranges will
-        # be defined to be the same.
+        # separate set of indexes for the transformation files.  However, if
+        # such custom index set is not provided, both ranges will be defined to
+        # be the same.
         self._logger.debug("Setting the transformations range.")
         if self.options.transformationsRange is not None:
             self._logger.debug("Using the custom transformation range.")
@@ -76,12 +77,13 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # In both cases, the lists of indices has to have the same length.
         assert len(self.options.transformRange) == \
             len(self.options.sliceRange), \
-            self._logger.error("Indexes for the slices and for the transformations does not have equal lenght.")
+            self._logger.error(r("Indexes for the slices and for the  \
+            transformations does not have equal lenght."))
         # This condition is required since below we create slice to
         # transformation mapping:
 
-        # Here, we create a slice to transformation index mapping.
-        # This means that for each slice to be reslices we assign corresponding
+        # Here, we create a slice to transformation index mapping.  This means
+        # that for each slice to be reslices we assign corresponding
         # transformation file index.
         self._slice_transform_map = \
             dict(zip(self.options.sliceRange, self.options.transformRange))
@@ -90,11 +92,15 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         # Check for the fixed images directory
         assert self.options.fixedImageInputDirectory is not None,\
-            self._logger.error("Fixed images directory is a obligatory parameters. Please supply the '--fixedImageInputDirectory' parameter.")
+            self._logger.error(r("Fixed images directory is a obligatory \
+            parameters. Please supply the '--fixedImageInputDirectory' \
+            parameter."))
 
         # And for the moving images directory
         assert self.options.movingImageInputDirectory is not None,\
-            self._logger.error("Fixed images directory is a obligatory parameters. Please supply the '--movingImageInputDirectory' parameter.")
+            self._logger.error(r("Fixed images directory is a obligatory \
+            parameters. Please supply the '--movingImageInputDirectory' \
+            parameter."))
 
     def _overrideDefaults(self):
         super(self.__class__, self)._overrideDefaults()
@@ -130,7 +136,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # At the very end we check if the reslice interpolation has a correct
         # value.:
         assert self.options.resliceInterpolation in [None, "NN", "BS"], \
-            "Incorrect reslice interpolation value. See the help for the list of allowed values."
+            r("Incorrect reslice interpolation value. See the help for \
+            the list of allowed values.")
 
     def launch(self):
         # Execute the parents before-execution activities
@@ -305,7 +312,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                 transform_filename = transfSpec[1] % transform_index
                 self.__is_filename_available(transform_filename)
 
-        self._logger.info("Apparently all the files required by the workflow are available.")
+        self._logger.info(r("Apparently all the files required \
+                            by the workflow are available."))
 
     def __is_filename_available(self, filename):
         """
@@ -340,13 +348,15 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # image in the stack is read and the component type is determined. If
         # the image is a multicomponent, a multicomponent reslicing workflow is
         # used.
-        self._logger.debug("Detecting the image properties of the first image in the stack to choose a proper reslicing routine.")
+        self._logger.debug(r("Detecting the image properties of the first \
+            image in the stack to choose a proper reslicing routine."))
         first_img_idx = self._slice_transform_map.items()[0][0]
         first_img_fname = self.f['moving_raw'](idx=first_img_idx)
         pixel_type = autodetect_file_type(first_img_fname, ret_itk=False)[0]
 
         if pixel_type in ["vector", "rgb"]:
-            self._logger.info("Reslicing the images using the multichannel workflow.")
+            self._logger.info(r("Reslicing the images using the \
+                                multichannel workflow."))
 
             # Prepare the commands batches, each batch for a single processing
             # step: components preparation, component reslicing and the
@@ -402,7 +412,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             self.execute(commands_merge)
 
         else:
-            self._logger.info("Reslicing the images using the grayscale reslice workflow.")
+            self._logger.info(r("Reslicing the images using the \
+                                grayscale reslice workflow."))
             commands = []
             for slice_index, transform_index in self._slice_transform_map.items():
                 commands.append(self._compose_reslice(slice_index, transform_index))
@@ -427,12 +438,13 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
     def _get_generic_stack_slice_wrapper(self, mask_type, ouput_filename_type):
         """
+
         Return generic command wrapper suitable either for stacking grayscale
         images or multichannel images. Aproperiate command line wrapper is returned
-        depending on provided `mask_type` and `output_filename_type`.
-        The command line wrapper is prepared mostly based on the command line
-        parameters which are common between both images stacks thus so there is
-        no need to parametrize them individually.
+        depending on provided `mask_type` and `output_filename_type`.  The command
+        line wrapper is prepared mostly based on the command line parameters which
+        are common between both images stacks thus so there is no need to
+        parametrize them individually.
 
         :param mask_type: mask type determining which images stack will be
                           converted into a volume.
@@ -506,7 +518,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             help='Supress generating color volume')
         workflow_settings.add_option('--outputVolumesDirectory', default=None,
             dest='outputVolumesDirectory', action='store',
-            help='Store output volumes in given directory instead of using default one.')
+            help=r('Store output volumes in given directory instead \
+                   of using default one.'))
         workflow_settings.add_option('--volumeFilename', default=False,
             dest='volumeFilename', type='str',
             help='Filename for the output grayscale volume')
@@ -516,7 +529,13 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
         image_processing_options.add_option('--resliceInterpolation',
             dest='resliceInterpolation', default=None, type='str',
-            help='Interpolation used during the application of the transformation chain to the slices. This is not interpolation used during stacking the resliced images into a output volume. Linear by default byt may be changed into NN or Bspline. For the NN interpolation put just "NN" while for the Bspline interpolation put BS. No other string will be accepted.')
+            help=r('Interpolation used during the application of the \
+                transformation chain to the slices. This is not \
+                interpolation used during stacking the resliced images \
+                into a output volume. Linear by default byt may be changed \
+                into NN or Bspline. For the NN interpolation put just "NN" \
+                while for the Bspline interpolation put BS. \
+                No other string will be accepted.'))
         image_processing_options.add_option('--regionOrigin',
             dest='regionOrigin', default=None, type='int', nargs=2,
             help='Region origin in voxels (2 values)')
