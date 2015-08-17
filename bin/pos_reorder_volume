@@ -276,13 +276,13 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     def parseArgs():
         __output_vol_command_line_args_help = {}
         __output_vol_command_line_args_help['inputImage'] =\
-                """Required: input image filename."""
+            """Required: input image filename."""
         __output_vol_command_line_args_help['outputImage'] =\
-                """Required: output image filename."""
+            """Required: output image filename."""
         __output_vol_command_line_args_help['mapping'] =\
-                """A mapping file for driving the reordering process."""
+            """A mapping file for driving the reordering process."""
         __output_vol_command_line_args_help['slicing_axis'] =\
-                """A index of the axis along which the slices will be reordered. The only allowed values are 0, 1, 2. The default value is 0."""
+            """A index of the axis along which the slices will be reordered. The only allowed values are 0, 1, 2. The default value is 0."""
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
         parser.add_option('--inputImage', '-i', dest='inputImage',
