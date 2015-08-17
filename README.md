@@ -233,9 +233,7 @@ The framework should be ready to use.
 Installation screencast
 -------------------------
 
-You may also want to check out the screencast showing how to install the framework ::
-
-    http://youtu.be/j89KxyluiCM
+You may also want to check out the screencast showing how to install the framework: http://youtu.be/j89KxyluiCM
 
 <!---
 Starting with the fresh system installation: window 160x50.
