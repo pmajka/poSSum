@@ -3,7 +3,7 @@ POS_INTERPOLATION_OPTIONS='nn linear'
 POS_DATA_TYPES='char uchar short ushort int uint float double'
 POS_ORIENTATION_PRESETS='saggital coronal horizontal'
 POS_ORIENTATION_CODES="RPI LAS LPI RAS RSP LIA"
-
+POS_LOGLEVEL_OPTIONS="CRITICAL ERROR WARNING INFO DEBUG"
 
 _pos_stack_sections()
 {
@@ -14,8 +14,7 @@ _pos_stack_sections()
     opts="--help -h --input-image -i --stacking-range  --output-image -o \
         --interpolation  --resample  --permutation  --flip  --flip-around-origin  \
         --spacing  --origin  --type  --orientation  --use-orientation-preset \
-        --job-id -j --work-dir -d --loglevel --log-filename --disable-shared-memory \
-        --specimen-id  --dry-run  --cpus  --archive-work-dir  --cleanup"
+        --loglevel --log-filename "
 
     if [[ ${prev} == 'pos_stack_sections' ]] ; then
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
@@ -67,14 +66,14 @@ _pos_stack_sections()
         return 0
     fi
 
-    if [ ${prev} == '--archive-work-dir' ] ; then
+    if [ ${prev} == '--log-filename' ] ; then
         COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
         return 0
     fi
 
-    if [ ${prev} == '--log-filename' ] ; then
-        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
-        return 0
+    if [ ${prev} == '--loglevel' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_LOGLEVEL_OPTIONS}" -- ${cur}) )
+        return 
     fi
 
 }
