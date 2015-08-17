@@ -10,12 +10,13 @@ import itk
 from possum import pos_wrapper_skel
 from possum.pos_itk_core import get_image_region, autodetect_file_type,\
         types_reduced_dimensions, resample_image_filter
+from possum.pos_common import r
 
 
 def prepare_single_channel(input_image,
-                           scale_factor=None, crop_index=None, crop_size=None,
-                           median_radius=None, invert=False, invert_max=255,
-                           rescale_min=None, rescale_max=None):
+    scale_factor=None, crop_index=None, crop_size=None,
+    median_radius=None, invert=False, invert_max=255,
+    rescale_min=None, rescale_max=None):
 
     # Determine image dimensionality:
     image_dim = len(input_image.GetSpacing())
@@ -84,7 +85,7 @@ def prepare_single_channel(input_image,
 
 
 def collapse_pseudo_3d_image(input_image, input_type,
-                             plane_to_collapse=2, plane_to_extract=0):
+            plane_to_collapse=2, plane_to_extract=0):
     """
     Colapses three dimensional image by extracting single a two dimensional
     slice. The extraction is performed only if the input image is three
@@ -133,7 +134,8 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
         super(self.__class__, self)._initializeOptions()
 
         assert self.options.inputFilename is not None, \
-            self._logger.error("The input image (-i ...) is an obligatory option!")
+            self._logger.error(r("The input image (-i ...) \
+            is an obligatory option!"))
 
     def launch(self):
         # Execute the parents before-execution activities
@@ -166,7 +168,8 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
         self._image_dim = len(self._collapsed.GetSpacing())
 
         assert (self._image_dim == 2), "Number of dimensions should be 2!"
-        self._logger.debug("Determined image dimensionality: %d", self._image_dim)
+        self._logger.debug("Determined image dimensionality: %d", \
+                           self._image_dim)
 
         # If the number of components is higher than one, it means we are
         # dealing with a multichannel image. In such case every component is
@@ -387,7 +390,8 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
         parser.add_option('--inputFilename', '-i', dest='inputFilename',
             type='str', default=None,
-            help='Input filename. See the detailed workflow description for the detailed criteria on the proper input file type.')
+            help=r('Input filename. See the detailed workflow description \
+            for the detailed criteria on the proper input file type.'))
 
         parser.add_option('--grayscaleOutputImage', '-g',
             dest='grayscaleOutputImage', type='str', default=None,
@@ -398,25 +402,31 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
 
         parser.add_option('--registrationROI', dest='registrationROI',
             default=None, type='int', nargs=4,
-            help='ROI of the input image used for registration (ox, oy, sx, sy).')
+            help=r('ROI of the input image used for registration \
+            (ox, oy, sx, sy).'))
         parser.add_option('--registrationResize', dest='registrationResize',
             default=None, type='float',
-            help='Scaling factor for the source image used for registration. Float between 0 and 1.')
+            help=r('Scaling factor for the source image used for \
+            registration. Float between 0 and 1.'))
         parser.add_option('--registrationColorChannel',
             dest='registrationColorChannel', default='blue', type='str',
-            help='In rgb images - color channel on which \
+            choices=['r', 'g', 'b', 'red', 'green', 'blue'],
+            help=r('In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
-            grayscale input images. Possible values: r/red, g/green, b/blue.')
+            grayscale input images. Possible values: r/red, g/green, b/blue.'))
 
         parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
-            help='Median workflow radius in voxels e.g. 2 2')
+            help=r('Median workflow radius in voxels e.g. 2 2'))
         parser.add_option('--invertSourceImage', dest='invertSourceImage',
             default=False, action='store_const', const=True,
-            help='Invert source image: both, grayscale and multichannel, before registration')
-        parser.add_option('--invertMultichannelImage', dest='invertMultichannelImage',
-            default=False, action='store_const', const=True,
-            help='Invert source image: both, grayscale and multichannel, before registration')
+            help=r('Invert source image: both, grayscale and multichannel, \
+            before registration'))
+        parser.add_option('--invertMultichannelImage',
+            dest='invertMultichannelImage', default=False,
+            action='store_const', const=True,
+            help=r('Invert source image: both, grayscale and multichannel, \
+            before registration'))
 
         (options, args) = parser.parse_args()
         return (options, args)
