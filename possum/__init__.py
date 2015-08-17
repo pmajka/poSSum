@@ -10,7 +10,8 @@ import pos_common
 import pos_color
 import pos_segmentation_parser
 
-if os.environ.get('TRAVIS') != 'true':
+if os.environ.get('TRAVIS') != 'true' and \
+   os.environ.get('CI') != 'true':
     import pos_itk_core
     import pos_itk_transforms
 
