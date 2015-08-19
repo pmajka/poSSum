@@ -193,8 +193,8 @@ class deformable_reconstruction_iteration(generic_workflow):
         self.weights = {}
         for i in self.slice_range:
             for j in range(i - eps, i + eps + 1):
-                if j != i and j <= end and j >= start:
-                    self.weights[(i, j)] = 1
+                self.weights[(i, j)] = 1
+        print self.weights
 
     def _assign_weights(self):
         self._assign_weights_from_func()
@@ -219,6 +219,12 @@ class deformable_reconstruction_iteration(generic_workflow):
                     if j != i and j <= end and j >= start:
                         files_to_average.append(self.f['src_slice'](idx=j))
                         weights.append(self.get_weight(i, j))
+                    if j < start:
+                        files_to_average.append(self.f['src_slice'](idx=start))
+                        weights.append(self.get_weight(i, start))
+                    if j > end:
+                        files_to_average.append(self.f['src_slice'](idx=end))
+                        weights.append(self.get_weight(i, end))
 
                 command = pos_wrappers.images_weighted_average(
                     dimension=2,
@@ -241,6 +247,12 @@ class deformable_reconstruction_iteration(generic_workflow):
                     if j != i and j <= end and j >= start:
                         files_to_average.append(self.f['outline'](idx=j))
                         weights.append(self.get_weight(i, j))
+                    if j < start:
+                        files_to_average.append(self.f['src_slice'](idx=start))
+                        weights.append(self.get_weight(i, start))
+                    if j > end:
+                        files_to_average.append(self.f['src_slice'](idx=end))
+                        weights.append(self.get_weight(i, end))
 
                 command = pos_wrappers.images_weighted_average(
                     dimension=2,
