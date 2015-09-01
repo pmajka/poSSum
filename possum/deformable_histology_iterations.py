@@ -128,6 +128,7 @@ class deformable_reconstruction_iteration(generic_workflow):
             # Check, if there is only one assignment per file
 
             if key in returnDictionary:
+                #TODO XXX: Turn into a logging statement
                 print >>sys.stderr, \
                     "Entry %s defined more than once. Skipping..." % key
                 continue
@@ -194,7 +195,6 @@ class deformable_reconstruction_iteration(generic_workflow):
         for i in self.slice_range:
             for j in range(i - eps, i + eps + 1):
                 self.weights[(i, j)] = 1
-        print self.weights
 
     def _assign_weights(self):
         self._assign_weights_from_func()
