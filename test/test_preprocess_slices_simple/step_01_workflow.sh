@@ -32,13 +32,6 @@ RESLICE_BACKGROUND=255
 rm -rf ${DIR_RAW_SLICES} ${DIR_INPUT_DATA}
 mkdir -p ${DIR_RAW_SLICES} ${DIR_INPUT_DATA}
 
-
-#--------------------------------------------------------------------
-# Try extracting the test sections from the archive
-#--------------------------------------------------------------------
-tar -xvvzf 00_source_sections.tgz
-
-
 #--------------------------------------------------------------------
 # Download the image stack to reconstruct. In case it is not already
 # downloaded.
@@ -49,6 +42,9 @@ do
     if [ ! -f  ${DIR_RAW_SLICES}/${section}.jpg ]; then
         wget http://brainmaps.org/HBP-JPG/40/${section}.jpg \
             -O ${DIR_RAW_SLICES}/${section}.jpg 
+        convert \
+            ${DIR_RAW_SLICES}/${section}.jpg -level -10% \
+            ${DIR_RAW_SLICES}/${section}.jpg
     fi
 done 
 
@@ -68,8 +64,8 @@ pos_process_source_images \
      --enable-process-source-images \
          --canvas-gravity Center \
          --canvas-background White \
-         --mask-threshold 84.0 \
-         --mask-median 2 \
+         --mask-threshold 65.0 \
+         --mask-median 4 \
          --mask-color-channel red \
          --masking-background ${RESLICE_BACKGROUND} \
      \
@@ -88,14 +84,55 @@ pos_process_source_images \
 #--------------------------------------------------------------------
 
 source header.sh
+DIR_SEQUENTIAL_ALIGNMENT=11_sections_sequential_alignment/
+mkdir -p ${DIR_SEQUENTIAL_ALIGNMENT}
+
+# ---------------------------------------------------------
+# Below a data for the sequential alignment is prepared.
+# The red channel of the image is extracted and a negative
+# image is calculated. This is due to the fact that the
+# registration routines handles better images which have
+# 0 as a background and nonzero values as content.
+# ---------------------------------------------------------
+
+c3d -mcs ${VOL_RGB_MASKED} \
+    -foreach \
+        -scale -1 -shift 255 -type uchar \
+    -endfor \
+    -omc 3 __temp__rgb_stack_inverted.nii.gz
+
+pos_slice_volume \
+    -s ${SLICING_PLANE_INDEX} \
+    -i __temp__rgb_stack_inverted.nii.gz \
+    --output-filenames-offset ${IDX_FIRST_SLICE} \
+    -o ${DIR_SEQUENTIAL_ALIGNMENT}/%04d.nii.gz
+rm -rfv __temp__rgb_stack_inverted.nii.gz
 
 
-#--------------------------------------------------------------------
-# Below we are testing the behaviour of the slicing and restacking
-# functions which purpose is to... slice the stack into individual
-# sections and then stack it back into 3D image.
-# Sound silly but it is suprisingly usefull.
-#--------------------------------------------------------------------
+# ---------------------------------------------------------
+# Perform seqential alignment
+# ---------------------------------------------------------
+REFERENCE_SLICE=25
 
-tempdir=`hd_split_volume ${VOL_RGB_MASKED}`
-hd_stack_sections ${tempdir} rgb_stack-sectioned_and_stacked_back.nii.gz
+pos_sequential_alignment \
+    --enable-sources-slices-generation \
+    --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} ${REFERENCE_SLICE}\
+    --inputImageDir ${DIR_SEQUENTIAL_ALIGNMENT}/ \
+    --registrationColor red \
+    --enable-transformations \
+        --enable-moments \
+        --medianFilterRadius 4 4 \
+        --useRigidAffine \
+        --antsImageMetric CC \
+        --affineGradientDescent 0.5 0.95 0.0001 0.0001 \
+        --resliceBackgorund 0 \
+        --graphEdgeLambda 0.0 \
+        --graphEdgeEpsilon 2 \
+    --outputVolumesDirectory . \
+    ${OUTPUT_VOLUME_PROPERTIES} \
+    --multichannelVolumeFilename sequential_alignment.nii.gz \
+    --loglevel DEBUG
+
+# ---------------------------------------------------------
+# Yeap, that's it. 
+# ---------------------------------------------------------
