@@ -409,7 +409,7 @@ class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
             help=r('Scaling factor for the source image used for \
             registration. Float between 0 and 1.'))
         parser.add_option('--registrationColorChannel',
-            dest='registrationColorChannel', default='blue', type='str',
+            dest='registrationColorChannel', default='blue',
             choices=['r', 'g', 'b', 'red', 'green', 'blue'],
             help=r('In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
