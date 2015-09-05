@@ -34,7 +34,7 @@ def launchFilter(options, args):
 def parseArgs():
     parser = OptionParser()
     parser.add_option('--radius', '-r', nargs=3,
-                      type='int', dest='radius', default=[2,0,2],
+                      type='int', dest='radius', default=[2, 0, 2],
                       help='Median filter radius')
     parser.add_option('--imageDim', '-d', dest='imageDim', type='int',
             default=3, help='')
