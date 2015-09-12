@@ -19,7 +19,7 @@ class preprocess_slice_volume(pos_wrappers.generic_wrapper):
             'start_slice' : value_parameter('start_slice', None),
             'end_slice'   : value_parameter('end_slice', None),
             'step'        : value_parameter('step', 1),
-            'shift_indexes' : value_parameter('shiftIndexes', None, str_template="--{_name} {_value}"),
+            'shift_indexes' : value_parameter('output-filenames-offset', None, str_template="--{_name} {_value}"),
             'output_dir'   : string_parameter('output_dir', None),
             }
 
