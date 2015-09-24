@@ -107,14 +107,14 @@ class preprocess_reference(pos_wrappers.generic_wrapper):
         -fill "#000000" -opaque "#ffffff" {output_mask};"""
 
     _parameters = {\
-        'input_image'  : pos_parameters.filename_parameter('input_image'),
-        'resize' : pos_parameters.value_parameter('resize', 100., str_template = '-{_name} {_value}%'),
-        'background' : pos_parameters.string_parameter('background', 'white', str_template = '-{_name} {_value}'),
-        'gravity' : pos_parameters.value_parameter('gravity', 'NorthWest', str_template = '-{_name} {_value}'),
-        'extent' : pos_parameters.vector_parameter('extent', None, str_template = '-{_name} {_list}'),
-        'output_image' : pos_parameters.filename_parameter('output_image', str_template = 'PNG8:{_value}'),
-        'threshold' : pos_parameters.value_parameter('threshold', None, str_template = '-{_name} {_value}%'),
-        'output_mask' : pos_parameters.filename_parameter('output_mask')
+        'input_image': pos_parameters.filename_parameter('input_image'),
+        'resize': pos_parameters.value_parameter('resize', 100., str_template='-{_name} {_value}%'),
+        'background': pos_parameters.string_parameter('background', 'white', str_template='-{_name} {_value}'),
+        'gravity': pos_parameters.value_parameter('gravity', 'NorthWest', str_template='-{_name} {_value}'),
+        'extent': pos_parameters.vector_parameter('extent', None, str_template='-{_name} {_list}'),
+        'output_image': pos_parameters.filename_parameter('output_image', str_template='PNG8:{_value}'),
+        'threshold': pos_parameters.value_parameter('threshold', None, str_template='-{_name} {_value}%'),
+        'output_mask': pos_parameters.filename_parameter('output_mask')
         }
 
 
@@ -239,8 +239,8 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         "saggital": {'permutation': [2, 0, 1], 'flip': [0, 0, 0], 'axis': 0},
         "sagital": {'permutation': [2, 0, 1], 'flip': [0, 0, 0], 'axis': 0},
         "coronal": {'permutation': [0, 2, 1], 'flip': [0, 0, 0], 'axis': 1},
-        "axial": {'permutation': [0, 1 ,2], 'flip': [0, 0, 0], 'axis': 2},
-        "horizontal": {'permutation': [0, 1 ,2], 'flip': [0, 0, 0], 'axis': 2}}
+        "axial": {'permutation': [0, 1, 2], 'flip': [0, 0, 0], 'axis': 2},
+        "horizontal": {'permutation': [0, 1, 2], 'flip': [0, 0, 0], 'axis': 2}}
 
     __DEFAULT_VOLUME_ORIENTATION_CODE = "RAS"
 
@@ -409,7 +409,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # Remask the reference image.
         commands = []
-        command=self._get_remask_wrapper("atlas_mask", "atlas_rgb", "atlas_masked")
+        command = self._get_remask_wrapper("atlas_mask", "atlas_rgb", "atlas_masked")
         commands.append(copy.copy(command))
         self.execute(commands)
 
@@ -1112,7 +1112,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             dest='NegateInputImages', action='store_true')
         source_processing.add_option('--canvas-gravity', default="NorthWest",
             dest='canvasGravity', action='store', type="choice",
-            choices=["NorthWest","Center"],
+            choices=["NorthWest", "Center"],
             help='Image canvas extention gravity.')
         source_processing.add_option('--canvas-background', default="white",
             dest='canvasBackground', action='store', type="str",
@@ -1176,7 +1176,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             help='Extent of the reference images.')
         reference_options.add_option('--reference-gravity', default="NorthWest",
             dest='referenceGravity', action='store', type="choice",
-            choices=["NorthWest","Center"],
+            choices=["NorthWest", "Center"],
             help='Gravity of the reference extent.')
         reference_options.add_option('--reference-background', default='white',
             dest='referenceBackground', action='store', type="str",
