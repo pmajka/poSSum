@@ -66,7 +66,7 @@ c3d ${DIR_SOURCE_STACKS}/rgb_slice_to_slice_masked_stack_downsampled.nii.gz \
 # ------------------------------------------------------------------
 # Now, prepare the reference dataset - in this case the Waxholm Space
 # T1? MR image. To speed up the calculations, the reference image
-# is seriously downsampled.
+# it is seriously downsampled.
 # ------------------------------------------------------------------
 
 c3d ${DIR_REFERENCE}/atlas_fullsize.nii.gz \
