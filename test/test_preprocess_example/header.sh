@@ -1,7 +1,7 @@
 #!/bin/bash
 set -xe
 
-# Generation date: 12_09_2015_15-14-06
+# Generation date: 29_09_2015_14-54-19
 
 SPECIMEN_NAME=test_case
 

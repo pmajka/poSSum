@@ -44,7 +44,7 @@ do
       -gravity Center \
       -weight 700 -pointsize 360 \
       -annotate 0 "${i}" \
-      00_input_sections/${ii}.jpg
+      -alpha remove -alpha off png24:00_input_sections/${ii}.png
 done
 
 
@@ -64,8 +64,8 @@ pos_process_source_images \
          --canvas-gravity Center \
          --canvas-background White \
          --mask-threshold 65.0 \
-         --mask-median 1 \
-         --mask-color-channel red \
+         --mask-median 5 \
+         --mask-color-channel blue \
          --masking-background ${RESLICE_BACKGROUND} \
      \
      --enable-source-stacking \
