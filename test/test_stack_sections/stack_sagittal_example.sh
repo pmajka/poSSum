@@ -12,7 +12,7 @@
 # If you want to redownload the section, please uncomment the lines below 
 # 
 #
-# wget -i list_of_sagital_sections_to_download
+# wget -i list_of_sagittal_sections_to_download
 # mogrify -resize 25% *.jpg
 
 # i=0; 
@@ -28,7 +28,7 @@ rm -rf *.jpg
 unzip example_sagittal_sections.zip
 pos_stack_sections \
     -i %04d.jpg \
-    -o stacked_sagital_exmaple.nii.gz \
+    -o stacked_sagittal_exmaple.nii.gz \
     --stacking-range 0 55 1 \
     --permutation 2 0 1 \
     --orientation RAS \
