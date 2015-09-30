@@ -12,7 +12,7 @@ from possum.pos_common import r
 
 
 C_ORIENTATION_SETTINGS = {
-    "saggital": {
+    "sagittal": {
         'output_volume_permute_axes': [2, 0, 1],
         'output_volume_flip': [0, 0, 0],
         'output_volume_orientation': 'RAS'},
@@ -322,12 +322,12 @@ False by default."""
 """Image stacking options: first slice, last slice, slice increment.
 Three integers are required."""
         __output_vol_command_line_args_help['orientation_preset'] =\
-"""Use one of the orientation presets (saggital, coronal, horizontal) \
+"""Use one of the orientation presets (sagittal, coronal, horizontal) \
 to set up the orientation settings. Usefull when you don't want to \
 fill out the permutation, flipping and the rest of the settings. \
 When this options is used it overrides the '--output-volume-permute-axes',\
 '--output-volume-filp-axes' and '--output-volume-orientation',\
-parameters. The allowed choices are: 'horizontal', 'coronal', 'saggital'."""
+parameters. The allowed choices are: 'horizontal', 'coronal', 'sagittal'."""
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
@@ -370,7 +370,7 @@ parameters. The allowed choices are: 'horizontal', 'coronal', 'saggital'."""
             help=__output_vol_command_line_args_help['output_volume_orientation'])
         parser.add_option('--use-orientation-preset',
             dest='orientation_preset', type='choice', default=None,
-            choices=['horizontal', 'coronal', 'saggital'],
+            choices=['horizontal', 'coronal', 'sagittal'],
             help=__output_vol_command_line_args_help['orientation_preset'])
 #       print " ".join(map(lambda x: x.get_opt_string() + " "+ " ".join(x._short_opts), parser._get_all_options()))
 

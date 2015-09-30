@@ -45,16 +45,16 @@ class input_image_padding(pos_wrappers.generic_wrapper):
     """
     """
 
-    _template = """convert {input_image} {negate} {background} {rotation}\
+    _template = """convert {input_image} {invert} {background} {rotation}\
     {horizontal_flip} {vertical_flip} {gravity} {extent} \
-    \( +clone -write {full_size_output} \
+        \( +clone -write png24:{full_size_output} \
          {color_channel} {median} -separate \
         -write {temp_mask} +delete \); \
-    convert {temp_mask} {threshold} -alpha remove -alpha off {temp_mask}"""
+        convert {temp_mask} {threshold} -alpha remove -alpha off png24:{temp_mask}"""
 
     _parameters = {
         'input_image': pos_parameters.filename_parameter('input_image', None),
-        'negate': pos_parameters.string_parameter('negate', None, "-{_name}"),
+        'invert': pos_parameters.string_parameter('invert', None, "-{_name}"),
         'background': pos_parameters.string_parameter('background', "white", "-{_name} {_value}"),
         'gravity': pos_parameters.string_parameter('gravity', "NorthWest", "-{_name} {_value}"),
         'extent': pos_parameters.vector_parameter('extent', None, "-{_name} {_list}"),
@@ -101,7 +101,8 @@ class preprocess_reference(pos_wrappers.generic_wrapper):
     """
 
     _template = """convert {input_image} \
-        {resize} {background} {gravity} {extent} -alpha off -colors 256 \
+        {resize} {background} {gravity} {extent} \
+        -alpha off -alpha remove -colors 256 \
         \( +clone -write {output_image} +delete \) \
         {threshold} -fill "#010101" -opaque "#000000" \
         -fill "#000000" -opaque "#ffffff" {output_mask};"""
@@ -236,8 +237,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
     }
 
     slicing_planes_settings = {
-        "saggital": {'permutation': [2, 0, 1], 'flip': [0, 0, 0], 'axis': 0},
-        "sagital": {'permutation': [2, 0, 1], 'flip': [0, 0, 0], 'axis': 0},
+        "sagittal": {'permutation': [2, 0, 1], 'flip': [0, 0, 0], 'axis': 0},
         "coronal": {'permutation': [0, 2, 1], 'flip': [0, 0, 0], 'axis': 1},
         "axial": {'permutation': [0, 1, 2], 'flip': [0, 0, 0], 'axis': 2},
         "horizontal": {'permutation': [0, 1, 2], 'flip': [0, 0, 0], 'axis': 2}}
@@ -252,7 +252,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # Therefore it is nice to be able to at least read them in for the
         # purpose of processing. Yes, the input images directory has to be
         # provided, it is obligatory.
-        assert self.options.inputImagesDir, \
+        assert self.options.input_images_dir, \
             self._logger.error(r("Directory with the input images is not\
             provided. Please supply the --input-images-dir command line \
             options and try again."))
@@ -260,24 +260,24 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         # The second very important directory is the xls workbook with all the
         # metadata required for the purpose of the preprocessing and then
         # further reconstruction. Without this one we cannot proceed
-        assert self.options.inputWorkbook, \
+        assert self.options.input_workbook, \
             self._logger.error(r("The input xls file \
             is not provided. Please supply the --input-workbook \
             command line option and try again."))
 
         # Yep, we know where to look for the input workbook, but does the file
         # actually exists? The workbook file has to exist.
-        assert os.path.isfile(self.options.inputWorkbook), \
+        assert os.path.isfile(self.options.input_workbook), \
             self._logger.error(r("The workbook file does not exist: %s. \
-                Exiting." % self.options.inputWorkbook))
+                Exiting." % self.options.input_workbook))
 
         # This was just the basic set of the parameters. Now it's time for
         # something more complicated: combination of the valid parameters: Case
         # 1: We turn processing of the reference secetions but no reference
         # sections directory is actually prvided. Return error and yell at the
         # used :)
-        if self.options.doReference:
-            assert self.options.inputReferenceDir, \
+        if self.options.enable_reference:
+            assert self.options.input_reference_dir, \
                 self._logger.error(r("Hey! Something is wrong here. \
                 You turned on\
                 processing the reference sections (--enable-reference) but \
@@ -291,16 +291,16 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
     def launch(self):
 
         # Override the default reference images directory if required:
-        if self.options.inputReferenceDir is not False:
+        if self.options.input_reference_dir is not False:
             self.f['raw_ref_imgs'].override_dir = \
-                self.options.inputReferenceDir
+                self.options.input_reference_dir
 
         # Load the image settings chart and process and extract all the
         # required metadata.
 
-        self.w = worksheet_manager(self.options.inputWorkbook,
-            self.options.outputWorkbook,
-            images_dir=self.options.inputImagesDir)
+        self.w = worksheet_manager(self.options.input_workbook,
+            self.options.output_workbook,
+            images_dir=self.options.input_images_dir)
         self.w.process()
 
         # -----------------------------------------------------------
@@ -310,31 +310,31 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             self._from_source_to_masks()
             self._to_niftis()
 
-        if self.options.doSourceStacking:
+        if self.options.enable_source_stacking:
             self._stack_images_and_masks()
 
         # Process the reference dataset processing only when it is actually
         # enabled by the command line parameter as well as by the contents of
         # the excell file.
-        if self.options.doReference and self.w._use_atlas:
+        if self.options.enable_reference and self.w._use_atlas:
             self._process_reference()
 
         # Remasking means applying a certain type of mask to the input rgb
         # image. There are several types of masks, read trough the code to find
         # out more.
-        if self.options.doRemasking:
+        if self.options.enable_remasking:
             self._remask()
 
         # Slice extraction means extracting the individual slices stacks from
         # the masked volumes. Bla bla...
-        if self.options.doSliceExtraction:
+        if self.options.enable_slice_extraction:
             self._prepare_input_slices()
 
         # Filename of the header file. The header file is a bash script which
         # is intended to be sourced in to simplyfy calculations by providing
         # some frequently used variables. If the header file is not required
         # just do not provide thi option.
-        if self.options.headerFile:
+        if self.options.header_file:
             self._generate_bash_header()
 
     def _process_reference(self):
@@ -382,10 +382,10 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             command = preprocess_reference(
                 input_image=self.f['raw_ref_imgs'](idx=reference_index),
                 resize=reference_resize_factor,
-                background=self.options.referenceBackground,
-                gravity=self.options.referenceGravity,
-                extent=self.options.referenceExtent,
-                threshold=self.options.referenceThreshold,
+                background=self.options.reference_background,
+                gravity=self.options.reference_gravity,
+                extent=self.options.reference_extent,
+                threshold=self.options.reference_threshold,
                 output_image=self.f['source_ref_imgs'](idx=index),
                 output_mask=self.f['source_ref_imgs_mask'](idx=index))
             commands.append(copy.copy(command))
@@ -455,7 +455,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             # The name is composed from the source images directory,
             # which is passed as a command line parameter.
             source_image_filename =\
-                os.path.join(self.options.inputImagesDir,
+                os.path.join(self.options.input_images_dir,
                 self.w._images[input_index].image_name)
 
             # There is some syntax below which is a bit stupid:
@@ -464,18 +464,18 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             # and we cannot pass False. It's ugly. I know that.
             command = input_image_padding(
                 input_image=source_image_filename,
-                negate=self.options.NegateInputImages,
+                invert=self.options.invert_input_images,
                 extent=image.padded_size,
-                background=self.options.canvasBackground,
+                background=self.options.canvas_background,
                 rotation=image.rotation,
                 horizontal_flip=[None, True][int(image.horizontal_flip)],
                 vertical_flip=[None, True][int(image.vertical_flip)],
                 temp_mask=self.f['raw_png_masks'](idx=index),
                 full_size_output=self.f['raw_png_full'](idx=index),
-                median=self.options.maskMedian,
-                color_channel=self.options.maskColorChannel,
-                gravity=self.options.canvasGravity,
-                threshold=self.options.maskThreshold)
+                median=self.options.mask_median,
+                color_channel=self.options.mask_color_channel,
+                gravity=self.options.canvas_gravity,
+                threshold=self.options.mask_threshold)
             commands.append(copy.copy(command))
 
         self.execute(commands)
@@ -541,7 +541,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         by default. The source stack mask is stacked into 3d stack as well.
 
         The remaining two volumes are stacked only upon request
-        (useSliceToSliceMask and useSliceToReferenceMask).
+        (use_slice_to_slice_mask and use_slice_to_reference_mask).
         """
 
         # Collect all the commands into a single batch instead of executing
@@ -571,7 +571,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # Ok, if we are using slice-to-slice masks then we need to create
         # proper slice to slice mask image Create the slice-to-slice mask
-        if self.options.useSliceToSliceMask:
+        if self.options.use_slice_to_slice_mask:
             commands = []
             command = pos_wrappers.copy_wrapper(
                 source=[self.f['source_stacks'](stack_name="mask")],
@@ -581,7 +581,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # Similarly, if we are planning to use a slice-to-reference mask
         # Then create the slice-to-reference mask.
-        if self.options.useSliceToReferenceMask:
+        if self.options.use_slice_to_reference_mask:
             commands = []
             command = pos_wrappers.copy_wrapper(
                 source=[self.f['source_stacks'](stack_name="mask")],
@@ -639,7 +639,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         wrapper = remask_wrapper(
             mask_file=self.f['source_stacks'](stack_name=mask_file),
             input_volume=self.f['source_stacks'](stack_name=image_file),
-            replace=[0, self.options.maskingBackground],
+            replace=[0, self.options.masking_background],
             masked_volume=self.f['source_stacks'](stack_name=output_file))
         return copy.copy(wrapper)
 
@@ -658,13 +658,13 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         commands.append(command)
 
         # If required, the slice-to-slice masked volume is generated.
-        if self.options.useSliceToSliceMask:
+        if self.options.use_slice_to_slice_mask:
             command = self._get_remask_wrapper("slice_to_slice_mask",
                 "rgb", "rgb_slice_to_slice_masked")
             commands.append(command)
 
         # If required, the slice-to-reference mask is generated.
-        if self.options.useSliceToReferenceMask:
+        if self.options.use_slice_to_reference_mask:
             command = self._get_remask_wrapper("slice_to_reference_mask",
                 "rgb", "rgb_slice_to_reference_masked")
             commands.append(command)
@@ -694,14 +694,14 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             self.f['seq_input_mask']()]
 
         # Slice-to-slice slices and masks are extracted upon request
-        if self.options.useSliceToSliceMask:
+        if self.options.use_slice_to_slice_mask:
             input_names.append(self.f['source_stacks'](stack_name='rgb_slice_to_slice_masked'))
             input_names.append(self.f['source_stacks'](stack_name='slice_to_slice_mask'))
             output_namings.append(self.f['seq_slice_to_slice']())
             output_namings.append(self.f['seq_slice_to_slice_mask']())
 
         # Slice-to-reference slices and masks are extracted upon purpose
-        if self.options.useSliceToReferenceMask:
+        if self.options.use_slice_to_reference_mask:
             input_names.append(self.f['source_stacks'](stack_name='rgb_slice_to_reference_masked'))
             input_names.append(self.f['source_stacks'](stack_name='slice_to_reference_mask'))
             output_namings.append(self.f['seq_slice_to_ref']())
@@ -709,11 +709,11 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # If reference-to-slice images are required, extract them.
         # We perform the slice extraction only when the
-        # 'useReferenceToSliceMask'
+        # 'use_reference_to_slice_mask'
         # as well as the proper "use atlas" switch in the excel file are
         # defined.
-        if all([self.options.useReferenceToSliceMask, self.w._use_atlas,
-               self.options.doReference]):
+        if all([self.options.use_reference_to_slice_mask, self.w._use_atlas,
+               self.options.enable_reference]):
             input_names.append(self.f['source_stacks'](stack_name='atlas_masked'))
             input_names.append(self.f['source_stacks'](stack_name='atlas_mask'))
             output_namings.append(self.f['seq_ref_to_slice']())
@@ -891,7 +891,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         header += "}\n"
 
         # Ok, now just save the string into a file.
-        open(self.options.headerFile, 'w').write(header)
+        open(self.options.header_file, 'w').write(header)
 
 
     # ---------------------------------------------------------------------
@@ -902,7 +902,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         """
         Extracts and returns the slicing plane index in RAS convention,
         following the `slicing_planes_settings` variable. So: 0 goes for
-        saggital, 1 goes for coronal, 2 goes for axial.
+        sagittal, 1 goes for coronal, 2 goes for axial.
         """
         # Note that this method requires the self.w._slicing_plane  to be set.
         # usually it is.
@@ -1079,19 +1079,19 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
         obligatory_options.add_option('--input-images-dir', default=None,
-            type='str', dest='inputImagesDir',
+            type='str', dest='input_images_dir',
             help='The directory from which the input images will be read.')
         obligatory_options.add_option('--input-reference-dir', default=None,
-            type='str', dest='inputReferenceDir',
+            type='str', dest='input_reference_dir',
             help='The directory holding the reference slices.')
         obligatory_options.add_option('--input-workbook', default=None,
-            type='str', dest='inputWorkbook',
+            type='str', dest='input_workbook',
             help='Input workbook.')
         obligatory_options.add_option('--output-workbook', default=None,
-            type='str', dest='outputWorkbook',
+            type='str', dest='output_workbook',
             help='Output workbook.')
         obligatory_options.add_option('--header-file', default=None,
-            type='str', dest='headerFile',
+            type='str', dest='header_file',
             help=r('Filename of the header file. The header file \
             is a bash script which is intended to be sourced in to simplyfy\
             calculations by providing some frequently used variables.\
@@ -1108,81 +1108,81 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         source_processing.add_option('--disable-process-source-images', default=False,
             dest='doProcessSourceImages', action='store_false')
 
-        source_processing.add_option('--negate-input-images', default=None,
-            dest='NegateInputImages', action='store_true')
+        source_processing.add_option('--invert-input-images', default=None,
+            dest='invert_input_images', action='store_true')
         source_processing.add_option('--canvas-gravity', default="NorthWest",
-            dest='canvasGravity', action='store', type="choice",
+            dest='canvas_gravity', action='store', type="choice",
             choices=["NorthWest", "Center"],
             help='Image canvas extention gravity.')
         source_processing.add_option('--canvas-background', default="white",
-            dest='canvasBackground', action='store', type="str",
+            dest='canvas_background', action='store', type="str",
             help='Canvas color.')
         source_processing.add_option('--mask-threshold', default=93.,
-            dest='maskThreshold', action='store', type="float",
+            dest='mask_threshold', action='store', type="float",
             help='0-100 value.')
         source_processing.add_option('--mask-median', default=5,
-            dest='maskMedian', action='store', type="int",
+            dest='mask_median', action='store', type="int",
             help='Integer')
         source_processing.add_option('--mask-color-channel', default="red",
-            dest='maskColorChannel', action='store', type="choice",
+            dest='mask_color_channel', action='store', type="choice",
             choices=["R", "G", "B", "Red", "Green", "Blue", "red",
             "green", "blue", "r", "g", "b"],
-            help='red|green|blue|r|g|b')
+            help='Decide which color channel will be used to generate the mask red|green|blue|r|g|b')
         source_processing.add_option('--masking-background', default=255,
-            dest='maskingBackground', action='store', type="int",
-            help='Integer to which background value will be replaced.')
+            dest='masking_background', action='store', type="int",
+            help='Integer to which background value will be replaced in masked image')
 
 
         stacking_options = OptionGroup(parser, 'Images stacking options')
 
         stacking_options.add_option('--enable-remasking', default=False,
-            dest='doRemasking', action='store_true',
+            dest='enable_remasking', action='store_true',
             help='Do remasking')
         stacking_options.add_option('--disable-remasking', default=False,
-            dest='doRemasking', action='store_false')
+            dest='enable_remasking', action='store_false')
 
         stacking_options.add_option('--enable-slice-extraction', default=False,
-            dest='doSliceExtraction', action='store_true',
+            dest='enable_slice_extraction', action='store_true',
             help='Do slice extration.')
         stacking_options.add_option('--disable-slice-extraction', default=False,
-            dest='doSliceExtraction', action='store_false')
+            dest='enable_slice_extraction', action='store_false')
 
         stacking_options.add_option('--enable-source-stacking', default=False,
-            dest='doSourceStacking', action='store_true',
+            dest='enable_source_stacking', action='store_true',
             help='Process the initial slices into the initial stacks.')
         stacking_options.add_option('--disable-source-stacking', default=False,
-            dest='doSourceStacking', action='store_false')
+            dest='enable_source_stacking', action='store_false')
 
         stacking_options.add_option('--use-slice-to-slice-mask', default=False,
-            dest='useSliceToSliceMask', action='store_true',
+            dest='use_slice_to_slice_mask', action='store_true',
             help='Generate and use slice to slice mask.')
         stacking_options.add_option('--use-slice-to-reference-mask', default=False,
-            dest='useSliceToReferenceMask', action='store_true',
+            dest='use_slice_to_reference_mask', action='store_true',
             help='Generate and use slice to reference mask.')
 
 
         reference_options = OptionGroup(parser, 'Reference images processing options')
         reference_options.add_option('--enable-reference', default=False,
-            dest='doReference', action='store_true',
+            dest='enable_reference', action='store_true',
             help='General switch for the reference images processing.')
         reference_options.add_option('--disable-reference', default=False,
-            dest='doReference', action='store_false')
+            dest='enable_reference', action='store_false')
 
         reference_options.add_option('--use-reference-to-slice-mask', default=False,
-            dest='useReferenceToSliceMask', action='store_true',
+            dest='use_reference_to_slice_mask', action='store_true',
             help='Generate and use reference to slice mask.')
         reference_options.add_option('--reference-extent', default=None,
-            dest='referenceExtent', action='store', type="int", nargs=2,
+            dest='reference_extent', action='store', type="int", nargs=2,
             help='Extent of the reference images.')
         reference_options.add_option('--reference-gravity', default="NorthWest",
-            dest='referenceGravity', action='store', type="choice",
+            dest='reference_gravity', action='store', type="choice",
             choices=["NorthWest", "Center"],
             help='Gravity of the reference extent.')
         reference_options.add_option('--reference-background', default='white',
-            dest='referenceBackground', action='store', type="str",
+            dest='reference_background', action='store', type="str",
             help='Background of the reference image.')
         reference_options.add_option('--reference-threshold', default=99.,
-            dest='referenceThreshold', action='store', type="float",
+            dest='reference_threshold', action='store', type="float",
             help='0-100 value.')
 
         parser.add_option_group(obligatory_options)
