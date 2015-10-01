@@ -1081,9 +1081,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         obligatory_options.add_option('--input-images-dir', default=None,
             type='str', dest='input_images_dir',
             help='The directory from which the input images will be read.')
-        obligatory_options.add_option('--input-reference-dir', default=None,
-            type='str', dest='input_reference_dir',
-            help='The directory holding the reference slices.')
         obligatory_options.add_option('--input-workbook', default=None,
             type='str', dest='input_workbook',
             help='Input workbook.')
@@ -1140,19 +1137,17 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
             help='Do remasking')
         stacking_options.add_option('--disable-remasking', default=False,
             dest='enable_remasking', action='store_false')
-
         stacking_options.add_option('--enable-slice-extraction', default=False,
             dest='enable_slice_extraction', action='store_true',
             help='Do slice extration.')
+
         stacking_options.add_option('--disable-slice-extraction', default=False,
             dest='enable_slice_extraction', action='store_false')
-
         stacking_options.add_option('--enable-source-stacking', default=False,
             dest='enable_source_stacking', action='store_true',
             help='Process the initial slices into the initial stacks.')
         stacking_options.add_option('--disable-source-stacking', default=False,
             dest='enable_source_stacking', action='store_false')
-
         stacking_options.add_option('--use-slice-to-slice-mask', default=False,
             dest='use_slice_to_slice_mask', action='store_true',
             help='Generate and use slice to slice mask.')
@@ -1162,12 +1157,16 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
 
         reference_options = OptionGroup(parser, 'Reference images processing options')
+
         reference_options.add_option('--enable-reference', default=False,
             dest='enable_reference', action='store_true',
             help='General switch for the reference images processing.')
         reference_options.add_option('--disable-reference', default=False,
             dest='enable_reference', action='store_false')
 
+        reference_options.add_option('--input-reference-dir', default=None,
+            type='str', dest='input_reference_dir',
+            help='The directory holding the reference slices.')
         reference_options.add_option('--use-reference-to-slice-mask', default=False,
             dest='use_reference_to_slice_mask', action='store_true',
             help='Generate and use reference to slice mask.')
