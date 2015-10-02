@@ -12,12 +12,13 @@ import itk
 
 from possum import pos_itk_core
 from possum import pos_wrapper_skel
+from possum.pos_common import r
 
 
 class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     """
-    The purpose of this class is to change order of slices of given volume along
-    specified axis according to a provided mapping.
+    The purpose of this class is to change order of slices of given volume
+    along specified axis according to a provided mapping.
     """
 
     # This is the the one and only multichannel output image type supported by
@@ -34,26 +35,30 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # Well, that's simple: the script only accepts 0,1,2 as image slicing
         # plane.
         assert self.options.slicing_axis in [0, 1, 2],\
-            self._logger.error("The slicing plane has to be either 0, 1 or 2.")
+            self._logger.error(r("The slicing plane has to be either 0, 1 or 2."))
 
         # And we DO require an input image.
-        assert self.options.inputImage is not None,\
-            self._logger.error("No input provided (-i ....). Plese supply input filename and try again.")
+        assert self.options.input_image is not None,\
+            self._logger.error(r("No input provided (-i ....). \
+            Plese supply input filename and try again."))
 
         # And we DO require the name of the output image.
-        assert self.options.outputImage is not None,\
-            self._logger.error("No outpu image name provided (-o). Plese supply input filename and try again.")
+        assert self.options.output_image is not None,\
+            self._logger.error(r("No output image name provided (-o). \
+            Plese supply input filename and try again."))
 
         # Print a warning if no mapping file is provided.
         if not self.options.mapping:
-            self._logger.warning("No mapping file has been provided! Slices will be reordered according to the randomly generated permutation.")
+            self._logger.warning(r("No mapping file has been provided! \
+            Slices will be reordered according to \
+            a randomly generated permutation."))
 
     def _read_input_image(self):
         """
         Reads the input image and sets some auxiliary variables like image type
         and dimensionality.
         """
-        input_filename = self.options.inputImage
+        input_filename = self.options.input_image
 
         # Determine the input image type (data type and dimensionality)
         self._input_image_type =\
@@ -63,7 +68,8 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         # Load the provided image,
         self._logger.debug("Reading volume file %s", input_filename)
-        self._image_reader = itk.ImageFileReader[self._input_image_type].New()
+        self._image_reader = \
+            itk.ImageFileReader[self._input_image_type].New()
         self._image_reader.SetFileName(input_filename)
         self._image_reader.Update()
 
@@ -77,7 +83,9 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         # Checking if the provided file is a volume -- it has to be exactly
         # three dimensional, no more, no less!
         assert len(self._image_shape) == 3, \
-            self._logger.error("The provided image is not three dimensional one. A three dimensional image is required.")
+            self._logger.error(r("The provided image is not \
+            a three dimensional one. \
+            A three dimensional image is required."))
 
     def _random_slices_permutation(self):
         """
@@ -121,7 +129,8 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
     def _check_mapping_structure(self):
         """
-        Checks if the provided mapping is a correct one. The criteria are following:
+        Checks if the provided mapping is a correct one. The criteria are
+        following:
 
             - the mapping starts from slice no 1.
             - the length of the mapping is the same as the number of the
@@ -129,6 +138,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
             - the mapping contains an exactly one entry for each of the output
               slices.
         """
+
         # Get the length of the mapping.
         mapping_length = len(self._reorder_mapping.keys())
         slicing_plane_length =\
@@ -136,18 +146,23 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         # Assert the length of the mapping
         assert mapping_length == slicing_plane_length,\
-            self._logger.error("The number of entries in the mapping (%d) does not match the number of slices (%d). Please check.",
-                mapping_length, slicing_plane_length)
+            self._logger.error(r("The number of entries in the mapping \
+            (%d) does not match the number of slices (%d). \
+            Please check."),
+            mapping_length, slicing_plane_length)
 
         # Assert the length of the mapping
         assert max(self._reorder_mapping.keys()) == slicing_plane_length,\
-            self._logger.error("The extent of the mapping (%d) is different than the number of slices (%d). Please correct.",
-                max(self._reorder_mapping.keys()), slicing_plane_length)
+            self._logger.error(r("The extent of the mapping (%d) \
+            is different than the number of slices (%d). \
+            Please correct."),
+            max(self._reorder_mapping.keys()), slicing_plane_length)
 
         # Check if the mapping starts with the proper index.
         assert min(self._reorder_mapping.keys()) == 1,\
-            self._logger.error("The mapping has to start from exactly 1. A different value (%d) has been encountered. Please correct.",
-                min(self._reorder_mapping.keys()))
+            self._logger.error(r("The mapping has to start from exactly 1. \
+            A different value (%d) has been encountered. Please correct."),
+            min(self._reorder_mapping.keys()))
 
         # Ok, let's sum up all the important information about the mapping:
         self._logger.info("First slice of the mapping: %d.",
@@ -170,7 +185,8 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
             try:
                 self._get_mapping_from_file()
             except:
-                self._logger.error("The mapping file cannot be parsed for some reason. Please check it.")
+                self._logger.error(r("The mapping file cannot \
+                be parsed for some reason. Please check it."))
 
         # Whatever is the source of the mapping, it is better to check if the
         # mapping itself is a correct one. In the future there may be more
@@ -228,7 +244,7 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
         compose.Update()
 
         # At the end, save the image.
-        itk.write(compose.GetOutput(), self.options.outputImage)
+        itk.write(compose.GetOutput(), self.options.output_image)
 
     def _process_grayscale_image(self):
         """
@@ -246,8 +262,8 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
 
         # At the end, save the image.
         self._logger.info("Writing the processed file to: %s.",
-                          self.options.outputImage)
-        itk.write(processed_channel, self.options.outputImage)
+                          self.options.output_image)
+        itk.write(processed_channel, self.options.output_image)
 
     def launch(self):
 
@@ -275,27 +291,29 @@ class reorder_volume_workflow(pos_wrapper_skel.enclosed_workflow):
     @staticmethod
     def parseArgs():
         __output_vol_command_line_args_help = {}
-        __output_vol_command_line_args_help['inputImage'] =\
+        __output_vol_command_line_args_help['input_image'] =\
             """Required: input image filename."""
-        __output_vol_command_line_args_help['outputImage'] =\
+        __output_vol_command_line_args_help['output_image'] =\
             """Required: output image filename."""
         __output_vol_command_line_args_help['mapping'] =\
             """A mapping file for driving the reordering process."""
         __output_vol_command_line_args_help['slicing_axis'] =\
-            """A index of the axis along which the slices will be reordered. The only allowed values are 0, 1, 2. The default value is 0."""
+            r("A index of the axis along which the slices \
+            will be reordered. The only allowed values are 0, 1, 2. \
+            The default value is 1.")
 
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
-        parser.add_option('--inputImage', '-i', dest='inputImage',
+        parser.add_option('--input-image', '-i', dest='input_image',
                 type='str', default=None,
-                help=__output_vol_command_line_args_help['inputImage'])
-        parser.add_option('--outputImage', '-o', dest='outputImage',
+                help=__output_vol_command_line_args_help['input_image'])
+        parser.add_option('--output-image', '-o', dest='output_image',
                 type='str', default=None,
-                help=__output_vol_command_line_args_help['outputImage'])
+                help=__output_vol_command_line_args_help['output_image'])
         parser.add_option('--mapping', dest='mapping',
                 type='str', default=None,
                 help=__output_vol_command_line_args_help['mapping'])
         parser.add_option('--slicing-axis', '-s', dest='slicing_axis',
-                type='int', default=0,
+                type='int', default=1,
                 help=__output_vol_command_line_args_help['slicing_axis'])
 
         (options, args) = parser.parse_args()
