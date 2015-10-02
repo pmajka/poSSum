@@ -203,8 +203,48 @@ _pos_process_source_images()
 
 }
 
+_pos_reorder_volume()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="--help -h \
+        --input-image --output-image \
+        --mapping --slicing-axis"
+
+    if [[ ${prev} == 'pos_reorder_volume' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--input-image' ] || [ ${prev} == '-i' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-image' ] || [ ${prev} == '-o' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--slicing-axis' ] || [ ${prev} == '-s' ] ; then
+        COMPREPLY=( $(compgen -W "0 1 2" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--mapping' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+}
+
 complete -F _pos_slice_volume pos_slice_volume
 complete -F _pos_stack_sections pos_stack_sections
 complete -F _pos_process_source_images pos_process_source_images
-
-
+complete -F _pos_reorder_volume pos_reorder_volume
