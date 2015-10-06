@@ -15,6 +15,8 @@ from optparse import OptionParser, OptionGroup
 import pos_common
 import pos_wrappers
 
+CONST_CMD_LINE_OPTIONS_OUTPUT_VOL_SETTINGS = "Output volumes settings"
+CONST_CMD_LINE_OPTIONS_GENERAL_SETTINGS = "General workflow settings"
 
 class generic_workflow(object):
     """
@@ -422,34 +424,35 @@ class generic_workflow(object):
         """
         parser = OptionParser(usage=cls._usage)
 
-        workflowSettings = OptionGroup(parser, 'General workflow settings')
+        workflowSettings = \
+            OptionGroup(parser, CONST_CMD_LINE_OPTIONS_GENERAL_SETTINGS)
         workflowSettings.add_option('--job-id', '-j', dest='job_id', type='str',
-                default=None, help='Job identifier. An optional value identyfying this particular workflow. If ommited, the job_id will be generated automatically.')
+            default=None, help='Job identifier. An optional value identyfying this particular workflow. If ommited, the job_id will be generated automatically.')
         workflowSettings.add_option('--work-dir', '-d', dest='workdir', type='str',
-                default=None, help='Sets the working directory of the process. Overrides the "--disable-shared-memory" switch.')
+            default=None, help='Sets the working directory of the process. Overrides the "--disable-shared-memory" switch.')
         workflowSettings.add_option('--loglevel', dest='loglevel', type='str',
-                default='WARNING', help='Loglevel: CRITICAL | ERROR | WARNING | INFO | DEBUG')
+            default='WARNING', help='Loglevel: CRITICAL | ERROR | WARNING | INFO | DEBUG')
         workflowSettings.add_option('--log-filename', dest='log_filename',
-                default=None, action='store', type='str',
-                help='Sets dumping the execution log file instead stderr')
+            default=None, action='store', type='str',
+            help='Sets dumping the execution log file instead stderr')
         workflowSettings.add_option('--disable-shared-memory', default=False,
             dest='disable_shared_memory', action='store_const', const=True,
             help='Forces script to use hard drive to store the worklfow data instaed of using RAM disk.')
         workflowSettings.add_option('--specimen-id', default=None,
-                dest='specimen_id', action='store', type='str',
-                help='Identifier of the specimen. Providing the ID is obligatory. Script will not run without providing specimen ID.')
+            dest='specimen_id', action='store', type='str',
+            help='Identifier of the specimen. Providing the ID is obligatory. Script will not run without providing specimen ID.')
         workflowSettings.add_option('--dry-run', default=False,
-                action='store_const', const=True, dest='dry_run',
-                help='Prints the commands to stdout instead of executing them')
+            action='store_const', const=True, dest='dry_run',
+            help='Prints the commands to stdout instead of executing them')
         workflowSettings.add_option('--cpus', default=None,
-                type='int', dest='cpus',
-                help='Set a number of CPUs for parallel processing. If skipped, the number of CPUs will be automatically detected.')
+            type='int', dest='cpus',
+            help='Set a number of CPUs for parallel processing. If skipped, the number of CPUs will be automatically detected.')
         workflowSettings.add_option('--archive-work-dir', default=None,
-                type='str', dest='archive_work_dir',
-                help='Compresses (.tgz) and moves workdir to a given directory')
+            type='str', dest='archive_work_dir',
+            help='Compresses (.tgz) and moves workdir to a given directory')
         workflowSettings.add_option('--cleanup', default=False,
-                dest='cleanup', action='store_const', const=True,
-                help='Remove the worklfow directory after calculations. Use when you are sure that the workflow will execute correctly.')
+            dest='cleanup', action='store_const', const=True,
+            help='Remove the worklfow directory after calculations. Use when you are sure that the workflow will execute correctly.')
         parser.add_option_group(workflowSettings)
         return parser
 
@@ -528,7 +531,7 @@ numbers. E.g. \'0 0 1\' will flip the z axis."""
         parser = generic_workflow._getCommandLineParser()
 
         outputVolumeSettings = \
-            OptionGroup(parser, 'Output volumes settings')
+            OptionGroup(parser, CONST_CMD_LINE_OPTIONS_OUTPUT_VOL_SETTINGS)
         outputVolumeSettings.add_option('--output-volume-origin',
             dest='output_volume_origin',
             default=[0., 0., 0.], action='store', type='float', nargs=3,
@@ -585,6 +588,39 @@ class enclosed_workflow(generic_workflow):
         self.options.dry_run = False
         self.options.cleanup = False
         self.options.cpus = 1
+
+    @classmethod
+    def _getCommandLineParser(cls):
+        parser = generic_workflow._getCommandLineParser()
+
+        # Ok, what we are doing here? Well, this might be not exactly in line
+        # with all the sofware development guides and tips but... What we're
+        # doing here it that we are sort of 'thinning' the child class in
+        # comparison with its parent class. In particular, the
+        # "enclosed_workflow" class is supposed to be a 'thin workflow' class
+        # with a bit limited set of featuers and options wrt its parent.
+        # Therefore some of the options have to be removed. There are two
+        # blocks of options to disable: "Output volumes settings", "General
+        # workflow settings". The code below iterated over all the available
+        # option groups and finds the groups to remove. Once located, the
+        # excessive option groups are deleted and the resulting option parser
+        # to be regurned is suited or the purposes of the 'thin workflow'.
+        option_titles_to_remove = \
+            [CONST_CMD_LINE_OPTIONS_OUTPUT_VOL_SETTINGS,
+             CONST_CMD_LINE_OPTIONS_GENERAL_SETTINGS]
+
+        parser_groups_to_remove = []
+
+        # Iterate over all available option groups"
+        for option_grp in parser.option_groups:
+            if option_grp.title in option_titles_to_remove:
+                parser_groups_to_remove.append(option_grp)
+
+        # Remove groups which should be removed. Simple!
+        for option_grp in parser_groups_to_remove:
+            parser.option_groups.remove(option_grp)
+
+        return parser
 
 if __name__ == 'possum.pos_wrapper_skel':
     import doctest

@@ -1,5 +1,4 @@
-- Tests for gradient descent multipliers in pairwise alignment!
-- Excel: download example from brainmaps and calculate
 - pos_itk_core: Image bounds, is inside image?, fit inside image
 - http://www.itk.org/Doxygen/html/Examples_2DataRepresentation_2Image_2Image4_8cxx-example.html#_a1
 - Update the virtual machine.
+- Put all orientation presets into a single file
