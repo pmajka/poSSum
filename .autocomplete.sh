@@ -244,7 +244,50 @@ _pos_reorder_volume()
     fi
 }
 
+_pos_align_by_moments()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="--help -h --fixed-image -f --moving-image -m --output-image -o \
+        --transformation-filename -t"
+    
+
+    if [[ ${prev} == 'pos_align_by_moments' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--transformation-filename' ] || [ ${prev} == '-t' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.txt' -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-image' ] || [ ${prev} == '-o' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.nii.gz' -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--moving-image' ] || [ ${prev} == '-m' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.nii.gz' -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--fixed-image' ] || [ ${prev} == '-f' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.nii.gz' -- ${cur}) )
+        return 0
+    fi
+
+}
+
 complete -F _pos_slice_volume pos_slice_volume
 complete -F _pos_stack_sections pos_stack_sections
 complete -F _pos_process_source_images pos_process_source_images
 complete -F _pos_reorder_volume pos_reorder_volume
+complete -F _pos_align_by_moments pos_align_by_moments
