@@ -41,6 +41,14 @@ poSSum Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`pos_itk_transforms` Module
+--------------------------
+
+.. automodule:: possum.pos_itk_transforms
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`pos_parameters` Module
 ----------------------------
 
