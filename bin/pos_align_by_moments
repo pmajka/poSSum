@@ -41,15 +41,15 @@ class align_by_centre_of_gravity(enclosed_workflow):
     def _validate_options(self):
         super(self.__class__, self)._initializeOptions()
 
-        assert self.options.fixedImage is not None,\
+        assert self.options.fixed_image is not None,\
             self._logger.error(r("No fixed image provided (-f ....). \
                 Plese supply a fixed image and try again."))
 
-        assert self.options.movingImage is not None,\
+        assert self.options.moving_image is not None,\
             self._logger.error(r("No moving image provided (-m ....). \
                 Plese supply a moving image and try again."))
 
-        assert self.options.transformationFileName is not None,\
+        assert self.options.transformation_filename is not None,\
             self._logger.error(("No output transformation \
                 filename provided (-t ....)."))
 
@@ -59,9 +59,9 @@ class align_by_centre_of_gravity(enclosed_workflow):
 
         # At the very beginning, determine input image type to configure the
         # reader.
-        reference_filename = self.options.fixedImage
-        moving_filename = self.options.movingImage
-        output_transform_filename = self.options.transformationFileName
+        reference_filename = self.options.fixed_image
+        moving_filename = self.options.moving_image
+        output_transform_filename = self.options.transformation_filename
 
         # Determine types of both: moving and fixed (reference) images:
         self._fixed_image_type =\
@@ -95,7 +95,7 @@ class align_by_centre_of_gravity(enclosed_workflow):
 
         # It is required that both images are of the same dimension!
         assert self._fixed_image_reader.GetOutput().GetImageDimension() == \
-               self._moving_image_reader.GetOutput().GetImageDimension(),\
+            self._moving_image_reader.GetOutput().GetImageDimension(), \
             self._logger.error(r("The images are not of the \
                     same dimension!. Cannot proceed."))
         # Well, if the images are of the same dimension then store the value:
@@ -131,9 +131,11 @@ class align_by_centre_of_gravity(enclosed_workflow):
         # Well, at the end of the day it would be useful to actually store
         # the transformation :) Let's do it then.
         self._logger.debug(r("Exporting the transformation parameters \
-            to a text file %s"), self.options.transformationFileName)
+            to a text file %s"), self.options.transformation_filename)
 
-        # TODO: Explain WTF?
+        # WTF? Why these two versions of the code? Well...
+        # the way how the transformations writers are instantiated
+        # as actually changes over the course of deveopment
         # http://www.itk.org/Wiki/ITK/Examples/IO/TransformFileReader
         # http://review.source.kitware.com/#/c/14293/1
         if (itk.Version.GetITKMajorVersion() == 4 and
@@ -147,35 +149,40 @@ class align_by_centre_of_gravity(enclosed_workflow):
         transform_writer.SetFileName(output_transform_filename)
         transform_writer.Update()
 
-        if self.options.outpuImage is not None:
-            resliced = pos_itk_transforms.reslice_image([center],
+        if self.options.output_image is not None:
+            resliced = possum.pos_itk_transforms.reslice_image([center],
                 self._moving_image_reader.GetOutput(),
                 self._fixed_image_reader.GetOutput())
-            pos_itk_transforms.write_itk_image(
-                resliced, self.options.outpuImage)
+            possum.pos_itk_transforms.write_itk_image(
+                resliced, self.options.output_image)
 
         # Run parent's post execution activities
         super(self.__class__, self)._post_launch()
 
     @staticmethod
     def parseArgs():
-        usage_string = r("python pos_align_by_center_of_gravity.py ")
-        # TODO: Update the usage string
+        usage_string = r("usage: %prog -f fixed_image -m moving_image \
+            -t transformation_filename [-o output_image]")
+
         parser = \
             possum.pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
+        parser.set_usage(usage_string)
 
-        parser.add_option('--fixedImage', '-f', dest='fixedImage', type='str',
-                default=None, help='Fixed image (target of the alignment).')
-        parser.add_option('--movingImage', '-m', dest='movingImage',
-                type='str', default=None,
-                help='Moving image image (image to be aligned).')
-        parser.add_option('--outpuImage', '-o', dest='outpuImage', type='str',
-                default=None, help=r('Optional argument. Name of the \
-                                     output resliced moving image.'))
-        parser.add_option('--transformationFileName', '-t',
-                dest='transformationFileName', type='str',
-                default=None,
-                help='Filename of the output transformation.')
+
+        parser.add_option('--fixed-image', '-f', dest='fixed_image',
+            type='str', default=None,
+            help='Fixed image (target of the alignment).')
+        parser.add_option('--moving-image', '-m', dest='moving_image',
+            type='str', default=None,
+            help='Moving image image (image to be aligned).')
+        parser.add_option('--output-image', '-o', dest='output_image',
+            type='str', default=None,
+            help=r('Optional argument. Name of the \
+            output resliced moving image.'))
+        parser.add_option('--transformation-filename', '-t',
+            dest='transformation_filename', type='str',
+            default=None,
+            help='Stores output transformation in a file.')
 
         (options, args) = parser.parse_args()
         return (options, args)
