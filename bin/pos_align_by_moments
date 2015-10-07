@@ -50,7 +50,7 @@ class align_by_centre_of_gravity(enclosed_workflow):
                 Plese supply a moving image and try again."))
 
         assert self.options.transformation_filename is not None,\
-            self._logger.error(("No output transformation \
+            self._logger.error(r("No output transformation \
                 filename provided (-t ....)."))
 
     def launch(self):
