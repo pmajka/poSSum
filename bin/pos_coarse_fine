@@ -17,6 +17,7 @@ from optparse import OptionGroup
 from possum import pos_parameters
 from possum import pos_wrappers
 from possum.pos_wrapper_skel import generic_workflow
+from possum.pos_common import r
 
 
 class coarse_to_fine_transformation_merger(generic_workflow):
@@ -44,14 +45,16 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         # Assert if both: starting slice index and the last slice index
         # are actually provided.
         assert self.options.sliceIndex is not None,\
-            self._logger.error("Starting and ending slices indexes are not provided. Please supply the starting and ending slice index.")
+            self._logger.error(r("Starting and ending slices indexes \
+            are not provided. Please supply \
+            the first and the last section index."))
 
         # Range of images to register. This is pretty self explaining.
         self.options.slice_range = \
             range(self.options.sliceIndex[0], self.options.sliceIndex[1] + 1)
 
         # Define default smoothing kernels for different type of parameters:
-        fields_array = ['smoothingSimgaRotation', 'smoothingSimgaOffset', \
+        fields_array = ['smoothingSimgaRotation', 'smoothingSimgaOffset',
                         'smoothingSimgaScaling', 'smoothingSimgaFixed']
 
         # This is a bit more complicated. Iterate over the parameters regarding
@@ -66,13 +69,16 @@ class coarse_to_fine_transformation_merger(generic_workflow):
 
         # Assert if the proper transformation naming schemes are provided:
         assert self.options.fineTransformFilenameTemplate is not None,\
-            self._logger.error("Fine transformation filename naming scheme is an obligatory parameter.")
+            self._logger.error(r("Fine transformation filename template \
+            is an obligatory parameter."))
 
         assert self.options.outputTransformFilenameTemplate is not None,\
-            self._logger.error("Please provide an output transformation filename scheme.")
+            self._logger.error("Please provide an output \
+            transformation filename template.")
 
         assert self.options.smoothTransformFilenameTemplate is not None,\
-            self._logger.error("Please provide a smoothed transformation filename scheme.")
+            self._logger.error("Please provide a smoothed \
+            transformation filename template.")
 
         # Latch the provided naming schemes.
         self.f['fine_transf'].override_path = \
@@ -95,7 +101,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
 
         # Oh, an the last but not least. One can assign a custom reports
         # directory (for whatever reason :). If that'workflow the case
-        if self.options.reportsDirectory != None:
+        if self.options.reportsDirectory is not None:
             self.f['fine_report'].override_dir = self.options.reportsDirectory
             self.f['smooth_report'].override_dir = self.options.reportsDirectory
             self.f['difference_report'].override_dir = self.options.reportsDirectory
@@ -190,8 +196,9 @@ class coarse_to_fine_transformation_merger(generic_workflow):
             transformation_string_validation_flag = False
 
         # Assert if the transformation_string_validation_flag is True
-        assert transformation_string_validation_flag,\
-         "One of the supplied transformation files is corrupted or it is not a valid transformation file."
+        assert transformation_string_validation_flag, \
+            r("One of the supplied transformation files is corrupted \
+            or it is not a valid transformation file.")
 
         # Extract the transformation parameters (first line)
         # and then the fixed parameters of the transformation (the bottom line)
@@ -243,7 +250,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         # the parameter :)
         for index, sigma in parameters_index.values():
             for i in index:
-                l[i, :] = gaussian_filter1d(k[i], sigma)[0 : k.shape[1]]
+                l[i, :] = gaussian_filter1d(k[i], sigma)[0: k.shape[1]]
 
         # Save smoothed parameters array:
         smoothed_parameters_array_filename = self.f['smooth_report']()
@@ -256,7 +263,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
 
         # Store difference of two sets of transformations as well:
         diff_parameters_array_filename = self.f['difference_report']()
-        self._save_parameters_array(k-l, diff_parameters_array_filename)
+        self._save_parameters_array(k - l, diff_parameters_array_filename)
 
     def _save_parameters_array(self, parameters_array, filename):
         """
@@ -285,7 +292,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         for i in range(l.shape[1]):
             slice_index = i + self.options.slice_range[0]
             output_filename = self.f['smooth_transf']() % slice_index
-            self._save_itk_transform(list(l[:,i]), output_filename)
+            self._save_itk_transform(list(l[:, i]), output_filename)
 
     def _save_itk_transform(self,  parameters, filename):
         """
@@ -388,32 +395,36 @@ class coarse_to_fine_transformation_merger(generic_workflow):
 
         parser = generic_workflow._getCommandLineParser()
 
-        parser.add_option('-i', '--fineTransformFilenameTemplate', default=None,
-            dest='fineTransformFilenameTemplate', action='store',
-            help='aaa')
-        parser.add_option('-s', '--smoothTransformFilenameTemplate', default=None,
-            dest='smoothTransformFilenameTemplate', action='store',
-            help='')
-        parser.add_option('-o', '--outputTransformFilenameTemplate', default=None,
-            dest='outputTransformFilenameTemplate', action='store',
-            help='Store transformations in given directory instead of using default one.')
-        parser.add_option('--sliceIndex', default=None,
-            type='int', dest='sliceIndex', nargs=2,
+        parser.add_option('-i', '--fineTransformFilenameTemplate',
+            default=None, dest='fineTransformFilenameTemplate',
+            action='store', help='aaa')
+        parser.add_option('-s', '--smoothTransformFilenameTemplate',
+            default=None, dest='smoothTransformFilenameTemplate',
+            action='store', help='')
+        parser.add_option('-o', '--outputTransformFilenameTemplate',
+            default=None, dest='outputTransformFilenameTemplate',
+            action='store',
+            help=r('Store transformations in given directory \
+            instead of using default one.'))
+        parser.add_option('--sliceIndex', default=None, type='int',
+            dest='sliceIndex', nargs=2,
             help='first, last slice index')
 
         preprocessingSettings = \
             OptionGroup(parser, 'Processing settings')
         preprocessingSettings.add_option('--smoothingSimga', default=5,
             type='float', dest='smoothingSimga',
-            help='General smoothing simga. Can be customized for specific parameters.')
+            help=r('General smoothing simga. Can be customized \
+            for specific parameters.'))
         preprocessingSettings.add_option('--smoothingSimgaRotation',
             default=None, type='float',
             dest='smoothingSimgaRotation', help='')
         preprocessingSettings.add_option('--smoothingSimgaScaling',
             default=None, type='float',
             est='smoothingSimgaScaling', help='')
-        preprocessingSettings.add_option('--smoothingSimgaOffset', default=None,
-            type='float', dest='smoothingSimgaOffset', help='')
+        preprocessingSettings.add_option('--smoothingSimgaOffset',
+            default=None, type='float',
+            dest='smoothingSimgaOffset', help='')
         preprocessingSettings.add_option('--smoothingSimgaFixed', default=None,
             type='float', dest='smoothingSimgaFixed', help='')
 
