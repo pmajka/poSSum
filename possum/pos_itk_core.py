@@ -608,7 +608,7 @@ def itk_is_point_inside_region(image, point, region=None):
 
     >>> pos_itk_core.itk_is_point_inside_region(test_image, [-2.9, 17., "x"])
     Traceback (most recent call last):
-    ValueError: Expecting a sequence of int or float
+    ValueError: could not convert string to float: x
 
     >>> pos_itk_core.itk_is_point_inside_region(test_image)
     Traceback (most recent call last):
@@ -678,6 +678,6 @@ def itk_is_point_inside_region(image, point, region=None):
     return region.IsInside(map(int, point_index))
 
 
-import doctest
-doctest.testmod()
-
+if __name__ == 'possum.pos_itk_core':
+    import doctest
+    print doctest.testmod()
