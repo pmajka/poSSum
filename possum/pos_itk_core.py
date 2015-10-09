@@ -498,3 +498,186 @@ def reorder_volume(input_image, reorder_mapping, slicing_plane):
     logger.info("Done.")
     # After conducting all iterations return the output image.
     return output_image
+
+
+def itk_is_point_inside_region(image, point, region=None):
+    """
+
+    :param image: Image inside which the point in question is or is not.
+                  Required argument.
+    :type image: `itk.Image`
+
+    :param point: Point in physical coordinates to be tested. `Iterable` of two
+        or three float values (depending on the dimensionality of the provided
+        image.  The point is expected to be provided in physical coordinates using
+        float numbers.  Explicit float conversion is suggested just in case.
+    :type point: An iterable compatibile with the `itk.Index` class (`list`,
+        `tuple`, or other `iterable`).
+
+    :param region: If the `region` is provided the `point` is tested against
+        the provided `region` instead of the provided `image`. The provided regions
+        has to match the `point` in terms of dimensionality. An instance of
+        `itk.ImageRegion` can be obtained using the `pos_itk_core.get_image_region`
+        function. I am unable to tell if the `region` has to be within the largest
+        possible region of the `image` but I think it would be better if it was.
+    :type region: `itk.ImageRegion`
+
+    :return: `True` when the point is within the image or within the provided
+             region. Returns `False` otherwise.
+    :rtype: bool
+
+    Determines if given point is inside provided image
+
+    Based on example from the ITK wiki:
+    http://itk.org/Wiki/ITK/Examples/SimpleOperations/PixelInsideRegion
+
+    According to the ITK
+
+    For a given index I3X1, the physical location P3X1 is calculated as following:
+        P3X1 = O3X1 + D3X3*diag(S3X1)3x3*I3X1
+
+    spacing = test_image.GetSpacing()
+    origin = test_image.GetOrigin()
+    cosines = test_image.GetDirection().GetVnlMatrix()
+    map(int,test_image.GetLargestPossibleRegion().GetSize())
+    origin[0] + cosines.get(0,0) * spacing[0] * 128
+    origin[1] + cosines.get(1,1) * spacing[0] * 128
+
+    >>> from possum import pos_itk_core
+
+    Testing the inside / outside point detection for a simple 3D image:
+
+    >>> test_image = itk.Image[itk.F,3].New()
+    >>> region =  itk.ImageRegion[(3,)]()
+    >>> region.SetIndex([0, 0, 0])
+    >>> region.SetSize([128, 128, 128])
+    >>> test_image.SetRegions(region)
+    >>> test_image.SetOrigin([0, 0, 0])
+    >>> test_image.SetSpacing([1, 1, 1])
+    >>> test_image.Allocate()
+    >>> test_image.FillBuffer(0)
+
+
+    This is close to the origin of the image
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [0, 0, 0])
+    True
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-1, -1, -1])
+    False
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [0, -1, 0])
+    False
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [0, 1, 0])
+    True
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [0.01, 0, 0])
+    True
+
+
+    Note the interpolation scheme:
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-0.5, 0, 0])
+    True
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-0.51, 0, 0])
+    False
+
+
+    Now we move to the oposite side of the image. Again, mind the way, how the values
+    are interpolated
+    >>> map(int,test_image.GetLargestPossibleRegion().GetSize())
+    [128, 128, 128]
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [127.499, 127.499, 127.499])
+    True
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [127.501, 127.501, 127.501])
+    False
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [127.0, 127.0, -31.23])
+    False
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, (-2.9, 17., 0))
+    False
+
+
+    Let's test some exceptions:
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-2.9, 17.])
+    Traceback (most recent call last):
+    TypeError: Expecting an itkPointD3, an int, a float, a sequence of int or a sequence of float.
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-2.9, 17., "x"])
+    Traceback (most recent call last):
+    ValueError: Expecting a sequence of int or float
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image)
+    Traceback (most recent call last):
+    TypeError: itk_is_point_inside_region() takes at least 2 arguments (1 given)
+
+
+    And now something a bit more complicated. There is an optional `region`
+    argument. When provided this argument provides the actual region against
+    which the region will be tested. In the `region` is not provided, the
+    `LagrestPossibleRegion` of the tested image is used.
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [11., 11.2, 10.232], \
+        get_image_region(3, [10, 10, 10], [20, 20, 20]))
+    True
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [0.2, -1., 0.], \
+        get_image_region(3, [10, 10, 10], [20, 20, 20]))
+    False
+
+    Now we test the whole stuff using a 2D image. When one uses negative indexed,
+    things might get tricky!
+    >>> region =  itk.ImageRegion[(2,)]()
+    >>> region.SetIndex([0, 0])
+    >>> region.SetSize([128, 128])
+
+    >>> test_image = itk.Image[itk.F,2].New()
+    >>> test_image.SetRegions(region)
+    >>> test_image.SetOrigin([-8, 12])
+    >>> test_image.SetSpacing([0.04, 0.04])
+    >>> test_image.Allocate()
+    >>> test_image.FillBuffer(0)
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [0, 0])
+    False
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-7, 13])
+    True
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-2.9, 17.])
+    True
+
+    Let's test some exceptions:
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-2.9, 17., 1])
+    Traceback (most recent call last):
+    TypeError: Expecting an itkPointD2, an int, a float, a sequence of int or a sequence of float.
+
+
+    And now testing the point against a region:
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [11, 11], \
+        get_image_region(2, [10, 10], [20, 20]))
+    False
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-7.4, 12.5], \
+        get_image_region(2, [10, 10], [20, 20]))
+    True
+
+    >>> pos_itk_core.itk_is_point_inside_region(test_image, [-7.4, 12.0], \
+        get_image_region(2, [10, 10], [20, 20]))
+    False
+    """
+
+    point_index = image.TransformPhysicalPointToIndex(map(float, point))
+
+    if region is None:
+        region = image.GetLargestPossibleRegion()
+
+    return region.IsInside(map(int, point_index))
+
+
+import doctest
+doctest.testmod()
+
