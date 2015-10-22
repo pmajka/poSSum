@@ -2,6 +2,14 @@ import logging
 import os
 
 
+IDENTITY_TRANSFORM_2D_STRING = """#Insight Transform File V1.0
+#Transform 0
+Transform: MatrixOffsetTransformBase_double_2_2
+Parameters: 1 0 0 1 0 0
+FixedParameters: 0 0
+"""
+
+
 def get_basename(path, with_extension=False):
     """
     Extract the very filename from the path provided. The filename can be
