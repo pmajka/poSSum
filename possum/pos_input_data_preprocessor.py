@@ -81,7 +81,55 @@ def round_custom(value, level=_DEFAULT_PADDING_ROUNDING):
     :return: `value` rounded up to nearest multiple of `level`
     :rtype: int
 
-    #TODO: doctest
+
+    Testing:
+
+    >>> round_custom(5.3) == 200.0
+    True
+
+    >>> round_custom(0.01) == 200.0
+    True
+
+    >>> round_custom(0) == 100.0
+    True
+
+    >>> round_custom(0) == 100
+    True
+
+    >>> round_custom(1563) == 1600
+    True
+
+    >>> round_custom(1) == 100
+    True
+
+    >>> round_custom(1999) == 2000
+    True
+
+    >>> round_custom(5.3, level=1) == 7.0
+    True
+
+    >>> round_custom(0.01, level=0.2) == 0.4
+    True
+
+    >>> round_custom(0, level=1) == 1.0
+    True
+
+    >>> round_custom(0.1, level=1) == 2
+    True
+
+    >>> round_custom(1563, level=1000) == 2000
+    True
+
+    >>> round_custom(1536, level=200) == 1600
+    True
+
+    >>> round_custom(1999, level=2000) == 2000
+    True
+
+    >>> round_custom(1999, level=2001) == 2001
+    True
+    >>> round_custom(2001, level=100) == 2100
+    True
     """
 
     return math.ceil(value / level + 1) * level
@@ -470,4 +518,5 @@ class worksheet_manager(object):
 
 
 if __name__ == "__main__":
-    pass
+    import doctest
+    print doctest.testmod()
