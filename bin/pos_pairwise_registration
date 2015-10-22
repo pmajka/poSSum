@@ -12,15 +12,8 @@ from optparse import OptionGroup
 
 from possum import pos_wrappers, pos_parameters
 from possum.pos_wrapper_skel import output_volume_workflow
+from possum.pos_common import IDENTITY_TRANSFORM_2D_STRING
 from possum.pos_common import r
-
-# TODO: Put this const into some common settings module
-IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0
-#Transform 0
-Transform: MatrixOffsetTransformBase_double_2_2
-Parameters: 1 0 0 1 0 0
-FixedParameters: 0 0
-"""
 
 
 class pairwiseRegistration(output_volume_workflow):
@@ -353,7 +346,7 @@ class pairwiseRegistration(output_volume_workflow):
         """
         Generated an two dimensional identity transformation.
         """
-        open(filename,'w').write(IDENTITY_TRANSFORM_STRING)
+        open(filename,'w').write(IDENTITY_TRANSFORM_2D_STRING)
 
     def _generate_slice_index(self):
         """
