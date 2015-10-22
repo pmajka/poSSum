@@ -245,6 +245,42 @@ def write_itk_image(image_to_save, filename):
     writer.Update()
 
 
+def itk_read_transformations_from_files(transformation_files):
+    """
+    Loads transformations from provided list of filenames. The provided
+    transformations have to be either text based ITK affine transformations or
+    displacement fileld transformations (saved as Niftii files). Other
+    transformations formats are not supported.
+
+    :param transformation_files: List of files containing either affine or
+    deformable transformation in an ITK-readable format.
+    :type transformation_files: [str, str, ...]
+
+    :return: List of itk transformations.
+    :rtype: [``itk.Tranfsorm``, ...]
+    """
+
+    transformations = []
+
+    #TODO: Provide debugging information so one will have a better idea
+    # of what is going on around.
+
+    # Load transformations from the list. The transformations will be most
+    # probably applied in the reverse order than the order of the list.
+    for transformation_filename in transformation_files:
+        if transformation_filename.endswith(".txt"):
+            transformations.append(\
+                load_itk_matrix_transform_from_file(transformation_filename))
+        elif transformation_filename.endswith(".nii.gz"):
+            transformations.append(\
+                load_warp_field_transform_from_file(transformation_filename))
+        else:
+            print "Unrecognized transformation type: %s " \
+                    % transformation_filename
+
+    return transformations
+
+
 def apply_transformation_workflow(moving_file, output_file, reference_file, transformation_list=None):
     """
     Currently only two types of transformations are supported. If the
@@ -270,24 +306,68 @@ def apply_transformation_workflow(moving_file, output_file, reference_file, tran
     moving_image = read_itk_image(moving_file)
     reference_image = read_itk_image(reference_file)
 
-    transformations = []
-
-    # Load transformations from the list. The transformations will be most
-    # probably applied in the reverse order than the order of the list.
-    for transformation_filename in transformation_list:
-        if transformation_filename.endswith(".txt"):
-            transformations.append(\
-                load_itk_matrix_transform_from_file(transformation_filename))
-        elif transformation_filename.endswith(".nii.gz"):
-            transformations.append(\
-                load_warp_field_transform_from_file(transformation_filename))
-        else:
-            print "Unrecognized transformation type"
+    transformations = \
+        itk_read_transformations_from_files(transformation_list)
 
     resliced_image = reslice_image(transformations,
         moving_image, reference_image)
 
     write_itk_image(resliced_image, output_file)
+
+
+def itk_coordinate_map(input_image, physical=True):
+    """
+    Generates coordinate map. Lousy attempt to emulate a way better
+    implementation in Convert3D.
+    """
+    logger = possum.pos_itk_core.logging.getLogger('itk_coordinate_map')
+
+    image_shape = input_image.GetLargestPossibleRegion().GetSize()
+    ndim = len(image_shape)
+
+    if physical:
+        logger.info("Creating physical coordinates map.")
+    else:
+        logger.info("Creating voxel coordinates map.")
+
+    logger.info("Provided image has a shape of : %s", map(str, image_shape))
+    logger.debug("Creating float vector canvas image.")
+
+    coordinate_map = itk.Image[(itk.Vector[(itk.F, ndim)], ndim)].New()
+    coordinate_map.SetRegions(input_image.GetLargestPossibleRegion().GetSize())
+    coordinate_map.SetOrigin(input_image.GetOrigin())
+    coordinate_map.SetSpacing(input_image.GetSpacing())
+    coordinate_map.SetDirection(input_image.GetDirection())
+    coordinate_map.Allocate()
+
+    logger.debug("Finished creating the canvas image.")
+    logger.info("Filling out the image buffer with zeros.")
+    coordinate_map.FillBuffer([0.] * ndim)
+
+    # Yeap, we need a proper iterator to handle the iteration over the image
+    # This is a bit fancy as we do not assume any image dimensionality here.
+    # We want this method to be support any number of dimensions (as long as
+    # any is either 2 or 3 :))
+
+    from itertools import product
+    image_ranges = map(lambda x: range(image_shape[x]), range(ndim))
+    voxel_iterator = product(*image_ranges)
+
+    # Ok, now: there are two ways how the method can fill out the canvas image:
+    # one method is to fill individual voxels with the actual coordinates.
+    # The other option is to fill the canvas image with the indices of the
+    # voxels instead of the actual physical coordinates.
+    if physical:
+        logger.info("Filling out the canvas with physical coordinates.")
+        for voxel in voxel_iterator:
+            point = coordinate_map.TransformIndexToPhysicalPoint(voxel)
+            coordinate_map.SetPixel(voxel, point)
+    else:
+        logger.info("Filling out the canvas with voxel indices.")
+        for voxel in voxel_iterator:
+            coordinate_map.SetPixel(voxel, voxel)
+
+    return coordinate_map
 
 
 if __name__ == "__main__":
