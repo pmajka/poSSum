@@ -372,7 +372,6 @@ parameters. The allowed choices are: 'horizontal', 'coronal', 'sagittal'."""
             dest='orientation_preset', type='choice', default=None,
             choices=['horizontal', 'coronal', 'sagittal'],
             help=__output_vol_command_line_args_help['orientation_preset'])
-#       print " ".join(map(lambda x: x.get_opt_string() + " "+ " ".join(x._short_opts), parser._get_all_options()))
 
         return parser
 
