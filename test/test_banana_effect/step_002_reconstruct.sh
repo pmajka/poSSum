@@ -85,12 +85,11 @@ pos_coarse_fine \
     -i 007_sequential_alignment/ct_m%04d_f0110_Affine.txt \
     -s 008_coarse_to_fine/01_smooth/%04d.txt \
     -o 008_coarse_to_fine/02_output/%04d.txt \
-    --sliceIndex ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --smoothingSimgaRotation 5 \
-    --smoothingSimgaOffset 5 \
-    --smoothingSimgaFixed 5 \
-    --smoothingSimgaFixed 5 \
-    --reportsDirectory 008_coarse_to_fine/ \
+    --slice-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --smoothing-simga-rotation 5 \
+    --smoothing-simga-offset 5 \
+    --smoothing-simga-fixed 5 \
+    --reports-directory 008_coarse_to_fine/ \
     --loglevel DEBUG \
     --cleanup
 
