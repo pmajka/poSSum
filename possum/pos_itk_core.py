@@ -34,6 +34,9 @@ io_component_string_name_to_image_type = {
         ('scalar', 'unsigned_short', 2) : itk.Image.US2,
         ('vector', 'unsigned_char', 2) : itk.Image.RGBUC2,
         ('vector', 'float', 3) : itk.Image.VF33,
+        ('vector', 'double', 3) : itk.Image.VD33,
+        ('vector', 'float', 2) : itk.Image.VF22,
+        ('vector', 'double', 2) : itk.Image.VD22,
         ('scalar', 'unsigned_char', 2) : itk.Image.UC2,
         ('scalar', 'float', 2) : itk.Image.F2,
         ('scalar', 'double', 3) : itk.Image.D3,
@@ -49,7 +52,9 @@ types_reduced_dimensions = {
         itk.Image.UC3 : itk.Image.UC2,
         itk.Image.RGBUC3 : itk.Image.RGBUC2,
         itk.Image.F3 : itk.Image.F2,
-        itk.Image.D3 : itk.Image.D2
+        itk.Image.D3 : itk.Image.D2,
+        itk.Image.VD33: itk.Image.VD22,
+        itk.Image.VF33: itk.Image.VF22
     }
 
 # This time a dictionary for stacking slices (a reverse of
