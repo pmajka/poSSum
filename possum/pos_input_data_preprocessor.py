@@ -225,7 +225,7 @@ class input_image(object):
 
 class worksheet_manager(object):
     """
-    #TODO XXX: Put some documentation here
+    Class for managing the excel worksheets.
     """
 
     _metadata_to_load = ['image_index', 'image_name', 'mask_name',

@@ -262,21 +262,27 @@ def itk_read_transformations_from_files(transformation_files):
 
     transformations = []
 
-    #TODO: Provide debugging information so one will have a better idea
-    # of what is going on around.
+    logger = possum.pos_itk_core.logging.getLogger(
+        'itk_read_transformations_from_files')
+    logger.debug("Starting loading transformations from file.")
 
     # Load transformations from the list. The transformations will be most
     # probably applied in the reverse order than the order of the list.
     for transformation_filename in transformation_files:
+        logger.info("Loading transformation file: %s ...", transformation_filename)
         if transformation_filename.endswith(".txt"):
             transformations.append(\
                 load_itk_matrix_transform_from_file(transformation_filename))
+            logger.info("As itk transformation matrix.")
         elif transformation_filename.endswith(".nii.gz"):
             transformations.append(\
                 load_warp_field_transform_from_file(transformation_filename))
+            logger.info("As displacement field.")
         else:
-            print "Unrecognized transformation type: %s " \
-                    % transformation_filename
+            logger.critical("Unrecognized transformation file %s. Exiting.", \
+                transformation_filename)
+
+    logger.debug("Done loading transformations from file.")
 
     return transformations
 
