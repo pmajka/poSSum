@@ -281,6 +281,8 @@ def itk_read_transformations_from_files(transformation_files):
         else:
             logger.critical("Unrecognized transformation file %s. Exiting.", \
                 transformation_filename)
+            raise RuntimeError("Unrecognized transformation file %s." \
+                % transformation_filename)
 
     logger.debug("Done loading transformations from file.")
 
