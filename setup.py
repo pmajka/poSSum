@@ -36,7 +36,9 @@ class run_tests(TestCommand):
         print doctest.testmod(possum.pos_common, verbose=verbose_flag)
         print doctest.testmod(possum.pos_color, verbose=verbose_flag)
         print doctest.testmod(possum.pos_segmentation_parser, verbose=verbose_flag)
-        print doctest.testmod(possum.pos_itk_core, verbose=verbose_flag)
+        if os.environ.get('TRAVIS') != 'true' and \
+        os.environ.get('CI') != 'true':
+                print doctest.testmod(possum.pos_itk_core, verbose=verbose_flag)
 
 setup(
     name='possum-reconstruction',
