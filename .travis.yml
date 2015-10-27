@@ -14,7 +14,7 @@ before_install:
 - export PYTHONPATH=${PYTHONPATH}:${HOME}/InsightToolkit-4.3.1-build/Wrapping/Generators/Python
 - export PYTHONPATH=${PYTHONPATH}:${HOME}/InsightToolkit-4.3.1-build/lib/
 - export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/InsightToolkit-4.3.1-build/lib/
-- ls && cd ~ && ls
+- cd ${TRAVIS_BUILD_DIR}
 
 install: pip install -r requirements.txt
 
