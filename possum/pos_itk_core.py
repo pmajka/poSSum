@@ -28,11 +28,9 @@ io_component_string_name_to_image_type = {
         ('scalar', 'short', 3) : itk.Image.SS3,
         ('scalar', 'unsigned_short', 3) : itk.Image.US3,
         ('scalar', 'unsigned_char', 3) : itk.Image.UC3,
-        ('vector', 'unsigned_char', 3) : itk.Image.RGBUC3,
         ('scalar', 'float', 3) : itk.Image.F3,
         ('scalar', 'short', 2) : itk.Image.SS2,
         ('scalar', 'unsigned_short', 2) : itk.Image.US2,
-        ('vector', 'unsigned_char', 2) : itk.Image.RGBUC2,
         ('vector', 'float', 3) : itk.Image.VF33,
         ('vector', 'double', 3) : itk.Image.VD33,
         ('vector', 'float', 2) : itk.Image.VF22,
@@ -42,17 +40,27 @@ io_component_string_name_to_image_type = {
         ('scalar', 'double', 3) : itk.Image.D3,
         ('rgb', 'unsigned_char', 2) : itk.Image.RGBUC2,
         ('rgb', 'unsigned_char', 3) : itk.Image.RGBUC3,
+        ('vector', 'unsigned_char', 3) : itk.Image.RGBUC3,
+        ('vector', 'unsigned_char', 2) : itk.Image.RGBUC2
         }
+
+# Here we define mapping which allows us to quickly map an
+# image class to its data type, pixel type and dimensionality.
+# This turns out to be very usefull, believe me.
+io_image_type_to_component_string_name = \
+     dict((io_component_string_name_to_image_type[k], k)
+        for k in io_component_string_name_to_image_type)
+
 
 # Another quite clever dictionary. This one converts given image type to the
 # same type but with number of dimensions reduced by one (e.g. 3->2).
 types_reduced_dimensions = {
-        itk.Image.SS3 : itk.Image.SS2,
-        itk.Image.US3 : itk.Image.US2,
-        itk.Image.UC3 : itk.Image.UC2,
-        itk.Image.RGBUC3 : itk.Image.RGBUC2,
-        itk.Image.F3 : itk.Image.F2,
-        itk.Image.D3 : itk.Image.D2,
+        itk.Image.SS3: itk.Image.SS2,
+        itk.Image.US3: itk.Image.US2,
+        itk.Image.UC3: itk.Image.UC2,
+        itk.Image.RGBUC3: itk.Image.RGBUC2,
+        itk.Image.F3: itk.Image.F2,
+        itk.Image.D3: itk.Image.D2,
         itk.Image.VD33: itk.Image.VD22,
         itk.Image.VF33: itk.Image.VF22
     }
