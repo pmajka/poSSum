@@ -190,9 +190,14 @@ def reslice_image(transforms, moving_image, reference_image=None, interpolator=N
         reference_image = moving_image
 
     # Set up the resampling filter.
-    resample = itk.ResampleImageFilter[moving_image, reference_image].New()
+    resample = itk.ResampleImageFilter[moving_image, moving_image].New()
     resample.SetTransform(composite_transform)
     resample.SetInput(moving_image)
+
+    # If a custom interpolator has been provided, attach it to the
+    # resampling filter.
+    if interpolator is not None:
+        resample.SetInterpolator(interpolator)
 
     resample.SetSize(reference_image.GetLargestPossibleRegion().GetSize())
     resample.SetOutputOrigin(reference_image.GetOrigin())
