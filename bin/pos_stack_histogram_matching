@@ -97,6 +97,10 @@ class stack_histogram_matching(output_volume_workflow):
     def _validate_options(self):
         super(self.__class__, self)._validate_options()
 
+        # TODO: There have to be at least two reference sections provided.
+        # these two reference section have to be different than the
+        # first and the last section of the stack.
+
         # We need to know where to store the results of the
         # processing.
         assert self.options.output_volume_filename is not None,\
@@ -463,9 +467,6 @@ class stack_histogram_matching(output_volume_workflow):
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
         #TODO: Document the command line options.
-        #TODO: Test the grayscale workflow.
-        # Test what happend when some of the files are not provided
-        # or what happend when strange set of parameters is provided.
         #TODO: There has to be at least two reference sections
         # for the workflow to proceed. Make an assertion.
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
@@ -477,13 +478,18 @@ class stack_histogram_matching(output_volume_workflow):
             reference section for the workflow to proceed. The first section \
             of the stack and the last section of the stack are required \
             therefore they are added automatically. \
-            this leaves used to add two reference sections at minumum.'))
+            this leaves used to add two reference sections at minumum.\
+            Duplicates are removed from the list.'))
         parser.add_option('--exclude-section', default=None,
             dest='excludedSections', action='append', nargs=1, type='int',
-            help=r('Not supported. Exclude given section from processing.'))
+            help=r('Not supported. Exclude given section from processing.\
+            This means that section with given index will not be processed \
+            and will be left as it came.'))
         parser.add_option('--histogram-matching-points', default=2048,
             dest='histogram_matching_points', action='store', type='int',
-            help=r(''))
+            help=r('Number of points used in the histogram matchcing \
+            algorithm. Please refer to the ITK documentation for details.\
+            Default value is 2048 which is quite high.'))
         parser.add_option('--input-images-dir', default=None,
             type='str', dest='input_images_dir', help=r('...'))
         parser.add_option('--output-volumes-dir', default=None,
