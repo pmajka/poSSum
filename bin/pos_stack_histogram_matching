@@ -185,10 +185,16 @@ class stack_histogram_matching(output_volume_workflow):
         # They're histograms remain unchanged.
         self.options.reference_pairs = []
 
+        # The first and the last sections of the stack are added automatically
+        # to the list of the reference sections as they are obligatory.
+        self.options.reference_sections.append(self._sections[0])
+        self.options.reference_sections.append(self._sections[-1])
+
         # The user can supply the sections of reference intensity in arbitrary
         # order. They have to be sorted before we can do anyting with them.
+        # Additionaly, converting the list to set removes any duplicates.
         self.options.reference_sections = \
-            sorted(self.options.reference_sections)
+            sorted(list(set(self.options.reference_sections)))
         ref = self.options.reference_sections
 
         # Now we can nicely generate tuples of (lower, upper) pairs of
@@ -399,6 +405,7 @@ class stack_histogram_matching(output_volume_workflow):
         :return: None
         :rtype: None
         """
+
         filename = self.options.output_volume_filename
 
         # Not much of a philosophy, just take the images and stack them.
@@ -459,18 +466,24 @@ class stack_histogram_matching(output_volume_workflow):
         #TODO: Test the grayscale workflow.
         # Test what happend when some of the files are not provided
         # or what happend when strange set of parameters is provided.
+        #TODO: There has to be at least two reference sections
+        # for the workflow to proceed. Make an assertion.
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
-                dest='sections_range',
-                help='Index of the first slice of the stack')
+            dest='sections_range',
+            help='Index of the first slice of the stack')
         parser.add_option('--add-reference-section', default=None,
-                dest='reference_sections', action='append', nargs=1, type='int',
-                help='Add reference section')
+            dest='reference_sections', action='append', nargs=1, type='int',
+            help=r('Add a reference section. There has to be at least four \
+            reference section for the workflow to proceed. The first section \
+            of the stack and the last section of the stack are required \
+            therefore they are added automatically. \
+            this leaves used to add two reference sections at minumum.'))
         parser.add_option('--exclude-section', default=None,
-                dest='excludedSections', action='append', nargs=1, type='int',
-                help='Exclude given section from processing.')
+            dest='excludedSections', action='append', nargs=1, type='int',
+            help=r('Not supported. Exclude given section from processing.'))
         parser.add_option('--histogram-matching-points', default=2048,
-                dest='histogram_matching_points', action='store', type='int',
-                help=r(''))
+            dest='histogram_matching_points', action='store', type='int',
+            help=r(''))
         parser.add_option('--input-images-dir', default=None,
             type='str', dest='input_images_dir', help=r('...'))
         parser.add_option('--output-volumes-dir', default=None,
