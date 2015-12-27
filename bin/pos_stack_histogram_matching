@@ -97,15 +97,39 @@ class stack_histogram_matching(output_volume_workflow):
     def _validate_options(self):
         super(self.__class__, self)._validate_options()
 
-        # Just in case we'll need it in the future
+        # We need to know where to store the results of the
+        # processing.
+        assert self.options.output_volume_filename is not None,\
+            self._logger.error(r("The output volume filename \
+            is required. Please provide the `--output-volume-filename` \
+            option and try again."))
 
-        # TODO: The output volume filename has to be provided
-        if self.options.output_volume_filename is None:
-            print "!!!!!! You have to provide the output volume filename!"
-            sys.exit(1)
+        # We also require that the output volume directory is provided.
+        # (even if it does not cause any error, the default directory
+        # is just a stub)...
+        assert self.options.output_volumes_dir is not None,\
+            self._logger.error(r("The output volume directory \
+            has to be provided. Please supply the \
+            `--output-volumes-dir` option."))
+
+        # Obviously, the directory with the input images has to be provided as
+        # well
+        assert self.options.inputImagesDir is not None,\
+            self._logger.error(r("The directory containing the input \
+            images is required. Please provide the `--input-images-dir` \
+            option."))
+
 
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
+
+        # Well, the first thing we would like to check is that
+        # ssections range has to be provided. If there are
+        # no sections defined, we cannot continue.
+        assert self.options.sliceRange is not None,\
+            self._logger.error(r("Starting and ending slices indexes \
+            are not provided. Please supply \
+            the first and the last section index."))
 
         # Define slices' range. All slices within given range will be
         # processed. Make sure that all images are available.
@@ -133,9 +157,7 @@ class stack_histogram_matching(output_volume_workflow):
 
         # We override the default output_volumes directory when
         # appropriate command line argument is provided
-        if self.options.output_volumes_dir is not None:
-            self.f['out_volume'].override_dir = \
-                self.options.output_volumes_dir
+        self.f['out_volume'].override_dir = self.options.output_volumes_dir
 
         # Input files have to exist. All of them!
         filenames_to_check = map(lambda x: self.f['input_stack'](idx=x),
@@ -408,7 +430,7 @@ class stack_histogram_matching(output_volume_workflow):
                           converted into a volume.
         :type mask_type: str
 
-        :param output_filename: output filename itself.
+        :param output_filename: output filename itself :)
         :type output_filename: str
         """
 
