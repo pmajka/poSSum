@@ -114,11 +114,10 @@ class stack_histogram_matching(output_volume_workflow):
 
         # Obviously, the directory with the input images has to be provided as
         # well
-        assert self.options.inputImagesDir is not None,\
+        assert self.options.input_images_dir is not None,\
             self._logger.error(r("The directory containing the input \
             images is required. Please provide the `--input-images-dir` \
             option."))
-
 
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
@@ -126,20 +125,16 @@ class stack_histogram_matching(output_volume_workflow):
         # Well, the first thing we would like to check is that
         # ssections range has to be provided. If there are
         # no sections defined, we cannot continue.
-        assert self.options.sliceRange is not None,\
+        assert self.options.sections_range is not None,\
             self._logger.error(r("Starting and ending slices indexes \
             are not provided. Please supply \
             the first and the last section index."))
 
         # Define slices' range. All slices within given range will be
         # processed. Make sure that all images are available.
-        self.options.slice_range = \
-            range(self.options.sliceRange[0], self.options.sliceRange[1] + 1)
-
-        # Dictionary below will hold the pairs of reference slices.
-        # This dictionary will hold paris of slices that will hold pairs of
-        # slices used for generating weights for histogram matching.
-        self.options.reference_sections = {}
+        self._sections = \
+            range(self.options.sections_range[0],
+                  self.options.sections_range[1] + 1)
 
         # We need this flag to know if the stack of images, we're currently
         # processing is a multichannel one (=rgb stack) or just a single
@@ -153,7 +148,7 @@ class stack_histogram_matching(output_volume_workflow):
         # At the very beginning override the default dummy input images
         # directory by the actual images directory. In other words: the
         # input images are read from the given directory. No magick here.
-        self.f['input_stack'].override_dir = self.options.inputImagesDir
+        self.f['input_stack'].override_dir = self.options.input_images_dir
 
         # We override the default output_volumes directory when
         # appropriate command line argument is provided
@@ -161,7 +156,7 @@ class stack_histogram_matching(output_volume_workflow):
 
         # Input files have to exist. All of them!
         filenames_to_check = map(lambda x: self.f['input_stack'](idx=x),
-                                self.options.slice_range)
+                                self._sections)
 
         for slice_filename in filenames_to_check:
             self._logger.debug("Checking for image: %s.", slice_filename)
@@ -192,9 +187,9 @@ class stack_histogram_matching(output_volume_workflow):
 
         # The user can supply the sections of reference intensity in arbitrary
         # order. They have to be sorted before we can do anyting with them.
-        self.options.referenceSections = \
-            sorted(self.options.referenceSections)
-        ref = self.options.referenceSections
+        self.options.reference_sections = \
+            sorted(self.options.reference_sections)
+        ref = self.options.reference_sections
 
         # Now we can nicely generate tuples of (lower, upper) pairs of
         # sections.
@@ -210,7 +205,7 @@ class stack_histogram_matching(output_volume_workflow):
         # Now we calculate a weights for the histogram matching process
         # for each input images and store them in a dictionary.
         self._weights = {}
-        for image_index in self.options.slice_range:
+        for image_index in self._sections:
             self._weights[image_index] = self._calculate_weights(image_index)
 
         # Print out all the weights, also for the sole purpose of debugging:
@@ -330,7 +325,7 @@ class stack_histogram_matching(output_volume_workflow):
             first image in the stack to choose a proper \
             reslicing routine."))
 
-        first_img_idx = self.options.slice_range[0]
+        first_img_idx = self._sections[0]
         first_img_fname = self.f['input_stack'](idx=first_img_idx)
         pixel_type = autodetect_file_type(first_img_fname, ret_itk=False)[0]
 
@@ -369,7 +364,7 @@ class stack_histogram_matching(output_volume_workflow):
             first_reference=self.f['input_stack'](idx=lower_section),
             second_reference=self.f['input_stack'](idx=upper_section),
             section_to_match=self.f['input_stack'](idx=image_index),
-            matching_points=self.options.histogramMatchingPoints,
+            matching_points=self.options.histogram_matching_points,
             weight_first=lower_weight,
             weight_second=upper_weight,
             output_filename=self.f['resliced'](idx=image_index))
@@ -388,7 +383,7 @@ class stack_histogram_matching(output_volume_workflow):
         # Commands to execute will be collected here.
         commands = []
 
-        for image_index in self.options.slice_range:
+        for image_index in self._sections:
             command = self._get_histogram_matching_wrapper(image_index)
             commands.append(copy.deepcopy(command))
 
@@ -436,8 +431,8 @@ class stack_histogram_matching(output_volume_workflow):
 
         # Assign some usefull aliases. The processing regards only slices that
         # are withing the moving slices index.
-        start = self.options.slice_range[0]
-        stop = self.options.slice_range[-1]
+        start = self._sections[0]
+        stop = self._sections[-1]
 
         # Define the warpper according to the provided settings.
         command = pos_wrappers.stack_and_reorient_wrapper(
@@ -464,21 +459,20 @@ class stack_histogram_matching(output_volume_workflow):
         #TODO: Test the grayscale workflow.
         # Test what happend when some of the files are not provided
         # or what happend when strange set of parameters is provided.
-        #TODO: sliceRange ---> sections_range or something even better
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
-                dest='sliceRange',
+                dest='sections_range',
                 help='Index of the first slice of the stack')
         parser.add_option('--add-reference-section', default=None,
-                dest='referenceSections', action='append', nargs=1, type='int',
+                dest='reference_sections', action='append', nargs=1, type='int',
                 help='Add reference section')
         parser.add_option('--exclude-section', default=None,
                 dest='excludedSections', action='append', nargs=1, type='int',
                 help='Exclude given section from processing.')
-        parser.add_option('--histogram-matching-points', default=512,
-                dest='histogramMatchingPoints', action='store', type='int',
+        parser.add_option('--histogram-matching-points', default=2048,
+                dest='histogram_matching_points', action='store', type='int',
                 help=r(''))
         parser.add_option('--input-images-dir', default=None,
-            type='str', dest='inputImagesDir', help=r('...'))
+            type='str', dest='input_images_dir', help=r('...'))
         parser.add_option('--output-volumes-dir', default=None,
             type='str', dest='output_volumes_dir', help=r('...'))
         parser.add_option('--output-volume-filename', default=None,
