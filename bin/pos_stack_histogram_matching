@@ -89,7 +89,7 @@ class stack_histogram_matching(output_volume_workflow):
         'input_stack': pos_parameters.filename('input_stack', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'resliced': pos_parameters.filename('resliced', work_dir='09_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_mask': pos_parameters.filename('resliced_mask', work_dir='09_resliced', str_template='%04d.nii.gz'),
-        'out_volume': pos_parameters.filename('out_volume', work_dir='10_output_volumes', str_template='output_volume_{fname}.nii.gz'),
+        'out_volume': pos_parameters.filename('out_volume', work_dir='10_output_volumes', str_template='{fname}'),
         }
 
     __VOL_STACK_SLICE_SPACING = 1
@@ -98,6 +98,11 @@ class stack_histogram_matching(output_volume_workflow):
         super(self.__class__, self)._validate_options()
 
         # Just in case we'll need it in the future
+
+        # TODO: The output volume filename has to be provided
+        if self.options.output_volume_filename is None:
+            print "!!!!!! You have to provide the output volume filename!"
+            sys.exit(1)
 
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
@@ -125,6 +130,12 @@ class stack_histogram_matching(output_volume_workflow):
         # directory by the actual images directory. In other words: the
         # input images are read from the given directory. No magick here.
         self.f['input_stack'].override_dir = self.options.inputImagesDir
+
+        # We override the default output_volumes directory when
+        # appropriate command line argument is provided
+        if self.options.output_volumes_dir is not None:
+            self.f['out_volume'].override_dir = \
+                self.options.output_volumes_dir
 
         # Input files have to exist. All of them!
         filenames_to_check = map(lambda x: self.f['input_stack'](idx=x),
@@ -371,12 +382,12 @@ class stack_histogram_matching(output_volume_workflow):
         :return: None
         :rtype: None
         """
-        filename_suffix = self._multichannel_workflow
+        filename = self.options.output_volume_filename
 
         # Not much of a philosophy, just take the images and stack them.
         # this piece of code repeats in many scripts.
 
-        output_filename = self.f['out_volume'](fname=filename_suffix)
+        output_filename = self.f['out_volume'](fname=filename)
         command = self._get_generic_stack_slice_wrapper(
             self.f['resliced_mask'](),
             output_filename)
@@ -384,12 +395,14 @@ class stack_histogram_matching(output_volume_workflow):
 
     def _get_generic_stack_slice_wrapper(self, mask_type, output_filename):
         """
+
         Return generic command wrapper suitable either for stacking grayscale
-        images or multichannel images. Aproperiate command line wrapper is returned
-        depending on provided `mask_type` and `output_filename_type`.
-        The command line wrapper is prepared mostly based on the command line
-        parameters which are common between both images stacks thus so there is
-        no need to parametrize them individually.
+        images or multichannel images. Aproperiate command line wrapper
+        is returned depending on provided `mask_type` and
+        `output_filename type`. The command line wrapper is prepared mostly
+        based on the command line parameters which are common between both
+        images stacks thus so there is no need to parametrize them
+        individually.
 
         :param mask_type: mask type determining which images stack will be
                           converted into a volume.
@@ -429,7 +442,7 @@ class stack_histogram_matching(output_volume_workflow):
         #TODO: Test the grayscale workflow.
         # Test what happend when some of the files are not provided
         # or what happend when strange set of parameters is provided.
-
+        #TODO: sliceRange ---> sections_range or something even better
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
                 dest='sliceRange',
                 help='Index of the first slice of the stack')
@@ -444,6 +457,10 @@ class stack_histogram_matching(output_volume_workflow):
                 help=r(''))
         parser.add_option('--input-images-dir', default=None,
             type='str', dest='inputImagesDir', help=r('...'))
+        parser.add_option('--output-volumes-dir', default=None,
+            type='str', dest='output_volumes_dir', help=r('...'))
+        parser.add_option('--output-volume-filename', default=None,
+            type='str', dest='output_volume_filename', help=r('...'))
 
         return parser
 
