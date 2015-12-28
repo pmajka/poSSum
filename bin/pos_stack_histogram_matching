@@ -478,7 +478,10 @@ class stack_histogram_matching(output_volume_workflow):
     @classmethod
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
-        #TODO: Document the command line options.
+
+        # TODO: Implement excluding the sections as this has not been
+        # implemented yet.
+
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
             dest='sections_range',
             help='Index of the first slice of the stack')
