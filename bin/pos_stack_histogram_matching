@@ -86,7 +86,6 @@ class stack_histogram_matching(output_volume_workflow):
     """
 
     _f = {
-#       'input_stack': pos_parameters.filename('input_stack', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
         'input_stack': pos_parameters.filename('input_stack', work_dir='00_override_this', str_template='_error_fname_template_not_set_'),
         'resliced': pos_parameters.filename('resliced', work_dir='09_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_mask': pos_parameters.filename('resliced_mask', work_dir='09_resliced', str_template='%04d.nii.gz'),
@@ -121,26 +120,11 @@ class stack_histogram_matching(output_volume_workflow):
             is required. Please provide the `--output-volume-filename` \
             option and try again."))
 
-#       # We also require that the output volume directory is provided.
-#       # (even if it does not cause any error, the default directory
-#       # is just a stub)...
-#       assert self.options.output_volumes_dir is not None,\
-#           self._logger.error(r("The output volume directory \
-#           has to be provided. Please supply the \
-#           `--output-volumes-dir` option."))
-
-#       # Obviously, the directory with the input images has to be provided as
-#       # well
-#       assert self.options.input_images_dir is not None,\
-#           self._logger.error(r("The directory containing the input \
-#           images is required. Please provide the `--input-images-dir` \
-#           option."))
-
         # The input section template is a required parameter because we need
         # to know where to find the sections :)
         assert self.options.input_sections_template is not None, \
             self._logger.error(r("The path to the sections is required. \
-            Please provide the `--output-volume-filename` parameters. \
+            Please provide the `--input-sections-template` parameters. \
             For now - exiting."))
 
     def _initializeOptions(self):
@@ -488,10 +472,6 @@ class stack_histogram_matching(output_volume_workflow):
         parser = output_volume_workflow._getCommandLineParser()
 
         # TODO: Implement excluding the sections as this has not been
-        # TODO: Implement the input section filename template
-        # so not only nifti files could be used but also different file
-        # formats e.g. png
-        # implemented yet.
 
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
             dest='sections_range',
