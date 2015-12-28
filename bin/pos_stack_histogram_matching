@@ -86,7 +86,8 @@ class stack_histogram_matching(output_volume_workflow):
     """
 
     _f = {
-        'input_stack': pos_parameters.filename('input_stack', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
+#       'input_stack': pos_parameters.filename('input_stack', work_dir='00_override_this', str_template='{idx:04d}.nii.gz'),
+        'input_stack': pos_parameters.filename('input_stack', work_dir='00_override_this', str_template='_error_fname_template_not_set_'),
         'resliced': pos_parameters.filename('resliced', work_dir='09_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_mask': pos_parameters.filename('resliced_mask', work_dir='09_resliced', str_template='%04d.nii.gz'),
         'out_volume': pos_parameters.filename('out_volume', work_dir='10_output_volumes', str_template='{fname}'),
@@ -120,20 +121,27 @@ class stack_histogram_matching(output_volume_workflow):
             is required. Please provide the `--output-volume-filename` \
             option and try again."))
 
-        # We also require that the output volume directory is provided.
-        # (even if it does not cause any error, the default directory
-        # is just a stub)...
-        assert self.options.output_volumes_dir is not None,\
-            self._logger.error(r("The output volume directory \
-            has to be provided. Please supply the \
-            `--output-volumes-dir` option."))
+#       # We also require that the output volume directory is provided.
+#       # (even if it does not cause any error, the default directory
+#       # is just a stub)...
+#       assert self.options.output_volumes_dir is not None,\
+#           self._logger.error(r("The output volume directory \
+#           has to be provided. Please supply the \
+#           `--output-volumes-dir` option."))
 
-        # Obviously, the directory with the input images has to be provided as
-        # well
-        assert self.options.input_images_dir is not None,\
-            self._logger.error(r("The directory containing the input \
-            images is required. Please provide the `--input-images-dir` \
-            option."))
+#       # Obviously, the directory with the input images has to be provided as
+#       # well
+#       assert self.options.input_images_dir is not None,\
+#           self._logger.error(r("The directory containing the input \
+#           images is required. Please provide the `--input-images-dir` \
+#           option."))
+
+        # The input section template is a required parameter because we need
+        # to know where to find the sections :)
+        assert self.options.input_sections_template is not None, \
+            self._logger.error(r("The path to the sections is required. \
+            Please provide the `--output-volume-filename` parameters. \
+            For now - exiting."))
 
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
@@ -161,17 +169,17 @@ class stack_histogram_matching(output_volume_workflow):
     def _overrideDefaults(self):
         super(self.__class__, self)._overrideDefaults()
 
-        # At the very beginning override the default dummy input images
-        # directory by the actual images directory. In other words: the
-        # input images are read from the given directory. No magick here.
-        self.f['input_stack'].override_dir = self.options.input_images_dir
+        # Assing the input sections directory so we know where to look
+        # for the sections.
+        self.f['input_stack'].override_path = \
+            self.options.input_sections_template
 
         # We override the default output_volumes directory when
         # appropriate command line argument is provided
         self.f['out_volume'].override_dir = self.options.output_volumes_dir
 
         # Input files have to exist. All of them!
-        filenames_to_check = map(lambda x: self.f['input_stack'](idx=x),
+        filenames_to_check = map(lambda x: self.f['input_stack']() % x,
                                 self._sections)
 
         for slice_filename in filenames_to_check:
@@ -285,7 +293,7 @@ class stack_histogram_matching(output_volume_workflow):
             Checking if the section has been excluded from processing."),
             image_index)
 
-        if image_index not in self.options.excludedSections:
+        if image_index not in self.options.excluded_sections:
             self._logger.error(r("Section %d has not been excluded from \
             processing but has no reference sections assigned. \
             That's clearly an error. Cannot continue."), image_index)
@@ -348,7 +356,7 @@ class stack_histogram_matching(output_volume_workflow):
             reslicing routine."))
 
         first_img_idx = self._sections[0]
-        first_img_fname = self.f['input_stack'](idx=first_img_idx)
+        first_img_fname = self.f['input_stack']() % first_img_idx
         pixel_type = autodetect_file_type(first_img_fname, ret_itk=False)[0]
 
         self._logger.debug(r("%s pixel type detected. Returning \
@@ -383,9 +391,9 @@ class stack_histogram_matching(output_volume_workflow):
 
         # Generate the command line command...
         command = histogram_matching_wrapper(
-            first_reference=self.f['input_stack'](idx=lower_section),
-            second_reference=self.f['input_stack'](idx=upper_section),
-            section_to_match=self.f['input_stack'](idx=image_index),
+            first_reference=self.f['input_stack']() % lower_section,
+            second_reference=self.f['input_stack']() % upper_section,
+            section_to_match=self.f['input_stack']() % image_index,
             matching_points=self.options.histogram_matching_points,
             weight_first=lower_weight,
             weight_second=upper_weight,
@@ -480,6 +488,9 @@ class stack_histogram_matching(output_volume_workflow):
         parser = output_volume_workflow._getCommandLineParser()
 
         # TODO: Implement excluding the sections as this has not been
+        # TODO: Implement the input section filename template
+        # so not only nifti files could be used but also different file
+        # formats e.g. png
         # implemented yet.
 
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
@@ -494,8 +505,8 @@ class stack_histogram_matching(output_volume_workflow):
             this leaves used to add two reference sections at minumum.\
             Duplicates are removed from the list.'))
         parser.add_option('--exclude-section', default=None,
-            dest='excludedSections', action='append', nargs=1, type='int',
-            help=r('Not supported. Exclude given section from processing.\
+            dest='excluded_sections', action='append', nargs=1, type='int',
+            help=r('Exclude given section from processing.\
             This means that section with given index will not be processed \
             and will be left as it came.'))
         parser.add_option('--histogram-matching-points', default=2048,
@@ -503,12 +514,19 @@ class stack_histogram_matching(output_volume_workflow):
             help=r('Number of points used in the histogram matchcing \
             algorithm. Please refer to the ITK documentation for details.\
             Default value is 2048 which is quite high.'))
-        parser.add_option('--input-images-dir', default=None,
-            type='str', dest='input_images_dir', help=r('...'))
         parser.add_option('--output-volumes-dir', default=None,
             type='str', dest='output_volumes_dir', help=r('...'))
         parser.add_option('--output-volume-filename', default=None,
             type='str', dest='output_volume_filename', help=r('...'))
+        # TODO: Merge the output volumes directory and the output volume
+        # filename into a single command line parameter.
+
+        parser.add_option('--input-sections-template', default=None,
+            type='str', dest='input_sections_template', help=r('Filename \
+            template for the input sections. This is a required parameter \
+            and the workflow will not run without it. Provide a full path \
+            and the section filename template there. For instance \
+            /some/path/to/a/dir/section_\%04d.nii.gz .'))
 
         return parser
 
