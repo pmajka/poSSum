@@ -89,7 +89,7 @@ class stack_histogram_matching(output_volume_workflow):
         'input_stack': pos_parameters.filename('input_stack', work_dir='00_override_this', str_template='_error_fname_template_not_set_'),
         'resliced': pos_parameters.filename('resliced', work_dir='09_resliced', str_template='{idx:04d}.nii.gz'),
         'resliced_mask': pos_parameters.filename('resliced_mask', work_dir='09_resliced', str_template='%04d.nii.gz'),
-        'out_volume': pos_parameters.filename('out_volume', work_dir='10_output_volumes', str_template='{fname}'),
+        'out_volume': pos_parameters.filename('out_volume', work_dir='10_output_volumes', str_template='_error_output_volume_not_set_'),
         }
 
     __VOL_STACK_SLICE_SPACING = 1
@@ -160,7 +160,8 @@ class stack_histogram_matching(output_volume_workflow):
 
         # We override the default output_volumes directory when
         # appropriate command line argument is provided
-        self.f['out_volume'].override_dir = self.options.output_volumes_dir
+        self.f['out_volume'].override_path = \
+            self.options.output_volume_filename
 
         # Input files have to exist. All of them!
         filenames_to_check = map(lambda x: self.f['input_stack']() % x,
@@ -414,15 +415,11 @@ class stack_histogram_matching(output_volume_workflow):
         :rtype: None
         """
 
-        filename = self.options.output_volume_filename
-
         # Not much of a philosophy, just take the images and stack them.
         # this piece of code repeats in many scripts.
-
-        output_filename = self.f['out_volume'](fname=filename)
         command = self._get_generic_stack_slice_wrapper(
             self.f['resliced_mask'](),
-            output_filename)
+            self.f['out_volume']())
         self.execute(command)
 
     def _get_generic_stack_slice_wrapper(self, mask_type, output_filename):
@@ -474,10 +471,11 @@ class stack_histogram_matching(output_volume_workflow):
         # TODO: Implement excluding the sections as this has not been
 
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
-            dest='sections_range',
+            dest='sections_range', metavar="INT INT",
             help='Index of the first slice of the stack')
         parser.add_option('--add-reference-section', default=None,
-            dest='reference_sections', action='append', nargs=1, type='int',
+            dest='reference_sections', action='append',
+            nargs=1, type='int', metavar="INT",
             help=r('Add a reference section. There has to be at least four \
             reference section for the workflow to proceed. The first section \
             of the stack and the last section of the stack are required \
@@ -485,24 +483,24 @@ class stack_histogram_matching(output_volume_workflow):
             this leaves used to add two reference sections at minumum.\
             Duplicates are removed from the list.'))
         parser.add_option('--exclude-section', default=None,
-            dest='excluded_sections', action='append', nargs=1, type='int',
+            dest='excluded_sections', action='append',
+            nargs=1, type='int', metavar="INT",
             help=r('Exclude given section from processing.\
             This means that section with given index will not be processed \
-            and will be left as it came.'))
+            and will be left as it came. TODO: Not implemented'))
         parser.add_option('--histogram-matching-points', default=2048,
-            dest='histogram_matching_points', action='store', type='int',
+            dest='histogram_matching_points',
+            action='store', type='int', metavar="FILE",
             help=r('Number of points used in the histogram matchcing \
             algorithm. Please refer to the ITK documentation for details.\
             Default value is 2048 which is quite high.'))
-        parser.add_option('--output-volumes-dir', default=None,
-            type='str', dest='output_volumes_dir', help=r('...'))
         parser.add_option('--output-volume-filename', default=None,
-            type='str', dest='output_volume_filename', help=r('...'))
-        # TODO: Merge the output volumes directory and the output volume
-        # filename into a single command line parameter.
-
+            type='str', dest='output_volume_filename',
+            help=r('The output volume filename. This is where the \
+            output 3D image will be stored.'))
         parser.add_option('--input-sections-template', default=None,
-            type='str', dest='input_sections_template', help=r('Filename \
+            metavar="FILE", type='str', dest='input_sections_template',
+            help=r('Filename \
             template for the input sections. This is a required parameter \
             and the workflow will not run without it. Provide a full path \
             and the section filename template there. For instance \
