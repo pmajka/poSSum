@@ -97,9 +97,21 @@ class stack_histogram_matching(output_volume_workflow):
     def _validate_options(self):
         super(self.__class__, self)._validate_options()
 
-        # TODO: There have to be at least two reference sections provided.
+        # There have to be some reference sections provided.
+        assert self.options.reference_sections is not None, \
+            self._logger.error(r("No reference sections provided. \
+            Please use `--add-reference-section` to provide reference \
+            sections."))
+
+        # There have to be at least two reference sections provided.
         # these two reference section have to be different than the
         # first and the last section of the stack.
+        assert len(self.options.reference_sections) >= 2, \
+            self._logger.error(r(" There have to be at least four \
+            reference sections provided in total including obligatory \
+            first and last section of the stack. This is currently not \
+            the case. Please provide more reference section \
+            using the `--add-reference-section` command line switch."))
 
         # We need to know where to store the results of the
         # processing.
@@ -467,8 +479,6 @@ class stack_histogram_matching(output_volume_workflow):
     def _getCommandLineParser(cls):
         parser = output_volume_workflow._getCommandLineParser()
         #TODO: Document the command line options.
-        #TODO: There has to be at least two reference sections
-        # for the workflow to proceed. Make an assertion.
         parser.add_option('--sections-range', default=None, nargs=2, type='int',
             dest='sections_range',
             help='Index of the first slice of the stack')
