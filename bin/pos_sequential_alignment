@@ -20,6 +20,7 @@ from possum import pos_wrappers
 from possum.pos_common import r
 
 
+# TODO: Import this stuff from the pos.common module
 IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0
 #Transform 0
 Transform: MatrixOffsetTransformBase_double_2_2
