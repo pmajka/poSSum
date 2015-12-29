@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*
 
 
-import os, sys
+import os
+import sys
 import copy
 
 from possum import pos_parameters
@@ -213,7 +214,7 @@ class stack_histogram_matching(output_volume_workflow):
         # Print out all the reference images pairs for the purpose of
         # debugging.
         for lower, upper in self.options.reference_pairs:
-            self._logger.info(r("Pair of reference images: %d, %d"),\
+            self._logger.info(r("Pair of reference images: %d, %d"),
                               lower, upper)
 
         self._logger.debug(r("Calculating normalization weights."))
@@ -286,7 +287,7 @@ class stack_histogram_matching(output_volume_workflow):
         else:
             self._logger.info(r("Section %d has been excluded from \
             processing and it will be normalized to itself. The \
-            resulting image should be identical to the inputed image"), \
+            resulting image should be identical to the inputed image"),
             image_index)
 
             # The trick is that instead of copying the file (which would be
@@ -399,6 +400,10 @@ class stack_histogram_matching(output_volume_workflow):
         commands = []
 
         for image_index in self._sections:
+            if image_index in self.options.excluded_sections:
+                self._logger.info(r("Section %d has been excluded and will \
+                not be processed." % image_index))
+
             command = self._get_histogram_matching_wrapper(image_index)
             commands.append(copy.deepcopy(command))
 
@@ -466,12 +471,29 @@ class stack_histogram_matching(output_volume_workflow):
 
     @classmethod
     def _getCommandLineParser(cls):
+        usage_string = r("Usage: %prog \n\
+            --input-sections-template FILENAME_TEMPLATE \n\
+            --sections-range INT INT \n\
+            --add-reference-section INT \n\
+            --add-reference-section INT ... \n\
+            --output-volume-filename FILE \n\
+            [other options]")
+
         parser = output_volume_workflow._getCommandLineParser()
+        parser.set_usage(usage_string)
 
-        # TODO: Implement excluding the sections as this has not been
+        parser.set_description(r("Workflow for eliminating staining \
+        nonuniformity across the stack by performing weighted \
+        histogram matching between selected reference sections and \
+        the remaining sections. The procedure was implemented after: \
+        Li, X., Yankeelov, T. E., Rosen, G. D., Gore, J. C., & Dawant, \
+        B. M. (2009). Enhancement of histological volumes through \
+        averaging and their use for the analysis of magnetic \
+        resonance images. Magnetic Resonance Imaging, 27(3), \
+        http://doi.org/10.1016/j.mri.2008.07.016i ."))
 
-        parser.add_option('--sections-range', default=None, nargs=2, type='int',
-            dest='sections_range', metavar="INT INT",
+        parser.add_option('--sections-range', default=None, nargs=2,
+            type='int', dest='sections_range', metavar="INT INT",
             help='Index of the first slice of the stack')
         parser.add_option('--add-reference-section', default=None,
             dest='reference_sections', action='append',
@@ -487,7 +509,7 @@ class stack_histogram_matching(output_volume_workflow):
             nargs=1, type='int', metavar="INT",
             help=r('Exclude given section from processing.\
             This means that section with given index will not be processed \
-            and will be left as it came. TODO: Not implemented'))
+            and will be left as it came.'))
         parser.add_option('--histogram-matching-points', default=2048,
             dest='histogram_matching_points',
             action='store', type='int', metavar="FILE",
