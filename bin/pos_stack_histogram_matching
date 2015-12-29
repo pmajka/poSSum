@@ -527,6 +527,7 @@ class stack_histogram_matching(output_volume_workflow):
             and the workflow will not run without it. Provide a full path \
             and the section filename template there. For instance \
             /some/path/to/a/dir/section_\%04d.nii.gz .'))
+#       print " ".join(map(lambda x: x.get_opt_string() + " "+ " ".join(x._short_opts), parser._get_all_options()))
 
         return parser
 

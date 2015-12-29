@@ -286,8 +286,107 @@ _pos_align_by_moments()
 
 }
 
+_pos_stack_histogram_matching()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="--help -h --loglevel --log-filename --cpus \
+        --specimen-id -d --work-dir \
+        --sections-range --add-reference-section \
+        --exclude-section --histogram-matching-points \
+        --output-volume-filename --input-sections-template \
+        --output-volume-origin --output-volume-scalar-type \
+        --output-volume-spacing --output-volume-resample \
+        --output-volume-permute-axes --output-volume-orientation \
+        --output-volume-interpolation --output-volume-filp-axes"
+
+    if [[ ${prev} == 'pos_stack_histogram_matching' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--log-filename' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--loglevel' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_LOGLEVEL_OPTIONS}" -- ${cur}) )
+        return 
+    fi
+
+    if [ ${prev} == '-d' ] || [ ${prev} == '--work-dir' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o nospace  -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--sections-range' ]; then
+        COMPREPLY=( $(compgen -W "two_int_arguments" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--add-reference-section' ] || [ ${prev} == '--exclude-section' ] || [ ${prev} == '--histogram-matching-points' ] ; then
+        COMPREPLY=( $(compgen -W "int" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-filename' ] || [ ${prev} == '--input-sections-template' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.nii.gz' -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-origin' ] ; then
+        COMPREPLY=( $(compgen -W "ox_float oy_float oz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-scalar-type' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_DATA_TYPES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-spacing' ] ; then
+        COMPREPLY=( $(compgen -W "sx_float sy_float sz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-resample' ] ; then
+        COMPREPLY=( $(compgen -W "rx_float_0-1 ry_float_0-1 rz_float_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-permute-axes' ] ; then
+        COMPREPLY=( $(compgen -W "three_ints_0_1_2" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-orientation' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_ORIENTATION_CODES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-interpolation' ]; then
+        COMPREPLY=( $(compgen -W "${POS_INTERPOLATION_OPTIONS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-filp-axes' ] ; then
+        COMPREPLY=( $(compgen -W "flip_x_0-1 flip_y_0-1 flip_z_0-1" -- ${cur}) )
+        return 0
+    fi
+
+}
+
 complete -F _pos_slice_volume pos_slice_volume
 complete -F _pos_stack_sections pos_stack_sections
 complete -F _pos_process_source_images pos_process_source_images
 complete -F _pos_reorder_volume pos_reorder_volume
 complete -F _pos_align_by_moments pos_align_by_moments
+complete -F _pos_stack_histogram_matching pos_stack_histogram_matching
