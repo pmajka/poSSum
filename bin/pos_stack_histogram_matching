@@ -490,7 +490,10 @@ class stack_histogram_matching(output_volume_workflow):
         B. M. (2009). Enhancement of histological volumes through \
         averaging and their use for the analysis of magnetic \
         resonance images. Magnetic Resonance Imaging, 27(3), \
-        http://doi.org/10.1016/j.mri.2008.07.016i ."))
+        http://doi.org/10.1016/j.mri.2008.07.016i .\
+        By the way: you can easily generate multiple reference sections \
+        by issuing: for i in `seq -s \" \" 1 4 20`; do echo \
+        \"--add-reference-section $i\"; done; ."))
 
         parser.add_option('--sections-range', default=None, nargs=2,
             type='int', dest='sections_range', metavar="INT INT",
