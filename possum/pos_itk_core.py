@@ -691,6 +691,55 @@ def itk_is_point_inside_region(image, point, region=None):
     return region.IsInside(map(int, point_index))
 
 
+def generate_empty_image(reference_image, default_value, type_=None):
+    """
+    Generates empty image based on the provided reference image. The newly
+    created, empty image has the same size, dimensionality, directions, origin
+    and spacing as the reference image. The data type of the newly created
+    image might be determined by setting the `type_` argument. Note that the
+    lenth of the default default_value vector has to be equal to the bumber of
+    components of the canvas image.
+
+    :param reference_image: Image from which the spacing, origin, directions,
+         dimensionality, pixel type and, by default, data type will be copied.
+    :type reference_image: `itk.Image`
+
+    :param type_: Pixel type of the canvas. This overrides the pixel type of
+        the refrence image.
+    :type type_: `itkTypes.itkCType`
+
+    :param default_value: The default_value which will be used to fill the
+    image buffer. Note that the default_value has to match the image type. For
+    instance if you want to create black RGB image you have to fill it with
+    (0,0,0). If you're creating 'black' grayscale image use 0.  :type
+    default_value: depends on `type_` and `reference_image`.
+
+    :return: Two canvas images based on the provided reference image
+    :rtype: `itk.Image`
+
+    #TODO: This function should be tested a bit more.
+    """
+
+    # Things are pretty simple here. If the reference image is provided just
+    # get another instance of the reference image class.
+    if not type_:
+        output_canvas = reference_image.New()
+    else:
+        # Otherwise, extract the dimensionality of the image and compose it
+        # with the provided ppixel type and bu this, create
+        n_dimensions = reference_image.GetImageDimension()
+        canvas_pixel_type = type_
+        canvas_image_type = itk.Image[canvas_pixel_type, n_dimensions]
+        output_canvas = canvas_image_type.New()
+
+    output_canvas.CopyInformation(reference_image)
+    output_canvas.SetRegions(reference_image.GetLargestPossibleRegion())
+    output_canvas.Allocate()
+    output_canvas.FillBuffer(default_value)
+
+    return output_canvas
+
+
 if __name__ == 'possum.pos_itk_core':
     import doctest
     print doctest.testmod()
