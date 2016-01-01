@@ -128,8 +128,7 @@ class deformable_reconstruction_iteration(generic_workflow):
             # Check, if there is only one assignment per file
 
             if key in returnDictionary:
-                #TODO XXX: Turn into a logging statement
-                print >>sys.stderr, \
+                print >> sys.stderr, \
                     "Entry %s defined more than once. Skipping..." % key
                 continue
 
