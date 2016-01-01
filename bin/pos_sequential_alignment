@@ -17,16 +17,7 @@ from possum.pos_common import flatten
 from possum.pos_wrapper_skel import output_volume_workflow
 from possum import pos_parameters
 from possum import pos_wrappers
-from possum.pos_common import r
-
-
-# TODO: Import this stuff from the pos.common module
-IDENTITY_TRANSFORM_STRING="""#Insight Transform File V1.0
-#Transform 0
-Transform: MatrixOffsetTransformBase_double_2_2
-Parameters: 1 0 0 1 0 0
-FixedParameters: 0 0
-"""
+from possum.pos_common import r, IDENTITY_TRANSFORM_2D_STRING
 
 
 class sequential_alignment(output_volume_workflow):
@@ -223,7 +214,7 @@ class sequential_alignment(output_volume_workflow):
         """
         Generated an two dimensional identity transformation.
         """
-        open(filename, 'w').write(IDENTITY_TRANSFORM_STRING)
+        open(filename, 'w').write(IDENTITY_TRANSFORM_2D_STRING)
 
     def _generate_source_slices(self):
         """

@@ -150,6 +150,10 @@ class nonuniform_relice(generic_workflow):
             self.prepare_output_grayscale_volume()
 
     def load_coordinates_from_file(self, filename, negate=False):
+        #TODO: Whatever you want to read, read it with the CSV module.
+        # TODO: Add generic csv reader to the possum framework
+        # TODO: And simply refactor all the code so it will be using this
+        # refactored uniforma csv reader.
         multiplier = [1, -1][negate]
 
         coords = []
@@ -247,6 +251,9 @@ class nonuniform_relice(generic_workflow):
 
         self.execute_callable(stack_multichannel)
 
+    # TODO: Rethink this in general.
+    # perhaps you want to have a module which
+    # simply puts section in a canvas?
     @classmethod
     def _getCommandLineParser(cls):
         parser = generic_workflow._getCommandLineParser()

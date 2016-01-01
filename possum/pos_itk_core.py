@@ -716,8 +716,6 @@ def generate_empty_image(reference_image, default_value, type_=None):
 
     :return: Two canvas images based on the provided reference image
     :rtype: `itk.Image`
-
-    #TODO: This function should be tested a bit more.
     """
 
     # Things are pretty simple here. If the reference image is provided just
