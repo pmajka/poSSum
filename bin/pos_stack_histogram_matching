@@ -400,9 +400,11 @@ class stack_histogram_matching(output_volume_workflow):
         commands = []
 
         for image_index in self._sections:
-            if image_index in self.options.excluded_sections:
+            if (self.options.excluded_sections is not None) and \
+               (image_index in self.options.excluded_sections):
                 self._logger.info(r("Section %d has been excluded and will \
                 not be processed." % image_index))
+                next
 
             command = self._get_histogram_matching_wrapper(image_index)
             commands.append(copy.deepcopy(command))
@@ -493,7 +495,7 @@ class stack_histogram_matching(output_volume_workflow):
         http://doi.org/10.1016/j.mri.2008.07.016i .\
         By the way: you can easily generate multiple reference sections \
         by issuing: for i in `seq -s \" \" 1 4 20`; do echo \
-        \"--add-reference-section $i\"; done; ."))
+        \"--add-reference-section $i\\\"; done; ."))
 
         parser.add_option('--sections-range', default=None, nargs=2,
             type='int', dest='sections_range', metavar="INT INT",
@@ -515,7 +517,7 @@ class stack_histogram_matching(output_volume_workflow):
             and will be left as it came.'))
         parser.add_option('--histogram-matching-points', default=2048,
             dest='histogram_matching_points',
-            action='store', type='int', metavar="FILE",
+            action='store', type='int', metavar="INT",
             help=r('Number of points used in the histogram matchcing \
             algorithm. Please refer to the ITK documentation for details.\
             Default value is 2048 which is quite high.'))
