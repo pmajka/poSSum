@@ -36,6 +36,7 @@ from possum import pos_parameters
 from possum import pos_wrappers
 from possum import pos_deformable_wrappers
 
+from possum.pos_itk_core import pos_itk_image_info
 from possum.pos_wrapper_skel import output_volume_workflow
 from possum.pos_input_data_preprocessor import worksheet_manager
 from possum.pos_common import r
@@ -134,37 +135,6 @@ class remask_wrapper(pos_wrappers.generic_wrapper):
         'mask_file': pos_parameters.filename_parameter('mask_file', None),
         'masked_volume': pos_parameters.filename_parameter('masked_volume', None),
         'replace': pos_parameters.list_parameter('replace', None, '-{_name} {_list}'),
-    }
-
-
-class origin_readout_wrapper(pos_wrappers.generic_wrapper):
-    """
-    Extracts the information about origin and spacing of an image in a very
-    crapy way -- by a series of the command line parameters and bash trics.
-    Very ugly but the fastest way of actually doing it.
-    # TODO: Replace this one by an approperiate itk function
-    """
-
-    _template = """PrintHeader {input_image} | grep qoffset"""
-
-    _parameters = {
-        'input_image': pos_parameters.filename_parameter('input_image', None),
-    }
-
-
-class spacing_readout_wrapper(pos_wrappers.generic_wrapper):
-    """
-    Extracts the information about origin and spacing of an image in a very
-    crapy way -- by a series of the command line parameters and bash trics.
-    Very ugly but the fastest way of actually doing it.
-    # TODO: Replace this one by an approperiate itk function
-    """
-
-    _template = """PrintHeader {input_image} | grep 'Voxel Spacing' \
-        | cut -f2 -d: | tr -d " " | tr -d '[]'"""
-
-    _parameters = {
-        'input_image': pos_parameters.filename_parameter('input_image', None),
     }
 
 
@@ -946,7 +916,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         return first_slice, last_slice
 
-    def __get_output_slice_spacing(self):
+    def __get_output_volume_spacing(self):
         """
         Returns the output volume spacing based on the slices parameters.
         """
@@ -960,20 +930,14 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
 
         # We extract the altered orgin from the first image in the stack.
         index = self.slices_span[0]
+        input_image = self.f['source_images_downsampled'](idx=index)
+        image_info = pos_itk_image_info(input_image)
+        self._spacing_x = map(float, image_info.Spacing)[0]
 
-        # Then, define theorigin readout command line wrapper and then
-        # append this single command into the commands batch.
-        command = spacing_readout_wrapper(
-            input_image=self.f['source_images_downsampled'](idx=index))
-        commands.append(copy.copy(command))
-
-        # Execute the commands and capture the stdout and stderr.
-        stdout, stderr = self.execute(commands)
-
-        # Ok, we extract only the x spacing of the code since the assumption
-        # that the x spacing is the same as y spacing (the images are
-        # isotropic) which is a very basic assumption.
-        self._spacing_x = float(stdout.split(",")[0])
+        # And then we form a proper spacing array for the output
+        # volume. This is based od the actual spacing of the actual
+        # section and on the declared (by the user) thickned of individual
+        # sections.
 
         spacing = [self._spacing_x] * 3
         spacing[self.slicing_plane] = self.slice_thickness
@@ -991,36 +955,26 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         If you applay an arbitrary sampling, the size of the image may turn out
         to be non integer.
 
-        The actual origin is determinated by executing some shell command which
-        stdout is processed. Not an optimal way of performing the task but at
-        least it works.
+        # TODO: There's cleartly something wrong with this one. The origin
+        # should be extracted from downsampled sections before stacking.
+        # by doing what we're doing at the moment, we introduce a systematic
+        # shift in the volume origin of a half of the downsamples pixel size in
+        # the section plane (but not across the sections)
+        # This has to be corrected in the future.
         """
-
-        # Initialize the commands batch
-        commands = []
 
         # We extract the altered orgin from the first image in the stack.
         index = self.slices_span[0]
+        input_image = self.f['source_images_downsampled'](idx=index)
+        image_info = pos_itk_image_info(input_image)
 
-        # Then, define theorigin readout command line wrapper and then
-        # append this single command into the commands batch.
-        command = origin_readout_wrapper(
-            input_image=self.f['source_images_downsampled'](idx=index))
-        commands.append(copy.copy(command))
-
-        # Execute the commands and capture the stdout and stderr.
-        stdout, stderr = self.execute(commands)
-
-        # Process the stdout string and extract the actual origin value. The
-        # value extracted is the offset_x. It is assumed that the offset_x
-        # is the same as the offset_y, and, since the image is an 2d image,
-        # the offset_z value is usually zero, but we don't care about it at
-        # all.
-        origin_x = float(stdout.split("\n")[0].split()[2])
+        # We read the origin of the downsamples section in order to avoid
+        # systematic bias of the origin caused by downsampling.
+        origin_x = map(float, image_info.Origin)[0]
         origin = [origin_x] * 3
         origin[self.slicing_plane] = 0
-        # TODO: Until fixed properly we return [0,0,0]
-        return [0, 0, 0]
+
+        return origin
 
     def __get_slicing_plane_string(self):
         """
@@ -1065,7 +1019,7 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
     flipping = property(__get_flipping)
     permutation = property(__get_permutation)
     slices_span = property(__get_extreme_slices)
-    output_volume_spacing = property(__get_output_slice_spacing)
+    output_volume_spacing = property(__get_output_volume_spacing)
     output_volume_origin = property(__get_output_volume_origin)
     slice_thickness = property(__get_slice_thickness)
     stack_size = property(__get_stack_size)
