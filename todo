@@ -1,4 +1,5 @@
-- pos_itk_core: Image bounds, is inside image?, fit inside image
-- http://www.itk.org/Doxygen/html/Examples_2DataRepresentation_2Image_2Image4_8cxx-example.html#_a1
+- there is something wrong in the test_preprocess_input_images: When multiplying the image by the mask
+  it seems that only one channel is multiplied or something like this... this has to be checked and corrected.
 - Update the virtual machine.
 - Put all orientation presets into a single file
+- http://www.itk.org/Doxygen/html/Examples_2DataRepresentation_2Image_2Image4_8cxx-example.html#_a1
