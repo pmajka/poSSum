@@ -167,6 +167,273 @@ def autodetect_file_type(image_path, ret_itk=True):
     return image_type
 
 
+class pos_itk_image_info(object):
+    """
+    This class reads the most important information about the image, but only
+    the information which can be recovered from the image's header. To be
+    even more precise, only such image properties which can be recovered
+    from the image header using the Itk's ImageIO object::
+
+        http://www.itk.org/Doxygen/html/classitk_1_1ImageIOBase.html
+
+    Since the ImageIO reads only the image header, usually without reading the
+    image itself, no image values-based arributes like min. and max. values or
+    the average value cannot be calculated. To get these, one has to read the
+    image and compute these values by oneself.
+
+    .. note::
+
+        This class has a bit similar purpose as the `autodetect_file_type`
+        function but there's nothing that can be easilu done to merge
+        these two. Perhaps in the future...
+
+    .. warning::
+
+        This class is only an draft and its far from complete.
+        Therefore it is used internally and should not be used
+        anywhere at a user level. Kapish?
+
+    In order to conduct the test we need to store save the test image to the disk:
+
+    >>> import base64
+    >>> nii_enc = 'H4sIAAAAAAAAA+2Y22+SdxjH34K4Opu5qKW08HJ6OZQzlHIqlEOxpS1QCgWqTg52Vtu62myiHcYZ3WK6aOZ0Tt1mOvViS90pznTZvJqLWXazLLvp5f6Xvc/ze2niejHmoHDBl5Dnw+/9HZ7n4XeCI21UFXqL4lO7KCnVRbVxr+fFo9rRXvw5k9kIwlv4+M/g1n4ehdk6gc1GDRbvuTguBjIZx1N4Cx9bWbvxtPIAygC4ss3PIDZOrP/Pvk8ZbPVyu6Wq1cXZ3c/sBLoffknAffk7Ar53nxB49aaTq216abv8q6MiPz4j8NfgidcQPrjx/QaC98hvq2D5nsh8FkAw6JueAmj3+Qc8WOIYCRWx8mgsmEOYMS3vRFhMHuDGMNQ9ihdTZP0PsrI/PZZ+CJYXOD9fBhCN55YXARbCmZkUxHPfm1jw0yw80HmTA90sPDE5Z/rh0fumTNEBlct6W8EI8IPNbu8FWOo1qqQAPptNhTnkTzppPg6aiA9zfuzYhli3SMHZz/NrZxBcpU9ug7WOZ89NA3w2kn9zTMXC733lG5EECz/1zUVMERbu2spRd5yF0hullQE9C1FrpN8qYqEYy8b0kJbjplhEC/0s6hgGs+HuCYVxWIdCk4BcUgVGp+wDSBm1KgbdCMtMxLH92vomAGSWE3svnXwElp89eeo6wFJ89sI0rO+18Fl/DFb8uiObG/Kz8LXbPhmBkOcD6bkJIQtDw7K8F77UsE2hR+8P9SmzZoCcxSWButQF+5AIQz7hzI5AUqlRSy+tAbC4jRKcJJq9KrEEQCmViTAbCYVBis13KmX7iau0vl7JuJR8ex2heLr0Ldij+ZNHUxDgauDS6RCs4vPXXaFhOQueRMoSgcUjCB0ujmMrhdexgHCrX3uN9GNznUU4JLceRJgzSCfAthnM8jzAHr1aHwTIylVMCOAdsziEs0XJ+MViAPE+iZTkh2ZEuJc4jAzdAcCjaXltkyD4ao1cOH69UvoFbMf07eMY1+TwnXi0kwVhIl5IQgl/xO0hcV0bG7uKMOU5YyEdXZngehRVMWqQs+05B4EC40I3OjS9Glwyr7v6GdxPFZ6oH+eYNkSr8PLAdGu7cNuJa3RS0lwirc3Z1JN+j2ze5ZVz5EQ8+M2HswiH7y2OIRzwRBMIV3uWyQlCfRSuyehbxZvsJGDZQwZPqrWqlwHswVE9Zt5vVJhfAUg4VbjgKL5coyat+P/zLmkZJefFaiF1F2Ell/oC4eNk/Bapc/8OV7mqG3ONVJljx+ggWrdOLUMIGJaUCEmziZTs0Oq5jVUgeKGxHJUv18LNdEo9yMHNB1zQndsZ/L8ro8Ydl9pl0pFfFUKjUk4e7ZXWaIypdAX21ajHukvl46ByDFIWTYNcaUp1qRvtQVPJUYHdjfSiWWSqQOV/im3d8JtNm7HPVkDeED+aVdVcAltqqaWWWmrpv+tvgz1QS6IZAAA='
+    >>> open("/tmp/pos_itk_image_info.nii.gz", "w").write(base64.decodestring(nii_enc))
+
+    >>> image_info = pos_itk_image_info("/tmp/pos_itk_image_info.nii.gz")
+    >>> print str(image_info.ByteOrder)
+    2
+
+    >>> print str(image_info.ComponentSize)
+    1
+
+    >>> print str(image_info.DefaultDirection)
+    [(1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)]
+
+    >>> print str(image_info.ComponentTypeAsString)
+    unsigned_char
+
+    >>> print str(image_info.FileType)
+    2
+
+    >>> print str(image_info.Dimensions)
+    [9, 30, 23]
+
+    >>> print str(image_info.FileTypeAsString)
+    TypeNotApplicable
+
+    >>> print str(image_info.ImageSizeInBytes)
+    6210
+
+    >>> print str(image_info.ImageSizeInComponents)
+    6210
+
+    >>> print str(image_info.ImageSizeInPixels)
+    6210
+
+    >>> print str(image_info.NameOfClass)
+    NiftiImageIO
+
+    >>> print str(image_info.NumberOfComponents)
+    1
+
+    >>> print str(image_info.NumberOfDimensions)
+    3
+
+    >>> print str(map(lambda x: round(x,4), image_info.Origin))
+    [2.8333, 2.8333, -2.7609]
+
+    >>> print str(image_info.PixelType)
+    1
+
+    >>> print str(image_info.PixelTypeAsString)
+    scalar
+
+    >>> print str(map(lambda x: round(x,4), image_info.Spacing))
+    [6.6667, 6.6667, 6.5217]
+
+    >>> print str(sorted(image_info.SupportedReadExtensions))
+    ['.hdr', '.img', '.img.gz', '.nia', '.nii', '.nii.gz']
+
+    >>> import os
+    >>> os.remove("/tmp/pos_itk_image_info.nii.gz")
+
+    # Here's another example. This time we process 2D, RGBA png file:
+
+    >>> nii_enc = 'iVBORw0KGgoAAAANSUhEUgAAACYAAAAmEAYAAAD4rTXtAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dE////////CVj33AAAAAlwSFlzAAAASAAAAEgARslrPgAAAZtJREFUaN7t2itIQ3EYxuGflzEvzPucIggmRbzATPMSTGISsUyL2WAxKyKaLQazRS0iJhGDQXTJgRfEJUGQOe9zTDdvM8z1fWkM3qccTvvz8n4f5xxOQSpVsQ/fq1CyCwDlgfTVNQ/Aa/UFAHN1QYDf2fobgJ8XTyvA15lnFSDR1FABED9yTwJEr2r8AE/nleO0Q2SrbJkg3O04/YVOCF879oovIewr2nb2QuSgwFfaAw/TTLgO4bUbqk4hNsC6ewU+TlIBzyAkj39GGwPw3f411NgCv8nkZsMI4H2f8YwBl9GN2k6A583KNoCHtfI+gLu3kluAyJSjCyASKqoGuG8uXAJ49LII8NJBFUBsIZ1D3Je+JoYBitM3nyEkK/+BJVtzfZB8kQlsINcHyReZkezP9UHyhRpmlAlMDcuSGmaU2WEKLEsaSSONpJEaZqSGGWnpG6lhRtphRmqYkXaYkUbSSCNppMCM9AHRSDvMSCNppMCM9BxmpB1mpJE0UmBGGkkjLX0jNcxIO8xIgRnp5dtIDTPSH4hG+sfV6A+/3H/IJeHXVgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxNi0wMS0wNFQxMjoxMzoxOCsxMTowMKYo+UIAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTUtMTAtMDVUMTg6MzE6MDgrMTE6MDBYjMl1AAAAAElFTkSuQmCC'
+    >>> open("/tmp/pos_itk_image_info.png", "w").write(base64.decodestring(nii_enc))
+    >>> image_info = pos_itk_image_info("/tmp/pos_itk_image_info.png")
+
+    >>> print str(image_info.ByteOrder)
+    2
+
+    >>> print str(image_info.ComponentSize)
+    2
+
+    >>> print str(image_info.DefaultDirection)
+    [(1.0, 0.0), (0.0, 1.0)]
+
+    >>> print str(image_info.ComponentTypeAsString)
+    unsigned_short
+
+    >>> print str(image_info.FileType)
+    2
+
+    >>> print str(image_info.Dimensions)
+    [38, 38]
+
+    >>> print str(image_info.FileTypeAsString)
+    TypeNotApplicable
+
+    >>> print str(image_info.ImageSizeInBytes)
+    11552
+
+    >>> print str(image_info.ImageSizeInComponents)
+    5776
+
+    >>> print str(image_info.ImageSizeInPixels)
+    1444
+
+    >>> print str(image_info.NameOfClass)
+    PNGImageIO
+
+    >>> print str(image_info.NumberOfComponents)
+    4
+
+    >>> print str(image_info.NumberOfDimensions)
+    2
+
+    >>> print str(map(lambda x: round(x,4), image_info.Origin))
+    [0.0, 0.0]
+
+    >>> print str(image_info.PixelType)
+    3
+
+    >>> print str(image_info.PixelTypeAsString)
+    rgba
+
+    >>> print str(map(lambda x: round(x,4), image_info.Spacing))
+    [1.0, 1.0]
+
+    >>> print str(sorted(image_info.SupportedReadExtensions))
+    ['.PNG', '.png']
+
+    >>> import os
+    >>> os.remove("/tmp/pos_itk_image_info.png")
+    """
+
+    _DIMENSION_INDEPENDENT_ATTRS = [
+        "ByteOrder", "ByteOrderAsString",
+        "ComponentSize", "ComponentTypeAsString", "FileName",
+        "FileType", "FileTypeAsString", "ImageSizeInBytes",
+        "ImageSizeInComponents", "ImageSizeInPixels", "NameOfClass",
+        "NumberOfComponents", "NumberOfDimensions", "PixelStride",
+        "PixelType", "PixelTypeAsString",
+        "SupportedReadExtensions", "SupportedWriteExtensions"]
+
+    _DIMENSION_DEPENDENT_ATTRS = [
+        "DefaultDirection", "Dimensions", "Direction", "Origin",
+        "Spacing"]
+    _DIMENSION_DEPENDENT_TYPES = {
+        "Dimensions": int, "Origin": float, "Spacing": float}
+
+
+    def __init__(self, image_path):
+        """
+        :param image_path: Name of the image file to be analyzed.
+        :type image_path: str
+        """
+
+        self._logger = logging.getLogger('pos_itk_image_info')
+        self._logger.debug("Reading %s file header details." % image_path)
+        self._logger.debug("Setting up the ITK ImageIO object...")
+
+        self._image_io = itk.ImageIOFactory.CreateImageIO(image_path, \
+                                    itk.ImageIOFactory.ReadMode)
+        self._image_io.SetFileName(image_path)
+
+        self._logger.debug("Reading image information.")
+        self._image_io.ReadImageInformation()
+
+        # Once we read the IO details from the file,
+        # it is time to pass the interesting IO values
+        # from the itk IO object to the python object.
+        self._logger.debug("Copying stuff from the ImageIO to self.")
+        self._get_dimension_independent_properties()
+        self._get_diemsion_dependent_properties()
+
+        # Then, just in case (to be sure that we do not
+        # have unncecessary references) remove the
+        # ImageIO object:
+        self._logger.debug("Removing the ITK ImageIO object reference.")
+        del self._image_io
+
+    def _get_dimension_independent_properties(self):
+        """
+        """
+
+        for prop in self._DIMENSION_INDEPENDENT_ATTRS:
+
+            self._logger.debug("Processing the %s property.")
+
+            # I love the itk Get/Set convention so much!
+            attr_name = "Get" + prop
+
+            # Some attributes express some properties of the
+            # image using string. But the string representation
+            # requires first a int number to be read from the
+            # image IO. Therefore all the code below!
+            if attr_name.endswith("AsString"):
+                mod_attr_name = attr_name[0:-8]
+                prop_val = getattr(self._image_io, mod_attr_name)()
+
+                self._logger.debug("%s method found.", mod_attr_name)
+                attr_value = getattr(self._image_io, attr_name)(prop_val)
+
+                self._logger.debug("%s method found.", attr_name)
+                setattr(self, prop, attr_value)
+            else:
+                attr_value = getattr(self._image_io, attr_name)()
+                self._logger.debug("%s method found.", attr_name)
+                setattr(self, prop, attr_value)
+
+            self._logger.debug("Setting %s to %s .", prop, str(attr_value))
+
+    def _get_diemsion_dependent_properties(self):
+        """
+        """
+
+        # Just make a quick alias, so the code
+        # will remain clean
+        n_dims = self.NumberOfDimensions
+
+        for prop in self._DIMENSION_DEPENDENT_ATTRS:
+
+            self._logger.debug("Processing the %s property.")
+
+            # I love the itk Get/Set convention so much!
+            attr_name = "Get" + prop
+
+            # Get a reference to the actual itk ImageIO
+            # function based on the name of the attribute
+            io_function = getattr(self._image_io, attr_name)
+            attr_value = map(io_function, range(n_dims))
+            self._logger.debug("%s method found.", attr_name)
+
+            # Sometimes, the value of the arribute obtained
+            # directly ftom the itk function has to be casted
+            # to a different type to maintain compatibility with
+            # native python (e.g. long_int -> int).
+            # This is where this is done:
+            type_ = self._DIMENSION_DEPENDENT_TYPES.get(prop, None)
+            if type_:
+                self._logger.debug("Mapping %s to %s.",
+                                    attr_name, str(type_))
+                attr_value = map(type_, attr_value)
+
+            setattr(self, prop, attr_value)
+            self._logger.debug("Setting %s to %s .", prop, str(attr_value))
+
+
 def resample_image_filter(input_image, scaling_factor, default_value=0,
                           interpolation='linear'):
     """
