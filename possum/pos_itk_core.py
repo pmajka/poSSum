@@ -373,7 +373,7 @@ class pos_itk_image_info(object):
 
         for prop in self._DIMENSION_INDEPENDENT_ATTRS:
 
-            self._logger.debug("Processing the %s property.")
+            self._logger.debug("Processing the %s property.", prop)
 
             # I love the itk Get/Set convention so much!
             attr_name = "Get" + prop
