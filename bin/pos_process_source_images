@@ -954,13 +954,6 @@ class volume_reconstruction_preprocessor(output_volume_workflow):
         arbitrary sampling as the number of voxels has to be an integer value.
         If you applay an arbitrary sampling, the size of the image may turn out
         to be non integer.
-
-        # TODO: There's cleartly something wrong with this one. The origin
-        # should be extracted from downsampled sections before stacking.
-        # by doing what we're doing at the moment, we introduce a systematic
-        # shift in the volume origin of a half of the downsamples pixel size in
-        # the section plane (but not across the sections)
-        # This has to be corrected in the future.
         """
 
         # We extract the altered orgin from the first image in the stack.

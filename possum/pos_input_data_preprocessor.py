@@ -165,8 +165,6 @@ def read_image_size(filename):
 
     :return: tuple containing the width and height of the image.
     :rtype: (int, int)
-
-    TODO: Doctest - temp file with predefined size
     """
 
     image = Image.open(filename)
