@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*
 
 import itk
-from sys import argv
 from optparse import OptionParser, OptionGroup
 
 #itk.auto_progress(2)
