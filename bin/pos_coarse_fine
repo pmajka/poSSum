@@ -421,7 +421,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
             dest='smoothing_simga_rotation', help='')
         preprocessingSettings.add_option('--smoothing-simga-scaling',
             default=None, type='float',
-            est='smoothing_simga_scaling', help='')
+            dest='smoothing_simga_scaling', help='')
         preprocessingSettings.add_option('--smoothing-simga-offset',
             default=None, type='float',
             dest='smoothing_simga_offset', help='')
