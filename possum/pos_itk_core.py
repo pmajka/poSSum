@@ -1009,5 +1009,5 @@ def generate_empty_image(reference_image, default_value, type_=None):
 
 if __name__ == 'possum.pos_itk_core':
     import doctest
-    print doctest.testfile("../test/test_check_itk_build/pos_check_itk_build.txt", verbose=True)
+    print doctest.testfile("../test/test_check_itk_build/pos_check_itk_build.txt")
     print doctest.testmod(verbose=True)
