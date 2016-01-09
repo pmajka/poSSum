@@ -4,7 +4,9 @@
 import itk
 import logging
 
+"""
 # http://sphinx-doc.org/domains.html#the-python-domain
+"""
 
 # Dictionary below copied from (Sun Apr  7 14:04:28 CEST 2013)
 # http://code.google.com/p/medipy/source/browse/lib/medipy/itk/types.py?name=default&r=0da35e1099e5947151dee239f7a09f405f4e105c
@@ -1007,4 +1009,5 @@ def generate_empty_image(reference_image, default_value, type_=None):
 
 if __name__ == 'possum.pos_itk_core':
     import doctest
-    print doctest.testmod()
+    print doctest.testfile("../test/test_check_itk_build/pos_check_itk_build.txt", verbose=True)
+    print doctest.testmod(verbose=True)

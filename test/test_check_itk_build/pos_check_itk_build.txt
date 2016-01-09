@@ -1,0 +1,207 @@
+The purpose of this huge doctest is to check it the ITK has
+been compiled properly.  This is done in a very nasty and
+brute-force way. Basically, the code iterates through all
+the instances of (mostly) all the classes which are used in
+the code and then tries to instanciate individual classes.
+How brute-force is that?
+
+Just one note. We do not perform ITK unit testing here. This
+is way simpler.  The code below just tries to instantiate
+classes with different types of images.  That's it. This
+allows us to verify if the ITK build has been conducted
+properly.
+
+
+>>> import sys
+>>> import os
+>>> import itk
+
+
+>>> itkImage_types = \
+... ['D2', 'D3', 'F2', 'F3', 'RGBAUC2', 'RGBAUC3', 'RGBAUS2',
+... 'RGBAUS3', 'RGBUC2', 'RGBUC3', 'RGBUS2', 'RGBUS3', 'SC2',
+... 'SC3', 'SL2', 'SL3', 'SS2', 'SS3', 'UC2', 'UC3', 'UL2',
+... 'UL3', 'US2', 'US3', 'VD22', 'VD23', 'VD33', 'VD34',
+... 'VF22', 'VF33']
+
+>>> itkImageFileReader_types = \
+... ['ID2', 'ID3', 'IF2', 'IF3', 'IRGBAUC2', 'IRGBAUC3',
+...  'IRGBAUS2', 'IRGBAUS3', 'IRGBUC2', 'IRGBUC3', 'IRGBUS2',
+...  'IRGBUS3', 'ISC2', 'ISC3', 'ISL2', 'ISL3', 'ISS2', 'ISS3',
+...  'IUC2', 'IUC3', 'IUL2', 'IUL3', 'IUS2', 'IUS3', 'IVD22',
+...  'IVD33', 'IVF22', 'IVF33', 'VID2', 'VID3', 'VIF2', 'VIF3',
+...  'VISC2', 'VISC3', 'VISL2', 'VISL3', 'VISS2', 'VISS3',
+...  'VIUC2', 'VIUC3', 'VISS3', 'VIUC2', 'VIUC3', 'VIUL2',
+...  'VIUL3', 'VIUS2', 'VIUS3' ]
+
+>>> itkImageFileWriter_types = \
+... ['ID2', 'ID3', 'IF2', 'IF3', 'IRGBAUC2', 'IRGBAUC3',
+...  'IRGBAUS2', 'IRGBAUS3', 'IRGBUC2', 'IRGBUC3', 'IRGBUS2',
+...  'IRGBUS3', 'ISC2', 'ISC3', 'ISL2', 'ISL3', 'ISS2', 'ISS3',
+...  'IUC2', 'IUC3', 'IUL2', 'IUL3', 'IUS2', 'IUS3', 'IVD22',
+...  'IVD33', 'IVF22', 'IVF33', 'VID2', 'VID3', 'VIF2', 'VIF3',
+...  'VISC2', 'VISC3', 'VISL2', 'VISL3', 'VISS2', 'VISS3',
+...  'VIUC2', 'VIUC3', 'VISS3', 'VIUC2', 'VIUC3', 'VIUL2',
+...  'VIUL3', 'VIUS2', 'VIUS3' ]
+
+>>> itkNearestNeighborInterpolateImageFunction_types = \
+... ['ID2D', 'ID3D', 'IF2D', 'IF3D', 'ISC2D', 'ISC3D', 'ISL2D',
+...  'ISL3D', 'ISS2D', 'ISS3D', 'IUC2D', 'IUC3D', 'IUL2D',
+...  'IUL3D', 'IUS2D', 'IUS3D']
+
+>>> itkLinearInterpolateImageFunction_types = \
+... ['ID2D', 'ID3D', 'IF2D', 'IF3D', 'IRGBAUC2D', 'IRGBAUC3D',
+...  'IRGBAUS2D', 'IRGBAUS3D', 'IRGBUC2D', 'IRGBUC3D',
+...  'IRGBUS2D', 'IRGBUS3D', 'ISC2D', 'ISC3D', 'ISL2D', 'ISL3D',
+...  'ISS2D', 'ISS3D', 'IUC2D', 'IUC3D', 'IUL2D', 'IUL3D',
+...  'IUS2D', 'IUS3D', 'IVD22D', 'IVD33D', 'IVF22D', 'IVF33D']
+
+>>> itkResampleImageFilter_types = \
+... ['ID2ID2', 'ID3ID3', 'IF2IF2', 'IF3IF3', 'IRGBAUC2IRGBAUC2',
+...  'IRGBAUC3IRGBAUC3', 'IRGBAUS2IRGBAUS2', 'IRGBAUS3IRGBAUS3',
+...  'IRGBUC2IRGBUC2', 'IRGBUC3IRGBUC3', 'IRGBUS2IRGBUS2',
+...  'IRGBUS3IRGBUS3', 'ISC2ISC2', 'ISC3ISC3', 'ISL2ISL2',
+...  'ISL3ISL3', 'ISS2ISS2', 'ISS3ISS3', 'IUC2IUC2', 'IUC3IUC3',
+...  'IUL2IUL2', 'IUL3IUL3', 'IUS2IUS2', 'IUS3IUS3',
+...  'IVD22IVD22', 'IVD33IVD33', 'IVF22IVF22', 'IVF33IVF33',
+...  'VID2VID2', 'VID3VID3', 'VIF2VIF2', 'VIF3VIF3',
+...  'VISC2VISC2', 'VISC3VISC3', 'VISL2VISL2', 'VISL3VISL3',
+...  'VISS2VISS2', 'VISS3VISS3', 'VIUC2VIUC2', 'VIUC3VIUC3',
+...  'VIUL2VIUL2', 'VIUL3VIUL3', 'VIUS2VIUS2', 'VIUS3VIUS3']
+
+>>> itkBSplineInterpolateImageFunction_types = \
+... ['ID2DD', 'ID3DD', 'IF2DF', 'IF3DF', 'ISC2DSC', 'ISC3DSC',
+...  'ISL2DSL', 'ISL3DSL', 'ISS2DSS', 'ISS3DSS', 'IUC2DUC',
+...  'IUC3DUC', 'IUL2DUL', 'IUL3DUL', 'IUS2DUS', 'IUS3DUS']
+
+
+>>> itkImageDuplicator_types = \
+...  ['ID2', 'ID3', 'IF2', 'IF3', 'IRGBAUC2', 'IRGBAUC3',
+...   'IRGBAUS2', 'IRGBAUS3', 'IRGBUC2', 'IRGBUC3', 'IRGBUS2',
+...   'IRGBUS3', 'ISC2', 'ISC3', 'ISL2', 'ISL3', 'ISS2', 'ISS3',
+...   'IUC2', 'IUC3', 'IUL2', 'IUL3', 'IUS2', 'IUS3', 'IVD22',
+...   'IVD33', 'IVF22', 'IVF33']
+
+>>> itkShiftScaleImageFilter_types = \
+... ['ID2ID2', 'ID3ID3', 'IF2IF2', 'IF3IF3', 'ISC2ISC2',
+...  'ISC3ISC3', 'ISL2ISL2', 'ISL3ISL3', 'ISS2ISS2', 'ISS3ISS3',
+...  'IUC2IUC2', 'IUC3IUC3', 'IUL2IUL2', 'IUL3IUL3', 'IUS2IUS2',
+...  'IUS3IUS3']
+
+>>> itkPasteImageFilter_types = \
+... ['ID2', 'ID3', 'IF2', 'IF3', 'ISC2', 'ISC3', 'ISL2', 'ISL3',
+... 'ISS2', 'ISS3', 'IUC2', 'IUC3', 'IUL2', 'IUL3', 'IUS2',
+... 'IUS3']
+
+>>> itkExtractImageFilter_types = \
+... ['ID2ID2', 'ID3ID2', 'ID3ID3', 'IF2IF2', 'IF3IF2', 'IF3IF3',
+...  'IRGBAUC2IRGBAUC2', 'IRGBAUC3IRGBAUC3', 'IRGBAUS2IRGBAUS2',
+...  'IRGBAUS3IRGBAUS3', 'IRGBUC2IRGBUC2', 'IRGBUC3IRGBUC2',
+...  'IRGBUC3IRGBUC3', 'IRGBUS2IRGBUS2', 'IRGBUS3IRGBUS2',
+...  'IRGBUS3IRGBUS3', 'ISC2ISC2', 'ISC3ISC2', 'ISC3ISC3',
+...  'ISL2ISL2', 'ISL3ISL2', 'ISL3ISL3', 'ISS2ISS2', 'ISS3ISS2',
+...  'ISS3ISS3', 'IUC2IUC2', 'IUC3IUC2', 'IUC3IUC3', 'IUL2IUL2',
+...  'IUL3IUL2', 'IUL3IUL3', 'IUS2IUS2', 'IUS3IUS2', 'IUS3IUS3',
+...  'IVD22IVD22', 'IVD33IVD33', 'IVF22IVF22', 'IVF33IVF33']
+
+>>> itkCastImageFilter_types = \
+... ['ID2ID2', 'ID2IF2', 'ID2ISC2', 'ID2ISL2', 'ID2ISS2',
+... 'ID2IUC2', 'ID2IUL2', 'ID2IUS2', 'ID3ID3', 'ID3IF3',
+... 'ID3ISC3', 'ID3ISL3', 'ID3ISS3', 'ID3IUC3', 'ID3IUL3',
+... 'ID3IUS3', 'IF2ID2', 'IF2IF2', 'IF2ISC2', 'IF2ISL2',
+... 'IF2ISS2', 'IF2IUC2', 'IF2IUL2', 'IF2IUS2', 'IF3ID3',
+... 'IF3IF3', 'IF3ISC3', 'IF3ISL3', 'IF3ISS3', 'IF3IUC3',
+... 'IF3IUL3', 'IF3IUS3', 'ISC2ID2', 'ISC2IF2', 'ISC2ISC2',
+... 'ISC2ISL2', 'ISC2ISS2', 'ISC2IUC2', 'ISC2IUL2', 'ISC2IUS2',
+... 'ISC3ID3', 'ISC3IF3', 'ISC3ISC3', 'ISC3ISL3', 'ISC3ISS3',
+... 'ISC3IUC3', 'ISC3IUL3', 'ISC3IUS3', 'ISL2ID2', 'ISL2IF2',
+... 'ISL2ISC2', 'ISL2ISL2', 'ISL2ISS2', 'ISL2IUC2', 'ISL2IUL2',
+... 'ISL2IUS2', 'ISL3ID3', 'ISL3IF3', 'ISL3ISC3', 'ISL3ISL3',
+... 'ISL3ISS3', 'ISL3IUC3', 'ISL3IUL3', 'ISL3IUS3', 'ISS2ID2',
+... 'ISS2IF2', 'ISS2ISC2', 'ISS2ISL2', 'ISS2ISS2', 'ISS2IUC2',
+... 'ISS2IUL2', 'ISS2IUS2', 'ISS3ID3', 'ISS3IF3', 'ISS3ISC3',
+... 'ISS3ISL3', 'ISS3ISS3', 'ISS3IUC3', 'ISS3IUL3', 'ISS3IUS3',
+... 'IUC2ID2', 'IUC2IF2', 'IUC2ISC2', 'IUC2ISL2', 'IUC2ISS2',
+... 'IUC2IUC2', 'IUC2IUL2', 'IUC2IUS2', 'IUC3ID3', 'IUC3IF3',
+... 'IUC3ISC3', 'IUC3ISL3', 'IUC3ISS3', 'IUC3IUC3', 'IUC3IUL3',
+... 'IUC3IUS3', 'IUL2ID2', 'IUL2IF2', 'IUL2ISC2', 'IUL2ISL2',
+... 'IUL2ISS2', 'IUL2IUC2', 'IUL2IUL2', 'IUL2IUS2', 'IUL3ID3',
+... 'IUL3IF3', 'IUL3ISC3', 'IUL3ISL3', 'IUL3ISS3', 'IUL3IUC3',
+... 'IUL3IUL3', 'IUL3IUS3', 'IUS2ID2', 'IUS2IF2', 'IUS2ISC2',
+... 'IUS2ISL2', 'IUS2ISS2', 'IUS2IUC2', 'IUS2IUL2', 'IUS2IUS2',
+... 'IUS3ID3', 'IUS3IF3', 'IUS3ISC3', 'IUS3ISL3', 'IUS3ISS3',
+... 'IUS3IUC3', 'IUS3IUL3', 'IUS3IUS3']
+
+>>> itkVectorCastImageFiter_types = \
+... ['IRGBUC2IRGBUC2', 'IRGBUC2IRGBUS2', 'IRGBUC3IRGBUC3',
+... 'IRGBUC3IRGBUS3', 'IRGBUS2IRGBUC2', 'IRGBUS2IRGBUS2',
+... 'IRGBUS3IRGBUC3', 'IRGBUS3IRGBUS3', 'IVD22ICVD22',
+... 'IVD22ICVF22', 'IVD22IVD22', 'IVD22IVF22', 'IVD33ICVD33',
+... 'IVD33ICVF33', 'IVD33IVD33', 'IVD33IVF33', 'IVF22ICVD22',
+... 'IVF22ICVF22', 'IVF22IVD22', 'IVF22IVF22', 'IVF33ICVD33',
+... 'IVF33ICVF33', 'IVF33IVD33', 'IVF33IVF33']
+
+>>> itkVectorResampleImageFilter_types = \
+... ['IVD22IVD22', 'IVD33IVD33', 'IVF22IVF22', 'IVF33IVF33']
+
+>>> itkMedianImageFilter_types = \
+... ['ID2ID2', 'ID3ID3', 'IF2IF2', 'IF3IF3', 'ISC2ISC2',
+... 'ISC3ISC3', 'ISL2ISL2', 'ISL3ISL3', 'ISS2ISS2', 'ISS3ISS3',
+... 'IUC2IUC2', 'IUC3IUC3', 'IUL2IUL2', 'IUL3IUL3', 'IUS2IUS2',
+... 'IUS3IUS3']
+
+>>> itkChangeInformationImageFilter_types = \
+... ['ID2', 'ID3', 'IF2', 'IF3', 'ISC2', 'ISC3', 'ISL2', 'ISL3',
+... 'ISS2', 'ISS3', 'IUC2', 'IUC3', 'IUL2', 'IUL3', 'IUS2',
+... 'IUS3']
+
+>>> itkJoinSeriesImageFilter_types = \
+... ['ID2ID3', 'IF2IF3', 'ISC2ISC3', 'ISL2ISL3', 'ISS2ISS3',
+... 'IUC2IUC3', 'IUL2IUL3', 'IUS2IUS3']
+
+
+>>> itkDisplacementFieldTransform_types = ['D2', 'D3']
+
+>>> itkCompositeTransform_types = ['D2', 'D3']
+
+
+>>> classes_to_test = [
+... ("Image", itkImage_types),
+... ("ImageDuplicator", itkImageDuplicator_types),
+... ("ImageFileReader", itkImageFileReader_types),
+... ("ImageFileWriter", itkImageFileWriter_types),
+... ("CastImageFilter", itkCastImageFilter_types),
+... ("ExtractImageFilter", itkExtractImageFilter_types),
+... ("PasteImageFilter", itkPasteImageFilter_types),
+... ("NearestNeighborInterpolateImageFunction", itkNearestNeighborInterpolateImageFunction_types),
+... ("LinearInterpolateImageFunction", itkLinearInterpolateImageFunction_types),
+... ("BSplineInterpolateImageFunction", itkBSplineInterpolateImageFunction_types),
+... ("ResampleImageFilter", itkResampleImageFilter_types),
+... ("ShiftScaleImageFilter", itkShiftScaleImageFilter_types),
+... ("VectorCastImageFilter", itkVectorCastImageFiter_types),
+... ("VectorResampleImageFilter", itkVectorResampleImageFilter_types),
+... ("MedianImageFilter", itkMedianImageFilter_types),
+... ("ChangeInformationImageFilter", itkChangeInformationImageFilter_types),
+... ("JoinSeriesImageFilter", itkJoinSeriesImageFilter_types),
+... ("DisplacementFieldTransform", itkDisplacementFieldTransform_types),
+... ("CompositeTransform", itkCompositeTransform_types)]
+
+>>> for class_, types_ in classes_to_test:
+...     for type_ in types_:
+...        _ = getattr(getattr(itk, class_), type_).New()
+
+
+>>> itkVector_types = \
+... ['D1', 'D2', 'D3', 'D4', 'D6', 'F1', 'F2', 'F3', 'F4', 'F6',
+... 'SC1', 'SC2', 'SC3', 'SC4', 'SC6', 'SL1', 'SL2', 'SL3',
+... 'SL4', 'SL6', 'SS1', 'SS2', 'SS3', 'SS4', 'SS6', 'UC1',
+... 'UC2', 'UC3', 'UC4', 'UC6', 'UL1', 'UL2', 'UL3', 'UL4',
+... 'UL6', 'US1', 'US2', 'US3', 'US4', 'US6']
+
+>>> small_classes_to_test = [("Vector", itkVector_types)]
+
+>>> for class_, types_ in small_classes_to_test:
+...     for type_ in types_:
+...         _ = getattr(getattr(itk, class_), type_)
+
+Uhhh.... that's it!
