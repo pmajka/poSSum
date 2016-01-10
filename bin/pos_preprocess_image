@@ -386,47 +386,77 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
 
     @staticmethod
     def parseArgs():
+        usage_string = r("Usage: %prog -i FILE\n\
+            [-g FILE] [-r FILE] \n\
+            [other options]")
+        description_string = r("This script performs several \
+        operations on the 2d image in order to prepare it to \
+        a reconstruction process.")
+
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
+        parser.set_usage(usage_string)
+        parser.set_description(description_string)
 
         parser.add_option('--input-image', '-i', dest='input_image',
-            type='str', default=None,
-            help=r('Input filename. See the detailed workflow description \
+            type='str', default=None, metavar="FILE",
+            help=r('Input image filename. \
+            See the detailed workflow description \
             for the detailed criteria on the proper input file type.'))
-
         parser.add_option('--output-grayscale-image', '-g',
-            dest='output_grayscale_image', type='str', default=None,
+            dest='output_grayscale_image', type='str',
+            default=None, metavar="FILE",
             help='Name of the output grayscale image.')
         parser.add_option('--output-rgb-image', '-r',
-            dest='output_rgb_image', type='str', default=None,
-            help='Name of the output multichannel image.')
+            dest='output_rgb_image', type='str',
+            default=None, metavar="FILE",
+            help='Name of the output rgb image.')
 
         parser.add_option('--extract-roi', dest='extract_roi',
-            default=None, type='int', nargs=4,
-            help=r('ROI of the input image used for registration \
-            (ox, oy, sx, sy).'))
+            default=None, type='int', nargs=4, metavar="\'INT INT INT INT\'",
+            help=r('Causes the workflow to extract a region of interest \
+            from the provided image. This is useful if one wants to \
+            use only a subset of the image in the reconstruction. \
+            Four integer (pixel indices) values are required: \
+            (ox, oy, sx, sy). Ox and Oy stand for origin in pixels and \
+            the sy and sx are obviously the size of the regions to extract.'))
         parser.add_option('--resize-factor', dest='resize_factor',
-            default=None, type='float',
-            help=r('Scaling factor for the source image used for \
-            registration. Float between 0 and 1.'))
+            default=None, type='float', metavar="\'FLOAT_0-1 FLOAT_0-1\'",
+            help=r('Scaling factor for the source image. Provide a float \
+            number between 0 and 1. Do not provide 0 as this will cause \
+            stupid problems (you asked for it). Providing 1 also does not make \
+            much sense as it will not cause any actual resampling. \
+            The resampling is conducted as a last stage of processing \
+            after cropping (this is important) and after all smoothing, \
+            etc.'))
         parser.add_option('--color-channel',
             dest='color_channel', default='blue',
             choices=['r', 'g', 'b', 'red', 'green', 'blue'],
             help=r('In rgb images - color channel on which \
-            registration will be performed. Has no meaning for \
-            grayscale input images. Possible values: r/red, g/green, b/blue.'))
-
+            will be used to generate the grayscale image. Has no meaning for \
+            grayscale only input images. Possible values: \
+            r/red, g/green, b/blue.'))
         parser.add_option('--median-filter-radius', dest='median_filter_radius',
-            default=None, type='int', nargs=2,
-            help=r('Median workflow radius in voxels e.g. 2 2'))
+            default=None, type='int', nargs=2, metavar="\'INT INT\'",
+            help=r('If provided triggers a smoothing of the grayscale image. \
+            Does not trigger smoothing of the rgb image as rgb images \
+            are never smoothed. Requires two integer values - median filter \
+            radius along each image axis (IN VOXELS). \
+            Since the radii are independent so you can do \
+            some fancy-shmancy anisoptropic smoothing if you want. Examples: \
+            \'2 2\' or \'0 3\', etc.'))
         parser.add_option('--invert-source-image', dest='invert_source_image',
             default=False, action='store_const', const=True,
-            help=r('Invert source image: both, grayscale and multichannel, \
-            before registration'))
+            help=r('Invert source image: both, the grayscale image and \
+            the rgb image. Therefore, the output images will be inverted w.r.t \
+            the input image.'))
         parser.add_option('--invert-rgb-image',
             dest='invert_rgb_image', default=False,
             action='store_const', const=True,
-            help=r('Invert source image: both, grayscale and multichannel, \
-            before registration'))
+            help=r('Inverts the rgb image in addition to the \
+            \'--invert-source-image\'. Yes, wired. This is usefull pretty \
+            much in only one situation: When you provide rgb image as an \
+            input and you want to get inverted grayscale image and \
+            not inverted output rgb images.'))
 
         (options, args) = parser.parse_args()
         return (options, args)

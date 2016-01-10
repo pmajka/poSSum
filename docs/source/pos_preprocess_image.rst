@@ -35,7 +35,7 @@ Desctiption
 -----------
 
 This script performs several operations on the 2d image in order to
-prepare it to a coregistration or reconstruction process.
+prepare it to a reconstruction process.
 
 
 Input image requirements
