@@ -425,8 +425,8 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         preprocessingSettings.add_option('--smoothing-simga-offset',
             default=None, type='float',
             dest='smoothing_simga_offset', help='')
-        preprocessingSettings.add_option('--smoothing-simga-fixed', default=None,
-            type='float', dest='smoothing_simga_fixed', help='')
+        preprocessingSettings.add_option('--smoothing-simga-fixed',
+            default=None, type='float', dest='smoothing_simga_fixed', help='')
 
         workflowSettings = \
             OptionGroup(parser, 'Workflow settings')
