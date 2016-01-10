@@ -24,7 +24,7 @@ All supported features in one invocation (an example) ::
                         --grayscaleOutputImage <filename>
                         --colorOutputImage <filename>
      [ox, oy, sx, sy]   --registrationROI 10 20 30 30
-                        --registrationResize 0.5
+                        --resize-factor 0.5
      [red, green, blue] --color-channel red
                         --median-filter-radius 2 2
                         --invert-source-image
@@ -92,7 +92,7 @@ square from the whole image and outputs only color image::
         [required]      --inputFilename <filename>
                         --grayscaleOutputImage <filename>
                         --color-channel blue
-                        --registrationResize 0.5
+                        --resize-factor 0.5
                         --registrationROI 200 200 100 100
 
 

@@ -404,7 +404,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
             default=None, type='int', nargs=4,
             help=r('ROI of the input image used for registration \
             (ox, oy, sx, sy).'))
-        parser.add_option('--registrationResize', dest='resize_factor',
+        parser.add_option('--resize-factor', dest='resize_factor',
             default=None, type='float',
             help=r('Scaling factor for the source image used for \
             registration. Float between 0 and 1.'))

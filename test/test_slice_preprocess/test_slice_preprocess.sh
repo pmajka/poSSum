@@ -40,21 +40,21 @@ pos_slice_preprocess \
     -g ${INPUT_IMAGE}_g_6.nii.gz \
     -r ${INPUT_IMAGE}_r_6.nii.gz \
     --registrationROI 200 200 250 250 \
-    --registrationResize 0.5
+    --resize-factor 0.5
 
 pos_slice_preprocess \
     -i ${INPUT_IMAGE}.nii.gz \
     -g ${INPUT_IMAGE}_g_8.nii.gz \
     -r ${INPUT_IMAGE}_r_8.nii.gz \
     --registrationROI 100 100 350 350 \
-    --registrationResize 0.5
+    --resize-factor 0.5
 
 pos_slice_preprocess \
     -i ${INPUT_IMAGE}.nii.gz \
     -g ${INPUT_IMAGE}_g_7.nii.gz \
     -r ${INPUT_IMAGE}_r_7.nii.gz \
     --registrationROI 100 100 350 350 \
-    --registrationResize 0.5 \
+    --resize-factor 0.5 \
     --median-filter-radius 4 4 \
     --invert-rgb-image
 
