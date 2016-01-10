@@ -1132,12 +1132,12 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     <possum.pos_wrappers.alignment_preprocessor_wrapper object at 0x...>
 
     >>> print alignment_preprocessor_wrapper() #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess --inputFilename
+    pos_slice_preprocess --input-image
 
     >>> print alignment_preprocessor_wrapper(input_image="input.nii.gz",
     ... grayscale_output_image="grayscale.nii.gz",
     ... color_output_image="color.nii.gz") #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess --inputFilename input.nii.gz -g grayscale.nii.gz -r color.nii.gz
+    pos_slice_preprocess --input-image input.nii.gz -g grayscale.nii.gz -r color.nii.gz
 
     >>> p=alignment_preprocessor_wrapper(input_image="i.nii.gz",
     ... grayscale_output_image="g.nii.gz",
@@ -1181,25 +1181,25 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     KeyError: 'parameter_that_does_not_exist'
 
     >>> print p.updateParameters({"median_filter_radius" : [2,2]}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --median-filter-radius 2 2
+    pos_slice_preprocess --input-image i.nii.gz -g g.nii.gz -r c.nii.gz --median-filter-radius 2 2
 
     >>> print p.updateParameters({"median_filter_radius" : [2,2],
     ... 'invert_grayscale':True,
     ... 'invert_multichannel':True,
     ... 'registration_color': 'green'}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --color-channel green --median-filter-radius 2 2 --invert-source-image --invert-rgb-image
+    pos_slice_preprocess --input-image i.nii.gz -g g.nii.gz -r c.nii.gz --color-channel green --median-filter-radius 2 2 --invert-source-image --invert-rgb-image
 
     >>> print p.updateParameters({"median_filter_radius" : [2,2],
     ... 'invert_grayscale':False,
     ... 'invert_multichannel':False,
     ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --color-channel red --median-filter-radius 2 2 --invert-source-image --invert-rgb-image
+    pos_slice_preprocess --input-image i.nii.gz -g g.nii.gz -r c.nii.gz --color-channel red --median-filter-radius 2 2 --invert-source-image --invert-rgb-image
 
     >>> print p.updateParameters({"median_filter_radius" : None,
     ... 'invert_grayscale':None,
     ... 'invert_multichannel': None,
     ... 'registration_color': 'red'}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz --color-channel red
+    pos_slice_preprocess --input-image i.nii.gz -g g.nii.gz -r c.nii.gz --color-channel red
 
     >>> print p.updateParameters({"median_filter_radius" : 2})
     Traceback (most recent call last):
@@ -1209,11 +1209,11 @@ class alignment_preprocessor_wrapper(generic_wrapper):
     ... 'invert_grayscale' : None,
     ... 'invert_multichannel' : None,
     ... 'registration_color': None}) #doctest: +NORMALIZE_WHITESPACE
-    pos_slice_preprocess --inputFilename i.nii.gz -g g.nii.gz -r c.nii.gz
+    pos_slice_preprocess --input-image i.nii.gz -g g.nii.gz -r c.nii.gz
     """
 
     _template = """pos_slice_preprocess \
-                  --inputFilename {input_image} \
+                  --input-image {input_image} \
                   {grayscale_output_image} {color_output_image} \
                   {registration_roi} {registration_resize} \
                   {registration_color} \

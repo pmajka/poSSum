@@ -20,7 +20,7 @@ Usage summary
 All supported features in one invocation (an example) ::
 
     pos_slice_preprocess.py
-        [required]      --inputFilename <filename>
+        [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --output-rgb-image <filename>
      [ox, oy, sx, sy]   --extract-roi 10 20 30 30
@@ -42,7 +42,7 @@ Input image requirements
 ________________________
 
 The script requires only one input parameter - the slice image to process
-(provided via ``--inputFilename`` command line option). It has to be in one of
+(provided via ``--input-image`` command line option). It has to be in one of
 the formats from the list below:
 
     1) Three channel, 8-bit per channel RGB image. A 24-bit PNG (no transparency)
@@ -77,7 +77,7 @@ files: grayscale (by default, the blue channel is extracted) and rgb image,
 both in nifti format. No additional processing is performed ::
 
     pos_slice_preprocess
-        [required]      --inputFilename <filename>
+        [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --output-rgb-image <filename>
 
@@ -89,7 +89,7 @@ The example below the script takes an image scales it down and extracts a
 square from the whole image and outputs only color image::
 
     pos_slice_preprocess
-        [required]      --inputFilename <filename>
+        [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --color-channel blue
                         --resize-factor 0.5
@@ -105,7 +105,7 @@ images. Both grayscale and rgb images are outputes. Note, however, that only
 grayscale image is smoothed by the median workflow::
 
     pos_slice_preprocess
-        [required]      --inputFilename <filename>
+        [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --output-rgb-image <filename>
                         --median-filter-radius 2 2

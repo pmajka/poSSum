@@ -133,7 +133,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
     def _validate_options(self):
         super(self.__class__, self)._initializeOptions()
 
-        assert self.options.input_filename is not None, \
+        assert self.options.input_image is not None, \
             self._logger.error(r("The input image (-i ...) \
             is an obligatory option!"))
 
@@ -142,10 +142,10 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
         super(self.__class__, self)._pre_launch()
 
         # Determine the filetype and then load the image to be processed.
-        self._logger.debug("Reading volume file %s", self.options.input_filename)
-        self._input_type = autodetect_file_type(self.options.input_filename)
+        self._logger.debug("Reading volume file %s", self.options.input_image)
+        self._input_type = autodetect_file_type(self.options.input_image)
         reader = itk.ImageFileReader[self._input_type].New()
-        reader.SetFileName(self.options.input_filename)
+        reader.SetFileName(self.options.input_image)
         reader.Update()
 
         # Read number of the components of the image.
@@ -388,7 +388,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
     def parseArgs():
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
-        parser.add_option('--inputFilename', '-i', dest='input_filename',
+        parser.add_option('--input-image', '-i', dest='input_image',
             type='str', default=None,
             help=r('Input filename. See the detailed workflow description \
             for the detailed criteria on the proper input file type.'))
