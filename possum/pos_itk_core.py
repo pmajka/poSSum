@@ -1007,7 +1007,8 @@ def generate_empty_image(reference_image, default_value, type_=None):
     return output_canvas
 
 
-if __name__ == 'possum.pos_itk_core':
+#if __name__ == 'possum.pos_itk_core':
+if __name__ == '__name__':
     import doctest
     print doctest.testfile("../test/test_check_itk_build/pos_check_itk_build.txt")
     print doctest.testmod(verbose=True)

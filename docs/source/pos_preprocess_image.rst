@@ -19,7 +19,7 @@ Usage summary
 
 All supported features in one invocation (an example) ::
 
-    pos_slice_preprocess.py
+    pos_preprocess_image
         [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --output-rgb-image <filename>
@@ -76,7 +76,7 @@ The folloving invocation takes an rgb input image and produces two output
 files: grayscale (by default, the blue channel is extracted) and rgb image,
 both in nifti format. No additional processing is performed ::
 
-    pos_slice_preprocess
+    pos_preprocess_image
         [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --output-rgb-image <filename>
@@ -88,7 +88,7 @@ Trim and rescale and image
 The example below the script takes an image scales it down and extracts a
 square from the whole image and outputs only color image::
 
-    pos_slice_preprocess
+    pos_preprocess_image
         [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --color-channel blue
@@ -104,7 +104,7 @@ for input, extracts default color channel and applies smoothing and inverts the
 images. Both grayscale and rgb images are outputes. Note, however, that only
 grayscale image is smoothed by the median workflow::
 
-    pos_slice_preprocess
+    pos_preprocess_image
         [required]      --input-image <filename>
                         --output-grayscale-image <filename>
                         --output-rgb-image <filename>
@@ -116,4 +116,4 @@ Examples
 --------
 
 Please see the examples in the `tests/test_slice_preprocess` directory which
-contains several examples on using the `pos_slice_preprocess` script.
+contains several examples on using the `pos_preprocess_image` script.

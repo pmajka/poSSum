@@ -13,7 +13,7 @@ Basic workflow building blocks:
 
 * :doc:`pos_slice_volume`
 * :doc:`pos_stack_sections`
-* :doc:`pos_slice_preprocess`
+* :doc:`pos_preprocess_image`
 * :doc:`pos_reorder_volume`
 
 More more complex building blocks:
