@@ -23,7 +23,7 @@ All supported features in one invocation (an example) ::
         [required]      --inputFilename <filename>
                         --grayscaleOutputImage <filename>
                         --colorOutputImage <filename>
-     [ox, oy, sx, sy]   --registrationROI 10 20 30 30
+     [ox, oy, sx, sy]   --extract-roi 10 20 30 30
                         --resize-factor 0.5
      [red, green, blue] --color-channel red
                         --median-filter-radius 2 2
@@ -93,7 +93,7 @@ square from the whole image and outputs only color image::
                         --grayscaleOutputImage <filename>
                         --color-channel blue
                         --resize-factor 0.5
-                        --registrationROI 200 200 100 100
+                        --extract-roi 200 200 100 100
 
 
 Smooth and invert images

@@ -1224,7 +1224,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
         'input_image': filename_parameter('input_image', None),
         'grayscale_output_image': filename_parameter('-g', None, str_template="{_name} {_value}"),
         'color_output_image': filename_parameter('-r', None, str_template="{_name} {_value}"),
-        'registration_roi': list_parameter('registrationROI', None, str_template="--{_name} {_list}"),
+        'registration_roi': list_parameter('extract-roi', None, str_template="--{_name} {_list}"),
         'registration_resize': value_parameter('resize-factor', None, str_template="--{_name} {_value}"),
         'registration_color': string_parameter('color_channel', None, str_template="--{_name} {_value}"),
         'median_filter_radius': list_parameter('median-filter-radius', None, str_template="--{_name} {_list}"),

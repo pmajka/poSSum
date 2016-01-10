@@ -186,18 +186,18 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
     def _get_crop_settings(self):
         """
         Determine if output image cropping is enabled. The output image
-        cropping is determined by the `registration_roi` command line option. The
+        cropping is determined by the `extract_roi` command line option. The
         first two integers determine the origin of the subregion to be cropped
         while the two last integers denote the size of the output region. The
         easiest way to determine subregion settings is just to try it :)
         """
         try:
-            crop_index = self.options.registration_roi[0:2]
+            crop_index = self.options.extract_roi[0:2]
         except:
             crop_index = None
 
         try:
-            crop_size = self.options.registration_roi[2:4]
+            crop_size = self.options.extract_roi[2:4]
         except:
             crop_size = None
 
@@ -400,7 +400,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
             dest='output_rgb_image', type='str', default=None,
             help='Name of the output multichannel image.')
 
-        parser.add_option('--registrationROI', dest='registration_roi',
+        parser.add_option('--extract-roi', dest='extract_roi',
             default=None, type='int', nargs=4,
             help=r('ROI of the input image used for registration \
             (ox, oy, sx, sy).'))
