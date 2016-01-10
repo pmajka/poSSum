@@ -20,15 +20,15 @@ Usage summary
 All supported features in one invocation (an example) ::
 
     pos_slice_preprocess.py
-        [required]      --input-image <filename>
-                        --output-grayscale-image <filename>
-                        --output-rgb-image <filename>
-     [ox, oy, sx, sy]   --extract-roi 10 20 30 30
-                        --resize-factor 0.5
-     [red, green, blue] --color-channel red
-                        --median-filter-radius 2 2
-                        --invert-source-image
-                        --invert-rgb-image
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
+                        --colorOutputImage <filename>
+     [ox, oy, sx, sy]   --registrationROI 10 20 30 30
+                        --registrationResize 0.5
+     [red, green, blue] --registrationColorChannel red
+                        --medianFilterRadius 2 2
+                        --invertSourceImage
+                        --invertMultichannelImage
 
 
 Desctiption
@@ -42,7 +42,7 @@ Input image requirements
 ________________________
 
 The script requires only one input parameter - the slice image to process
-(provided via ``--input-image`` command line option). It has to be in one of
+(provided via ``--inputFilename`` command line option). It has to be in one of
 the formats from the list below:
 
     1) Three channel, 8-bit per channel RGB image. A 24-bit PNG (no transparency)
@@ -77,9 +77,9 @@ files: grayscale (by default, the blue channel is extracted) and rgb image,
 both in nifti format. No additional processing is performed ::
 
     pos_slice_preprocess
-        [required]      --input-image <filename>
-                        --output-grayscale-image <filename>
-                        --output-rgb-image <filename>
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
+                        --colorOutputImage <filename>
 
 
 Trim and rescale and image
@@ -89,11 +89,11 @@ The example below the script takes an image scales it down and extracts a
 square from the whole image and outputs only color image::
 
     pos_slice_preprocess
-        [required]      --input-image <filename>
-                        --output-grayscale-image <filename>
-                        --color-channel blue
-                        --resize-factor 0.5
-                        --extract-roi 200 200 100 100
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
+                        --registrationColorChannel blue
+                        --registrationResize 0.5
+                        --registrationROI 200 200 100 100
 
 
 Smooth and invert images
@@ -105,12 +105,12 @@ images. Both grayscale and rgb images are outputes. Note, however, that only
 grayscale image is smoothed by the median workflow::
 
     pos_slice_preprocess
-        [required]      --input-image <filename>
-                        --output-grayscale-image <filename>
-                        --output-rgb-image <filename>
-                        --median-filter-radius 2 2
-                        --invert-source-image
-                        --invert-rgb-image
+        [required]      --inputFilename <filename>
+                        --grayscaleOutputImage <filename>
+                        --colorOutputImage <filename>
+                        --medianFilterRadius 2 2
+                        --invertSourceImage
+                        --invertMultichannelImage
 
 Examples
 --------

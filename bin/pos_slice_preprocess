@@ -122,7 +122,7 @@ def collapse_pseudo_3d_image(input_image, input_type,
         return input_image, input_type
 
 
-class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
+class prepare_slice_for_seq_alignment(pos_wrapper_skel.enclosed_workflow):
     """
     """
 
@@ -133,7 +133,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
     def _validate_options(self):
         super(self.__class__, self)._initializeOptions()
 
-        assert self.options.input_image is not None, \
+        assert self.options.inputFilename is not None, \
             self._logger.error(r("The input image (-i ...) \
             is an obligatory option!"))
 
@@ -142,10 +142,10 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
         super(self.__class__, self)._pre_launch()
 
         # Determine the filetype and then load the image to be processed.
-        self._logger.debug("Reading volume file %s", self.options.input_image)
-        self._input_type = autodetect_file_type(self.options.input_image)
+        self._logger.debug("Reading volume file %s", self.options.inputFilename)
+        self._input_type = autodetect_file_type(self.options.inputFilename)
         reader = itk.ImageFileReader[self._input_type].New()
-        reader.SetFileName(self.options.input_image)
+        reader.SetFileName(self.options.inputFilename)
         reader.Update()
 
         # Read number of the components of the image.
@@ -186,18 +186,18 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
     def _get_crop_settings(self):
         """
         Determine if output image cropping is enabled. The output image
-        cropping is determined by the `extract_roi` command line option. The
+        cropping is determined by the `registrationROI` command line option. The
         first two integers determine the origin of the subregion to be cropped
         while the two last integers denote the size of the output region. The
         easiest way to determine subregion settings is just to try it :)
         """
         try:
-            crop_index = self.options.extract_roi[0:2]
+            crop_index = self.options.registrationROI[0:2]
         except:
             crop_index = None
 
         try:
-            crop_size = self.options.extract_roi[2:4]
+            crop_size = self.options.registrationROI[2:4]
         except:
             crop_size = None
 
@@ -208,7 +208,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
         Execute slice preparation pipeline on a multichannel image.
         """
 
-        if self.options.output_rgb_image:
+        if self.options.colorOutputImage:
             # Just initialize an array holding processed individual channels.
             processed_components = []
 
@@ -230,11 +230,11 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
                 crop_index_s, crop_size_s = self._get_crop_settings()
                 processed_channel = prepare_single_channel(
                     extract_filter.GetOutput(),
-                    scale_factor=self.options.resize_factor,
+                    scale_factor=self.options.registrationResize,
                     crop_index=crop_index_s,
                     crop_size=crop_size_s,
                     median_radius=None,
-                    invert=self.options.invert_rgb_image)
+                    invert=self.options.invertMultichannelImage)
 
                 # Cast the processed channel to approperiate type (the type
                 # based on which multicomponent image will be created)
@@ -258,12 +258,12 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
 
             # Write the processed multichannel image.
             self._logger.debug("Writing the rgb(rgb) image to: %s.",
-                            self.options.output_rgb_image)
+                            self.options.colorOutputImage)
             writer = itk.ImageFileWriter[self._rgb_out_type].New(
-                compose, FileName=self.options.output_rgb_image)
+                compose, FileName=self.options.colorOutputImage)
             writer.Update()
 
-        if self.options.output_grayscale_image:
+        if self.options.grayscaleOutputImage:
             # Now extract a grayscale image from the provided multichannel
             # image. The channel to extract is a specific color provided via
             # command line options.
@@ -277,7 +277,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
 
             # Extract a specific color channel based on which grayscale image
             # will be prepared.
-            registration_channel = self.options.color_channel
+            registration_channel = self.options.registrationColorChannel
             self._logger.debug("Extract color channel: %s.",
                                registration_channel)
             extract_filter = itk.VectorIndexSelectionCastImageFilter[
@@ -298,18 +298,18 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                     caster.GetOutput(),
-                    scale_factor=self.options.resize_factor,
+                    scale_factor=self.options.registrationResize,
                     crop_index=crop_index_s,
                     crop_size=crop_size_s,
-                    median_radius=self.options.median_filter_radius,
-                    invert=self.options.invert_source_image)
+                    median_radius=self.options.medianFilterRadius,
+                    invert=self.options.invertSourceImage)
 
             # Write the grayscale(rgb) image to file.
             self._logger.debug("Writing the grayscale image to %s.",
-                            self.options.output_grayscale_image)
+                            self.options.grayscaleOutputImage)
             writer = itk.ImageFileWriter[self._grayscale_out_type].New()
             writer.SetInput(processed_channel)
-            writer.SetFileName(self.options.output_grayscale_image)
+            writer.SetFileName(self.options.grayscaleOutputImage)
             writer.Update()
 
     def _process_grayscale_image(self):
@@ -317,7 +317,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
         Execute slice processing workflow on a grayscale image.
         """
 
-        if self.options.output_rgb_image:
+        if self.options.colorOutputImage:
             self._logger.debug("Extracting rgb(grayscale) image.")
 
             # The rgb(grayscale) image is created by simply cloning the
@@ -333,11 +333,11 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                 caster.GetOutput(),
-                scale_factor=self.options.resize_factor,
+                scale_factor=self.options.registrationResize,
                 crop_index=crop_index_s,
                 crop_size=crop_size_s,
                 median_radius=None,
-                invert=self.options.invert_rgb_image)
+                invert=self.options.invertMultichannelImage)
 
             # Finally the multichannel image can be composed from individual
             # grayscale channel(s) prepared in the previous step.
@@ -350,23 +350,23 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
                     Input3=processed_channel)
 
             self._logger.debug("Writing the rgb(grayscale) image to %s.",
-                            self.options.output_rgb_image)
+                            self.options.colorOutputImage)
             writer = itk.ImageFileWriter[self._rgb_out_type].New(
-                compose_filter, FileName=self.options.output_rgb_image)
+                compose_filter, FileName=self.options.colorOutputImage)
             writer.Update()
 
         # Now, let's extraxct the processed grayscale image (only if such
         # option is requested).
-        if self.options.output_grayscale_image:
+        if self.options.grayscaleOutputImage:
             self._logger.debug("Extracting grayscale(grayscale) image.")
             crop_index_s, crop_size_s = self._get_crop_settings()
             processed_channel = prepare_single_channel(
                     self._collapsed,
-                    scale_factor=self.options.resize_factor,
+                    scale_factor=self.options.registrationResize,
                     crop_index=crop_index_s,
                     crop_size=crop_size_s,
-                    median_radius=self.options.median_filter_radius,
-                    invert=self.options.invert_source_image)
+                    median_radius=self.options.medianFilterRadius,
+                    invert=self.options.invertSourceImage)
 
             # Cast the processed grayscale image to the grayscale image output
             # type as we want to keep the code flexible (it is possible that
@@ -379,51 +379,51 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
 
             # Finally we write the processed grayscale image to a file.
             self._logger.debug("Writing the grayscale(grayscale) image to %s.",
-                            self.options.output_grayscale_image)
+                            self.options.grayscaleOutputImage)
             writer = itk.ImageFileWriter[self._grayscale_out_type].New(caster,
-                        FileName=self.options.output_grayscale_image)
+                        FileName=self.options.grayscaleOutputImage)
             writer.Update()
 
     @staticmethod
     def parseArgs():
         parser = pos_wrapper_skel.enclosed_workflow._getCommandLineParser()
 
-        parser.add_option('--input-image', '-i', dest='input_image',
+        parser.add_option('--inputFilename', '-i', dest='inputFilename',
             type='str', default=None,
             help=r('Input filename. See the detailed workflow description \
             for the detailed criteria on the proper input file type.'))
 
-        parser.add_option('--output-grayscale-image', '-g',
-            dest='output_grayscale_image', type='str', default=None,
+        parser.add_option('--grayscaleOutputImage', '-g',
+            dest='grayscaleOutputImage', type='str', default=None,
             help='Name of the output grayscale image.')
-        parser.add_option('--output-rgb-image', '-r',
-            dest='output_rgb_image', type='str', default=None,
+        parser.add_option('--colorOutputImage', '-r',
+            dest='colorOutputImage', type='str', default=None,
             help='Name of the output multichannel image.')
 
-        parser.add_option('--extract-roi', dest='extract_roi',
+        parser.add_option('--registrationROI', dest='registrationROI',
             default=None, type='int', nargs=4,
             help=r('ROI of the input image used for registration \
             (ox, oy, sx, sy).'))
-        parser.add_option('--resize-factor', dest='resize_factor',
+        parser.add_option('--registrationResize', dest='registrationResize',
             default=None, type='float',
             help=r('Scaling factor for the source image used for \
             registration. Float between 0 and 1.'))
-        parser.add_option('--color-channel',
-            dest='color_channel', default='blue',
+        parser.add_option('--registrationColorChannel',
+            dest='registrationColorChannel', default='blue',
             choices=['r', 'g', 'b', 'red', 'green', 'blue'],
             help=r('In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.'))
 
-        parser.add_option('--median-filter-radius', dest='median_filter_radius',
+        parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help=r('Median workflow radius in voxels e.g. 2 2'))
-        parser.add_option('--invert-source-image', dest='invert_source_image',
+        parser.add_option('--invertSourceImage', dest='invertSourceImage',
             default=False, action='store_const', const=True,
             help=r('Invert source image: both, grayscale and multichannel, \
             before registration'))
-        parser.add_option('--invert-rgb-image',
-            dest='invert_rgb_image', default=False,
+        parser.add_option('--invertMultichannelImage',
+            dest='invertMultichannelImage', default=False,
             action='store_const', const=True,
             help=r('Invert source image: both, grayscale and multichannel, \
             before registration'))
@@ -433,6 +433,6 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
 
 
 if __name__ == '__main__':
-    options, args = preprocess_image_workflow.parseArgs()
-    workflow = preprocess_image_workflow(options, args)
+    options, args = prepare_slice_for_seq_alignment.parseArgs()
+    workflow = prepare_slice_for_seq_alignment(options, args)
     workflow.launch()
