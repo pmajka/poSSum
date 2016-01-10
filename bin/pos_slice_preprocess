@@ -393,7 +393,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
             help=r('Input filename. See the detailed workflow description \
             for the detailed criteria on the proper input file type.'))
 
-        parser.add_option('--grayscaleOutputImage', '-g',
+        parser.add_option('--output-grayscale-image', '-g',
             dest='output_grayscale_image', type='str', default=None,
             help='Name of the output grayscale image.')
         parser.add_option('--output-rgb-image', '-r',

@@ -21,7 +21,7 @@ All supported features in one invocation (an example) ::
 
     pos_slice_preprocess.py
         [required]      --inputFilename <filename>
-                        --grayscaleOutputImage <filename>
+                        --output-grayscale-image <filename>
                         --output-rgb-image <filename>
      [ox, oy, sx, sy]   --extract-roi 10 20 30 30
                         --resize-factor 0.5
@@ -78,7 +78,7 @@ both in nifti format. No additional processing is performed ::
 
     pos_slice_preprocess
         [required]      --inputFilename <filename>
-                        --grayscaleOutputImage <filename>
+                        --output-grayscale-image <filename>
                         --output-rgb-image <filename>
 
 
@@ -90,7 +90,7 @@ square from the whole image and outputs only color image::
 
     pos_slice_preprocess
         [required]      --inputFilename <filename>
-                        --grayscaleOutputImage <filename>
+                        --output-grayscale-image <filename>
                         --color-channel blue
                         --resize-factor 0.5
                         --extract-roi 200 200 100 100
@@ -106,7 +106,7 @@ grayscale image is smoothed by the median workflow::
 
     pos_slice_preprocess
         [required]      --inputFilename <filename>
-                        --grayscaleOutputImage <filename>
+                        --output-grayscale-image <filename>
                         --output-rgb-image <filename>
                         --median-filter-radius 2 2
                         --invert-source-image
