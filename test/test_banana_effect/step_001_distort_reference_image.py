@@ -24,7 +24,6 @@ def write_itk_matrix_transformation_to_file(transformation, filename):
     :type filename: str
     """
 
-    # TODO: Explain WTF?
     # http://www.itk.org/Wiki/ITK/Examples/IO/TransformFileReader
     # http://review.source.kitware.com/#/c/14293/1
     if (itk.Version.GetITKMajorVersion() == 4 and

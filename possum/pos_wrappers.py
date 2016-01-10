@@ -432,7 +432,6 @@ class ants_registration(generic_wrapper):
     >>> wrapper() # doctest: +ELLIPSIS
     Executing: ...
 
-    #TODO: Check the port output
     """
 
     _template = """ANTS {dimension} \
@@ -1706,8 +1705,6 @@ class image_voxel_count_wrapper(generic_wrapper):
 
     .. note ::
         Only positive (incl. 0) background values are supported.
-
-    #TODO: Implement negative background values support.
 
     >>> image_voxel_count_wrapper
     <class 'possum.pos_wrappers.image_voxel_count_wrapper'>
