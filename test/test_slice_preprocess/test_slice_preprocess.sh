@@ -16,24 +16,24 @@ pos_slice_preprocess \
     -i ${INPUT_IMAGE}.nii.gz \
     -g ${INPUT_IMAGE}_g_3.nii.gz \
     -r ${INPUT_IMAGE}_r_3.nii.gz \
-    --registrationColorChannel red
+    --color-channel red
 
 pos_slice_preprocess \
     -i ${INPUT_IMAGE}.nii.gz \
     -g ${INPUT_IMAGE}_g_4.nii.gz \
     -r ${INPUT_IMAGE}_r_4.nii.gz \
-    --registrationColorChannel red \
-    --invertSourceImage \
-    --invertMultichannelImage
+    --color-channel red \
+    --invert-source-image \
+    --invert-rgb-image
 
 pos_slice_preprocess \
     -i ${INPUT_IMAGE}.nii.gz \
     -g ${INPUT_IMAGE}_g_5.nii.gz \
     -r ${INPUT_IMAGE}_r_5.nii.gz \
-    --registrationColorChannel red \
-    --invertSourceImage \
-    --medianFilterRadius 3 3 \
-    --invertMultichannelImage
+    --color-channel red \
+    --invert-source-image \
+    --median-filter-radius 3 3 \
+    --invert-rgb-image
 
 pos_slice_preprocess \
     -i ${INPUT_IMAGE}.nii.gz \
@@ -55,8 +55,8 @@ pos_slice_preprocess \
     -r ${INPUT_IMAGE}_r_7.nii.gz \
     --registrationROI 100 100 350 350 \
     --registrationResize 0.5 \
-    --medianFilterRadius 4 4 \
-    --invertMultichannelImage
+    --median-filter-radius 4 4 \
+    --invert-rgb-image
 
 md5sum -c test_slice_preprocess.md5
 exit $?

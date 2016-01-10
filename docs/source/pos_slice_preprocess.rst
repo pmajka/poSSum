@@ -25,10 +25,10 @@ All supported features in one invocation (an example) ::
                         --colorOutputImage <filename>
      [ox, oy, sx, sy]   --registrationROI 10 20 30 30
                         --registrationResize 0.5
-     [red, green, blue] --registrationColorChannel red
-                        --medianFilterRadius 2 2
-                        --invertSourceImage
-                        --invertMultichannelImage
+     [red, green, blue] --color-channel red
+                        --median-filter-radius 2 2
+                        --invert-source-image
+                        --invert-rgb-image
 
 
 Desctiption
@@ -91,7 +91,7 @@ square from the whole image and outputs only color image::
     pos_slice_preprocess
         [required]      --inputFilename <filename>
                         --grayscaleOutputImage <filename>
-                        --registrationColorChannel blue
+                        --color-channel blue
                         --registrationResize 0.5
                         --registrationROI 200 200 100 100
 
@@ -108,9 +108,9 @@ grayscale image is smoothed by the median workflow::
         [required]      --inputFilename <filename>
                         --grayscaleOutputImage <filename>
                         --colorOutputImage <filename>
-                        --medianFilterRadius 2 2
-                        --invertSourceImage
-                        --invertMultichannelImage
+                        --median-filter-radius 2 2
+                        --invert-source-image
+                        --invert-rgb-image
 
 Examples
 --------
