@@ -396,7 +396,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
         parser.add_option('--grayscaleOutputImage', '-g',
             dest='output_grayscale_image', type='str', default=None,
             help='Name of the output grayscale image.')
-        parser.add_option('--colorOutputImage', '-r',
+        parser.add_option('--output-rgb-image', '-r',
             dest='output_rgb_image', type='str', default=None,
             help='Name of the output multichannel image.')
 
