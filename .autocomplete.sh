@@ -384,9 +384,61 @@ _pos_stack_histogram_matching()
 
 }
 
+_pos_preprocess_image()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="--help -h \
+         -i --input-image \
+         -g --output-grayscale-image \
+         -r --output-rgb-image \
+         --extract-roi --resize-factor --color-channel \
+         --median-filter-radius --invert-source-image \
+         --invert-rgb-image"
+
+    if [[ ${prev} == 'pos_preprocess_image' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--input-image' ] || [ ${prev} == '-i' ] || [ ${prev} == '--output-grayscale-image' ] || [ ${prev} == '-g' ] || [ ${prev} == '--output-rgb-image' ] || [ ${prev} == '-r' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--extract-roi' ] ; then
+        COMPREPLY=( $(compgen -W "ox_oy_sx_sy_in_pixels" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--resize-factor' ] ; then
+        COMPREPLY=( $(compgen -W "rx_float_0-1 ry_float_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--color-channel' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_IMAGEMAGICK_COLOR_CHANNELS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--median-filter-radius' ] ; then
+        COMPREPLY=( $(compgen -W "int-x-radius_int-y-radius" -- ${cur}) )
+        return 0
+    fi
+
+}
+
 complete -F _pos_slice_volume pos_slice_volume
 complete -F _pos_stack_sections pos_stack_sections
 complete -F _pos_process_source_images pos_process_source_images
 complete -F _pos_reorder_volume pos_reorder_volume
 complete -F _pos_align_by_moments pos_align_by_moments
 complete -F _pos_stack_histogram_matching pos_stack_histogram_matching
+complete -F _pos_preprocess_image pos_preprocess_image
