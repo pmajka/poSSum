@@ -26,7 +26,7 @@ including Windows, OSX and Linux. Note however, that the file to download is a
 substantial one: about 2GB. Have also in mind that, although we're trying to
 keep the VM updated, the environment installed on the VM might be slightly
 behind the current [develop
-branch](https://github.com/pmajka//tree/develop) of the framework. You
+branch](https://github.com/pmajka/poSSum/tree/develop) of the framework. You
 have to update it on your own.
 
 You can download the Possum preconfigured virtual machine
