@@ -1,6 +1,6 @@
 
 
-poSSum volumetric reconstruction framework
+Possum volumetric reconstruction framework
 ===========================================================
 
 [![Build Status](https://travis-ci.org/pmajka/poSSum.svg?branch=master)](https://travis-ci.org/pmajka/poSSum) [![Coverage Status](https://coveralls.io/repos/pmajka/poSSum/badge.svg?branch=master)](https://coveralls.io/r/pmajka/poSSum?branch=master)
@@ -8,55 +8,56 @@ poSSum volumetric reconstruction framework
 Overview
 ========
 
-The poSSum framework is a set of scripts and workflows which purpose it to
-reconstruct the volumetric datasets based on series of serial sections of
-different modality and quality.
+The Possum framework is a set of scripts and workflows for reconstructing
+three-dimensional images based on series of serial sections of different
+modalities and quality.
 
 
 Preconfigured VM
 ================
 
-If you would like to start using the poSSum framework immediately
-without necessity of installation and configuration, you are strongly 
-encouraged to download preconfigured virtual machine.
+If you would like to start using the Possum framework immediately, without the
+necessity of installation and configuration, you are strongly encouraged to
+download a preconfigured virtual machine.
 
-The appliance can be imported to VirtualBox software
-(https://www.virtualbox.org/) which operates on multiple operating systems
-including Windows, OSX and Linux. Note however, that the file
-to download is a substantial one: about 2GB. Have also in mind that, although we're trying to keep the VM updated, the environment installed on th VM might be slightly behind the current develop branch of the framework. You have to update it on your own.
+The appliance can be imported into the VirtualBox software
+(https://www.virtualbox.org/) which runs on multiple operating systems
+including Windows, OSX and Linux. Note however, that the file to download is a
+substantial one: about 2GB. Have also in mind that, although we're trying to
+keep the VM updated, the environment installed on the VM might be slightly
+behind the current [develop
+branch](https://github.com/pmajka//tree/develop) of the framework. You
+have to update it on your own.
 
-You can download the poSSum preconfigured virtual machine
+You can download the Possum preconfigured virtual machine
 using the link below:
 http://doc.3dbar.org/possum/possum_framework_vm.ova
 
 Should you have any problem with importing the virtual appliance,
 please refer to the VirtualBox documentation:
-
 http://docs.oracle.com/cd/E26217_01/E26796/html/qs-import-vm.html
-
 http://www.virtualbox.org/manual/ch01.html#ovf
-
 or other online resources, e.g:
 http://www.maketecheasier.com/import-export-ova-files-in-virtualbox/
 
-Note that all usernames and passwords (including the root passord) are: testuser
+Note that all usernames and passwords (including the root passord) are: `testuser`
 Also, please let the VM have at least 4GB of memory (8GB recommended) 
-and 4CPUs (however, the more the better).
+and 4 CPUs (however, the more the better).
 
 
 
 Installation
 ============
 
-Below one can find the description of the dependencies.
-For the exact installation steps, check the `installation procedure` section below.
+Below one can find the description of the dependencies. For the exact
+installation steps, check the `installation procedure` section below.
 
 Requirements and dependencies
 -----------------------------
 
-In order to make the poSSum framework working, several dependencies have to be
-satisfied. Below one can find the list of dependencies with a brief instruction
-on installing the individual dependencies.
+In order to make the Possum framework working, several dependencies have to be
+satisfied. Below one can find the list of dependencies with a brief
+instruction on installing the individual dependencies.
 
 
 Operating system
@@ -73,11 +74,11 @@ Only the system locale were altered.
 InsightToolkit 4.3.1
 --------------------
 
-The poSSum framework requires the InsightToolkit (ITK, http://www.itk.org/)
-image processing library. PosSSum was created and tested using ITK 4.3.1
+The Possum framework requires the InsightToolkit (ITK, http://www.itk.org/) image
+processing library. Possum was created and tested using ITK 4.3.1
 (http://sourceforge.net/projects/itk/files/itk/4.3/InsightToolkit-4.3.1.tar.gz/download)
 thus this ITK version is recommended. Due to rapid development of the ITK
-framework it is not guaranteed (although quite likely) that the poSSum will work
+framework it is not guaranteed (although quite likely) that Possum will work
 with newer as well as with some of the older ITK versions.
 
 In order to install the InsightToolkit one has to perform the steps described on
@@ -88,9 +89,9 @@ the ITK website (http://www.itk.org/Wiki/ITK/Complete_Setup):
 
   2. Download the InsightToolkit 4.3.1 and unzip the file. 
 
-  3. Run cmake or ccmake and provide compilation settings. Make sure that
-     the listed parameters are set as shown below. Basically this build
-     the itk with a python wrappers and support for different types of
+  3. Run cmake or ccmake and provide the compilation settings. Make sure that
+     the listed parameters are set as shown below. Basically this builds
+     the ITK with a Python wrappers and support for different types of
      RGB images which are not included by default. Follow the instructions
      from http://www.itk.org/Wiki/ITK/Python_Wrapping to compile itk with
      python wrapping.
@@ -103,22 +104,23 @@ the ITK website (http://www.itk.org/Wiki/ITK/Complete_Setup):
 Advanced Normalization Tools
 ----------------------------
 
-The Advanced Normalization Tools (or shortly ANTS) is an image normalization and
-registration framework which provides reliable and algorithms for image
-registration. ANTS binaries may be downloaded from the ANTS website: http://stnava.github.io/ANTs/,
-The posSSum framework was tested with ANTS v3 as well as ANTS v4.
+The Advanced Normalization Tools (or shortly ANTS) is an image normalization
+and registration framework which provides reliable and algorithms for image
+registration. ANTS binaries may be downloaded from the ANTS website:
+http://stnava.github.io/ANTs/, The Possum framework has been tested with ANTS
+v3 as well as ANTS v4.
 
 
 Convert 3D and ItkSnap tool
 ---------------------------
 
-Convert 3D (crucial) and ItkSnap (not crucial but extremely useful).
-Visit the http://www.itksnap.org/ in order to get both, the Convert 3D
-as well as the ItkSnap.
+Convert 3D (crucial) and ItkSnap (not required but extremely useful). Visit
+the http://www.itksnap.org/ in order to get both, the Convert 3D as well as
+the ItkSnap.
 
 
 
-Exact installation procedure
+Detailed installation procedure
 ======================================
 
 
@@ -217,7 +219,7 @@ And then make the build::
 Install ANTS, Convert 3d and setup the paths
 ----------------------------------------------
 
-As described below (provided that `/home/test/` is you home ddirectory)::
+As described below (provided that `/home/test/` is you home directory)::
 
 
     cd
@@ -268,7 +270,6 @@ cd
 #-------------------------------------------------------------------------
 
 cmake ../InsightToolkit-4.6.0 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=OFF -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=OFF -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON
-
 cmake ../InsightToolkit-4.3.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=OFF -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=OFF -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON
 
 sudo apt-get install htop
