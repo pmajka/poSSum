@@ -1806,7 +1806,6 @@ class align_by_center_of_gravity(generic_wrapper):
     >>> print p.updateParameters({"moving_image": "m.nii.gz", "fixed_image": "f.nii.gz"})
     pos_align_by_moments --fixed-image f.nii.gz --moving-image m.nii.gz --transformation-filename output.txt
     """
-    #TODO: Output image command line parameter is not tested
 
     _template = """pos_align_by_moments {fixed_image} {moving_image} {output_transformation}"""
 
@@ -1942,8 +1941,15 @@ class get_affine_from_landmarks_wrapper(generic_wrapper):
     same physical space as the images to register. Both images has to have the
     same set of landmarks defined.
 
-    TODO: DOC
-    TODO: Explain yourself why the wrapper is so f*ckin messy.
+    This parser is crazy messy and probably should be rewritten entirely or
+    replaced with something better. The main problem is that, so fat, the
+    landmark matching in convert 3d is implemented only for three dimensional
+    images. This means that it does not work well for 2D images. The only way
+    to align 2D images with landmark matching is to consider them as 3D image
+    which will produce a 3D transformation and then convert is somehow to 2D
+    transformation. This is what the clumsy awk part of the script doing.
+    Again, this should be done in a better way, but hey! it works and produces
+    good results.
     """
 
     _template = """c3d {fixed_image} {moving_image} -alm {transformation_type} {output_transformation} && \
