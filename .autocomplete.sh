@@ -381,7 +381,6 @@ _pos_stack_histogram_matching()
         COMPREPLY=( $(compgen -W "flip_x_0-1 flip_y_0-1 flip_z_0-1" -- ${cur}) )
         return 0
     fi
-
 }
 
 _pos_preprocess_image()
@@ -432,8 +431,109 @@ _pos_preprocess_image()
         COMPREPLY=( $(compgen -W "int-x-radius_int-y-radius" -- ${cur}) )
         return 0
     fi
+}
+
+_pos_coarse_fine()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="--help -h --loglevel --log-filename --cpus \
+          --specimen-id -d --work-dir \
+          --dry-run --disable-shared-memory \
+          -i --fine-transform-filename-template \
+          -s --smooth-transform-filename-template \
+          -o --output-transform-filename-template \
+          --sections-range \
+          --reports-directory \
+          --skip-transforms \
+          --smoothing-simga \
+          --smoothing-simga-rotation \
+          --smoothing-simga-scaling \
+          --smoothing-simga-offset \
+          --smoothing-simga-fixed"
+
+
+    if [[ ${prev} == 'pos_coarse_fine' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+
+    if [ ${prev} == '--loglevel' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_LOGLEVEL_OPTIONS}" -- ${cur}) )
+        return 
+    fi
+
+    if [ ${prev} == '--log-filename' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '-d' ] || [ ${prev} == '--work-dir' ] || [ ${prev} == '--reports-directory' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o nospace  -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '-i' ] || [ ${prev} == '--fine-transform-filename-template' ] || \
+       [ ${prev} == '-s' ] || [ ${prev} == '--smooth-transform-filename-template' ] || \
+       [ ${prev} == '-o' ] || [ ${prev} == '--output-transform-filename-template' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.txt' -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--sections-range' ] ; then
+        COMPREPLY=( $(compgen -W "int_int" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--smoothing-simga' ] || \
+       [ ${prev} == '--smoothing-simga-rotation' ] || \
+       [ ${prev} == '--smoothing-simga-offset' ] || \
+       [ ${prev} == '--smoothing-simga-scaling' ] || \
+       [ ${prev} == '--smoothing-simga-fixed' ] ; then
+        COMPREPLY=( $(compgen -W "float" -- ${cur}) )
+        return 0
+    fi
+
 
 }
+
+
+
+
+
+#   if [ ${prev} == '--input-image' ] || [ ${prev} == '-i' ] || [ ${prev} == '--output-grayscale-image' ] || [ ${prev} == '-g' ] || [ ${prev} == '--output-rgb-image' ] || [ ${prev} == '-r' ] ; then
+#       COMPREPLY=( $(compgen -o plusdirs  -f -- ${cur}) )
+#       return 0
+#   fi
+
+#   if [ ${prev} == '--extract-roi' ] ; then
+#       COMPREPLY=( $(compgen -W "ox_oy_sx_sy_in_pixels" -- ${cur}) )
+#       return 0
+#   fi
+
+#   if [ ${prev} == '--resize-factor' ] ; then
+#       COMPREPLY=( $(compgen -W "rx_float_0-1 ry_float_0-1" -- ${cur}) )
+#       return 0
+#   fi
+
+#   if [ ${prev} == '--color-channel' ] ; then
+#       COMPREPLY=( $(compgen -W "${POS_IMAGEMAGICK_COLOR_CHANNELS}" -- ${cur}) )
+#       return 0
+#   fi
+
+#   if [ ${prev} == '--median-filter-radius' ] ; then
+#       COMPREPLY=( $(compgen -W "int-x-radius_int-y-radius" -- ${cur}) )
+#       return 0
+#   fi
+#
 
 complete -F _pos_slice_volume pos_slice_volume
 complete -F _pos_stack_sections pos_stack_sections
@@ -442,3 +542,16 @@ complete -F _pos_reorder_volume pos_reorder_volume
 complete -F _pos_align_by_moments pos_align_by_moments
 complete -F _pos_stack_histogram_matching pos_stack_histogram_matching
 complete -F _pos_preprocess_image pos_preprocess_image
+complete -F _pos_coarse_fine pos_coarse_fine
+
+
+# MedianFilter.py*
+# pos_coarse_fine*
+# pos_deformable_histology_reconstruction*
+# pos_pairwise_registration*
+# pos_sequential_alignment*
+# pos_stack_warp_image_multi_transform*
+
+
+
+

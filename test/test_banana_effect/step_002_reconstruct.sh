@@ -85,7 +85,7 @@ pos_coarse_fine \
     -i 007_sequential_alignment/ct_m%04d_f0110_Affine.txt \
     -s 008_coarse_to_fine/01_smooth/%04d.txt \
     -o 008_coarse_to_fine/02_output/%04d.txt \
-    --slice-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --sections-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --smoothing-simga-rotation 5 \
     --smoothing-simga-offset 5 \
     --smoothing-simga-fixed 5 \

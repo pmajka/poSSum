@@ -19,8 +19,9 @@ Coarse to fine transformation merger.
 Obligatory command line parameters:
 
     1. self.options.sliceIndex
-    2. fineTransformFilenameTemplate
-    3. outputTransformFilenameTemplate
+    2. --fine-transform-filename-template
+    3. --output-transform-filename-template
+    4. --smooth-transform-filename-template
 
 
 Implementation details

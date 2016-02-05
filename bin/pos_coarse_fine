@@ -1,16 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*
 
-
 """
-The coarse-to-fine script splits a series of transformations into low- and
-high frequency components.
+The coarse-to-fine script splits a series of transformations into low- and high
+frequency components.
 """
 
 import os
 import sys
+
 import copy
 import numpy
+
 from scipy.ndimage.filters import gaussian_filter1d
 from optparse import OptionGroup
 
@@ -23,14 +24,28 @@ from possum.pos_common import r
 class coarse_to_fine_transformation_merger(generic_workflow):
     """
     The coarse-to-fine script splits a series of transformations into low- and
-    high frequency components.
+    high frequency components. See the literature:
+
+    Yushkevich PA, Avants BB, Ng L, Hawrylycz M, Burstein PD, Zhang H, Gee JC.
+    2006. 3D mouse brain reconstruction from histology using a coarse-to-fine
+    approach. In: Pluim JPW, Likar B, Gerritsen FA, editors. Lecture Notes in
+    Computer Science (including subseries Lecture Notes in Artificial Intelligence
+    and Lecture Notes in Bioinformatics). Lecture Notes in
+    Computer Science. Berlin, Heidelberg: Springer Berlin Heidelberg. p. 230–237.
+    http://link.springer.com/10.1007/11784012
+
+    Majka P, Wójcik DK. 2015. Possum—A Framework for Three-Dimensional
+    Reconstruction of Brain Images from Serial Sections. Neuroinformatics.
+    http://link.springer.com/10.1007/s12021-015-9286-1
+
+    for description of the algorithm and its implementation.
+    Also see the 'test_banana_effect' for an example application of the workflow.
     """
 
     _f = {
         'fine_transf': pos_parameters.filename('fine_transf', work_dir='01_fine_transformation', str_template='{idx:04d}.txt'),
         'smooth_transf': pos_parameters.filename('smooth_transf', work_dir='03_smooth_transformation', str_template='{idx:04d}.txt'),
         'final_transf': pos_parameters.filename('final_transf', work_dir='04_final_transformation', str_template='{idx:04d}.txt'),
-
         'fine_report': pos_parameters.filename('fine_report', work_dir='05_reports', str_template='fine_transformations.csv'),
         'smooth_report': pos_parameters.filename('smooth_report', work_dir='05_reports', str_template='smooth_transformations.csv'),
         'difference_report': pos_parameters.filename('difference_report', work_dir='05_reports', str_template='difference_trasnformations.csv'),
@@ -44,14 +59,18 @@ class coarse_to_fine_transformation_merger(generic_workflow):
 
         # Assert if both: starting slice index and the last slice index
         # are actually provided.
-        assert self.options.slice_range is not None,\
+        assert self.options.sections_range is not None,\
             self._logger.error(r("Starting and ending slices indexes \
             are not provided. Please supply \
             the first and the last section index."))
 
         # Range of images to register. This is pretty self explaining.
-        self.options.slice_range = \
-            range(self.options.slice_range[0], self.options.slice_range[1] + 1)
+        # Note that at this point we are overriding the original, initial
+        # value of the `sections_range`. This may cause some troubles in future
+        # but now seems to work fine.
+        self.options.sections_range = \
+            range(self.options.sections_range[0],
+                  self.options.sections_range[1] + 1)
 
         # Define default smoothing kernels for different type of parameters:
         fields_array = ['smoothing_simga_rotation', 'smoothing_simga_offset',
@@ -88,8 +107,8 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         self.f['smooth_transf'].override_path = \
             self.options.smooth_transform_filename_template
 
-        filenames_to_check = map(lambda x: self.f['fine_transf']() % x,
-            self.options.slice_range)
+        filenames_to_check = map(lambda x: self.f['fine_transf']() % x, \
+            self.options.sections_range)
 
         for transf_filename in filenames_to_check:
             self._logger.debug("Checking for image: %s.", transf_filename)
@@ -134,7 +153,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         transformation_parameters = []
 
         # Interate over all slices, extract parameters of the trasnformation.
-        for slice_index in self.options.slice_range:
+        for slice_index in self.options.sections_range:
             transformation_parameters.append(
                 self._set_single_transformation_parameters(slice_index))
 
@@ -290,7 +309,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         # Iterate over the smoothed transformation parameters, exctract the
         # parameters and save them as an itk transformation file.
         for i in range(l.shape[1]):
-            slice_index = i + self.options.slice_range[0]
+            slice_index = i + self.options.sections_range[0]
             output_filename = self.f['smooth_transf']() % slice_index
             self._save_itk_transform(list(l[:, i]), output_filename)
 
@@ -342,7 +361,7 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         """
 
         commands = []
-        for slice_index in self.options.slice_range:
+        for slice_index in self.options.sections_range:
             commands.append(self._store_final_transformation(slice_index))
         self.execute(commands)
 
@@ -377,8 +396,8 @@ class coarse_to_fine_transformation_merger(generic_workflow):
         """
         ret_value = ""
 
-        ret_value += "_start_" + str(self.options.slice_range[0])
-        ret_value += "_end_" + str(self.options.slice_range[-1])
+        ret_value += "_start_" + str(self.options.sections_range[0])
+        ret_value += "_end_" + str(self.options.sections_range[-1])
 
         ret_value += "_s_" + str(self.options.smoothing_simga)
         ret_value += "_sR_" + str(self.options.smoothing_simga_rotation)
@@ -390,56 +409,109 @@ class coarse_to_fine_transformation_merger(generic_workflow):
 
     @classmethod
     def _getCommandLineParser(cls):
-        """
-        """
+
+        usage_string = "\n\n%prog \n\
+            -i input_from_sequential_alignment/sequential_%04d_Affine.txt \n\
+            -s output_from_coarse_to_fine/01_smooth/smooth_%04d.txt \n\
+            -o output_from_coarse_to_fine/02_output/output_%04d.txt \n\
+            --sections-range 1 100 \n\
+            --smoothing-simga 5 \n\
+            --smoothing-simga-rotation 3 \n\
+            --smoothing-simga-offset 5  \n\
+            --smoothing-simga-fixed 7 \n\
+            --reports-directory 008_coarse_to_fine/ \n\
+            --loglevel DEBUG \n\
+            --cleanup \n\
+            [other options]"
 
         parser = generic_workflow._getCommandLineParser()
+        parser.set_usage(usage_string)
+        parser.set_description(r("""The coarse-to-fine script splits a series
+        of transformations into low- and
+        high frequency components. See the literature:
+        Yushkevich PA, Avants BB, Ng L, Hawrylycz M, Burstein PD, Zhang H, Gee JC.
+        2006. 3D mouse brain reconstruction from histology using a coarse-to-fine
+        approach. In: Pluim JPW, Likar B, Gerritsen FA, editors. Lecture Notes in
+        Computer Science (including subseries Lecture Notes in Artificial Intelligence
+        and Lecture Notes in Bioinformatics). Lecture Notes in
+        Computer Science. Berlin, Heidelberg: Springer Berlin Heidelberg. p. 230-237.
+        http://link.springer.com/10.1007/11784012
+        Majka P, Wojcik DK. 2015. Possum-A Framework for Three-Dimensional
+        Reconstruction of Brain Images from Serial Sections. Neuroinformatics.
+        http://link.springer.com/10.1007/s12021-015-9286-1
+        for description of the algorithm and its implementation.
+        Also see the 'test_banana_effect' for an example application of the workflow."""))
 
-        parser.add_option('-i', '--fineTransformFilenameTemplate',
+        parser.add_option('-i', '--fine-transform-filename-template',
             default=None, dest='fine_transform_filename_template',
-            action='store', help='aaa')
-        parser.add_option('-s', '--smoothTransformFilenameTemplate',
+            action='store', metavar="FNAME_TEMPLATE",
+            help=r('Filename template for the fine (affine) \
+            transformations. This should only include the actual filename \
+            template without directory. An example template could be e.g: \
+            "fine_%04d.txt".'))
+        parser.add_option('-s', '--smooth-transform-filename-template',
             default=None, dest='smooth_transform_filename_template',
-            action='store', help='')
-        parser.add_option('-o', '--outputTransformFilenameTemplate',
+            action='store', metavar="FNAME_TEMPLATE",
+            help=r('Filename template for the smoothed (affine) \
+            transformations. This should only include the actual filename \
+            template without directory. An example template could be e.g: \
+            "smooth_%04d.txt".'))
+        parser.add_option('-o', '--output-transform-filename-template',
             default=None, dest='output_transform_filename_template',
-            action='store',
-            help=r('Store transformations in given directory \
-            instead of using default one.'))
-        parser.add_option('--slice-range', default=None, type='int',
-            dest='slice_range', nargs=2,
-            help='first, last slice index')
+            action='store', metavar="FNAME_TEMPLATE",
+            help=r('Filename template for the output (affine) \
+            transformations. This should only include the actual filename \
+            template without directory. An example template could be e.g: \
+            "output_%04d.txt".'))
+        parser.add_option('--sections-range', default=None, type='int',
+            dest='sections_range', nargs=2, metavar="INT INT",
+            help=r('The range of indexes of sections to be included. \
+            Provide two integers: index of the first and index of the \
+            last sections to be processed. Please provide the actual \
+            indexes of the sections as the forkflow automatically adds \
+            the nesessary offseet in the Python range function.'))
 
-        preprocessingSettings = \
-            OptionGroup(parser, 'Processing settings')
-        preprocessingSettings.add_option('--smoothing-simga', default=5,
-            type='float', dest='smoothing_simga',
-            help=r('General smoothing simga. Can be customized \
-            for specific parameters.'))
-        preprocessingSettings.add_option('--smoothing-simga-rotation',
-            default=None, type='float',
-            dest='smoothing_simga_rotation', help='')
-        preprocessingSettings.add_option('--smoothing-simga-scaling',
-            default=None, type='float',
-            dest='smoothing_simga_scaling', help='')
-        preprocessingSettings.add_option('--smoothing-simga-offset',
-            default=None, type='float',
-            dest='smoothing_simga_offset', help='')
-        preprocessingSettings.add_option('--smoothing-simga-fixed',
-            default=None, type='float', dest='smoothing_simga_fixed', help='')
+        smoothing_settings = \
+            OptionGroup(parser, 'Processing settings.')
+        smoothing_settings.add_option('--smoothing-simga', default=5,
+            type='float', dest='smoothing_simga', metavar="FLOAT",
+            help=r('General gaussian smoothing sigma. This value will \
+            be used for smoothing scaling, rotation and translation \
+            parameters of the transformation unless specific values \
+            for these parameters are defined (see below). \
+            Please provide a single FLOAT value here.'))
+        smoothing_settings.add_option('--smoothing-simga-rotation',
+            default=None, type='float', metavar="FLOAT",
+            dest='smoothing_simga_rotation',
+            help=r('A specific smoothing setting for rotation \
+            parameter of the transformation.'))
+        smoothing_settings.add_option('--smoothing-simga-scaling',
+            default=None, type='float', metavar="FLOAT",
+            dest='smoothing_simga_scaling', help=r('A specific smoothing \
+            setting for the scaling parameter of the transformations.'))
+        smoothing_settings.add_option('--smoothing-simga-offset',
+            default=None, type='float',  metavar="FLOAT",
+            dest='smoothing_simga_offset', help=r('A specific smoothing \
+            setting for the translation parameters of transformations.'))
+        smoothing_settings.add_option('--smoothing-simga-fixed',
+            default=None, type='float', dest='smoothing_simga_fixed',
+            metavar="FLOAT", help=r('A specific smoothing setting for the \
+            fixed parameters of the transformations.'))
 
-        workflowSettings = \
+        workflow_settings = \
             OptionGroup(parser, 'Workflow settings')
-        workflowSettings.add_option('--reports-directory', default=None,
+        workflow_settings.add_option('--reports-directory', default=None,
             dest='reports_directory', action='store',
-            help='Use custom reports directory instead of using default one.')
-        workflowSettings.add_option('--skip-transforms',
+            metavar="DIRECTORY", help=r('Use custom reports directory \
+            instead of using default one.'))
+        workflow_settings.add_option('--skip-transforms',
             default=False, dest='skip_transforms',
             action='store_const', const=True,
-            help='')
+            help=r('Supresses generation of the output transformation. \
+            Only generates the smoothed transformations.'))
 
-        parser.add_option_group(workflowSettings)
-        parser.add_option_group(preprocessingSettings)
+        parser.add_option_group(workflow_settings)
+        parser.add_option_group(smoothing_settings)
         return parser
 
 if __name__ == '__main__':
