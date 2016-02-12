@@ -146,8 +146,8 @@ And the required python modules::
     sudo easy_install -U config
     sudo easy_install -U networkx
     sudo easy_install coverage
-    sudo easy_install xlrd
-    sudo easy_install xlutils
+    sudo apt-get install python-xlwt python-xlrd
+    sudo easy_install xlrd xlutils
 
 Install the ImageMagick and parallel packages::
 
