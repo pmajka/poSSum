@@ -337,12 +337,12 @@ class deformable_reconstruction_iteration(generic_workflow):
 
             if i in self.subset:
                 registration = pos_wrappers.ants_registration(
-                    dimension=2,
+                    dimension=2,   #TODO: Remove hardcoded values
                     outputNaming=self.f['out_naming'](idx=i),
                     iterations=iterations,
                     transformation=('SyN', [transf_grad]),
                     regularization=(reg_type, reg_ammount),
-                    affineIterations=[0],
+                    affineIterations=[0],  #TODO: Remove hardcoded values
                     continueAffine=False,
                     rigidAffine=False,
                     imageMetrics=metrics,

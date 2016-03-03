@@ -546,7 +546,6 @@ complete -F _pos_coarse_fine pos_coarse_fine
 
 
 # MedianFilter.py*
-# pos_coarse_fine*
 # pos_deformable_histology_reconstruction*
 # pos_pairwise_registration*
 # pos_sequential_alignment*
