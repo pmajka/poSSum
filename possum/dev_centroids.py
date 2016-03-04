@@ -185,6 +185,10 @@ def get_middle_points(itk_image):
 
         middle_points[label_idx] = (tuple(point), tuple(index))
 
+    # Below there is some debugging code. Not really important for everyday
+    # use.
+    # print middle_points.__repr__()
+
     return middle_points
 
 
@@ -239,6 +243,11 @@ if __name__ == '__main__':
     output_vtk_points_filename = sys.argv[2]
     itk_image = pos_itk_transforms.read_itk_image(input_filename)
     midpoints = get_middle_points(itk_image)
+
+    try:
+        vtk.vtkVersion()
+    except:
+        sys.exit(1)
 
     vtk_points_writer = vtk.vtkPolyDataWriter()
     vtk_points_writer.SetFileName(output_vtk_points_filename)
