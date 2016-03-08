@@ -40,6 +40,7 @@ io_component_string_name_to_image_type = {
         ('scalar', 'unsigned_char', 2) : itk.Image.UC2,
         ('scalar', 'float', 2) : itk.Image.F2,
         ('scalar', 'double', 3) : itk.Image.D3,
+        ('scalar', 'double', 2) : itk.Image.D2,
         ('rgb', 'unsigned_char', 2) : itk.Image.RGBUC2,
         ('rgb', 'unsigned_char', 3) : itk.Image.RGBUC3,
         ('vector', 'unsigned_char', 3) : itk.Image.RGBUC3,

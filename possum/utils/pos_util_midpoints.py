@@ -5,19 +5,18 @@ import os
 import sys
 import itk
 
-from possum.pos_common import r
 from possum import pos_itk_core
 from possum import pos_itk_transforms
+from possum.pos_common import r
 
 
-# Try importing the vtk module. If the module cannot be imported some of the
-# features of the workflow cannot be executed.
-try:
-    import vtk
-except ImportError:
-    pass
+"""
+.. note::
 
-# TODO: Tests, logging.
+    Some of the non-cruical, optional functions in this module require vtk
+    module to be installed. If it is not available the VTK support will be
+    disabled.
+"""
 
 
 def get_middle_points(itk_image):
@@ -40,6 +39,15 @@ def get_middle_points(itk_image):
     4) Pick the maximum of the distance transform for given segmentation
        and by this define the 'middle point' of given label.
 
+    .. note :: Please have in ming that this procedure returns position of the
+    first (index-wise) voxel with the maimum value. This means that if there is
+    more than one pixels with the maximum value of the distance transform,
+    location of the first one is returned. One could think that probably a
+    centre of mass of the max voxels should be returned, but no. It is unknown
+    is such centre would be located in the actual structure or outside the
+    structure. Therefore some of the results may look wired but they are
+    actually ok.
+
     :param itk_image: Labelled image, the image is expected to be a labelled
                       image in which individual discrete values correspond
                       to individual structures. Formally this means that
@@ -51,6 +59,40 @@ def get_middle_points(itk_image):
 
     :return: Middle midpoints of the labels in the image.
     :rtype: {int: ((float, float, float), (float, float, float)), ...}
+
+    And now it it a time to do some unit testing. Please also consited this set
+    of unittests as an example how to use this function.
+
+    >>> import base64
+    >>> from possum import pos_itk_transforms
+    >>> example_two_dimensions='H4sIAAAAAAAAA4thZCACFDEwMWgAISMcogImBg44u8EegdHBBmdUPosTNtvCizJLSlLzFJIqFQIq/TzTQjwVylKLijPz8xQM9IwMDA0MzAzM9QyJcfiAgTxtdPcxwgETHDDDwag6+qjjggNuOOCBA144GFVHH3UicCAKB2JwIA4Ho+roo04ODuThQAEOFOFgVB191AEAXtGveKAHAAA='
+
+    >>> open("/tmp/pos_itk_centroids_example_two_dimensions.nii.gz", "w").write(base64.decodestring(example_two_dimensions))
+    >>> input_filename="/tmp/pos_itk_centroids_example_two_dimensions.nii.gz"
+    >>> itk_image = pos_itk_transforms.read_itk_image(input_filename)
+    >>> midpoints = get_middle_points(itk_image)
+
+    >>> sorted(midpoints.keys()) == [1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33]
+    True
+
+    >>> map(int, midpoints[1][0]) == [14, 0, 0]
+    True
+
+    >>> map(int, midpoints[21][0]) == [14, 24, 0]
+    True
+
+    >>> midpoints[30] == ((0.0, 39.0, 0), (0, 39, 0))
+    True
+
+    >>> type(midpoints[30][1][1]) == type(1)
+    True
+
+    >>> type(midpoints[30][0][1]) == type(1)
+    False
+
+    >>> type(midpoints[30][0][1]) == type(1.0)
+    True
+
     """
 
     C_BACKGROUND_LABEL_IDX = 0
@@ -67,8 +109,6 @@ def get_middle_points(itk_image):
     number_of_components = itk_image.GetNumberOfComponentsPerPixel()
     data_type = label_type[1]
 
-    print n_dim, number_of_components, data_type
-
     assert n_dim in [2, 3], \
         "Incorrect dimensionality."
 
@@ -76,7 +116,8 @@ def get_middle_points(itk_image):
         "Only single component images are allowed."
 
     assert data_type in ["unsigned_char", "unsigned_short"], \
-        "Incorrect data type for a labelled image."
+        r("Incorrect data type for a labelled image only unsigned_char\
+          and unsigned_short are accepted.")
 
     # t_label_img is the ITK image type class to be used in filters
     # templates.
@@ -96,7 +137,7 @@ def get_middle_points(itk_image):
     unique_labels = \
         itk.LabelGeometryImageFilter[(t_label_img, t_label_img)].New()
     unique_labels.SetInput(itk_image)
-    unique_labels.CalculatePixelIndicesOn()
+    unique_labels.CalculatePixelIndicesOff()
     unique_labels.Update()
 
     # This is where we'll collect the results. We collect, both, the physical
@@ -213,7 +254,7 @@ def points_to_vtk_points(points_list):
     try:
         vtk.vtkVersion()
     except:
-        return
+        return None
 
     n_points = len(points_list.keys())
 
@@ -238,18 +279,7 @@ def points_to_vtk_points(points_list):
 
     return point
 
+
 if __name__ == '__main__':
-    input_filename = sys.argv[1]
-    output_vtk_points_filename = sys.argv[2]
-    itk_image = pos_itk_transforms.read_itk_image(input_filename)
-    midpoints = get_middle_points(itk_image)
-
-    try:
-        vtk.vtkVersion()
-    except:
-        sys.exit(1)
-
-    vtk_points_writer = vtk.vtkPolyDataWriter()
-    vtk_points_writer.SetFileName(output_vtk_points_filename)
-    vtk_points_writer.SetInput(points_to_vtk_points(midpoints))
-    vtk_points_writer.Update()
+    import doctest
+    print doctest.testmod(verbose=True)
