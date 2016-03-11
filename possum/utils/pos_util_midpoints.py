@@ -19,7 +19,7 @@ from possum.pos_common import r
 """
 
 
-def get_middle_points(itk_image):
+def calculate_labels_midpoints(itk_image):
     """
     This function introduces a workflow for calculating the middle midpoints of
     the labelled imags. The term 'middle midpoints' is used on purpose. You might
@@ -67,10 +67,10 @@ def get_middle_points(itk_image):
     >>> from possum import pos_itk_transforms
     >>> example_two_dimensions='H4sIAAAAAAAAA4thZCACFDEwMWgAISMcogImBg44u8EegdHBBmdUPosTNtvCizJLSlLzFJIqFQIq/TzTQjwVylKLijPz8xQM9IwMDA0MzAzM9QyJcfiAgTxtdPcxwgETHDDDwag6+qjjggNuOOCBA144GFVHH3UicCAKB2JwIA4Ho+roo04ODuThQAEOFOFgVB191AEAXtGveKAHAAA='
 
-    >>> open("/tmp/pos_itk_centroids_example_two_dimensions.nii.gz", "w").write(base64.decodestring(example_two_dimensions))
     >>> input_filename="/tmp/pos_itk_centroids_example_two_dimensions.nii.gz"
+    >>> open(input_filename, "w").write(base64.decodestring(example_two_dimensions))
     >>> itk_image = pos_itk_transforms.read_itk_image(input_filename)
-    >>> midpoints = get_middle_points(itk_image)
+    >>> midpoints = calculate_labels_midpoints(itk_image)
 
     >>> sorted(midpoints.keys()) == [1, 2, 3, 10, 11, 12, 13, 20, 21, 22, 23, 30, 31, 32, 33]
     True
@@ -93,6 +93,48 @@ def get_middle_points(itk_image):
     >>> type(midpoints[30][0][1]) == type(1.0)
     True
 
+    >>> os.remove(input_filename)
+
+
+    Now we will try to process a 3D image
+
+    >>> example_three_dimensions="H4sIAAAAAAAAA+3PPUtCURzH8XN1iUposNzqNAty1MqlchCqu4Rp0NIUXsPlWjcJby3Rw1tI23rYeoCGrLfnF4nEWvxPDfd8DhfOF+5wfvuOGkOg4mpmcJzvMyqmJn7uF8Xh99t7abQLpb//KLUXNFotz9cHoS6H225919WnXnDSaPraZHIma8yKKWSy4zz83/jp4fscxBCHtCcxhWkkIO0kZjGHFKQ9jwVoLELadr/dH+X9OeSxhGVIexVrWEcR0t7AJrbgQtpl7KCCKqRt99v9Ud5fg4c6DiFtH00c4RjSbiPEGc4h7Utc4Ro3kLbdb/dHef8tOujiDtK+xwMe8QRpP+MFr3iDtD/Qwye+IG273+6P8v4+5Jgfs2ARAAA="
+
+    >>> input_filename="/tmp/pos_itk_centroids_example_three_dimensions.nii.gz"
+    >>> open(input_filename, "w").write(base64.decodestring(example_three_dimensions))
+    >>> itk_image = pos_itk_transforms.read_itk_image(input_filename)
+    >>> midpoints = calculate_labels_midpoints(itk_image)
+    >>> os.remove(input_filename)
+
+    >>> str(type(midpoints)) == "<type 'dict'>"
+    True
+
+    >>> len(midpoints.keys()) == 63
+    True
+
+    >>> str(midpoints.get(0,None)) == "None"
+    True
+
+    >>> midpoints[1] == ((5.0, 0.0, 0.0), (5, 0, 0))
+    True
+
+    >>> type(midpoints[30][0][1]) == type(1)
+    False
+
+    >>> type(midpoints[30][0][1]) == type(1)
+    False
+
+    >>> type(midpoints[30][0][1]) == type(1.0)
+    True
+
+    >>> midpoints[183] == ((15.0, 15.0, 15.0), (15, 15, 15))
+    True
+
+    >>> midpoints[111] == ((5.0, 5.0, 9.0), (5, 5, 9))
+    True
+
+    >>> midpoints[53] == ((13.0, 0.0, 5.0), (13, 0, 5))
+    True
     """
 
     C_BACKGROUND_LABEL_IDX = 0
@@ -171,7 +213,6 @@ def get_middle_points(itk_image):
     # are something different and they are calculated in a different
     # way. Our center midpoints cannot be called centroids.
     for label_idx in available_labels:
-
         extract_label = \
             itk.BinaryThresholdImageFilter[
                 (t_label_img, t_label_img)].New()
@@ -202,6 +243,8 @@ def get_middle_points(itk_image):
         distance_transform.SetInput(largest_patch.GetOutput())
         distance_transform.InsideIsPositiveOn()
         distance_transform.Update()
+
+        pos_itk_transforms.write_itk_image(distance_transform.GetOutput(), "/home/pmajka/%04d.nii.gz" % label_idx)
 
         centroid = itk.MinimumMaximumImageCalculator[t_float_img].New()
         centroid.SetImage(distance_transform.GetOutput())
