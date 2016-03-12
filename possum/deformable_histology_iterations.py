@@ -35,6 +35,8 @@ class deformable_reconstruction_iteration(generic_workflow):
         'resliced_custom' : pos_parameters.filename('resliced_custom', work_dir='24_resliced_custom', str_template='{idx:04d}.nii.gz')
         }
 
+    __IMAGE_DIMENSION = 2
+
     def __init__(self, options, args):
         super(self.__class__, self).__init__(options, args)
 
@@ -337,14 +339,14 @@ class deformable_reconstruction_iteration(generic_workflow):
 
             if i in self.subset:
                 registration = pos_wrappers.ants_registration(
-                    dimension=2,   #TODO: Remove hardcoded values
+                    dimension=self.__IMAGE_DIMENSION,
                     outputNaming=self.f['out_naming'](idx=i),
                     iterations=iterations,
                     transformation=('SyN', [transf_grad]),
                     regularization=(reg_type, reg_ammount),
-                    affineIterations=[0],  #TODO: Remove hardcoded values
-                    continueAffine=False,
-                    rigidAffine=False,
+                    affineIterations=[0],    # 0: Hardcoded as this is a
+                    continueAffine=False,    # deformable reconstruction
+                    rigidAffine=False,       # workflow
                     imageMetrics=metrics,
                     maskImage=mask_image,
                     allMetricsConverge=True)
