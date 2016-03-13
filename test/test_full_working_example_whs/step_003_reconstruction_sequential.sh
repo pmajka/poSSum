@@ -48,7 +48,7 @@ pos_sequential_alignment \
      --use-rigid-affine \
      --ants-image-metric MI \
      --reslice-backgorund ${RESLICE_BACKGROUND} \
-     --transformationsDirectory ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ \
+     --transformations-directory ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ \
      --graph-edge-lambda 0.000 \
      --graph-edge-epsilon 5 \
  --output-volumes-directory . \

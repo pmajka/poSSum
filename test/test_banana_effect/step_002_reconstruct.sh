@@ -38,7 +38,7 @@ pos_pairwise_registration \
     --fixedImagesDir 003_shape_prior_sections/ \
     --movingImagesDir 004_distorted_sections/ \
     --output-volumes-directory . \
-    --transformationsDirectory 005_pairwise_alignment/ \
+    --transformations-directory 005_pairwise_alignment/ \
     --grayscale-volume-filename sections_to_shape_prior.nii.gz \
     --skipColorReslice \
         ${OV_SETTINGS} \
@@ -68,7 +68,7 @@ pos_sequential_alignment \
         --use-rigid-affine \
         --ants-image-metric MI \
         --reslice-backgorund 0 \
-        --transformationsDirectory 007_sequential_alignment/ \
+        --transformations-directory 007_sequential_alignment/ \
     --output-volumes-directory . \
         ${OV_SETTINGS} \
     --multichannel-volume-filename sequential_alignment.nii.gz \

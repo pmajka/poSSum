@@ -493,7 +493,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         obligatory_options.add_option('--transformationsRange', default=None,
             type='int', dest='transformationsRange', nargs=2,
             help='[Optional] The first and the last transformation index.')
-        obligatory_options.add_option('--transformationsDirectory', default=None,
+        obligatory_options.add_option('--transformations-directory', default=None,
             dest='transformationsDirectory', action='store',
             help='Store transformations in given directory instead of using default one.')
         obligatory_options.add_option('--fixedImageInputDirectory', default=None,

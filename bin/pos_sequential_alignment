@@ -897,7 +897,7 @@ class sequential_alignment(output_volume_workflow):
             of gravity. Note that the images have to have dark (0) \
             background with a bright (positive) content.'))
 
-        registration_options.add_option('--transformationsDirectory',
+        registration_options.add_option('--transformations-directory',
             default=False, dest='transformations_directory', type="str",
             help=r('Use provided transformation directory \
             instead of the default one.'))

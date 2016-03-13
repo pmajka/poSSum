@@ -127,7 +127,7 @@ do
             --movingImagesDir ${DIR_COARSE_ALIGNMENT}/${DIR_PAIRWISE_ITERATION}${ii}/exp/ \
             --output-volumes-directory ${DIR_WORK}/ \
             --grayscale-volume-filename slices_to_reference_${ii}.nii.gz \
-            --transformationsDirectory ${DIR_TRANSF}/ \
+            --transformations-directory ${DIR_TRANSF}/ \
             --skipColorReslice \
             ${OV_SETTINGS} \
             --loglevel DEBUG \
