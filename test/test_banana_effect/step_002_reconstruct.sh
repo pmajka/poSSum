@@ -39,7 +39,7 @@ pos_pairwise_registration \
     --movingImagesDir 004_distorted_sections/ \
     --outputVolumesDirectory . \
     --transformationsDirectory 005_pairwise_alignment/ \
-    --grayscaleVolumeFilename sections_to_shape_prior.nii.gz \
+    --grayscale-volume-filename sections_to_shape_prior.nii.gz \
     --skipColorReslice \
         ${OV_SETTINGS} \
     --affineGradientDescent 0.5 0.95 0.0001 0.0001 \

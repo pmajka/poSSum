@@ -1133,7 +1133,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--transformationsDirectory', default=None,
             dest='transformationsDirectory', action='store',
             help='Store transformations in given directory instead of using default one.')
-        parser.add_option('--grayscaleVolumeFilename', default=False,
+        parser.add_option('--grayscale-volume-filename', default=False,
             dest='grayscaleVolumeFilename', type='str',
             help='Filename for the output grayscale volume')
         parser.add_option('--multichannel-volume-filename', default=False,

@@ -312,7 +312,7 @@ class nonuniform_relice(generic_workflow):
             help='Apply axes permutation. Permutation has to be provided as sequence of 3 integers separated by space. Identity (0,1,2) permutation is a default one.')
         outputVolumeSettings.add_option('--output-volume-orientation',  dest='output_volume_orientation', type='str',
                 default='RAS', help='')
-        outputVolumeSettings.add_option('--grayscaleVolumeFilename',  dest='grayscaleVolumeFilename',
+        outputVolumeSettings.add_option('--grayscale-volume-filename',  dest='grayscaleVolumeFilename',
                 type='str', default=None)
         outputVolumeSettings.add_option('--rgbVolumeFilename',  dest='rgbVolumeFilename',
                 type='str', default=None)

@@ -60,7 +60,7 @@ pos_pairwise_registration \
     --useRigidAffine \
     --outputVolumesDirectory . \
     --loglevel DEBUG  \
-    --grayscaleVolumeFilename test_1_gray.nii.gz\
+    --grayscale-volume-filename test_1_gray.nii.gz\
     --multichannel-volume-filename test_1_color.nii.gz\
     -d /dev/shm/x/
 
@@ -75,7 +75,7 @@ pos_pairwise_registration \
     --skipPreprocessing \
     --skipTransformGeneration \
     --resliceBackgorund 255 \
-    --grayscaleVolumeFilename test_2_gray.nii.gz\
+    --grayscale-volume-filename test_2_gray.nii.gz\
     --multichannel-volume-filename test_2_color.nii.gz\
     -d /dev/shm/x/
 
@@ -90,7 +90,7 @@ pos_pairwise_registration \
     --skipPreprocessing \
     --skipTransformGeneration \
     --outputVolumeROI 64 64 64 64 \
-    --grayscaleVolumeFilename test_3_gray.nii.gz\
+    --grayscale-volume-filename test_3_gray.nii.gz\
     --multichannel-volume-filename test_3_color.nii.gz\
     -d /dev/shm/x/
 
@@ -105,7 +105,7 @@ pos_pairwise_registration \
     --skipPreprocessing \
     --skipTransformGeneration \
     --outputVolumeROI 0 0 64 64 \
-    --grayscaleVolumeFilename test_4_gray.nii.gz\
+    --grayscale-volume-filename test_4_gray.nii.gz\
     --multichannel-volume-filename test_4_color.nii.gz\
     -d /dev/shm/x/
 
@@ -121,7 +121,7 @@ pos_pairwise_registration \
     --movingImageResize 2.0 \
     --registrationColorChannelMovingImage red \
     --registrationColorChannelFixedImage red \
-    --grayscaleVolumeFilename test_5_gray.nii.gz\
+    --grayscale-volume-filename test_5_gray.nii.gz\
     --multichannel-volume-filename test_5_color.nii.gz\
     -d /dev/shm/x/
 
@@ -136,7 +136,7 @@ pos_pairwise_registration \
     --fixedImageResize 2.0 \
     --movingImageResize 2.0 \
     --medianFilterRadius 2 2 \
-    --grayscaleVolumeFilename test_6_gray.nii.gz\
+    --grayscale-volume-filename test_6_gray.nii.gz\
     --multichannel-volume-filename test_6_color.nii.gz\
     -d /dev/shm/x/
 

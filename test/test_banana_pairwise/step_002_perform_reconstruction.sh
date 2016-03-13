@@ -126,7 +126,7 @@ do
             --fixedImagesDir ${DIR_REF} \
             --movingImagesDir ${DIR_COARSE_ALIGNMENT}/${DIR_PAIRWISE_ITERATION}${ii}/exp/ \
             --outputVolumesDirectory ${DIR_WORK}/ \
-            --grayscaleVolumeFilename slices_to_reference_${ii}.nii.gz \
+            --grayscale-volume-filename slices_to_reference_${ii}.nii.gz \
             --transformationsDirectory ${DIR_TRANSF}/ \
             --skipColorReslice \
             ${OV_SETTINGS} \

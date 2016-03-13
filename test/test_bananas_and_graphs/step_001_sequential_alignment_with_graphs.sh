@@ -53,7 +53,7 @@ do
             --graphEdgeEpsilon ${PARAM_EPSILON} \
         --outputVolumesDirectory . \
             ${OV_SETTINGS} \
-        --grayscaleVolumeFilename grayscale_l${PARAM_LAMBDA}_e${PARAM_EPSILON}.nii.gz \
+        --grayscale-volume-filename grayscale_l${PARAM_LAMBDA}_e${PARAM_EPSILON}.nii.gz \
         --loglevel DEBUG \
         --work-dir __workdir_sequential_reconstruction__ \
         --cleanup
