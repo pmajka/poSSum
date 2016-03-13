@@ -71,7 +71,7 @@ pos_sequential_alignment \
         --transformationsDirectory 007_sequential_alignment/ \
     --outputVolumesDirectory . \
         ${OV_SETTINGS} \
-    --multichannelVolumeFilename sequential_alignment.nii.gz \
+    --multichannel-volume-filename sequential_alignment.nii.gz \
     --loglevel DEBUG \
     --cleanup
 

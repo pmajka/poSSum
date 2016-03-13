@@ -53,7 +53,7 @@ pos_sequential_alignment \
      --graphEdgeEpsilon 5 \
  --outputVolumesDirectory . \
      ${OV_SETTINGS} \
- --multichannelVolumeFilename sequential_alignment.nii.gz \
+ --multichannel-volume-filename sequential_alignment.nii.gz \
  --work-dir ${DIR_SEQUENTIAL_ALIGNMENT} \
  --loglevel DEBUG \
  --cleanup

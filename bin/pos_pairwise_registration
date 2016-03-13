@@ -1136,7 +1136,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--grayscaleVolumeFilename', default=False,
             dest='grayscaleVolumeFilename', type='str',
             help='Filename for the output grayscale volume')
-        parser.add_option('--multichannelVolumeFilename', default=False,
+        parser.add_option('--multichannel-volume-filename', default=False,
             dest='multichannelVolumeFilename', type='str',
             help='Filename for the output multichannel volume.')
 
