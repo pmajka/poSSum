@@ -50,7 +50,7 @@ pos_sequential_alignment \
      --reslice-backgorund ${RESLICE_BACKGROUND} \
      --transformationsDirectory ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ \
      --graphEdgeLambda 0.000 \
-     --graphEdgeEpsilon 5 \
+     --graph-edge-epsilon 5 \
  --output-volumes-directory . \
      ${OV_SETTINGS} \
  --multichannel-volume-filename sequential_alignment.nii.gz \

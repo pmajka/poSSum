@@ -50,7 +50,7 @@ do
             --antsImageMetric CC \
             --reslice-backgorund 0 \
             --graphEdgeLambda ${PARAM_LAMBDA} \
-            --graphEdgeEpsilon ${PARAM_EPSILON} \
+            --graph-edge-epsilon ${PARAM_EPSILON} \
         --output-volumes-directory . \
             ${OV_SETTINGS} \
         --grayscale-volume-filename grayscale_l${PARAM_LAMBDA}_e${PARAM_EPSILON}.nii.gz \

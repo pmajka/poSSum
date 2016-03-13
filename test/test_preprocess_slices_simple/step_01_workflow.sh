@@ -127,7 +127,7 @@ pos_sequential_alignment \
         --affine-gradient-descent 0.5 0.95 0.0001 0.0001 \
         --reslice-backgorund 0 \
         --graphEdgeLambda 0.0 \
-        --graphEdgeEpsilon 2 \
+        --graph-edge-epsilon 2 \
     --output-volumes-directory . \
     ${OUTPUT_VOLUME_PROPERTIES} \
     --multichannel-volume-filename sequential_alignment.nii.gz \

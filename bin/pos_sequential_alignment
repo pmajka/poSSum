@@ -923,7 +923,7 @@ class sequential_alignment(output_volume_workflow):
         registration_options.add_option('--graphEdgeLambda', default=0.0,
             dest='graph_edge_lambda', action='store', type="float",
             help='Provedes lambda value for the graph edges generation.')
-        registration_options.add_option('--graphEdgeEpsilon', default=1,
+        registration_options.add_option('--graph-edge-epsilon', default=1,
             dest='graph_edge_epsilon', action='store', type="int",
             help='Provedes epsilon value for the graph edges generation.')
 
