@@ -74,7 +74,7 @@ pos_pairwise_registration \
     --loglevel DEBUG  \
     --skipPreprocessing \
     --skipTransformGeneration \
-    --resliceBackgorund 255 \
+    --reslice-backgorund 255 \
     --grayscale-volume-filename test_2_gray.nii.gz\
     --multichannel-volume-filename test_2_color.nii.gz\
     -d /dev/shm/x/

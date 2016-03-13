@@ -536,6 +536,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                 into NN or Bspline. For the NN interpolation put just "NN" \
                 while for the Bspline interpolation put BS. \
                 No other string will be accepted.'))
+        # TODO: Try to provide the reslice background option.
         image_processing_options.add_option('--regionOrigin',
             dest='regionOrigin', default=None, type='int', nargs=2,
             help='Region origin in voxels (2 values)')

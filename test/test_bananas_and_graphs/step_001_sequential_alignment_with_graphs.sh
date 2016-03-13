@@ -48,7 +48,7 @@ do
         --enable-transformations \
             --useRigidAffine \
             --antsImageMetric CC \
-            --resliceBackgorund 0 \
+            --reslice-backgorund 0 \
             --graphEdgeLambda ${PARAM_LAMBDA} \
             --graphEdgeEpsilon ${PARAM_EPSILON} \
         --output-volumes-directory . \

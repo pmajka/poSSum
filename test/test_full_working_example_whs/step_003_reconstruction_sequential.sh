@@ -47,7 +47,7 @@ pos_sequential_alignment \
      --enable-moments \
      --useRigidAffine \
      --antsImageMetric MI \
-     --resliceBackgorund ${RESLICE_BACKGROUND} \
+     --reslice-backgorund ${RESLICE_BACKGROUND} \
      --transformationsDirectory ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ \
      --graphEdgeLambda 0.000 \
      --graphEdgeEpsilon 5 \

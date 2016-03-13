@@ -1073,7 +1073,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--reslice-interpolation',
             dest='resliceInterpolation', default=None, type='str',
             help='Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc')
-        parser.add_option('--resliceBackgorund', default=None,
+        parser.add_option('--reslice-backgorund', default=None,
             type='float', dest='resliceBackgorund',
             help='Background color')
         parser.add_option('--medianFilterRadius', dest='medianFilterRadius',

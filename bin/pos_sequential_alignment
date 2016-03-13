@@ -935,7 +935,7 @@ class sequential_alignment(output_volume_workflow):
         reslicing_options.add_option('--disable-reslice', default=True,
             dest='enable_reslice', action='store_false')
 
-        reslicing_options.add_option('--resliceBackgorund', default=None,
+        reslicing_options.add_option('--reslice-backgorund', default=None,
             type='float', dest='reslice_backgorund',
             help='Background color TODO: More info here required')
         reslicing_options.add_option('--reslice-interpolation',
