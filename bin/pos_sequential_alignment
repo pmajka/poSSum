@@ -85,7 +85,7 @@ class sequential_alignment(output_volume_workflow):
             Please provide the input images directory (--inputImageDir)"))
 
         # Verify, if the provided image-to-image metric is provided.
-        assert self.options.antsImageMetric.lower() in ['mi', 'cc', 'msq'], \
+        assert self.options.ants_image_metric.lower() in ['mi', 'cc', 'msq'], \
             self._logger.error(r("Provided image-to-image metric name is \
             invalid. Three image-to-image metrics are allowed: MSQ, MI, CC."))
 
@@ -406,8 +406,8 @@ class sequential_alignment(output_volume_workflow):
         # Define the registration settings: image-to-image metric and its
         # parameter, number of iterations, output naming, type of the affine
         # transformation.
-        similarity_metric = self.options.antsImageMetric
-        affine_metric_type = self.options.antsImageMetric
+        similarity_metric = self.options.ants_image_metric
+        affine_metric_type = self.options.ants_image_metric
         metric_parameter = self.options.ants_image_metric_opt
         affine_iterations = self.__AFFINE_ITERATIONS
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
@@ -822,7 +822,7 @@ class sequential_alignment(output_volume_workflow):
         except:
             filename_prefix += "_Median-None"
 
-        filename_prefix += "_Metric-%s" % self.options.antsImageMetric
+        filename_prefix += "_Metric-%s" % self.options.ants_image_metric
         filename_prefix += "_MetricOpt-%d" % self.options.ants_image_metric_opt
         filename_prefix += "_Affine-%s" % str(self.options.use_rigid_affine)
 
@@ -875,7 +875,7 @@ class sequential_alignment(output_volume_workflow):
             default=None, action='store_const', const=True,
             help=r('Invert source image: both, grayscale and multichannel, \
             before registration'))
-        source_processing.add_option('--registrationROI', dest='registration_roi',
+        source_processing.add_option('--registration-roi', dest='registration_roi',
             default=None, type='int', nargs=4,
             help='ROI of the input image used for registration (ox, oy, sx, sy).')
 
@@ -909,7 +909,7 @@ class sequential_alignment(output_volume_workflow):
             dest='use_rigid_affine', action='store_const', const=True,
             help='Use rigid affine transformation.')
         registration_options.add_option('--ants-image-metric', default='MI',
-            type='choice', dest='antsImageMetric', choices=['MI', 'CC', 'MSQ'],
+            type='choice', dest='ants_image_metric', choices=['MI', 'CC', 'MSQ'],
             help=r('ANTS affine image to image metric. \
             Three values are allowed: CC, MI, MSQ.'))
         registration_options.add_option('--ants-image-metric-opt', default=32,
