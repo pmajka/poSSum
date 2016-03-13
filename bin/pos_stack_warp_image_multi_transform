@@ -527,7 +527,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         image_processing_options = \
             OptionGroup(parser, "Image processing options")
 
-        image_processing_options.add_option('--resliceInterpolation',
+        image_processing_options.add_option('--reslice-interpolation',
             dest='resliceInterpolation', default=None, type='str',
             help=r('Interpolation used during the application of the \
                 transformation chain to the slices. This is not \

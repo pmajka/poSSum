@@ -1070,7 +1070,7 @@ class pairwiseRegistration(output_volume_workflow):
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
-        parser.add_option('--resliceInterpolation',
+        parser.add_option('--reslice-interpolation',
             dest='resliceInterpolation', default=None, type='str',
             help='Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc')
         parser.add_option('--resliceBackgorund', default=None,
