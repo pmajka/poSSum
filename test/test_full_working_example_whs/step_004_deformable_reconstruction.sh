@@ -42,7 +42,7 @@ rm -rfv input_for_deformable_reconstruction.nii.gz
 # -------------------------------------------------------------------
 
 pos_stack_warp_image_multi_transform \
-    --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
     --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
     --appendTransformation 0 ${DIR_DEFORMABLE_RECONSTRUCTION}/10_rescaled_deformation/%04d.nii.gz \
@@ -56,7 +56,7 @@ pos_stack_warp_image_multi_transform \
     --cleanup
 
 pos_stack_warp_image_multi_transform \
-    --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
     --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
     --appendTransformation 0 ${DIR_DEFORMABLE_RECONSTRUCTION}/10_rescaled_deformation/%04d.nii.gz \
@@ -70,7 +70,7 @@ pos_stack_warp_image_multi_transform \
     --cleanup
 
 pos_stack_warp_image_multi_transform \
-    --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
     --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
     --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
@@ -83,7 +83,7 @@ pos_stack_warp_image_multi_transform \
     --cleanup
 
 pos_stack_warp_image_multi_transform \
-    --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
     --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
     --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \

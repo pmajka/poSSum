@@ -61,7 +61,7 @@ pos_slice_volume \
 
 pos_sequential_alignment \
     --enable-sources-slices-generation \
-    --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 110\
+    --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 110\
     --input-images-directory 006_sections_to_shape_prior/ \
     --registration-color-channel red \
     --enable-transformations \
@@ -96,7 +96,7 @@ pos_coarse_fine \
     --cleanup
 
 pos_stack_warp_image_multi_transform  \
-    --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --fixedImageInputDirectory 006_sections_to_shape_prior/ \
     --movingImageInputDirectory 006_sections_to_shape_prior/ \
     --appendTransformation 0 007_sequential_alignment/ct_m%04d_f0110_Affine.txt \

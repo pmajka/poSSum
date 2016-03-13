@@ -61,7 +61,7 @@ class sequential_alignment(output_volume_workflow):
 
         # Yes, it is extremely important to provide the slicing range.
         assert self.options.slice_range, \
-            self._logger.error(r("Slice range parameters (`--sliceRange`) \
+            self._logger.error(r("Slice range parameters (`--slices-range`) \
             are required. Please provide the slice range. "))
 
         # Define slices' range. All slices within given range will be
@@ -845,7 +845,7 @@ class sequential_alignment(output_volume_workflow):
         parser = output_volume_workflow._getCommandLineParser()
 
         obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
-        obligatory_options.add_option('--sliceRange', default=None,
+        obligatory_options.add_option('--slices-range', default=None,
             type='int', dest='slice_range', nargs=3,
             help='Slice range: start, stop, reference. Requires three integers.')
         obligatory_options.add_option('--input-images-directory', default=None,

@@ -45,7 +45,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # Assert if the image stack is defined.
         assert self.options.sliceRange is not None,\
             r("The input image slice is not provided. \
-              Please supply the input image range: --sliceRange.")
+              Please supply the input image range: --slices-range.")
 
         # Range of images to register
         self._logger.debug("Setting the slice range.")
@@ -487,7 +487,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         obligatory_options = \
             OptionGroup(parser, 'Obligatory options')
 
-        obligatory_options.add_option('--sliceRange', default=None,
+        obligatory_options.add_option('--slices-range', default=None,
             type='int', dest='sliceRange', nargs=2,
             help='[Required] Index of the fist and the last images in the stack.')
         obligatory_options.add_option('--transformationsRange', default=None,

@@ -13,7 +13,7 @@ Usage summary
 A minimum working example of the sequential alignment script ::
 
     python pos_sequential_alignment \
-    [start stop ref] --sliceRange 50 70 60 \
+    [start stop ref] --slices-range 50 70 60 \
     [directory]      --input-images-directory <directory_name>
 
 
@@ -41,7 +41,7 @@ Images in order Continous naming, Reference slice ::
 
     python pos_sequential_alignment \
             --input-images-directory dir_with_the_niftii_images/ \
-            --sliceRange 10 120 60
+            --slices-range 10 120 60
             --loglevel DEBUG \
             --registration-color-channel blue \
             --median-filter-radius 4 4 \
