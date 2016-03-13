@@ -37,7 +37,7 @@ pos_pairwise_registration \
     --resliceBackgorund 0 \
     --fixedImagesDir 003_shape_prior_sections/ \
     --movingImagesDir 004_distorted_sections/ \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --transformationsDirectory 005_pairwise_alignment/ \
     --grayscale-volume-filename sections_to_shape_prior.nii.gz \
     --skipColorReslice \
@@ -69,7 +69,7 @@ pos_sequential_alignment \
         --antsImageMetric MI \
         --resliceBackgorund 0 \
         --transformationsDirectory 007_sequential_alignment/ \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
         ${OV_SETTINGS} \
     --multichannel-volume-filename sequential_alignment.nii.gz \
     --loglevel DEBUG \
@@ -102,7 +102,7 @@ pos_stack_warp_image_multi_transform  \
     --appendTransformation 0 007_sequential_alignment/ct_m%04d_f0110_Affine.txt \
     --appendTransformation 1 008_coarse_to_fine/01_smooth/%04d.txt \
         ${OV_SETTINGS} \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --volumeFilename coarse_to_fine.nii.gz \
     --loglevel DEBUG \
     --cleanup

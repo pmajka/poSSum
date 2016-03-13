@@ -123,7 +123,7 @@ Utilizes typical options::
             --registrationColorChannelFixedImage green  \
             --resliceBackgorund 255  \
             --medianFilterRadius 4 4 \
-            --outputVolumesDirectory output_volumes_directory/ \
+            --output-volumes-directory output_volumes_directory/ \
             --useRigidAffine \
             --loglevel DEBUG \
             --output-volume-spacing 0.02 0.02 0.06 \

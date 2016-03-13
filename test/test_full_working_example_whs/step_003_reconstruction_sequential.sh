@@ -51,7 +51,7 @@ pos_sequential_alignment \
      --transformationsDirectory ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ \
      --graphEdgeLambda 0.000 \
      --graphEdgeEpsilon 5 \
- --outputVolumesDirectory . \
+ --output-volumes-directory . \
      ${OV_SETTINGS} \
  --multichannel-volume-filename sequential_alignment.nii.gz \
  --work-dir ${DIR_SEQUENTIAL_ALIGNMENT} \

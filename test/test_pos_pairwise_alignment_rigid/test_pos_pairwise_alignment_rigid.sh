@@ -58,7 +58,7 @@ pos_pairwise_registration \
     --movingSlicesRange 0 9 \
     --fixedSlicesRange 0 9  \
     --useRigidAffine \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --loglevel DEBUG  \
     --grayscale-volume-filename test_1_gray.nii.gz\
     --multichannel-volume-filename test_1_color.nii.gz\
@@ -70,7 +70,7 @@ pos_pairwise_registration \
     --movingSlicesRange 0 9 \
     --fixedSlicesRange 0 9  \
     --useRigidAffine \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --loglevel DEBUG  \
     --skipPreprocessing \
     --skipTransformGeneration \
@@ -84,7 +84,7 @@ pos_pairwise_registration \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
     --fixedSlicesRange 0 9  \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --useRigidAffine \
     --loglevel DEBUG  \
     --skipPreprocessing \
@@ -99,7 +99,7 @@ pos_pairwise_registration \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
     --fixedSlicesRange 0 9  \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --useRigidAffine \
     --loglevel DEBUG  \
     --skipPreprocessing \
@@ -114,7 +114,7 @@ pos_pairwise_registration \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
     --fixedSlicesRange 0 9  \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --useRigidAffine \
     --loglevel DEBUG  \
     --fixedImageResize 2.0 \
@@ -130,7 +130,7 @@ pos_pairwise_registration \
     --movingImagesDir moving/ \
     --movingSlicesRange 0 9 \
     --fixedSlicesRange 0 9  \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --useRigidAffine \
     --loglevel DEBUG  \
     --fixedImageResize 2.0 \

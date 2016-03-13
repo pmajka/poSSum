@@ -954,7 +954,7 @@ class sequential_alignment(output_volume_workflow):
         output_volume_opts.add_option('--disable-output-volumes', default=True,
             dest='enable_output_volumes', action='store_false')
 
-        output_volume_opts.add_option('--outputVolumesDirectory', default=False,
+        output_volume_opts.add_option('--output-volumes-directory', default=False,
             dest='output_volumes_directory', type="str",
             help='Directory in which the reconstruction results will be sored.')
         output_volume_opts.add_option('--grayscale-volume-filename', default=False,

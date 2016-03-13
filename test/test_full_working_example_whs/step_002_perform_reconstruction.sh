@@ -127,7 +127,7 @@ do
 	    --resliceBackgorund ${RESLICE_BACKGROUND} \
 	    --fixedImagesDir ${DIR_REF} \
 	    --movingImagesDir ${DIR_COARSE_ALIGNMENT}/${DIR_PAIRWISE_ITERATION}${ii}/exp/ \
-	    --outputVolumesDirectory ${DIR_WORK}/ \
+	    --output-volumes-directory ${DIR_WORK}/ \
 	    --grayscale-volume-filename slices_to_reference_${ii}.nii.gz \
 	    --transformationsDirectory ${DIR_TRANSF}/ \
 	    --skipColorReslice \
@@ -180,7 +180,7 @@ pos_stack_warp_image_multi_transform \
     --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED}/ \
     --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --volumeFilename rgb_after_pairwise.nii.gz \
     --work-dir __pairwise__rgb_after_pairwise \
     --loglevel DEBUG \

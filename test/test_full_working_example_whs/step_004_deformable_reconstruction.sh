@@ -49,7 +49,7 @@ pos_stack_warp_image_multi_transform \
     --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
     --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --volumeFilename final_image.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_image \
@@ -63,7 +63,7 @@ pos_stack_warp_image_multi_transform \
     --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
     --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --volumeFilename final_image_mask.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_mask \
@@ -76,7 +76,7 @@ pos_stack_warp_image_multi_transform \
     --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
     --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --volumeFilename final_image_coarse_to_fine.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_image \
@@ -89,7 +89,7 @@ pos_stack_warp_image_multi_transform \
     --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
     --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
-    --outputVolumesDirectory . \
+    --output-volumes-directory . \
     --volumeFilename final_image_mask_coarse_to_fine.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_mask \

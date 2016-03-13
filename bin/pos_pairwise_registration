@@ -1101,7 +1101,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--skipOutputVolumes', default=False,
             dest='skipOutputVolumes', action='store_const', const=True,
             help='Supress generating volumes.')
-        parser.add_option('--outputVolumesDirectory', default=None,
+        parser.add_option('--output-volumes-directory', default=None,
             dest='outputVolumesDirectory', action='store',
             help='Store output volumes in given directory instead of using default one.')
 

@@ -516,7 +516,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         workflow_settings.add_option('--skipOutputVolumes', default=False,
             dest='skipOutputVolumes', action='store_const', const=True,
             help='Supress generating color volume')
-        workflow_settings.add_option('--outputVolumesDirectory', default=None,
+        workflow_settings.add_option('--output-volumes-directory', default=None,
             dest='outputVolumesDirectory', action='store',
             help=r('Store output volumes in given directory instead \
                    of using default one.'))

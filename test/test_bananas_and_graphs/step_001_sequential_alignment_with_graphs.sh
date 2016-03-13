@@ -51,7 +51,7 @@ do
             --resliceBackgorund 0 \
             --graphEdgeLambda ${PARAM_LAMBDA} \
             --graphEdgeEpsilon ${PARAM_EPSILON} \
-        --outputVolumesDirectory . \
+        --output-volumes-directory . \
             ${OV_SETTINGS} \
         --grayscale-volume-filename grayscale_l${PARAM_LAMBDA}_e${PARAM_EPSILON}.nii.gz \
         --loglevel DEBUG \
