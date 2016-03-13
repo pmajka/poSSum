@@ -942,7 +942,7 @@ class sequential_alignment(output_volume_workflow):
             dest='reslice_interpolation', default=None, type='choice',
             choices=['Cubic', 'Gaussian', 'Linear', 'Nearest', 'Sinc', 'cubic'],
             help='Interpolation during applying the transforms to individual slices.')
-        reslicing_options.add_option('--outputVolumeROI', default=None,
+        reslicing_options.add_option('--output-volume-roi', default=None,
             type='int', dest='output_volume_roi',  nargs=4,
             help='ROI of the output volume - in respect to registration ROI.')
 

@@ -89,7 +89,7 @@ pos_pairwise_registration \
     --loglevel DEBUG  \
     --skipPreprocessing \
     --skipTransformGeneration \
-    --outputVolumeROI 64 64 64 64 \
+    --output-volume-roi 64 64 64 64 \
     --grayscale-volume-filename test_3_gray.nii.gz\
     --multichannel-volume-filename test_3_color.nii.gz\
     -d /dev/shm/x/
@@ -104,7 +104,7 @@ pos_pairwise_registration \
     --loglevel DEBUG  \
     --skipPreprocessing \
     --skipTransformGeneration \
-    --outputVolumeROI 0 0 64 64 \
+    --output-volume-roi 0 0 64 64 \
     --grayscale-volume-filename test_4_gray.nii.gz\
     --multichannel-volume-filename test_4_color.nii.gz\
     -d /dev/shm/x/
