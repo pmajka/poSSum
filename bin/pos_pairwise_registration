@@ -1122,7 +1122,7 @@ class pairwiseRegistration(output_volume_workflow):
             dest='useRigidAffine', action='store_const', const=True,
             help=r('Use rigid affine transformation. By default affine \
             transformation is used to drive the registration '))
-        parser.add_option('--antsImageMetricOpt', default=32,
+        parser.add_option('--ants-image-metric-opt', default=32,
             type='int', dest='antsImageMetricOpt',
             help='Parameter of ANTS i2i metric.')
         parser.add_option('--affineGradientDescent', default=None,

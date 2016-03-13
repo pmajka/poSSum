@@ -912,7 +912,7 @@ class sequential_alignment(output_volume_workflow):
             type='choice', dest='antsImageMetric', choices=['MI', 'CC', 'MSQ'],
             help=r('ANTS affine image to image metric. \
             Three values are allowed: CC, MI, MSQ.'))
-        registration_options.add_option('--antsImageMetricOpt', default=32,
+        registration_options.add_option('--ants-image-metric-opt', default=32,
             type='int', dest='ants_image_metric_opt',
             help=r('Parameter of ANTS i2i metric. Makes a sense only when \
             provided metric can be customized.'))
