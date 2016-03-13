@@ -146,7 +146,7 @@ class sequential_alignment(output_volume_workflow):
         # simltaneously by a single routine. Slices preparation may be
         # disabled, switched off by providing approperiate command line
         # parameter. In that's the case, this step will be skipped.
-        if self.options.sourceSlicesGeneration is True:
+        if self.options.source_slices_generation is True:
             self._generate_source_slices()
 
         # Generate transforms. This step may be switched off by providing
@@ -857,10 +857,10 @@ class sequential_alignment(output_volume_workflow):
         source_processing = OptionGroup(parser, 'Source data processing.')
 
         source_processing.add_option('--enable-sources-slices-generation',
-            default=True, dest='sourceSlicesGeneration', action='store_true',
+            default=True, dest='source_slices_generation', action='store_true',
             help='Enable / disable generation of the source slices')
         source_processing.add_option('--disable-sources-slices-generation',
-            default=True, dest='sourceSlicesGeneration', action='store_false')
+            default=True, dest='source_slices_generation', action='store_false')
 
         source_processing.add_option('--registration-color-channel',
             dest='registration_color', default='blue', type='choice',
