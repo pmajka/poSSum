@@ -46,7 +46,7 @@ do
         --inputImageDir 001_sections_to_reconstruct/ \
         --registrationColor red \
         --enable-transformations \
-            --useRigidAffine \
+            --use-rigid-affine \
             --ants-image-metric CC \
             --reslice-backgorund 0 \
             --graph-edge-lambda ${PARAM_LAMBDA} \

@@ -905,7 +905,7 @@ class sequential_alignment(output_volume_workflow):
             dest='registration_resize', default=None, type='float',
             help=r('Scaling factor for the source image used for \
             registration. Float between 0 and 1.'))
-        registration_options.add_option('--useRigidAffine', default=False,
+        registration_options.add_option('--use-rigid-affine', default=False,
             dest='use_rigid_affine', action='store_const', const=True,
             help='Use rigid affine transformation.')
         registration_options.add_option('--ants-image-metric', default='MI',

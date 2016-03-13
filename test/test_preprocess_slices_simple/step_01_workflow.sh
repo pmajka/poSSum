@@ -122,7 +122,7 @@ pos_sequential_alignment \
     --enable-transformations \
         --enable-moments \
         --median-filter-radius 4 4 \
-        --useRigidAffine \
+        --use-rigid-affine \
         --ants-image-metric CC \
         --affine-gradient-descent 0.5 0.95 0.0001 0.0001 \
         --reslice-backgorund 0 \

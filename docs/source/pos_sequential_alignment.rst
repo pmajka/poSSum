@@ -47,7 +47,7 @@ Images in order Continous naming, Reference slice ::
             --median-filter-radius 4 4 \
             --reslice-backgorund 255 \
             --disable-source-slices-generation \
-            --useRigidAffine \
+            --use-rigid-affine \
             --enableTransformations \
             --enableReslice \
             --output-volume-spacing 0.02 0.02 0.06

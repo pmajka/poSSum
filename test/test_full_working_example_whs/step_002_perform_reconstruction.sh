@@ -134,7 +134,7 @@ do
 	    --enable-moments \
 	    ${OV_SETTINGS} \
 	    --loglevel DEBUG \
-	    --useRigidAffine \
+	    --use-rigid-affine \
 	    --cleanup
     fi
 

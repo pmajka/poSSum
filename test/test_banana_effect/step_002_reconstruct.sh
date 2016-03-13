@@ -43,7 +43,7 @@ pos_pairwise_registration \
     --skipColorReslice \
         ${OV_SETTINGS} \
     --affineGradientDescent 0.5 0.95 0.0001 0.0001 \
-    --useRigidAffine \
+    --use-rigid-affine \
     --disable-moments \
     --loglevel DEBUG \
     --cleanup
@@ -65,7 +65,7 @@ pos_sequential_alignment \
     --inputImageDir 006_sections_to_shape_prior/ \
     --registrationColor red \
     --enable-transformations \
-        --useRigidAffine \
+        --use-rigid-affine \
         --ants-image-metric MI \
         --reslice-backgorund 0 \
         --transformationsDirectory 007_sequential_alignment/ \

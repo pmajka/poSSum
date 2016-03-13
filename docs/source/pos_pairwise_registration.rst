@@ -124,7 +124,7 @@ Utilizes typical options::
             --reslice-backgorund 255  \
             --median-filter-radius 4 4 \
             --output-volumes-directory output_volumes_directory/ \
-            --useRigidAffine \
+            --use-rigid-affine \
             --loglevel DEBUG \
             --output-volume-spacing 0.02 0.02 0.06 \
             --dry-run

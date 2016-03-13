@@ -45,7 +45,7 @@ pos_sequential_alignment \
  --enable-sources-slices-generation \
  --enable-transformations \
      --enable-moments \
-     --useRigidAffine \
+     --use-rigid-affine \
      --ants-image-metric MI \
      --reslice-backgorund ${RESLICE_BACKGROUND} \
      --transformationsDirectory ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ \
