@@ -1079,7 +1079,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        parser.add_option('--invertMultichannel', dest='invertMultichannel',
+        parser.add_option('--invert-multichannel', dest='invertMultichannel',
             default=None, action='store_const', const=True,
             help='Invert source image: both, grayscale and multichannel, before registration')
         parser.add_option('--output-volume-roi', default=None,

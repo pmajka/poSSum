@@ -871,7 +871,7 @@ class sequential_alignment(output_volume_workflow):
         source_processing.add_option('--medianFilterRadius', dest='median_filter_radius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        source_processing.add_option('--invertMultichannel', dest='invert_multichannel',
+        source_processing.add_option('--invert-multichannel', dest='invert_multichannel',
             default=None, action='store_const', const=True,
             help=r('Invert source image: both, grayscale and multichannel, \
             before registration'))
