@@ -41,7 +41,7 @@ pos_sequential_alignment \
  --enable-sources-slices-generation \
  --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} ${REFERENCE_SLICE}\
  --inputImageDir ${DIR_SECTIONS_TO_SHAPE_PRIOR}/ \
- --registrationColor red \
+ --registration-color-channel red \
  --enable-sources-slices-generation \
  --enable-transformations \
      --enable-moments \

@@ -43,7 +43,7 @@ Images in order Continous naming, Reference slice ::
             --inputImageDir dir_with_the_niftii_images/ \
             --sliceRange 10 120 60
             --loglevel DEBUG \
-            --registrationColor blue \
+            --registration-color-channel blue \
             --median-filter-radius 4 4 \
             --reslice-backgorund 255 \
             --disable-source-slices-generation \

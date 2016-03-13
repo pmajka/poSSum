@@ -63,7 +63,7 @@ pos_sequential_alignment \
     --enable-sources-slices-generation \
     --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} 110\
     --inputImageDir 006_sections_to_shape_prior/ \
-    --registrationColor red \
+    --registration-color-channel red \
     --enable-transformations \
         --use-rigid-affine \
         --ants-image-metric MI \

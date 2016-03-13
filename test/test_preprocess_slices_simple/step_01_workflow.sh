@@ -118,7 +118,7 @@ pos_sequential_alignment \
     --enable-sources-slices-generation \
     --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} ${REFERENCE_SLICE}\
     --inputImageDir ${DIR_SEQUENTIAL_ALIGNMENT}/ \
-    --registrationColor red \
+    --registration-color-channel red \
     --enable-transformations \
         --enable-moments \
         --median-filter-radius 4 4 \

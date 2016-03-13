@@ -862,7 +862,7 @@ class sequential_alignment(output_volume_workflow):
         source_processing.add_option('--disable-sources-slices-generation',
             default=True, dest='sourceSlicesGeneration', action='store_false')
 
-        source_processing.add_option('--registrationColor',
+        source_processing.add_option('--registration-color-channel',
             dest='registration_color', default='blue', type='choice',
             choices=['r', 'g', 'b', 'red', 'green', 'blue'],
             help='In rgb images - color channel on which \
