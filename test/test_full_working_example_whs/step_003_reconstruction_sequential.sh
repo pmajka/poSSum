@@ -49,7 +49,7 @@ pos_sequential_alignment \
      --antsImageMetric MI \
      --reslice-backgorund ${RESLICE_BACKGROUND} \
      --transformationsDirectory ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ \
-     --graphEdgeLambda 0.000 \
+     --graph-edge-lambda 0.000 \
      --graph-edge-epsilon 5 \
  --output-volumes-directory . \
      ${OV_SETTINGS} \

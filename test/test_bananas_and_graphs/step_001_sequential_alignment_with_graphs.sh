@@ -49,7 +49,7 @@ do
             --useRigidAffine \
             --antsImageMetric CC \
             --reslice-backgorund 0 \
-            --graphEdgeLambda ${PARAM_LAMBDA} \
+            --graph-edge-lambda ${PARAM_LAMBDA} \
             --graph-edge-epsilon ${PARAM_EPSILON} \
         --output-volumes-directory . \
             ${OV_SETTINGS} \

@@ -920,7 +920,7 @@ class sequential_alignment(output_volume_workflow):
             default=None, type='float',
             dest='affine_gradient_descent', nargs=4,
             help='Grandient descent optimizers coefficients.')
-        registration_options.add_option('--graphEdgeLambda', default=0.0,
+        registration_options.add_option('--graph-edge-lambda', default=0.0,
             dest='graph_edge_lambda', action='store', type="float",
             help='Provedes lambda value for the graph edges generation.')
         registration_options.add_option('--graph-edge-epsilon', default=1,
