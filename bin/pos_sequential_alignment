@@ -58,27 +58,27 @@ class sequential_alignment(output_volume_workflow):
         super(self.__class__, self)._initializeOptions()
 
         # Yes, it is extremely important to provide the slicing range.
-        assert self.options.sliceRange, \
+        assert self.options.slice_range, \
             self._logger.error(r("Slice range parameters (`--sliceRange`) \
             are required. Please provide the slice range. "))
 
         # Define slices' range. All slices within given range will be
         # processed. Make sure that all images are available.
         self.options.slice_range = \
-            range(self.options.sliceRange[0], self.options.sliceRange[1] + 1)
+            range(self.options.slice_range[0], self.options.slice_range[1] + 1)
 
         # Verify if the reference slice index is provided and if ti is correct.
         # The reference slice index cannot be the same as either the starting
         # and the last slice index. This will cause an error.
-        assert self.options.sliceRange[0] < self.options.sliceRange[2] and \
-            self.options.sliceRange[2] < self.options.sliceRange[1], \
+        assert self.options.slice_range[0] < self.options.slice_range[2] and \
+            self.options.slice_range[2] < self.options.slice_range[1], \
             self._logger.error(r("Incorrect reference slice index. \
             The reference slice index has to be larger than the first \
             slice index and smaller than the last slice index."))
 
         # Validate, if an input images directory is provided,
         # Obviously, we need to load the images in order to workflow them.
-        assert self.options.inputImageDir, \
+        assert self.options.input_image_dir, \
             self._logger.error(r("No input images directory is provided. \
             Please provide the input images directory (--inputImageDir)"))
 
@@ -92,42 +92,42 @@ class sequential_alignment(output_volume_workflow):
 
         # At the very beginning override the default dummy input images
         # directory by the actual images directory.
-        self.f['raw_image'].override_dir = self.options.inputImageDir
+        self.f['raw_image'].override_dir = self.options.input_image_dir
 
         # Overriding the transformations directory
         # It might be usefull i.e. when one wants to save the transformation
         # to a different directory than the default one.
         # Note that directory names for two file types has to be switched.
-        if self.options.transformationsDirectory is not False:
+        if self.options.transformations_directory is not False:
             self.f['part_naming'].override_dir = \
-                self.options.transformationsDirectory
+                self.options.transformations_directory
             self.f['part_transf'].override_dir = \
-                self.options.transformationsDirectory
+                self.options.transformations_directory
             self.f['comp_transf'].override_dir = \
-                self.options.transformationsDirectory
+                self.options.transformations_directory
             self.f['comp_transf_mask'].override_dir = \
-                self.options.transformationsDirectory
+                self.options.transformations_directory
 
         # The output volumes directory may be overriden as well
         # Note that the the output volumes directory stores also
         # transformation analyses plots.
-        if self.options.outputVolumesDirectory is not False:
+        if self.options.output_volumes_directory is not False:
             self.f['out_volume_gray'].override_dir = \
-                self.options.outputVolumesDirectory
+                self.options.output_volumes_directory
             self.f['out_volume_color'].override_dir = \
-                self.options.outputVolumesDirectory
+                self.options.output_volumes_directory
             self.f['transform_report'].override_dir = \
-                self.options.outputVolumesDirectory
+                self.options.output_volumes_directory
 
         # Apart from just setting the custom output volumes directory, one can
         # also customize even the output filename of both, grayscale and
         # multichannel volumes! That a variety of options!
-        if self.options.grayscaleVolumeFilename:
+        if self.options.grayscale_volume_filename:
             self.f['out_volume_gray'].override_fname = \
-                self.options.grayscaleVolumeFilename
-        if self.options.multichannelVolumeFilename:
+                self.options.grayscale_volume_filename
+        if self.options.multichannel_volume_filename:
             self.f['out_volume_color'].override_fname = \
-                self.options.multichannelVolumeFilename
+                self.options.multichannel_volume_filename
 
     def launch(self):
         # Execute the parents before-execution activities
@@ -149,7 +149,7 @@ class sequential_alignment(output_volume_workflow):
 
         # Generate transforms. This step may be switched off by providing
         # aproperiate command line parameter.
-        if self.options.enableTransformations is True:
+        if self.options.enable_transformations is True:
             self._calculate_transforms()
 
         # Composite transformations take relatively small amount of time to
@@ -159,13 +159,13 @@ class sequential_alignment(output_volume_workflow):
         # Reslice the input slices according to the generated transforms.
         # This step may be skipped by providing approperiate command line
         # parameter.
-        if self.options.enableReslice is True:
+        if self.options.enable_reslice is True:
             self._reslice()
 
         # Stack both grayscale as well as the rgb slices into a volume.
         # This step may be skipped by providing approperiate command line
         # parameter.
-        if self.options.enableOutputVolumes is True:
+        if self.options.enable_output_volumes is True:
             self._stack_output_images()
 
         # Run parent's post execution activities
@@ -205,7 +205,7 @@ class sequential_alignment(output_volume_workflow):
         for slice_index in self.options.slice_range:
             command = pos_wrappers.image_voxel_count_wrapper(
                 image = self.f['raw_image'](idx=slice_index),
-                background = self.options.resliceBackgorund,
+                background = self.options.reslice_backgorund,
                 voxel_sum = True)
             vox_count = float(command()['stdout'].strip())
             self._slices_voxel_counts[slice_index] = vox_count
@@ -235,12 +235,12 @@ class sequential_alignment(output_volume_workflow):
                 input_image=self.f['raw_image'](idx=slice_number),
                 grayscale_output_image=self.f['src_gray'](idx=slice_number),
                 color_output_image=self.f['src_color'](idx=slice_number),
-                registration_roi=self.options.registrationROI,
-                registration_resize=self.options.registrationResize,
-                registration_color=self.options.registrationColor,
-                median_filter_radius=self.options.medianFilterRadius,
-                invert_grayscale=self.options.invertMultichannel,
-                invert_multichannel=self.options.invertMultichannel)
+                registration_roi=self.options.registration_roi,
+                registration_resize=self.options.registration_resize,
+                registration_color=self.options.registration_color,
+                median_filter_radius=self.options.median_filter_radius,
+                invert_grayscale=self.options.invert_multichannel,
+                invert_multichannel=self.options.invert_multichannel)
             commands.append(copy.deepcopy(command))
 
         self._logger.info("Executing the source slice generation commands.")
@@ -277,7 +277,7 @@ class sequential_alignment(output_volume_workflow):
 
         # If user decided to prealign the images by their centre of gravity
         # an additional series of transformations has to be carried out.
-        if self.options.enableMomentsAlignment:
+        if self.options.enable_moments_alignment:
             commands = map(lambda x: self._get_cog_alignment(*x),
                 partial_transformation_pairs)
             commands = filter(None, commands)
@@ -352,12 +352,12 @@ class sequential_alignment(output_volume_workflow):
 
         # Just convenient aliases
         i = moving_slice_index
-        s, e, r = tuple(self.options.sliceRange)
+        s, e, r = tuple(self.options.slice_range)
 
         # Array holding pairs of transformations between which the
         # transformations will be calculated.
         retDict = []
-        epsilon = self.options.graphEdgeEpsilon
+        epsilon = self.options.graph_edge_epsilon
 
         if i == r:
             j = i
@@ -406,19 +406,19 @@ class sequential_alignment(output_volume_workflow):
         # transformation.
         similarity_metric = self.options.antsImageMetric
         affine_metric_type = self.options.antsImageMetric
-        metric_parameter = self.options.antsImageMetricOpt
+        metric_parameter = self.options.ants_image_metric_opt
         affine_iterations = self.__AFFINE_ITERATIONS
         output_naming = self.f['part_naming'](mIdx=moving_slice_index,
                                               fIdx=fixed_slice_index)
 
         # Yeah, I know this is not the most optimal way
         # to make a true/false string out of boolean value but ...
-        use_rigid_transformation = str(self.options.useRigidAffine).lower()
+        use_rigid_transformation = str(self.options.use_rigid_affine).lower()
 
         # Ok, next we need to incorporate the centre-of-gravity prealignment
         # information if a user decided to switch on the prealignment step.
         initial_affine = None
-        if self.options.enableMomentsAlignment:
+        if self.options.enable_moments_alignment:
             initial_affine = \
             self.f['transf_center'](mIdx=moving_slice_index,
                                     fIdx=fixed_slice_index)
@@ -426,11 +426,11 @@ class sequential_alignment(output_volume_workflow):
         # If there is a affine gradient descent command line parameter \
         # provided it has to be preprocessed before providing it
         # to the command line wapper.
-        if self.options.affineGradientDescent is None:
+        if self.options.affine_gradient_descent is None:
             gradient_descent_option = None
         else:
             gradient_descent_option = \
-                self.options.affineGradientDescent
+                self.options.affine_gradient_descent
 
         # Define the image-to-image metric.
         metrics = []
@@ -511,7 +511,7 @@ class sequential_alignment(output_volume_workflow):
 
         # Lambda defines slice skipping is preffered (lower l), or reluctant
         # to slice skipping (higher)
-        l = self.options.graphEdgeLambda
+        l = self.options.graph_edge_lambda
 
         for (mdx, fdx), s in simmilarity.iteritems():
             w = (1.0 + s) * abs(mdx - fdx) * (1.0 + l) ** (abs(mdx - fdx))
@@ -547,7 +547,7 @@ class sequential_alignment(output_volume_workflow):
         """
 
         i = moving_slice_index
-        s, e, r = tuple(self.options.sliceRange)
+        s, e, r = tuple(self.options.slice_range)
 
         # Calculate shortest paths between individual slices
         slice_paths = nx.all_pairs_dijkstra_path(self.G)
@@ -648,7 +648,7 @@ class sequential_alignment(output_volume_workflow):
         reference_image_filename = self.f['src_gray'](
             idx=self.options.slice_range[2])
         transformation_file = self.f['comp_transf'](
-            mIdx=slice_number, fIdx=self.options.sliceRange[2])
+            mIdx=slice_number, fIdx=self.options.slice_range[2])
 
         # Get output volume region of interest (if such region is defined)
         region_origin_roi, region_size_roi =\
@@ -660,8 +660,8 @@ class sequential_alignment(output_volume_workflow):
             moving_image=moving_image_filename,
             transformation=transformation_file,
             output_image=resliced_image_filename,
-            background=self.options.resliceBackgorund,
-            interpolation=self.options.resliceInterpolation,
+            background=self.options.reslice_backgorund,
+            interpolation=self.options.reslice_interpolation,
             region_origin=region_origin_roi,
             region_size=region_size_roi)
         return copy.deepcopy(command)
@@ -684,7 +684,7 @@ class sequential_alignment(output_volume_workflow):
         reference_image_filename = self.f['src_gray'](
             idx=self.options.slice_range[2])
         transformation_file = self.f['comp_transf'](
-            mIdx=slice_number, fIdx=self.options.sliceRange[2])
+            mIdx=slice_number, fIdx=self.options.slice_range[2])
 
         # Get output volume region of interest (if such region is defined)
         region_origin_roi, region_size_roi =\
@@ -698,9 +698,9 @@ class sequential_alignment(output_volume_workflow):
             output_image=resliced_image_filename,
             region_origin=region_origin_roi,
             region_size=region_size_roi,
-            background=self.options.resliceBackgorund,
-            interpolation=self.options.resliceInterpolation,
-            inversion_flag=self.options.invertMultichannel)
+            background=self.options.reslice_backgorund,
+            interpolation=self.options.reslice_interpolation,
+            inversion_flag=self.options.invert_multichannel)
 
         # Return the created command line parser.
         return copy.deepcopy(command)
@@ -719,9 +719,9 @@ class sequential_alignment(output_volume_workflow):
 
         # Define output ROI based on provided command line arguments, if such
         # arguments are provided.
-        if self.options.outputVolumeROI:
-            region_origin_roi = self.options.outputVolumeROI[0:2]
-            region_size_roi = self.options.outputVolumeROI[2:4]
+        if self.options.output_volume_roi:
+            region_origin_roi = self.options.output_volume_roi[0:2]
+            region_size_roi = self.options.output_volume_roi[2:4]
         else:
             region_origin_roi = None
             region_size_roi = None
@@ -747,7 +747,7 @@ class sequential_alignment(output_volume_workflow):
         """
 
         # Assign some usefull aliases.
-        start, stop, reference = self.options.sliceRange
+        start, stop, reference = self.options.slice_range
 
         # Define the output volume filename. If no custom colume name is
         # provided, the filename is based on the provided processing
@@ -801,34 +801,34 @@ class sequential_alignment(output_volume_workflow):
         # straigthforward but pretty tireingsome.
         filename_prefix = "sequential_alignment_"
 
-        filename_prefix += "s-%d_e-%d_r-%d_" % tuple(self.options.sliceRange)
+        filename_prefix += "s-%d_e-%d_r-%d_" % tuple(self.options.slice_range)
 
         try:
-            filename_prefix += "ROI-%s" % "x".join(map(str, self.options.registrationROI))
+            filename_prefix += "ROI-%s" % "x".join(map(str, self.options.registration_roi))
         except:
             filename_prefix += "ROI-None"
 
         try:
-            filename_prefix += "_Resize-%s" % "x".join(map(str, self.options.registrationResize))
+            filename_prefix += "_Resize-%s" % "x".join(map(str, self.options.registration_resize))
         except:
             filename_prefix += "_Resize-None"
 
-        filename_prefix += "_Color-%s" % self.options.registrationColor
+        filename_prefix += "_Color-%s" % self.options.registration_color
 
         try:
-            filename_prefix += "_Median-%s" % "x".join(map(str, self.options.medianFilterRadius))
+            filename_prefix += "_Median-%s" % "x".join(map(str, self.options.median_filter_radius))
         except:
             filename_prefix += "_Median-None"
 
         filename_prefix += "_Metric-%s" % self.options.antsImageMetric
-        filename_prefix += "_MetricOpt-%d" % self.options.antsImageMetricOpt
-        filename_prefix += "_Affine-%s" % str(self.options.useRigidAffine)
+        filename_prefix += "_MetricOpt-%d" % self.options.ants_image_metric_opt
+        filename_prefix += "_Affine-%s" % str(self.options.use_rigid_affine)
 
         filename_prefix += "_eps-%d_lam%02.2f" % \
-            (self.options.graphEdgeEpsilon, self.options.graphEdgeLambda)
+            (self.options.graph_edge_epsilon, self.options.graph_edge_lambda)
 
         try:
-            filename_prefix += "outROI-%s" % "x".join(map(str, self.options.outputVolumeROI))
+            filename_prefix += "outROI-%s" % "x".join(map(str, self.options.output_volume_roi))
         except:
             filename_prefix += "outROI-None"
 
@@ -844,10 +844,10 @@ class sequential_alignment(output_volume_workflow):
 
         obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
         obligatory_options.add_option('--sliceRange', default=None,
-            type='int', dest='sliceRange', nargs=3,
+            type='int', dest='slice_range', nargs=3,
             help='Slice range: start, stop, reference. Requires three integers.')
         obligatory_options.add_option('--inputImageDir', default=None,
-            type='str', dest='inputImageDir',
+            type='str', dest='input_image_dir',
             help=r('The directory from which the input slices will be read. \
             The directory has to contain images named \
             according to "%04d.nii.gz" scheme.'))
@@ -861,105 +861,105 @@ class sequential_alignment(output_volume_workflow):
             default=True, dest='sourceSlicesGeneration', action='store_false')
 
         source_processing.add_option('--registrationColor',
-            dest='registrationColor', default='blue', type='choice',
+            dest='registration_color', default='blue', type='choice',
             choices=['r', 'g', 'b', 'red', 'green', 'blue'],
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
-        source_processing.add_option('--medianFilterRadius', dest='medianFilterRadius',
+        source_processing.add_option('--medianFilterRadius', dest='median_filter_radius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
-        source_processing.add_option('--invertMultichannel', dest='invertMultichannel',
+        source_processing.add_option('--invertMultichannel', dest='invert_multichannel',
             default=None, action='store_const', const=True,
             help=r('Invert source image: both, grayscale and multichannel, \
             before registration'))
-        source_processing.add_option('--registrationROI', dest='registrationROI',
+        source_processing.add_option('--registrationROI', dest='registration_roi',
             default=None, type='int', nargs=4,
             help='ROI of the input image used for registration (ox, oy, sx, sy).')
 
         registration_options = OptionGroup(parser, 'Registration options.')
 
         registration_options.add_option('--enable-transformations', default=True,
-            dest='enableTransformations', action='store_true',
+            dest='enable_transformations', action='store_true',
             help='Supress transformation calculation')
         registration_options.add_option('--disable-transformations', default=True,
-            dest='enableTransformations', action='store_false')
+            dest='enable_transformations', action='store_false')
         registration_options.add_option('--enable-moments', default=False,
-            dest='enableMomentsAlignment', action='store_true',
+            dest='enable_moments_alignment', action='store_true',
             help=r('Enable prealigning the images by their centre of gravity. \
             Note that the images have to have dark (0) background \
             with a bright (positive) content.'))
         registration_options.add_option('--disable-moments', default=False,
-            dest='enableMomentsAlignment', action='store_false',
+            dest='enable_moments_alignment', action='store_false',
             help=r('Enable prealigning the images by their centre \
             of gravity. Note that the images have to have dark (0) \
             background with a bright (positive) content.'))
 
         registration_options.add_option('--transformationsDirectory',
-            default=False, dest='transformationsDirectory', type="str",
+            default=False, dest='transformations_directory', type="str",
             help=r('Use provided transformation directory \
             instead of the default one.'))
         registration_options.add_option('--registrationResize',
-            dest='registrationResize', default=None, type='float',
+            dest='registration_resize', default=None, type='float',
             help=r('Scaling factor for the source image used for \
             registration. Float between 0 and 1.'))
         registration_options.add_option('--useRigidAffine', default=False,
-            dest='useRigidAffine', action='store_const', const=True,
+            dest='use_rigid_affine', action='store_const', const=True,
             help='Use rigid affine transformation.')
         registration_options.add_option('--antsImageMetric', default='MI',
             type='choice', dest='antsImageMetric', choices=['MI', 'CC', 'MSQ'],
             help=r('ANTS affine image to image metric. \
             Three values are allowed: CC, MI, MSQ.'))
         registration_options.add_option('--antsImageMetricOpt', default=32,
-            type='int', dest='antsImageMetricOpt',
+            type='int', dest='ants_image_metric_opt',
             help=r('Parameter of ANTS i2i metric. Makes a sense only when \
             provided metric can be customized.'))
         registration_options.add_option('--affineGradientDescent',
             default=None, type='float',
-            dest='affineGradientDescent', nargs=4,
+            dest='affine_gradient_descent', nargs=4,
             help='Grandient descent optimizers coefficients.')
         registration_options.add_option('--graphEdgeLambda', default=0.0,
-            dest='graphEdgeLambda', action='store', type="float",
+            dest='graph_edge_lambda', action='store', type="float",
             help='Provedes lambda value for the graph edges generation.')
         registration_options.add_option('--graphEdgeEpsilon', default=1,
-            dest='graphEdgeEpsilon', action='store', type="int",
+            dest='graph_edge_epsilon', action='store', type="int",
             help='Provedes epsilon value for the graph edges generation.')
 
         reslicing_options = OptionGroup(parser, 'Reslicing options.')
 
         reslicing_options.add_option('--enable-reslice', default=True,
-            dest='enableReslice', action='store_true',
+            dest='enable_reslice', action='store_true',
             help='Supress generating grayscale volume')
         reslicing_options.add_option('--disable-reslice', default=True,
-            dest='enableReslice', action='store_false')
+            dest='enable_reslice', action='store_false')
 
         reslicing_options.add_option('--resliceBackgorund', default=None,
-            type='float', dest='resliceBackgorund',
-            help='Background color')
+            type='float', dest='reslice_backgorund',
+            help='Background color TODO: More info here required')
         reslicing_options.add_option('--resliceInterpolation',
-            dest='resliceInterpolation', default=None, type='choice',
+            dest='reslice_interpolation', default=None, type='choice',
             choices=['Cubic', 'Gaussian', 'Linear', 'Nearest', 'Sinc', 'cubic'],
             help='Interpolation during applying the transforms to individual slices.')
         reslicing_options.add_option('--outputVolumeROI', default=None,
-            type='int', dest='outputVolumeROI',  nargs=4,
+            type='int', dest='output_volume_roi',  nargs=4,
             help='ROI of the output volume - in respect to registration ROI.')
 
         output_volume_opts = OptionGroup(parser, 'Output volume options.')
 
         output_volume_opts.add_option('--enable-output-volumes', default=True,
-            dest='enableOutputVolumes', action='store_true',
+            dest='enable_output_volumes', action='store_true',
             help='Supress generating color volume')
         output_volume_opts.add_option('--disable-output-volumes', default=True,
-            dest='enableOutputVolumes', action='store_false')
+            dest='enable_output_volumes', action='store_false')
 
         output_volume_opts.add_option('--outputVolumesDirectory', default=False,
-            dest='outputVolumesDirectory', type="str",
+            dest='output_volumes_directory', type="str",
             help='Directory in which the reconstruction results will be sored.')
         output_volume_opts.add_option('--grayscaleVolumeFilename', default=False,
-            dest='grayscaleVolumeFilename', type='str',
+            dest='grayscale_volume_filename', type='str',
             help='Filename for the output grayscale volume.')
         output_volume_opts.add_option('--multichannelVolumeFilename', default=False,
-            dest='multichannelVolumeFilename', type='str',
+            dest='multichannel_volume_filename', type='str',
             help='Filename for the output multichannel (rgb) volume.')
 
         parser.add_option_group(obligatory_options)
