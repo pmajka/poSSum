@@ -585,7 +585,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         registration_parameters = \
             OptionGroup(parser, 'Registration parameters.')
 
-        registration_parameters.add_option('--antsImageMetric', default='CC',
+        registration_parameters.add_option('--ants-image-metric', default='CC',
             type='str', dest='antsImageMetric',
             help='ANTS image to image metric. See ANTS documentation.')
         registration_parameters.add_option('--ants-image-metric-opt', default=8,

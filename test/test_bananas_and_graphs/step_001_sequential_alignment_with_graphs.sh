@@ -47,7 +47,7 @@ do
         --registrationColor red \
         --enable-transformations \
             --useRigidAffine \
-            --antsImageMetric CC \
+            --ants-image-metric CC \
             --reslice-backgorund 0 \
             --graph-edge-lambda ${PARAM_LAMBDA} \
             --graph-edge-epsilon ${PARAM_EPSILON} \

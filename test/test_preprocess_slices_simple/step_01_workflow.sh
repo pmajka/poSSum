@@ -123,7 +123,7 @@ pos_sequential_alignment \
         --enable-moments \
         --medianFilterRadius 4 4 \
         --useRigidAffine \
-        --antsImageMetric CC \
+        --ants-image-metric CC \
         --affine-gradient-descent 0.5 0.95 0.0001 0.0001 \
         --reslice-backgorund 0 \
         --graph-edge-lambda 0.0 \

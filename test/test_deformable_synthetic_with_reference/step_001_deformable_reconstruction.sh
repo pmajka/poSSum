@@ -42,7 +42,7 @@ pos_deformable_histology_reconstruction \
     --iterations 12 \
     --neighbourhood 1 \
     --outputNaming output_ \
-    --antsImageMetric CC \
+    --ants-image-metric CC \
     --ants-image-metric-opt 4 \
     --antsTransformation 0.01 \
     --antsRegularization 2.0 1.0 \

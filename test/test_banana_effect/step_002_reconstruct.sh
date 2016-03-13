@@ -31,7 +31,7 @@ pos_slice_volume \
 
 pos_pairwise_registration \
     --medianFilterRadius 2 2 \
-    --antsImageMetric MI \
+    --ants-image-metric MI \
     --movingSlicesRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --fixedSlicesRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --reslice-backgorund 0 \
@@ -66,7 +66,7 @@ pos_sequential_alignment \
     --registrationColor red \
     --enable-transformations \
         --useRigidAffine \
-        --antsImageMetric MI \
+        --ants-image-metric MI \
         --reslice-backgorund 0 \
         --transformationsDirectory 007_sequential_alignment/ \
     --output-volumes-directory . \

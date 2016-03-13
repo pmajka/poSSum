@@ -1115,7 +1115,7 @@ class pairwiseRegistration(output_volume_workflow):
             help=r('Enable prealigning the images by their centre of gravity.\
             Note that the images have to have dark (0) background with \
             a bright (positive) content.'))
-        parser.add_option('--antsImageMetric', default='MI',
+        parser.add_option('--ants-image-metric', default='MI',
             type='str', dest='antsImageMetric',
             help='ANTS image to image metric. See ANTS documentation.')
         parser.add_option('--useRigidAffine', default=False,

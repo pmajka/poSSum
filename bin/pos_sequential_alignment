@@ -908,7 +908,7 @@ class sequential_alignment(output_volume_workflow):
         registration_options.add_option('--useRigidAffine', default=False,
             dest='use_rigid_affine', action='store_const', const=True,
             help='Use rigid affine transformation.')
-        registration_options.add_option('--antsImageMetric', default='MI',
+        registration_options.add_option('--ants-image-metric', default='MI',
             type='choice', dest='antsImageMetric', choices=['MI', 'CC', 'MSQ'],
             help=r('ANTS affine image to image metric. \
             Three values are allowed: CC, MI, MSQ.'))

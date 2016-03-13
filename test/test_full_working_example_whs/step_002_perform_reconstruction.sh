@@ -121,7 +121,7 @@ do
 
 	pos_pairwise_registration \
 	    --work-dir __pairwise__$iteration \
-	    --antsImageMetric CC \
+	    --ants-image-metric CC \
 	    --movingSlicesRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
 	    --fixedSlicesRange  ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
 	    --reslice-backgorund ${RESLICE_BACKGROUND} \
