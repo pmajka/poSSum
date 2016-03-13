@@ -82,7 +82,7 @@ class sequential_alignment(output_volume_workflow):
         # Obviously, we need to load the images in order to workflow them.
         assert self.options.input_image_dir, \
             self._logger.error(r("No input images directory is provided. \
-            Please provide the input images directory (--inputImageDir)"))
+            Please provide the input images directory (--input-images-directory)"))
 
         # Verify, if the provided image-to-image metric is provided.
         assert self.options.ants_image_metric.lower() in ['mi', 'cc', 'msq'], \
@@ -848,7 +848,7 @@ class sequential_alignment(output_volume_workflow):
         obligatory_options.add_option('--sliceRange', default=None,
             type='int', dest='slice_range', nargs=3,
             help='Slice range: start, stop, reference. Requires three integers.')
-        obligatory_options.add_option('--inputImageDir', default=None,
+        obligatory_options.add_option('--input-images-directory', default=None,
             type='str', dest='input_image_dir',
             help=r('The directory from which the input slices will be read. \
             The directory has to contain images named \

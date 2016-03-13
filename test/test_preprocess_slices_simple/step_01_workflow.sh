@@ -117,7 +117,7 @@ REFERENCE_SLICE=25
 pos_sequential_alignment \
     --enable-sources-slices-generation \
     --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} ${REFERENCE_SLICE}\
-    --inputImageDir ${DIR_SEQUENTIAL_ALIGNMENT}/ \
+    --input-images-directory ${DIR_SEQUENTIAL_ALIGNMENT}/ \
     --registration-color-channel red \
     --enable-transformations \
         --enable-moments \

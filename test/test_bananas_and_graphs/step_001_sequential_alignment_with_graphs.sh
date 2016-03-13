@@ -43,7 +43,7 @@ do
     pos_sequential_alignment \
         --enable-sources-slices-generation \
         --sliceRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} ${REFERENCE_SLICE}\
-        --inputImageDir 001_sections_to_reconstruct/ \
+        --input-images-directory 001_sections_to_reconstruct/ \
         --registration-color-channel red \
         --enable-transformations \
             --use-rigid-affine \

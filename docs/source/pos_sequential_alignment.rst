@@ -12,9 +12,9 @@ Usage summary
 
 A minimum working example of the sequential alignment script ::
 
-    python pos_sequential_alignment.py \
+    python pos_sequential_alignment \
     [start stop ref] --sliceRange 50 70 60 \
-    [directory]      --inputImageDir <directory_name>
+    [directory]      --input-images-directory <directory_name>
 
 
 Assumptions of the input images
@@ -39,8 +39,8 @@ Input images naming scheme
 TODO: Describe the parameters for the workflow.
 Images in order Continous naming, Reference slice ::
 
-    python pos_sequential_alignment.py \
-            --inputImageDir dir_with_the_niftii_images/ \
+    python pos_sequential_alignment \
+            --input-images-directory dir_with_the_niftii_images/ \
             --sliceRange 10 120 60
             --loglevel DEBUG \
             --registration-color-channel blue \
