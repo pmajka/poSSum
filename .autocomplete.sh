@@ -6,6 +6,7 @@ POS_ORIENTATION_CODES="RPI LAS LPI RAS RSP LIA"
 POS_LOGLEVEL_OPTIONS="CRITICAL ERROR WARNING INFO DEBUG"
 POS_IMAGEMAGICK_COLORS="snow red maroon pink crimson maroon orchid thistle plum violet fuchsia magenta purple lavender blue navy azure aqua cyan teal turquoise honeydew lime green ivory beige yellow olive khaki gold cornsilk goldenrod wheat orange moccasin tan bisque linen peru chocolate seashell sienna coral tomato salmon white gray black"
 POS_IMAGEMAGICK_COLOR_CHANNELS="red green blue"
+POS_ANTS_IMAGE_METRICS="MSQ CC MI"
 
 _pos_stack_sections()
 {
@@ -440,19 +441,19 @@ _pos_coarse_fine()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     opts="--help -h --loglevel --log-filename --cpus \
-          --specimen-id -d --work-dir \
-          --dry-run --disable-shared-memory \
-          -i --fine-transform-filename-template \
-          -s --smooth-transform-filename-template \
-          -o --output-transform-filename-template \
-          --sections-range \
-          --reports-directory \
-          --skip-transforms \
-          --smoothing-simga \
-          --smoothing-simga-rotation \
-          --smoothing-simga-scaling \
-          --smoothing-simga-offset \
-          --smoothing-simga-fixed"
+      --specimen-id -d --work-dir \
+      --dry-run --disable-shared-memory \
+      -i --fine-transform-filename-template \
+      -s --smooth-transform-filename-template \
+      -o --output-transform-filename-template \
+      --sections-range \
+      --reports-directory \
+      --skip-transforms \
+      --smoothing-simga \
+      --smoothing-simga-rotation \
+      --smoothing-simga-scaling \
+      --smoothing-simga-offset \
+      --smoothing-simga-fixed"
 
 
     if [[ ${prev} == 'pos_coarse_fine' ]] ; then
@@ -501,10 +502,198 @@ _pos_coarse_fine()
         COMPREPLY=( $(compgen -W "float" -- ${cur}) )
         return 0
     fi
-
-
 }
 
+_pos_sequential_alignment()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="--help -h --loglevel --log-filename --cpus \
+      --specimen-id -d --work-dir \
+      --dry-run --disable-shared-memory \
+      --archive-work-dir \
+      \
+      --output-volume-origin \
+      --output-volume-scalar-type \
+      --output-volume-spacing \
+      --output-volume-resample \
+      --output-volume-permute-axes \
+      --output-volume-orientation \
+      --output-volume-interpolation
+      --output-volume-filp-axes \
+      --output-volume-roi \
+      \
+      --slices-range \
+      --input-images-directory \
+      --enable-sources-slices-generation \
+      --disable-sources-slices-generation \
+      --registration-color-channel \
+      --median-filter-radius\
+      --invert-multichannel \
+      --registration-roi \
+      \
+      --enable-transformations \
+      --disable-transformations \
+      --enable-moments \
+      --disable-moments \
+      --transformations-directory \
+      --registration-resize \
+      --use-rigid-affine \
+      --ants-image-metric \
+      --ants-image-metric-opt \
+      --affine-gradient-descent \
+      --graph-edge-lambda \
+      --graph-edge-epsilon \
+      \
+      --enable-reslice \
+      --disable-reslice \
+      --reslice-backgorund \
+      --reslice-interpolation \
+      \
+      --enable-output-volumes \
+      --disable-output-volumes \
+      --output-volumes-directory \
+      --grayscale-volume-filename \
+      --multichannel-volume-filename"
+
+    if [[ ${prev} == 'pos_sequential_alignment' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--loglevel' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_LOGLEVEL_OPTIONS}" -- ${cur}) )
+        return 
+    fi
+
+    if [ ${prev} == '--log-filename' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '-d' ] || \
+       [ ${prev} == '--work-dir' ] || \
+       [ ${prev} == '--archive-work-dir' ] || \
+       [ ${prev} == '--input-images-directory' ] || \
+       [ ${prev} == '--transformations-directory' ] || \
+       [ ${prev} == '--output-volumes-directory' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o nospace  -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-origin' ] ; then
+        COMPREPLY=( $(compgen -W "ox_float oy_float oz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-scalar-type' ] || [ ${prev} == '--type' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_DATA_TYPES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-spacing' ] ; then
+        COMPREPLY=( $(compgen -W "sx_float sy_float sz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-resample' ] || [ ${prev} == '--resample' ] ; then
+        COMPREPLY=( $(compgen -W "rx_float_0-1 ry_float_0-1 rz_float_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-permute-axes' ] ; then
+        COMPREPLY=( $(compgen -W "three_ints_0_1_2" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-orientation' ] || [ ${prev} == '--orientation' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_ORIENTATION_CODES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-interpolation' ]; then
+        COMPREPLY=( $(compgen -W "${POS_INTERPOLATION_OPTIONS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-filp-axes' ] ; then
+        COMPREPLY=( $(compgen -W "flip_x_0-1 flip_y_0-1 flip_z_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--slices-range' ]; then
+        COMPREPLY=( $(compgen -W "start end" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--registration-color-channel' ]; then
+        COMPREPLY=( $(compgen -W "${POS_IMAGEMAGICK_COLOR_CHANNELS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--median-filter-radius' ] ; then
+        COMPREPLY=( $(compgen -W "int-x-radius_int-y-radius" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--registration-roi' ] ; then
+        COMPREPLY=( $(compgen -W "ox_oy_sx_sy_in_pixels" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--registration-resize' ] ; then
+        COMPREPLY=( $(compgen -W "rx_float_0-1 ry_float_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--ants-image-metric' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_ANTS_IMAGE_METRICS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--ants-image-metric-opt' ] ; then
+        COMPREPLY=( $(compgen -W "int_depends_on_particular_metric" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--affine-gradient-descent' ] ; then
+        COMPREPLY=( $(compgen -W "maximum_step_length-x-relaxation_factor-x-minimum_step_length-x-translation_scales" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--graph-edge-lambda' ] ; then
+        COMPREPLY=( $(compgen -W "positive_but_small_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--graph-edge-epsilon' ] ; then
+        COMPREPLY=( $(compgen -W "1 2 3 4 5 6 7 8 9 10" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--reslice-backgorund' ]; then
+        COMPREPLY=( $(compgen -W "integer_0-255 0 1 255" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--reslice-interpolation' ]; then
+        COMPREPLY=( $(compgen -W "${POS_INTERPOLATION_OPTIONS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-roi' ] ; then
+        COMPREPLY=( $(compgen -W "ox_oy_sx_sy_in_pixels" -- ${cur}) )
+        return 0
+    fi
+    
+    if [ ${prev} == '--grayscale-volume-filename' ] || \
+       [ ${prev} == '--multichannel-volume-filename' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.nii.gz' -- ${cur}) )
+        return 0
+    fi
+}
 
 
 
@@ -543,12 +732,12 @@ complete -F _pos_align_by_moments pos_align_by_moments
 complete -F _pos_stack_histogram_matching pos_stack_histogram_matching
 complete -F _pos_preprocess_image pos_preprocess_image
 complete -F _pos_coarse_fine pos_coarse_fine
+complete -F _pos_sequential_alignment pos_sequential_alignment
 
 
 # MedianFilter.py*
 # pos_deformable_histology_reconstruction*
 # pos_pairwise_registration*
-# pos_sequential_alignment*
 # pos_stack_warp_image_multi_transform*
 
 
