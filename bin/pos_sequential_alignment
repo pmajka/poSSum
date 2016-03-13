@@ -901,7 +901,7 @@ class sequential_alignment(output_volume_workflow):
             default=False, dest='transformations_directory', type="str",
             help=r('Use provided transformation directory \
             instead of the default one.'))
-        registration_options.add_option('--registrationResize',
+        registration_options.add_option('--registration-resize',
             dest='registration_resize', default=None, type='float',
             help=r('Scaling factor for the source image used for \
             registration. Float between 0 and 1.'))
