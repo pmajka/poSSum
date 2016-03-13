@@ -7,7 +7,9 @@ A sequential alignment script.
 """
 
 
-import os, sys
+import os
+import sys
+
 from optparse import OptionGroup
 import copy
 
@@ -204,9 +206,9 @@ class sequential_alignment(output_volume_workflow):
         # slice.
         for slice_index in self.options.slice_range:
             command = pos_wrappers.image_voxel_count_wrapper(
-                image = self.f['raw_image'](idx=slice_index),
-                background = self.options.reslice_backgorund,
-                voxel_sum = True)
+                image=self.f['raw_image'](idx=slice_index),
+                background=self.options.reslice_backgorund,
+                voxel_sum=True)
             vox_count = float(command()['stdout'].strip())
             self._slices_voxel_counts[slice_index] = vox_count
 
@@ -310,17 +312,17 @@ class sequential_alignment(output_volume_workflow):
 
         if self._slices_voxel_counts[moving_slice_index] <= 0.0005 or \
            self._slices_voxel_counts[fixed_slice_index] <= 0.0005:
-            self._generate_identity_transformation(\
+            self._generate_identity_transformation(
                 self.f['transf_center'](mIdx=moving_slice_index,
                                       fIdx=fixed_slice_index))
-            self._logger.info("Blank moving slice found. f=%d,m=%d ." % \
+            self._logger.info("Blank moving slice found. f=%d,m=%d ." %
                               (moving_slice_index, fixed_slice_index))
             self._logger.info("An identity transform will be applied.")
             return False
 
         cog_transform_getter = pos_wrappers.align_by_center_of_gravity(
-            fixed_image = self.f['src_gray'](idx=fixed_slice_index),
-            moving_image = self.f['src_gray'](idx=moving_slice_index),
+            fixed_image=self.f['src_gray'](idx=fixed_slice_index),
+            moving_image=self.f['src_gray'](idx=moving_slice_index),
             output_transformation = \
                     self.f['transf_center'](mIdx=moving_slice_index,
                                             fIdx=fixed_slice_index))
@@ -914,7 +916,7 @@ class sequential_alignment(output_volume_workflow):
             type='int', dest='ants_image_metric_opt',
             help=r('Parameter of ANTS i2i metric. Makes a sense only when \
             provided metric can be customized.'))
-        registration_options.add_option('--affineGradientDescent',
+        registration_options.add_option('--affine-gradient-descent',
             default=None, type='float',
             dest='affine_gradient_descent', nargs=4,
             help='Grandient descent optimizers coefficients.')

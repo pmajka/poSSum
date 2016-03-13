@@ -1,5 +1,3 @@
-- there is something wrong in the test_preprocess_input_images: When multiplying the image by the maski
-  it seems that only one channel is multiplied or something like this... this has to be checked and corrected.
 - Increase the code coverage in the possum/deformable_histology_iterations.py
 - pos_wrappers todos.
 - Update the virtual machine.

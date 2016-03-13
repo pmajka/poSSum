@@ -124,7 +124,7 @@ pos_sequential_alignment \
         --medianFilterRadius 4 4 \
         --useRigidAffine \
         --antsImageMetric CC \
-        --affineGradientDescent 0.5 0.95 0.0001 0.0001 \
+        --affine-gradient-descent 0.5 0.95 0.0001 0.0001 \
         --resliceBackgorund 0 \
         --graphEdgeLambda 0.0 \
         --graphEdgeEpsilon 2 \
