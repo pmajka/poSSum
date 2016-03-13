@@ -122,7 +122,7 @@ Utilizes typical options::
             --registrationColorChannelMovingImage blue  \
             --registrationColorChannelFixedImage green  \
             --reslice-backgorund 255  \
-            --medianFilterRadius 4 4 \
+            --median-filter-radius 4 4 \
             --output-volumes-directory output_volumes_directory/ \
             --useRigidAffine \
             --loglevel DEBUG \

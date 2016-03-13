@@ -127,7 +127,7 @@ pos_pairwise_registration \
     --loglevel DEBUG  \
     --fixedImageResize 2.0 \
     --movingImageResize 2.0 \
-    --medianFilterRadius 2 2 \
+    --median-filter-radius 2 2 \
     --grayscale-volume-filename test_6_gray.nii.gz\
     --multichannel-volume-filename test_6_color.nii.gz\
     -d /dev/shm/x/

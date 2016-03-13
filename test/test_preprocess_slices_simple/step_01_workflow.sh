@@ -121,7 +121,7 @@ pos_sequential_alignment \
     --registrationColor red \
     --enable-transformations \
         --enable-moments \
-        --medianFilterRadius 4 4 \
+        --median-filter-radius 4 4 \
         --useRigidAffine \
         --ants-image-metric CC \
         --affine-gradient-descent 0.5 0.95 0.0001 0.0001 \

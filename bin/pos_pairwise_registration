@@ -1076,7 +1076,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--reslice-backgorund', default=None,
             type='float', dest='resliceBackgorund',
             help='Background color')
-        parser.add_option('--medianFilterRadius', dest='medianFilterRadius',
+        parser.add_option('--median-filter-radius', dest='medianFilterRadius',
             default=None, type='int', nargs=2,
             help='Median filter radius in voxels e.g. 2 2')
         parser.add_option('--invert-multichannel', dest='invertMultichannel',
