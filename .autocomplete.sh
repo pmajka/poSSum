@@ -639,7 +639,7 @@ _pos_sequential_alignment()
     fi
 
     if [ ${prev} == '--registration-roi' ] ; then
-        COMPREPLY=( $(compgen -W "ox_oy_sx_sy_in_pixels" -- ${cur}) )
+        COMPREPLY=( $(compgen -W "ox_oy_sx_sy_in_pixels_separated_by_space" -- ${cur}) )
         return 0
     fi
 

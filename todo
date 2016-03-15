@@ -1,5 +1,3 @@
-- More elaborate comments in pos_sequential alignment.
-
 - Increase the code coverage in the possum/deformable_histology_iterations.py
 - additional tests:
     - reslice-interpolation sequential alignment test
