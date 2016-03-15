@@ -1,4 +1,7 @@
-731eb61174550c8e729d2f9314760015  grayscale_l0.0_e10.nii.gz
-0e829f9f23b0f2ea51dec3aa41619e50  grayscale_l0.2_e1.nii.gz
-0e829f9f23b0f2ea51dec3aa41619e50  grayscale_l0.5_e1.nii.gz
-36d9dbd14528026e1be2b1ca2f2eefb9  distorted_stack/distorted_stack_masked.nii.gz
+5dccdb8846a1e1c7ce37b83575622e5f  distorted_stack/distorted_stack_masked.nii.gz
+21be2857515b6e7c0ba3cd72a1b531cf  grayscale_l0.0_e1.nii.gz
+b179bc90e3a26d2d068d6f6a116f41d2  grayscale_l0.0_e2.nii.gz
+be9a20ec045875fa4839f9cfe6ba9265  grayscale_l0.0_e5.nii.gz
+21be2857515b6e7c0ba3cd72a1b531cf  grayscale_l0.5_e1.nii.gz
+e61178de3c1042a9d3b8a5110485be60  grayscale_l0.5_e2.nii.gz
+f1660a80fae21d0cf8c3fd56cc50daa3  grayscale_l0.5_e5.nii.gz
