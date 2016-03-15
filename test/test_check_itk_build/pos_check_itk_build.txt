@@ -11,6 +11,10 @@ classes with different types of images.  That's it. This
 allows us to verify if the ITK build has been conducted
 properly.
 
+One can execute this test from the command line by typing:
+
+python -m doctest -v pos_check_itk_build.txt
+
 
 >>> import sys
 >>> import os
