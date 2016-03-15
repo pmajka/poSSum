@@ -1,5 +1,15 @@
+- More elaborate comments in pos_sequential alignment.
+
 - Increase the code coverage in the possum/deformable_histology_iterations.py
+- additional tests:
+    - reslice-interpolation sequential alignment test
+    - pos_sequential_alignment - test registration ROI (also in pairwise alignment)
+    - test invert multichannel
+    - registration resize
 - pos_wrappers todos.
 - Update the virtual machine.
 - Put all orientation presets into a single file
 - http://www.itk.org/Doxygen/html/Examples_2DataRepresentation_2Image_2Image4_8cxx-example.html#_a1
+
+- some clever method to determine if given section is empty or if it does contain some non-background pixels
+  (replacement for pos_wrappers.image_voxel_count_wrapper)

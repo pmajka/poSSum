@@ -3,9 +3,17 @@
 
 
 """
-A sequential alignment script.
-"""
+A sequential alignment workflow.
 
+See the
+
+Majka P, Wójcik DK. 2015. Possum—A Framework for Three-Dimensional
+Reconstruction of Brain Images from Serial Sections. Neuroinformatics.
+10.1007/s12021-015-9286-1
+http://www.ncbi.nlm.nih.gov/pubmed/26687079
+
+for detailed description of the workflow implemented in this script.
+"""
 
 import os
 import sys
@@ -15,15 +23,24 @@ import copy
 
 import networkx as nx
 
-from possum.pos_common import flatten
+from possum.pos_common import r, IDENTITY_TRANSFORM_2D_STRING, flatten
 from possum.pos_wrapper_skel import output_volume_workflow
 from possum import pos_parameters
 from possum import pos_wrappers
-from possum.pos_common import r, IDENTITY_TRANSFORM_2D_STRING
 
 
 class sequential_alignment(output_volume_workflow):
     """
+    A sequential alignment workflow.
+
+    See the:
+
+    Majka P, Wójcik DK. 2015. Possum—A Framework for Three-Dimensional
+    Reconstruction of Brain Images from Serial Sections. Neuroinformatics.
+    10.1007/s12021-015-9286-1
+    http://www.ncbi.nlm.nih.gov/pubmed/26687079
+
+    for detailed description of the workflow implemented in this script.
     """
 
     _f = {
@@ -520,6 +537,7 @@ class sequential_alignment(output_volume_workflow):
             graph_connections.append((fdx, mdx, w))
 
         self._logger.info("Creating a graph based on image similarities.")
+
         # Generate the graph basen on the weight of the edges
         self.G = nx.DiGraph()
         self.G.add_weighted_edges_from(graph_connections)
@@ -844,53 +862,74 @@ class sequential_alignment(output_volume_workflow):
         """
         parser = output_volume_workflow._getCommandLineParser()
 
-        obligatory_options = OptionGroup(parser, 'Obligatory pipeline options.')
+        usage_string = r("usage: %prog --slices-range first last reference \
+            --input-images-directory input_directory [other options]")
+
+        obligatory_options = OptionGroup(parser, 'Obligatory parameters')
         obligatory_options.add_option('--slices-range', default=None,
             type='int', dest='sliceRange', nargs=3,
-            help='Slice range: start, stop, reference. Requires three integers.')
+            help=r('Slice range, Requires three integers: start index, \
+            stop index, reference section index. Requires three integers.'))
         obligatory_options.add_option('--input-images-directory', default=None,
             type='str', dest='input_image_dir',
             help=r('The directory from which the input slices will be read. \
             The directory has to contain images named \
             according to "%04d.nii.gz" scheme.'))
 
-        source_processing = OptionGroup(parser, 'Source data processing.')
+        source_processing = OptionGroup(parser, 'Source data processing')
 
         source_processing.add_option('--enable-sources-slices-generation',
             default=True, dest='source_slices_generation', action='store_true',
-            help='Enable / disable generation of the source slices')
+            help=r('Enable / disable generation of the source sections. \
+            Such sections are section which will be used as the \
+            input for the registration.'))
         source_processing.add_option('--disable-sources-slices-generation',
-            default=True, dest='source_slices_generation', action='store_false')
+            default=True, dest='source_slices_generation',
+            action='store_false')
 
         source_processing.add_option('--registration-color-channel',
             dest='registration_color', default='blue', type='choice',
             choices=['r', 'g', 'b', 'red', 'green', 'blue'],
-            help='In rgb images - color channel on which \
-            registration will be performed. Has no meaning for \
-            grayscale input images. Possible values: r/red, g/green, b/blue.')
-        source_processing.add_option('--median-filter-radius', dest='median_filter_radius',
-            default=None, type='int', nargs=2,
-            help='Median filter radius in voxels e.g. 2 2')
-        source_processing.add_option('--invert-multichannel', dest='invert_multichannel',
-            default=None, action='store_const', const=True,
-            help=r('Invert source image: both, grayscale and multichannel, \
-            before registration'))
-        source_processing.add_option('--registration-roi', dest='registration_roi',
-            default=None, type='int', nargs=4,
-            help='ROI of the input image used for registration (ox, oy, sx, sy).')
+            help=r('For the RGB input images selects a color channel on \
+            which registration will be performed. This parameter has no \
+            meaning for when a set of grayscale images is provided as input \
+            Allowed values: r/red, g/green, b/blue.'))
+        source_processing.add_option('--median-filter-radius',
+            dest='median_filter_radius', default=None, type='int', nargs=2,
+            help=r('Determined the size of the median filter which will be \
+            used smooth the raw input images during preprocessing \
+            for the registration. Median filtering is applied for both, \
+            fixed and moving image. Provide two integer values, e.g. 2 2. \
+            The values do not have to be the same. In such case you will get \
+            an anisotropic median smoothing. By default, no median \
+            filtering will be applied.'))
+        source_processing.add_option('--invert-multichannel',
+            dest='invert_multichannel', default=None,
+            action='store_const', const=True,
+            help=r('Inverts (e.g. 255->0, 0->255) during processing the \
+            images before the registation. This switch will apply the \
+            inversion for both: graysale and rgb images.'))
+        source_processing.add_option('--registration-roi',
+            dest='registration_roi', default=None, type='int', nargs=4,
+            help=r('ROI of the input images in pixels wich will be used \
+            to define the input image region of interest based on which \
+            the registration will be carried on. Note that the provided \
+            region has to be a valid region in all the images provided \
+            in the input stack. Four integers are required: ox, oy, sx, sy'))
 
-        registration_options = OptionGroup(parser, 'Registration options.')
+        registration_options = OptionGroup(parser, 'Registration options')
 
         registration_options.add_option('--enable-transformations', default=True,
             dest='enable_transformations', action='store_true',
-            help='Supress transformation calculation')
+            help='Determined if the actual registration will be conducted.')
         registration_options.add_option('--disable-transformations', default=True,
             dest='enable_transformations', action='store_false')
         registration_options.add_option('--enable-moments', default=False,
             dest='enable_moments_alignment', action='store_true',
             help=r('Enable prealigning the images by their centre of gravity. \
             Note that the images have to have dark (0) background \
-            with a bright (positive) content.'))
+            with a bright (positive) content to make \
+             this procedure behave correctly.'))
         registration_options.add_option('--disable-moments', default=False,
             dest='enable_moments_alignment', action='store_false',
             help=r('Enable prealigning the images by their centre \
@@ -919,15 +958,19 @@ class sequential_alignment(output_volume_workflow):
         registration_options.add_option('--affine-gradient-descent',
             default=None, type='float',
             dest='affine_gradient_descent', nargs=4,
-            help='Grandient descent optimizers coefficients.')
+            help=r('Grandient descent optimizers coefficients. \
+            Check out the ANTS documentation for the meaning \
+            and applications of this parameter.'))
         registration_options.add_option('--graph-edge-lambda', default=0.0,
             dest='graph_edge_lambda', action='store', type="float",
-            help='Provedes lambda value for the graph edges generation.')
+            help=r('Provedes lambda value for the graph edges generation. \
+            A small positive lambda value are required.'))
         registration_options.add_option('--graph-edge-epsilon', default=1,
             dest='graph_edge_epsilon', action='store', type="int",
-            help='Provedes epsilon value for the graph edges generation.')
+            help=r('Provedes epsilon value for the graph edges generation. \
+            An small integer is required e.g. 1-5'))
 
-        reslicing_options = OptionGroup(parser, 'Reslicing options.')
+        reslicing_options = OptionGroup(parser, 'Reslicing options')
 
         reslicing_options.add_option('--enable-reslice', default=True,
             dest='enable_reslice', action='store_true',
@@ -937,31 +980,40 @@ class sequential_alignment(output_volume_workflow):
 
         reslicing_options.add_option('--reslice-backgorund', default=None,
             type='float', dest='reslice_backgorund',
-            help='Background color TODO: More info here required')
+            help=r('Background color. A float and / or negarive \
+            values will probablu work, but unless you have to really \
+            just provide an integer.'))
         reslicing_options.add_option('--reslice-interpolation',
             dest='reslice_interpolation', default=None, type='choice',
-            choices=['Cubic', 'Gaussian', 'Linear', 'Nearest', 'Sinc', 'cubic'],
-            help='Interpolation during applying the transforms to individual slices.')
+            choices=['Cubic', 'Gaussian', 'Linear', 'Nearest',
+            'Sinc', 'cubic'],
+            help=r('Interpolation during applying the transforms \
+            to individual slices.'))
         reslicing_options.add_option('--output-volume-roi', default=None,
             type='int', dest='output_volume_roi',  nargs=4,
-            help='ROI of the output volume - in respect to registration ROI.')
+            help=r('ROI of the output volume. This is how the individual \
+            images after reslicing will be cropped before stacking them \
+            into a final stack. Note that this ROI has to be defined having \
+            in mind the the registration ROI. Basically, first the \
+            registration ROI is applied and then the output volume ROI.'))
 
         output_volume_opts = OptionGroup(parser, 'Output volume options.')
 
-        output_volume_opts.add_option('--enable-output-volumes', default=True,
-            dest='enable_output_volumes', action='store_true',
-            help='Supress generating color volume')
+        output_volume_opts.add_option('--enable-output-volumes',
+            default=True, dest='enable_output_volumes', action='store_true',
+            help='Supress generating color / rgb / multichannel volume.')
         output_volume_opts.add_option('--disable-output-volumes', default=True,
             dest='enable_output_volumes', action='store_false')
 
-        output_volume_opts.add_option('--output-volumes-directory', default=False,
-            dest='output_volumes_directory', type="str",
-            help='Directory in which the reconstruction results will be sored.')
-        output_volume_opts.add_option('--grayscale-volume-filename', default=False,
-            dest='grayscale_volume_filename', type='str',
+        output_volume_opts.add_option('--output-volumes-directory',
+            default=False, dest='output_volumes_directory', type="str",
+            help=r('Directory in which the reconstruction \
+            results will be sored.'))
+        output_volume_opts.add_option('--grayscale-volume-filename',
+            default=False, dest='grayscale_volume_filename', type='str',
             help='Filename for the output grayscale volume.')
-        output_volume_opts.add_option('--multichannel-volume-filename', default=False,
-            dest='multichannel_volume_filename', type='str',
+        output_volume_opts.add_option('--multichannel-volume-filename',
+            default=False, dest='multichannel_volume_filename', type='str',
             help='Filename for the output multichannel (rgb) volume.')
 
         parser.add_option_group(obligatory_options)
