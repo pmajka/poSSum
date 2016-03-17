@@ -1275,11 +1275,21 @@ class command_warp_rgb_slice(generic_wrapper):
         the region to extract.
     :type region_size: (int, int)
 
+    :param resampling: (optional) amount of upsampling or downsampling of the
+        image once it is resliced, expressed in percents. The resampling is applied
+        once the images has been resliced, however before the stacking.
+        Just remember that you have to provide a list of two positive values.
+        They may not be equal, but they have to be non-zero positive values.
+    :type resampling: [float, float, float] representing how much the new
+        image will be larger or smaller than the original image, expressed in percents.
+
     :param inversion_flag: (optional) True / False. Inverts the image after
         reslicing. Note that this option requires the image type that exactly meets
         the script specification - three channel, 8bit RGB image. Will not work for
         any other type of the image.
     :type inversion_flag: bool
+
+    #TODO: Doctests for resampling during reslicing
 
     Doctests
     --------
@@ -1323,6 +1333,21 @@ class command_warp_rgb_slice(generic_wrapper):
         -push ref -push b -reslice-itk transformation.txt \
           -region 20x20vox 100x100vox -scale -1 -shift 255 -type uchar -as rb -type uchar -clear \
         -push rr -push rg -push rb -omc 3 output.nii.gz
+
+    >>> print command_warp_rgb_slice(moving_image='moving.nii.gz',
+    ... reference_image='reference.nii.gz', output_image='output.nii.gz',
+    ... transformation='transformation.txt', background=255,
+    ... region_origin=[20,20], region_size=[100,100],
+    ... inversion_flag=True, resampling=[120,10])  #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose -background 255 reference.nii.gz -as ref -clear \
+        -mcs moving.nii.gz -as b -pop -as g -pop -as r \
+        -push ref -push r -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -resample 120x10% -scale -1 -shift 255 -type uchar -as rr -type uchar -clear \
+        -push ref -push g -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -resample 120x10% -scale -1 -shift 255 -type uchar -as rg -type uchar -clear \
+        -push ref -push b -reslice-itk transformation.txt \
+          -region 20x20vox 100x100vox -resample 120x10% -scale -1 -shift 255 -type uchar -as rb -type uchar -clear \
+        -push rr -push rg -push rb -omc 3 output.nii.gz
     """
 
     _template = "c{dimension}d -verbose {background} {interpolation}\
@@ -1331,9 +1356,9 @@ class command_warp_rgb_slice(generic_wrapper):
        -as b \
        -pop -as g \
        -pop -as r \
-       -push ref -push r -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rr -type uchar -clear \
-       -push ref -push g -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rg -type uchar -clear \
-       -push ref -push b -reslice-itk {transformation} {region_origin} {region_size} {inversion_flag} -as rb -type uchar -clear \
+       -push ref -push r -reslice-itk {transformation} {region_origin} {region_size} {resampling} {inversion_flag} -as rr -type uchar -clear \
+       -push ref -push g -reslice-itk {transformation} {region_origin} {region_size} {resampling} {inversion_flag} -as rg -type uchar -clear \
+       -push ref -push b -reslice-itk {transformation} {region_origin} {region_size} {resampling} {inversion_flag} -as rb -type uchar -clear \
        -push rr -push rg -push rb -omc 3 {output_image}"
 
     _parameters = {
@@ -1346,6 +1371,7 @@ class command_warp_rgb_slice(generic_wrapper):
         'output_image': pos_parameters.filename_parameter('output_image', None),
         'region_origin': pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
         'region_size': pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
+        'resampling': pos_parameters.vector_parameter('resampling', None, '-resample {_list}%'),
         'inversion_flag': pos_parameters.boolean_parameter('inversion_flag', None, str_template=' -scale -1 -shift 255 -type uchar'),
     }
 
@@ -1358,17 +1384,19 @@ class command_warp_grayscale_image(generic_wrapper):
     :param dimension: (optional) Dimension of the transformation (2 or 3)
     :type dimension: int
 
-    :param background: (optional) default background color applied during image reslicing.
+    :param background: (optional) default background color
+        applied during image reslicing.
     :type background: float
 
-    :param interpolation: (optional) Image intrerplation method. The allowed values are:
-        Cubic Gaussian Linear Nearest Sinc cubic gaussian linear nearest sinc.
+    :param interpolation: (optional) Image intrerplation method.
+        The allowed values are: Cubic Gaussian Linear Nearest Sinc
+        cubic gaussian linear nearest sinc.
         Please consult the Convert3D online documentation for the details of
         the image interpolation methods:
         http://www.itksnap.org/pmwiki/pmwiki.php?n=Convert3D.Documentation
     :type interpolation: str
 
-    :param reference_image: (required) Filename of the reference image used ruring the
+    :param reference_image: (required) Filename of the reference image used during the
         resampling process. The prefereble type of the image if of course Niftii
         format.
     :type reference_image: str
@@ -1380,6 +1408,14 @@ class command_warp_grayscale_image(generic_wrapper):
         transformation file (a human readable text file) is required. Other types
         of transformations are not well supproted.
     :type transformation: str
+
+    :param resampling: (optional) amount of upsampling or downsampling of the
+        image once it is resliced, expressed in percents. The resampling is applied
+        once the images has been resliced, however before the stacking.
+        Just remember that you have to provide a list of two positive values.
+        They may not be equal, but they have to be non-zero positive values.
+    :type resampling: [float, float, float] representing how much the new
+        image will be larger or smaller than the original image, expressed in percents.
 
     :param region_origin: (optional) If subregion extraction after the
         reslicing is to be done, this option determines the origin (in voxels) of
@@ -1426,13 +1462,22 @@ class command_warp_grayscale_image(generic_wrapper):
     c3d -verbose -background 255 -interpolation nn ref.nii.gz -as ref -clear \
     moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
     -region 10x10x10vox 50x50x50vox -type uchar -o output.nii.gz
+
+    >>> p = command_warp_grayscale_image(reference_image='ref.nii.gz',
+    ... moving_image='moving.nii.gz', transformation='transf.txt',
+    ... output_image='output.nii.gz', resampling=[40,50]) #doctest: +NORMALIZE_WHITESPACE
+    >>> print p #doctest: +NORMALIZE_WHITESPACE
+    c2d -verbose ref.nii.gz -as ref -clear \
+    moving.nii.gz -as moving -push ref -push moving -reslice-itk transf.txt \
+    -resample 40x50% -type uchar -o output.nii.gz
+
     """
 
     _template = "c{dimension}d -verbose {background} {interpolation}\
         {reference_image} -as ref -clear \
         {moving_image} -as moving \
         -push ref -push moving -reslice-itk {transformation} \
-        {region_origin} {region_size} \
+        {region_origin} {region_size} {resampling} \
         -type uchar -o {output_image}"
 
     _parameters = {
@@ -1442,6 +1487,7 @@ class command_warp_grayscale_image(generic_wrapper):
         'reference_image': pos_parameters.filename_parameter('reference_image', None),
         'moving_image': pos_parameters.filename_parameter('moving_image', None),
         'transformation': pos_parameters.filename_parameter('transformation', None),
+        'resampling': pos_parameters.vector_parameter('resampling', None, '-resample {_list}%'),
         'region_origin': pos_parameters.vector_parameter('region_origin', None, '-region {_list}vox'),
         'region_size': pos_parameters.vector_parameter('region_size', None, '{_list}vox'),
         'output_image': pos_parameters.filename_parameter('output_image', None),
