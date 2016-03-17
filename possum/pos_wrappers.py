@@ -1289,8 +1289,6 @@ class command_warp_rgb_slice(generic_wrapper):
         any other type of the image.
     :type inversion_flag: bool
 
-    #TODO: Doctests for resampling during reslicing
-
     Doctests
     --------
 
