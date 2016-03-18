@@ -171,9 +171,9 @@ class sequential_alignment(output_volume_workflow):
         if self.options.enable_transformations is True:
             self._calculate_transforms()
 
-        # Composite transformations take relatively small amount of time to
-        # compute:
-        self._calculate_composite_transforms()
+            # Composite transformations take relatively
+            # small amount of time to compute:
+            self._calculate_composite_transforms()
 
         # Reslice the input slices according to the generated transforms.
         # This step may be skipped by providing approperiate command line
@@ -682,6 +682,7 @@ class sequential_alignment(output_volume_workflow):
             output_image=resliced_image_filename,
             background=self.options.reslice_backgorund,
             interpolation=self.options.reslice_interpolation,
+            resampling=self.options.reslicing_resampling,
             region_origin=region_origin_roi,
             region_size=region_size_roi)
         return copy.deepcopy(command)
@@ -718,6 +719,7 @@ class sequential_alignment(output_volume_workflow):
             output_image=resliced_image_filename,
             region_origin=region_origin_roi,
             region_size=region_size_roi,
+            resampling=self.options.reslicing_resampling,
             background=self.options.reslice_backgorund,
             interpolation=self.options.reslice_interpolation,
             inversion_flag=self.options.invert_multichannel)
@@ -985,17 +987,26 @@ class sequential_alignment(output_volume_workflow):
             just provide an integer.'))
         reslicing_options.add_option('--reslice-interpolation',
             dest='reslice_interpolation', default=None, type='choice',
-            choices=['Cubic', 'Gaussian', 'Linear', 'Nearest',
-            'Sinc', 'cubic'],
+            choices=['Cubic', 'Linear', 'NearestNeighbor', 'Sinc'],
             help=r('Interpolation during applying the transforms \
             to individual slices.'))
+        reslicing_options.add_option('--reslice-resampling',
+            dest='reslicing_resampling', default=None, nargs=2,
+            type=float, help=r("Resampling during applying transforms to \
+            individual sections expressed in precents. To be exact applied \
+            after the image has been transformed and optioenally cropped \
+            Provide two positive non-zero float values."))
         reslicing_options.add_option('--output-volume-roi', default=None,
             type='int', dest='output_volume_roi',  nargs=4,
             help=r('ROI of the output volume. This is how the individual \
             images after reslicing will be cropped before stacking them \
             into a final stack. Note that this ROI has to be defined having \
             in mind the the registration ROI. Basically, first the \
-            registration ROI is applied and then the output volume ROI.'))
+            registration ROI is applied and then the output volume ROI. \
+            Provide four positive integers: ox oy sx sy. \
+            Note that the provided values have to make sense \
+            a definition of a region, otherwise a \
+            terrible error will occur.'))
 
         output_volume_opts = OptionGroup(parser, 'Output volume options.')
 

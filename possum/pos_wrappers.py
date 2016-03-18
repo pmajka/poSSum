@@ -1409,7 +1409,8 @@ class command_warp_grayscale_image(generic_wrapper):
 
     :param resampling: (optional) amount of upsampling or downsampling of the
         image once it is resliced, expressed in percents. The resampling is applied
-        once the images has been resliced, however before the stacking.
+        once the images has been resliced and optionally cropped,
+        however before the stacking.
         Just remember that you have to provide a list of two positive values.
         They may not be equal, but they have to be non-zero positive values.
     :type resampling: [float, float, float] representing how much the new
