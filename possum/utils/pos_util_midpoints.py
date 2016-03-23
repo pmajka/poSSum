@@ -244,8 +244,6 @@ def calculate_labels_midpoints(itk_image):
         distance_transform.InsideIsPositiveOn()
         distance_transform.Update()
 
-        pos_itk_transforms.write_itk_image(distance_transform.GetOutput(), "/home/pmajka/%04d.nii.gz" % label_idx)
-
         centroid = itk.MinimumMaximumImageCalculator[t_float_img].New()
         centroid.SetImage(distance_transform.GetOutput())
         centroid.Compute()
