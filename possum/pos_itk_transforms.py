@@ -108,7 +108,18 @@ def write_itk_matrix_transformation_to_file(transformation, filename):
     :type filename: str
     """
 
-    transform_writer = itk.TransformFileWriter.New()
+    # WTF? Why these two versions of the code? Well...
+    # the way how the transformations writers are instantiated
+    # as actually changes over the course of deveopment
+    # http://www.itk.org/Wiki/ITK/Examples/IO/TransformFileReader
+    # http://review.source.kitware.com/#/c/14293/1
+    if (itk.Version.GetITKMajorVersion() == 4 and
+        itk.Version.GetITKMinorVersion() >= 5) or \
+        (itk.Version.GetITKMajorVersion() > 4):
+        transform_writer = itk.TransformFileWriterTemplate.D.New()
+    else:
+        transform_writer = itk.TransformFileWriter.New()
+
     transform_writer.SetInput(transformation)
     transform_writer.SetFileName(filename)
     transform_writer.Update()
@@ -331,7 +342,8 @@ def apply_transformation_workflow(moving_file, output_file, reference_file, tran
 def itk_coordinate_map(input_image, physical=True):
     """
     Generates coordinate map. Lousy attempt to emulate a way better
-    implementation in Convert3D.
+    implementation from Convert3D:
+    https://sourceforge.net/p/c3d/git/ci/master/tree/adapters/CoordinateMap.cxx
     """
     logger = possum.pos_itk_core.logging.getLogger('itk_coordinate_map')
 
