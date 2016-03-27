@@ -547,6 +547,7 @@ _pos_sequential_alignment()
       --affine-gradient-descent \
       --graph-edge-lambda \
       --graph-edge-epsilon \
+      --graph-skip-section \
       \
       --enable-reslice \
       --disable-reslice \
@@ -671,6 +672,11 @@ _pos_sequential_alignment()
 
     if [ ${prev} == '--graph-edge-epsilon' ] ; then
         COMPREPLY=( $(compgen -W "1 2 3 4 5 6 7 8 9 10" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--graph-skip-section' ] ; then
+        COMPREPLY=( $(compgen -W "valid_section_index_int" -- ${cur}) )
         return 0
     fi
 

@@ -72,6 +72,7 @@ class sequential_alignment(output_volume_workflow):
     __HISTOGRAM_MATCHING = True
     __MI_SAMPLES = 16000
     __VOL_STACK_SLICE_SPACING = 1
+    __FORCE_SKIPPING_WEIGHT = 100
 
     def _initializeOptions(self):
         super(self.__class__, self)._initializeOptions()
@@ -330,14 +331,14 @@ class sequential_alignment(output_volume_workflow):
         # Define the output cog transformation filename as it is used multiple
         # times in this method:
         output_cog_filename = \
-            os.path.isfile(self.f['transf_center'](mIdx=moving_slice_index,fIdx=fixed_slice_index))
+            self.f['transf_center'](mIdx=moving_slice_index, fIdx=fixed_slice_index)
 
         if not self.options.override_transformations and \
            os.path.isfile(output_cog_filename):
             self._logger.info(r("A centre of gravity transformation for \
             sections. f=%d, m=%d already exists and \
             override_transformations is set to false. This transformation \
-            will not be recalculated" % \
+            will not be recalculated" %
             (moving_slice_index, fixed_slice_index)))
             return False
 
@@ -352,7 +353,7 @@ class sequential_alignment(output_volume_workflow):
         cog_transform_getter = pos_wrappers.align_by_center_of_gravity(
             fixed_image=self.f['src_gray'](idx=fixed_slice_index),
             moving_image=self.f['src_gray'](idx=moving_slice_index),
-            output_transformation = \
+            output_transformation= \
                     self.f['transf_center'](mIdx=moving_slice_index,
                                             fIdx=fixed_slice_index))
         return copy.deepcopy(cog_transform_getter)
@@ -422,7 +423,7 @@ class sequential_alignment(output_volume_workflow):
         # Define the output transformation filename (just for convenience
         # as it is used a few times in the code:
         output_affine_filename = \
-          self.f['part_transf'](mIdx=moving_slice_index,fIdx=fixed_slice_index)
+          self.f['part_transf'](mIdx=moving_slice_index, fIdx=fixed_slice_index)
 
         # If the transformation to be calculated already exists,
         # and override_transformations is set to false, the
@@ -433,7 +434,7 @@ class sequential_alignment(output_volume_workflow):
             self._logger.info(r("A transformation for \
             sections. f=%d, m=%d already exists and \
             override_transformations is set to false. This transformation \
-            will not be recalculated" % \
+            will not be recalculated" %
             (moving_slice_index, fixed_slice_index)))
             return False
 
@@ -443,7 +444,7 @@ class sequential_alignment(output_volume_workflow):
         if self._slices_voxel_counts[moving_slice_index] == 0 or \
            self._slices_voxel_counts[fixed_slice_index] == 0:
             self._generate_identity_transformation(output_affine_filename)
-            self._logger.info("Blank moving slice found. f=%d, m=%d ." % \
+            self._logger.info("Blank moving slice found. f=%d, m=%d ." %
                               (moving_slice_index, fixed_slice_index))
             self._logger.info("An identity transform will be applied.")
             return False
@@ -569,6 +570,18 @@ class sequential_alignment(output_volume_workflow):
         # Generate the graph basen on the weight of the edges
         self.G = nx.DiGraph()
         self.G.add_weighted_edges_from(graph_connections)
+
+        # Forcing skipping of some sections as defined in
+        # the '--graph-skip-section' command line option:
+        # This makes given section almost impossible to be included in any
+        # of the transformation chanins for epsilon larger than one. At the
+        # same time the section wiil have some transformation assigned
+        # anyway.
+        for s in self.options.graph_skip_section:
+            for t in self.G.edge[s].keys():
+                self.G.edge[s][t]['weight'] = self.__FORCE_SKIPPING_WEIGHT
+                self._logger.info(r("Forcing node s=%d, t=%d \
+                                    to be skipped.", s, t))
 
         self._logger.debug("Saving the graph to a file.")
         # Save the edges for some further analysis.
@@ -1007,6 +1020,14 @@ class sequential_alignment(output_volume_workflow):
             dest='graph_edge_epsilon', action='store', type="int",
             help=r('Provedes epsilon value for the graph edges generation. \
             An small integer is required e.g. 1-5'))
+        registration_options.add_option('--graph-skip-section', default=[],
+            dest='graph_skip_section', action='append', type="int", nargs=1,
+            help=r('Forces the section to be skipped in the shorest path \
+            calculation by assigning graph edge of some crazy high value. \
+            Note that still an appropriate value of the epsilon has to be \
+            provided in order to achieve the skipping. This switch has to be \
+            invoked multiple times if multiple sections are to \
+            be force-skipped.'))
 
         reslicing_options = OptionGroup(parser, 'Reslicing options')
 
