@@ -171,9 +171,9 @@ class sequential_alignment(output_volume_workflow):
         if self.options.enable_transformations is True:
             self._calculate_transforms()
 
-            # Composite transformations take relatively
-            # small amount of time to compute:
-            self._calculate_composite_transforms()
+        # Composite transformations take relatively
+        # small amount of time to compute:
+        self._calculate_composite_transforms()
 
         # Reslice the input slices according to the generated transforms.
         # This step may be skipped by providing approperiate command line
@@ -327,11 +327,23 @@ class sequential_alignment(output_volume_workflow):
         sections will not be registered.
         """
 
+        # Define the output cog transformation filename as it is used multiple
+        # times in this method:
+        output_cog_filename = \
+            os.path.isfile(self.f['transf_center'](mIdx=moving_slice_index,fIdx=fixed_slice_index))
+
+        if not self.options.override_transformations and \
+           os.path.isfile(output_cog_filename):
+            self._logger.info(r("A centre of gravity transformation for \
+            sections. f=%d, m=%d already exists and \
+            override_transformations is set to false. This transformation \
+            will not be recalculated" % \
+            (moving_slice_index, fixed_slice_index)))
+            return False
+
         if self._slices_voxel_counts[moving_slice_index] <= 0.0005 or \
            self._slices_voxel_counts[fixed_slice_index] <= 0.0005:
-            self._generate_identity_transformation(
-                self.f['transf_center'](mIdx=moving_slice_index,
-                                      fIdx=fixed_slice_index))
+            self._generate_identity_transformation(output_cog_filename)
             self._logger.info("Blank moving slice found. f=%d,m=%d ." %
                               (moving_slice_index, fixed_slice_index))
             self._logger.info("An identity transform will be applied.")
@@ -407,14 +419,30 @@ class sequential_alignment(output_volume_workflow):
         sections will not be registered.
         """
 
+        # Define the output transformation filename (just for convenience
+        # as it is used a few times in the code:
+        output_affine_filename = \
+          self.f['part_transf'](mIdx=moving_slice_index,fIdx=fixed_slice_index)
+
+        # If the transformation to be calculated already exists,
+        # and override_transformations is set to false, the
+        # new transformation will not be calculated and the existing
+        # transformation file will be used:
+        if not self.options.override_transformations and \
+           os.path.isfile(output_affine_filename):
+            self._logger.info(r("A transformation for \
+            sections. f=%d, m=%d already exists and \
+            override_transformations is set to false. This transformation \
+            will not be recalculated" % \
+            (moving_slice_index, fixed_slice_index)))
+            return False
+
         # Verify if both images contain actual image. If they do, proceed
         # normally. If a blank image has occured, generate an identity
         # transformation for this given pair of images.
         if self._slices_voxel_counts[moving_slice_index] == 0 or \
            self._slices_voxel_counts[fixed_slice_index] == 0:
-            self._generate_identity_transformation(\
-                self.f['part_transf'](mIdx=moving_slice_index,
-                                      fIdx=fixed_slice_index))
+            self._generate_identity_transformation(output_affine_filename)
             self._logger.info("Blank moving slice found. f=%d, m=%d ." % \
                               (moving_slice_index, fixed_slice_index))
             self._logger.info("An identity transform will be applied.")
@@ -942,6 +970,14 @@ class sequential_alignment(output_volume_workflow):
             default=False, dest='transformations_directory', type="str",
             help=r('Use provided transformation directory \
             instead of the default one.'))
+        registration_options.add_option('--override-transformations',
+            default=False, dest='override_transformations',
+            action='store_true', help=r('Causes the workflow to override \
+            existing transformations in the --transformations-directory. \
+            By default, such transformations are not overriden. A typical \
+            usage is with the --transformations-directory switch to preserve \
+            or erase the existing transformations during consecutive series \
+            of reconstructions.'))
         registration_options.add_option('--registration-resize',
             dest='registration_resize', default=None, type='float',
             help=r('Scaling factor for the source image used for \

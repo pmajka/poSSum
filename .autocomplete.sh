@@ -536,6 +536,7 @@ _pos_sequential_alignment()
       \
       --enable-transformations \
       --disable-transformations \
+      --override-transformations \
       --enable-moments \
       --disable-moments \
       --transformations-directory \
