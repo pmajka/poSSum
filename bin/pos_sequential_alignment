@@ -552,6 +552,23 @@ class sequential_alignment(output_volume_workflow):
         stdout, stderr = self.execute(commands)
         simmilarity = map(lambda x: float(x.strip()),
                           stdout.strip().split("\n"))
+
+#       # ------------------------------------------
+#       import numpy as np
+#       simmilarity = np.sqrt(np.array(simmilarity))
+#       input_min = simmilarity.min()
+#       input_max = simmilarity.max()
+#       print input_min, input_max
+#       output_max = 0
+#       output_min = -1
+#       a = (output_max - output_min) / (input_max - input_min)
+#       b = output_min
+#       simmilarity = (simmilarity - input_min) * a + b
+#       simmilarity = -1 * simmilarity
+#       print simmilarity.min(), simmilarity.max()
+#       simmilarity = list(simmilarity)
+#       #------------------------------------------------
+
         simmilarity = dict(zip(flatten(partial_transforms), simmilarity))
 
         self._logger.debug("Generating graph edges.")
@@ -581,7 +598,7 @@ class sequential_alignment(output_volume_workflow):
             for t in self.G.edge[s].keys():
                 self.G.edge[s][t]['weight'] = self.__FORCE_SKIPPING_WEIGHT
                 self._logger.info(r("Forcing node s=%d, t=%d \
-                                    to be skipped.", s, t))
+                                    to be skipped."), s, t)
 
         self._logger.debug("Saving the graph to a file.")
         # Save the edges for some further analysis.
