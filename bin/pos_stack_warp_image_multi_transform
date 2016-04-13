@@ -5,7 +5,8 @@
 
 """
 
-import os, sys
+import os
+import sys
 from optparse import OptionGroup
 import copy
 
@@ -254,8 +255,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # component of a multichannel image. In such case a different set of
         # filename templates is used:
         if channel_index is not False:
-            moving_image_filename = self.f['components'](idx=slice_index,comp=channel_index)
-            resliced_image_filename = self.f['resliced_components'](idx=slice_index,comp=channel_index)
+            moving_image_filename = self.f['components'](idx=slice_index, comp=channel_index)
+            resliced_image_filename = self.f['resliced_components'](idx=slice_index, comp=channel_index)
             reference_image_filename = self.f['fixed_raw'](idx=slice_index)
         else:
             # Define all the filenames required by the reslice command
@@ -271,8 +272,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # The way how transformations are defined is quite crazy due to how
         # ants reslice accepts the reslice settings. Anyway, there are two
         # parameters defined on the provided interpolation settings.
-        interpolation_settings = {None: (None, None) ,"NN": (True, None),
-                                  "BS": (None, True) }
+        interpolation_settings = {None: (None, None), "NN": (True, None),
+                                  "BS": (None, True)}
         use_nn, use_b_splines = \
             interpolation_settings[self.options.resliceInterpolation]
 
@@ -282,8 +283,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             moving_image=moving_image_filename,
             output_image=resliced_image_filename,
             reference_image=reference_image_filename,
-            useNN = use_nn,
-            useBspline = use_b_splines,
+            useNN=use_nn,
+            useBspline=use_b_splines,
             deformable_list=[],
             affine_list=transformations_list)
 
@@ -368,8 +369,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
             # A convenient function for getting the list of filenames of
             # the individual components
             def components_fnames(index, fn_tplt):
-                files = map(lambda x: \
-                    self.f[fn_tplt](idx=index, comp=x),\
+                files = map(lambda x:
+                    self.f[fn_tplt](idx=index, comp=x),
                     range(self.__NUMBER_OF_COMPONENTS))
                 return files
 
@@ -384,8 +385,8 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
                 # Splitting the mc images into individual components
                 command_prepare = pos_wrappers.split_multichannel_image(
-                    input_image = self.f['moving_raw'](idx=slice_index),
-                    output_components = components)
+                    input_image=self.f['moving_raw'](idx=slice_index),
+                    output_components=components)
                 commands_prepare.append(command_prepare)
 
                 # Reslicing the individual components of the image
@@ -395,12 +396,12 @@ class stack_warp_image_multi_transform(output_volume_workflow):
 
                 # Merging back the resliced components.
                 command_merge = pos_wrappers.merge_components(
-                    input_images = resliced_components,
-                    components_no = self.__NUMBER_OF_COMPONENTS,
-                    output_image = self.f['resliced'](idx=slice_index),
-                    region_origin = self.options.regionOrigin,
-                    region_size = self.options.regionSize,
-                    other_files_remove = components)
+                    input_images=resliced_components,
+                    components_no=self.__NUMBER_OF_COMPONENTS,
+                    output_image=self.f['resliced'](idx=slice_index),
+                    region_origin=self.options.regionOrigin,
+                    region_size=self.options.regionSize,
+                    other_files_remove=components)
                 commands_merge.append(command_merge)
 
             # Execute all the command batched in the approperiate order.

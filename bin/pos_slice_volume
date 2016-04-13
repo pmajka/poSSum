@@ -152,7 +152,7 @@ class extract_slices_from_volume(pos_wrapper_skel.enclosed_workflow):
 
         # First, we extract the number of slices in the volume in the provided
         # slicing plane.
-        max_slice_number = self._source_largest_region.GetSize()\
+        max_slice_number = self._source_largest_region.GetSize() \
             [self.options.slicing_axis]
 
         if self.options.slicing_range is None:
