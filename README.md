@@ -258,8 +258,9 @@ Installation of the LXDE desktop and the ItkSnap (optional):
 
     cd
     sudo apt get install lubuntu-desktop
-wget http://downloads.sourceforge.net/project/itk-snap/itk-snap/2.2.0/itksnap-2.2.0-20110504-Linux-x86_64.tar.gz -O itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
+    wget http://downloads.sourceforge.net/project/itk-snap/itk-snap/2.2.0/itksnap-2.2.0-20110504-Linux-x86_64.tar.gz -O itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
     tar -xvvzf itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
+    export PATH=$PATH:/home/testuser/itksnap-2.2.0-20110504-Linux-x86_64/bin/
 
 
 Installation screencast
@@ -271,12 +272,9 @@ You may also want to check out the screencast showing how to install the framewo
 
 <!---
 Starting with the fresh system installation: window 160x50.
-
 #http://releases.ubuntu.com/14.04/ubuntu-14.04.4-server-amd64.iso
-#-------------------------------------------------------------------------
 
     cd
-
     sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools parallel python-pip
     sudo apt-get install git-core
     sudo apt-get install htop
@@ -295,8 +293,8 @@ Starting with the fresh system installation: window 160x50.
     mkdir -p InsightToolkit-4.7.1-build && cd InsightToolkit-4.7.1-build
     ccmake ../InsightToolkit-4.7.1
 
-    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=OFF -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=ON -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=ON -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON
-    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_ALL_MODULES=ON -DITK_USE_REVIEW=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=OFF -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=OFF -DITK_WRAP_signed_char=OFF -DITK_WRAP_signed_long=OFF -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=OFF -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON
+    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_DEFAULT_MODULES=ON -DITK_FORBID_DOWNLOADS=OFF -DITK_LEGACY_REMOVE=OFF -DITK_LEGACY_SILENT=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS=2;3 -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_doub=ON -DITK_WRAP_covariant_vector_floa=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=ON -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=ON -DITK_WRAP_signed_char=ON -DITK_WRAP_signed_long=ON -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=ON -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON -DModule_ITKReview=OFF
+    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_DEFAULT_MODULES=ON -DITK_FORBID_DOWNLOADS=OFF -DITK_LEGACY_REMOVE=OFF -DITK_LEGACY_SILENT=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS=2;3 -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_doub=ON -DITK_WRAP_covariant_vector_floa=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=ON -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=ON -DITK_WRAP_signed_char=ON -DITK_WRAP_signed_long=ON -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=ON -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON -DModule_ITKReview=OFF
     make -j4
 
     cd
@@ -318,6 +316,6 @@ Starting with the fresh system installation: window 160x50.
     cd poSSum/ && cat .possum_vm_welcome_screen.sh | grep '#'  | tail -n +2 | sed 's/^.//'  >> ~/.bashrc
 
     sudo apt get install lubuntu-desktop
-wget http://downloads.sourceforge.net/project/itk-snap/itk-snap/2.2.0/itksnap-2.2.0-20110504-Linux-x86_64.tar.gz -O itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
+    wget http://downloads.sourceforge.net/project/itk-snap/itk-snap/2.2.0/itksnap-2.2.0-20110504-Linux-x86_64.tar.gz -O itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
     tar -xvvzf itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
 -->
