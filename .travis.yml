@@ -10,7 +10,7 @@ virtualenv:
 before_install:
 - sudo apt-get -u dist-upgrade
 - sudo apt-get update
-- sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools parallel python-pip python-xlwt python-xlrd parallel git-core
+- sudo apt-get install -y python-numpy python-scipy python-sphinx python-setuptools parallel python-pip python-xlwt python-xlrd parallel imagemagick git-core
 
 
 install: pip install -r requirements.txt
