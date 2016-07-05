@@ -1,9 +1,11 @@
 - Increase the code coverage in the possum/deformable_histology_iterations.py
 - additional tests:
-    - reslice-interpolation sequential alignment test
-    - pos_sequential_alignment - test registration ROI (also in pairwise alignment)
     - test invert multichannel
     - registration resize
+
+    - sequential alignment:
+       - force section skipping
+
 - pos_wrappers todos.
 - Update the virtual machine.
 - Put all orientation presets into a single file
@@ -11,3 +13,7 @@
 
 - some clever method to determine if given section is empty or if it does contain some non-background pixels
   (replacement for pos_wrappers.image_voxel_count_wrapper)
+
+
+!!!!!!!!!!!Create custom directories (e.g. output volumes or output transforms 
+if they do not exist!
