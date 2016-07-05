@@ -229,8 +229,8 @@ As described below (provided that `/home/testuser/` is you home directory)::
 
 
     cd
-cccc
-    wget http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz
+    wget http://heanet.dl.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.tar.gz -O ANTs-1.9.v4-Linux.tar.gz
+    wget http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz -O c3d-1.0.0-Linux-x86_64.tar.gz
     tar -xvvzf ANTs-1.9.v4-Linux.tar.gz
     tar -xvvzf c3d-1.0.0-Linux-x86_64.tar.gz
 
