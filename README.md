@@ -199,8 +199,8 @@ Setup the cmake so the python wrappings will be installed::
     ITK_WRAP_TCL                     OFF
     ITK_WRAP_complex_double          ON
     ITK_WRAP_complex_float           ON
-    ITK_WRAP_covariant_vector_doub   ON
-    ITK_WRAP_covariant_vector_floa   ON
+    ITK_WRAP_covariant_vector_double ON
+    ITK_WRAP_covariant_vector_float  ON
     ITK_WRAP_double                  ON
     ITK_WRAP_float                   ON
     ITK_WRAP_rgb_unsigned_char       ON
@@ -229,7 +229,7 @@ As described below (provided that `/home/testuser/` is you home directory)::
 
 
     cd
-    wget http://heanet.dl.sourceforge.net/project/advants/ANTS/ANTS_Latest/ANTs-1.9.v4-Linux.tar.gz -O ANTs-1.9.v4-Linux.tar.gz
+cccc
     wget http://downloads.sourceforge.net/project/c3d/c3d/1.0.0/c3d-1.0.0-Linux-x86_64.tar.gz
     tar -xvvzf ANTs-1.9.v4-Linux.tar.gz
     tar -xvvzf c3d-1.0.0-Linux-x86_64.tar.gz
@@ -263,16 +263,9 @@ Installation of the LXDE desktop and the ItkSnap (optional):
     export PATH=$PATH:/home/testuser/itksnap-2.2.0-20110504-Linux-x86_64/bin/
 
 
-Installation screencast
--------------------------
-
-You may also want to check out the screencast showing how to install the framework ::
-
-    http://youtu.be/j89KxyluiCM
-
 <!---
-Starting with the fresh system installation: window 160x50.
-#http://releases.ubuntu.com/14.04/ubuntu-14.04.4-server-amd64.iso
+# Starting with the fresh system installation: window 160x50.
+# http://releases.ubuntu.com/14.04/ubuntu-14.04.4-server-amd64.iso
 
     cd
     sudo apt-get install python-numpy python-scipy python-sphinx python-setuptools parallel python-pip
@@ -293,8 +286,8 @@ Starting with the fresh system installation: window 160x50.
     mkdir -p InsightToolkit-4.7.1-build && cd InsightToolkit-4.7.1-build
     ccmake ../InsightToolkit-4.7.1
 
-    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_DEFAULT_MODULES=ON -DITK_FORBID_DOWNLOADS=OFF -DITK_LEGACY_REMOVE=OFF -DITK_LEGACY_SILENT=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS=2;3 -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_doub=ON -DITK_WRAP_covariant_vector_floa=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=ON -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=ON -DITK_WRAP_signed_char=ON -DITK_WRAP_signed_long=ON -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=ON -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON -DModule_ITKReview=OFF
-    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_DEFAULT_MODULES=ON -DITK_FORBID_DOWNLOADS=OFF -DITK_LEGACY_REMOVE=OFF -DITK_LEGACY_SILENT=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS=2;3 -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_doub=ON -DITK_WRAP_covariant_vector_floa=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=ON -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=ON -DITK_WRAP_signed_char=ON -DITK_WRAP_signed_long=ON -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=ON -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON -DModule_ITKReview=OFF
+    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_DEFAULT_MODULES=ON -DITK_FORBID_DOWNLOADS=OFF -DITK_LEGACY_REMOVE=OFF -DITK_LEGACY_SILENT=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=ON -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=ON -DITK_WRAP_signed_char=ON -DITK_WRAP_signed_long=ON -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=ON -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON -DModule_ITKReview=OFF
+    cmake ../InsightToolkit-4.7.1 -Wno-dev -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DINSTALL_WRAP_ITK_COMPATIBILITY=ON -DITKV3_COMPATIBILITY=ON -DITK_BUILD_DEFAULT_MODULES=ON -DITK_FORBID_DOWNLOADS=OFF -DITK_LEGACY_REMOVE=OFF -DITK_LEGACY_SILENT=ON -DITK_USE_SYSTEM_SWIG=OFF -DITK_WRAP_DIMS="2;3" -DITK_WRAP_DOC=OFF -DITK_WRAP_EXPLICIT=OFF -DITK_WRAP_GCCXML=ON -DITK_WRAP_JAVA=OFF -DITK_WRAP_PERL=OFF -DITK_WRAP_PYTHON=ON -DITK_WRAP_RUBY=OFF -DITK_WRAP_SWIGINTERFACE=ON -DITK_WRAP_TCL=OFF -DITK_WRAP_complex_double=ON -DITK_WRAP_complex_float=ON -DITK_WRAP_covariant_vector_double=ON -DITK_WRAP_covariant_vector_float=ON -DITK_WRAP_double=ON -DITK_WRAP_float=ON -DITK_WRAP_rgb_unsigned_char=ON -DITK_WRAP_rgb_unsigned_short=ON -DITK_WRAP_rgba_unsigned_char=ON -DITK_WRAP_rgba_unsigned_short=ON -DITK_WRAP_signed_char=ON -DITK_WRAP_signed_long=ON -DITK_WRAP_signed_short=ON -DITK_WRAP_unsigned_char=ON -DITK_WRAP_unsigned_long=ON -DITK_WRAP_unsigned_short=ON -DITK_WRAP_vector_double=ON -DITK_WRAP_vector_float=ON -DModule_ITKReview=OFF
     make -j4
 
     cd
@@ -304,12 +297,12 @@ Starting with the fresh system installation: window 160x50.
     tar -xvvzf c3d-1.0.0-Linux-x86_64.tar.gz
 
     find InsightToolkit-4.7.1-build/ -name "*.pth" | xargs cat
-    export PYTHONPATH=${PYTHONPATH}:/home/test/InsightToolkit-4.7.1-build/Wrapping/Generators/Python
-    export PYTHONPATH=${PYTHONPATH}:/home/test/InsightToolkit-4.7.1-build/lib/
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/test/InsightToolkit-4.7.1-build/lib/
+    export PYTHONPATH=${PYTHONPATH}:/home/testuser/InsightToolkit-4.7.1-build/Wrapping/Generators/Python
+    export PYTHONPATH=${PYTHONPATH}:/home/testuser/InsightToolkit-4.7.1-build/lib/
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/testuser/InsightToolkit-4.7.1-build/lib/
 
-    export PATH=$PATH:/home/test/ANTs-1.9.v4-Linux/bin/
-    export PATH=$PATH:/home/test/c3d-1.0.0-Linux-x86_64/bin/
+    export PATH=$PATH:/home/testuser/ANTs-1.9.v4-Linux/bin/
+    export PATH=$PATH:/home/testuser/c3d-1.0.0-Linux-x86_64/bin/
 
     cd && git clone https://github.com/pmajka/poSSum.git
     cd poSSum && source setenv.sh
@@ -318,4 +311,5 @@ Starting with the fresh system installation: window 160x50.
     sudo apt get install lubuntu-desktop
     wget http://downloads.sourceforge.net/project/itk-snap/itk-snap/2.2.0/itksnap-2.2.0-20110504-Linux-x86_64.tar.gz -O itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
     tar -xvvzf itksnap-2.2.0-20110504-Linux-x86_64.tar.gz
+    export PATH=$PATH:/home/testuser/itksnap-2.2.0-20110504-Linux-x86_64/bin/
 -->
