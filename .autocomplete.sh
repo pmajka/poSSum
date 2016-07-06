@@ -746,7 +746,3 @@ complete -F _pos_sequential_alignment pos_sequential_alignment
 # pos_deformable_histology_reconstruction*
 # pos_pairwise_registration*
 # pos_stack_warp_image_multi_transform*
-
-
-
-
