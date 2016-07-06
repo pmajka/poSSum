@@ -124,9 +124,9 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         preprocess_slices = preprocess_slice_volume(
             input_image=self.options.inputVolume,
             output_naming=self.f['init_slice_naming'](),
-            slicing_plane=self.options.slicingPlane,
-            start_slice=self.options.startSlice,
-            end_slice=self.options.endSlice + 1,
+            slicing_plane=self.options.slicing_plane,
+            start_slice=self.options.start_slice,
+            end_slice=self.options.end_slice + 1,
             output_dir=self.f['init_slice'].base_dir)
 
         return preprocess_slices
@@ -138,7 +138,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         volumes but the further registration process will collapse).
 
         Volumes are sectioned separately. If the swich for given volume is
-        provided, the sections `startSlice` to `endSlice` are extracted. The
+        provided, the sections `start_slice` to `end_slice` are extracted. The
         process is repeated separately for each volume (grayscale, outline,
         custom mask volume, segmentation volume, etc...)
         """
@@ -268,8 +268,8 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         """
         Convenience function for returning frequently used numbers
         """
-        return (self.options.startSlice,
-                self.options.endSlice,
+        return (self.options.start_slice,
+                self.options.end_slice,
                 self.options.neighbourhood,
                 self.current_iteration)
 
@@ -470,8 +470,8 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
         stack_grayscale = pos_wrappers.stack_and_reorient_wrapper(
             stack_mask=self.f['iteration_stack_mask'](iter=iteration),
-            slice_start=self.options.startSlice,
-            slice_end=self.options.endSlice,
+            slice_start=self.options.start_slice,
+            slice_end=self.options.end_slice,
             slice_step=1,
             permutation_order=self.options.output_volume_permute_axes,
             orientation_code=self.options.output_volume_orientation,
@@ -521,14 +521,14 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             OptionGroup(parser, 'Input images and parameters.')
 
         input_parameters.add_option('--slicingPlane', default=1,
-            type='int', dest='slicingPlane',
+            type='int', dest='slicing_plane',
             help=r('Index of the slicing plane. Default: 1. \
             Allowed values: 0,1,2'))
         input_parameters.add_option('--startSlice', default=0,
-            type='int', dest='startSlice',
+            type='int', dest='start_slice',
             help='Index of the first slice of the stack')
         input_parameters.add_option('--endSlice', default=None,
-            type='int', dest='endSlice',
+            type='int', dest='end_slice',
             help='Index of the last slice of the stack')
         input_parameters.add_option('--shiftFinalIndexes', default=0,
             type='int', dest='shiftFinalIndexes',
