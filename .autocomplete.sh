@@ -859,7 +859,6 @@ _pos_deformable_histology_reconstruction()
 }
 
 
-
 #   if [ ${prev} == '--input-image' ] || [ ${prev} == '-i' ] || [ ${prev} == '--output-grayscale-image' ] || [ ${prev} == '-g' ] || [ ${prev} == '--output-rgb-image' ] || [ ${prev} == '-r' ] ; then
 #       COMPREPLY=( $(compgen -o plusdirs  -f -- ${cur}) )
 #       return 0
