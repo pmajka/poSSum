@@ -82,16 +82,16 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
         # First important thing is that indexed of the first and
         # the last sections are required parameters:
-        assert self.options.start_slice ,\
+        assert self.options.startSlice is not None, \
             self._logger.error(r("Index of the first section is required."))
 
-        assert self.options.end_slice, \
+        assert self.options.endSlice is not None, \
             self._logger.error(r("Index of the lase section is required."))
 
         # Second important thing is that the index of the starting section
         # has to be smaller than the index of the end-index.
-        assert self.options.start_slice < \
-               self.options.end_slice, \
+        assert self.options.startSlice < \
+               self.options.endSlice, \
             self._logger.error(r("The index of the first slice has to\
                 greater than the index of the last section"))
 
@@ -144,8 +144,8 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             input_image=self.options.inputVolume,
             output_naming=self.f['init_slice_naming'](),
             slicing_plane=self.options.slicing_plane,
-            start_slice=self.options.start_slice,
-            end_slice=self.options.end_slice + 1,
+            start_slice=self.options.startSlice,
+            end_slice=self.options.endSlice + 1,
             output_dir=self.f['init_slice'].base_dir)
 
         return preprocess_slices
@@ -287,8 +287,8 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         """
         Convenience function for returning frequently used numbers
         """
-        return (self.options.start_slice,
-                self.options.end_slice,
+        return (self.options.startSlice,
+                self.options.endSlice,
                 self.options.neighbourhood,
                 self.current_iteration)
 
@@ -489,8 +489,8 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
         stack_grayscale = pos_wrappers.stack_and_reorient_wrapper(
             stack_mask=self.f['iteration_stack_mask'](iter=iteration),
-            slice_start=self.options.start_slice,
-            slice_end=self.options.end_slice,
+            slice_start=self.options.startSlice,
+            slice_end=self.options.endSlice,
             slice_step=1,
             permutation_order=self.options.output_volume_permute_axes,
             orientation_code=self.options.output_volume_orientation,
@@ -544,13 +544,13 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             help=r('Index of the slicing plane. Please provide \
             a single integer here, defaults to: 1. Allowed values: 0, 1, 2'))
         input_parameters.add_option('--start-slice', default=0,
-            type='int', dest='start_slice', metavar="INT",
+            type='int', dest='startSlice', metavar="INT",
             help=r('Index of the first slice of the stack.\
             Please provide a positive integer here. The provided value has to \
             be smaller than the one provided via the \'--end-slice\' option.\
             This is an obligatory parameter.'))
         input_parameters.add_option('--end-slice', default=None,
-            type='int', dest='end_slice', metavar="INT",
+            type='int', dest='endSlice', metavar="INT",
             help=r('Index of the last slice of the stack. \
             Please provide a positive integer here. The provided value has to \
             be larger than the one provided via the \'--start-slice\' option.\
