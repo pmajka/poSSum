@@ -521,7 +521,7 @@ _pos_sequential_alignment()
       --output-volume-resample \
       --output-volume-permute-axes \
       --output-volume-orientation \
-      --output-volume-interpolation
+      --output-volume-interpolation \
       --output-volume-filp-axes \
       --output-volume-roi \
       \
@@ -702,6 +702,161 @@ _pos_sequential_alignment()
     fi
 }
 
+_pos_deformable_histology_reconstruction()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    opts="--help -h --loglevel --log-filename --cpus \
+        --specimen-id -d --work-dir \
+        --dry-run --disable-shared-memory \
+        --archive-work-dir \
+        --cleanup \
+        --output-volume-origin \
+        --output-volume-scalar-type \
+        --output-volume-spacing \
+        --output-volume-resample \
+        --output-volume-permute-axes \
+        --output-volume-orientation \
+        --output-volume-interpolation \
+        --output-volume-filp-axes \
+        \
+        --slicing-plane \
+        --start-slice \
+        --end-slice \
+        --shift-final-indexes \
+        --neighbourhood \
+        --iterations \
+        -i --input-volume \
+        -o --outline-volume \
+        -r --reference-volume \
+        -m --masked-volume \
+        --masked-volume-file \
+        --register-subset \
+        --output-naming \
+        \
+        --start-from-iteration \
+        --skip-transformations \
+        --skip-preprocessing \
+        --stack-final-transformation \
+        \
+        --ants-image-metric \
+        --ants-image-metric-opt \
+        --ants-gradient-step \
+        --ants-regularization-type \
+        --ants-regularization \
+        --ants-iterations \
+        --plane-spacing"
+
+    if [[ ${prev} == 'pos_deformable_histology_reconstruction' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--loglevel' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_LOGLEVEL_OPTIONS}" -- ${cur}) )
+        return 
+    fi
+
+    if [ ${prev} == '--log-filename' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '-d' ] || \
+       [ ${prev} == '--work-dir' ] || \
+       [ ${prev} == '--archive-work-dir' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o nospace  -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-origin' ] ; then
+        COMPREPLY=( $(compgen -W "ox_float oy_float oz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-scalar-type' ] || [ ${prev} == '--type' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_DATA_TYPES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-spacing' ] ; then
+        COMPREPLY=( $(compgen -W "sx_float sy_float sz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-resample' ] || [ ${prev} == '--resample' ] ; then
+        COMPREPLY=( $(compgen -W "rx_float_0-1 ry_float_0-1 rz_float_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-permute-axes' ] ; then
+        COMPREPLY=( $(compgen -W "three_ints_0_1_2" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-orientation' ] || [ ${prev} == '--orientation' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_ORIENTATION_CODES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-interpolation' ]; then
+        COMPREPLY=( $(compgen -W "${POS_INTERPOLATION_OPTIONS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-filp-axes' ] ; then
+        COMPREPLY=( $(compgen -W "flip_x_0-1 flip_y_0-1 flip_z_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--slicing-plane' ] || \
+       [ ${prev} == '--start-slice' ] || \
+       [ ${prev} == '--shift-final-indexes' ] || \
+       [ ${prev} == '--neighbourhood' ] || \
+       [ ${prev} == '--iterations' ] || \
+       [ ${prev} == '--start-from-iteration' ] || \
+       [ ${prev} == '--ants-image-metric-opt' ] || \
+       [ ${prev} == '--end-slice' ] ; then
+        COMPREPLY=( $(compgen -W "int" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--ants-gradient-step' ] || \
+       [ ${prev} == '--plane-spacing' ] ; then
+        COMPREPLY=( $(compgen -W "float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--register-subset' ] || \
+       [ ${prev} == '--masked-volume-file' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.txt' -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--input-volume' ]     || \
+       [ ${prev} == '-i' ]                 || \
+       [ ${prev} == '--outline-volume' ]   || \
+       [ ${prev} == '-o' ]                 || \
+       [ ${prev} == '--reference-volume' ] || \
+       [ ${prev} == '-r' ]                 || \
+       [ ${prev} == '--masked-volume' ]    || \
+       [ ${prev} == '-m' ] ; then
+        COMPREPLY=( $(compgen -W "float_0-1_and_nifti_filename" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--ants-image-metric' ] ; then
+        COMPREPLY=( $(compgen -W "CC MI MSQ" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--ants-iterations' ] ; then
+        COMPREPLY=( $(compgen -W "eg_1000x1000_1000x200" -- ${cur}) )
+        return 0
+    fi
+}
 
 
 
@@ -740,6 +895,7 @@ complete -F _pos_stack_histogram_matching pos_stack_histogram_matching
 complete -F _pos_preprocess_image pos_preprocess_image
 complete -F _pos_coarse_fine pos_coarse_fine
 complete -F _pos_sequential_alignment pos_sequential_alignment
+complete -F _pos_deformable_histology_reconstruction pos_deformable_histology_reconstruction
 
 
 # MedianFilter.py*
