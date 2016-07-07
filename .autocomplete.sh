@@ -898,6 +898,5 @@ complete -F _pos_deformable_histology_reconstruction pos_deformable_histology_re
 
 
 # MedianFilter.py*
-# pos_deformable_histology_reconstruction*
 # pos_pairwise_registration*
 # pos_stack_warp_image_multi_transform*
