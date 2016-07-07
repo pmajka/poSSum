@@ -77,6 +77,25 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             self._logger.error("No input volumes provided. Exiting.")
             sys.exit(1)
 
+    def _validate_options(self):
+        super(self.__class__, self)._initializeOptions()
+
+        # First important thing is that indexed of the first and
+        # the last sections are required parameters:
+        assert self.options.start_slice ,\
+            self._logger.error(r("Index of the first section is required."))
+
+        assert self.options.end_slice, \
+            self._logger.error(r("Index of the lase section is required."))
+
+        # Second important thing is that the index of the starting section
+        # has to be smaller than the index of the end-index.
+        assert self.options.start_slice < \
+               self.options.end_slice, \
+            self._logger.error(r("The index of the first slice has to\
+                greater than the index of the last section"))
+
+
     def _overrideDefaults(self):
         super(self.__class__, self)._overrideDefaults()
 
@@ -424,7 +443,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
 
         commands = []
         for i in range(start, end + 1):
-            out_idx = i + self.options.shiftFinalIndexes
+            out_idx = i + self.options.shift_final_indexes
             command = convert_slice_image(
                 input_image=self.f['final_deformations'](idx=i),
                 output_image=self.f['rescaled_deformations'](idx=out_idx),
@@ -439,7 +458,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         # initial space.
         commands = []
         for i in range(start, end + 1):
-            out_idx = i + self.options.shiftFinalIndexes
+            out_idx = i + self.options.shift_final_indexes
             command = convert_slice_image(
                 input_image=self.f['final_deformations_inverse'](idx=i),
                 output_image=self.f['rescaled_deformations_inverse'](idx=out_idx),
@@ -452,7 +471,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         # spacing as, again, the spacing used in computations is ... 1x1mm
         commands = []
         for i in range(start, end + 1):
-            out_idx = i + self.options.shiftFinalIndexes
+            out_idx = i + self.options.shift_final_indexes
             command = convert_slice_image_grayscale(
                 input_image=self.f['init_slice'](idx=i),
                 output_image=self.f['rescaled_source'](idx=out_idx),
@@ -520,93 +539,161 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         input_parameters = \
             OptionGroup(parser, 'Input images and parameters.')
 
-        input_parameters.add_option('--slicingPlane', default=1,
-            type='int', dest='slicing_plane',
-            help=r('Index of the slicing plane. Default: 1. \
-            Allowed values: 0,1,2'))
-        input_parameters.add_option('--startSlice', default=0,
-            type='int', dest='start_slice',
-            help='Index of the first slice of the stack')
-        input_parameters.add_option('--endSlice', default=None,
-            type='int', dest='end_slice',
-            help='Index of the last slice of the stack')
-        input_parameters.add_option('--shiftFinalIndexes', default=0,
-            type='int', dest='shiftFinalIndexes',
-            help='Shift indexes of the final warps and slices.')
+        input_parameters.add_option('--slicing-plane', default=1,
+            type='int', dest='slicing_plane', metavar="INT",
+            help=r('Index of the slicing plane. Please provide \
+            a single integer here, defaults to: 1. Allowed values: 0, 1, 2'))
+        input_parameters.add_option('--start-slice', default=0,
+            type='int', dest='start_slice', metavar="INT",
+            help=r('Index of the first slice of the stack.\
+            Please provide a positive integer here. The provided value has to \
+            be smaller than the one provided via the \'--end-slice\' option.\
+            This is an obligatory parameter.'))
+        input_parameters.add_option('--end-slice', default=None,
+            type='int', dest='end_slice', metavar="INT",
+            help=r('Index of the last slice of the stack. \
+            Please provide a positive integer here. The provided value has to \
+            be larger than the one provided via the \'--start-slice\' option.\
+            This is an obligatory parameter.'))
+        input_parameters.add_option('--shift-final-indexes', default=0,
+            type='int', dest='shift_final_indexes', metavar="INT",
+            help=r('Shift indexes of the final warps and slices. \
+            An integer is required, defaults to zero. This option will cause \
+            the final resliced images and the displacement fields names to \
+            be shifted with respect to the initial value by the provided \
+            offset. Please be carefull with negative values as they are \
+            not fully tested yet.'))
         input_parameters.add_option('--neighbourhood', default=1, type='int',
-            dest='neighbourhood',
-            help='Neighbourhood radius to which given slices will be aligned.')
+            dest='neighbourhood', metavar="INT",
+            help=r('Radius (number of preceesing and following sections) \
+            which will be included for to create an average image which \
+            will be used as a fixed image during coregistration of \
+            given section. Denoting the neighbourhood by n and having \
+            a section i, the average image will be created based on \
+            sections i-n through i+n excluding the section i.'))
         input_parameters.add_option('--iterations', default=10,
-            type='int', dest='iterations',
-            help='Number of iterations')
-        input_parameters.add_option('--inputVolume', '-i', default=None,
-            type='str', dest='inputVolume', nargs=2,
+            type='int', dest='iterations', metavar="INT",
+            help='Number of iterations. Please provide a positive \
+            integer here. This in an oblitatory parameter.')
+        input_parameters.add_option('--input-volume', '-i', default=None,
+            type='str', dest='inputVolume', nargs=2,\
+            metavar="FLOAT_0-1 NIFTI_FILE",
             help=r('Input volume which undergoes smooth nonlinear \
-            reconstruction.'))
-        input_parameters.add_option('--outlineVolume', '-o', default=None,
+            reconstruction. This is an obligatory parameter. \
+            The first value has to be a float ranging from 0 to 1 \
+            denoting weight of similarity metric based on this particular \
+            input volume. If there is only one volume provided \
+            as an input, please provide 1 as the weight. \
+            The second parameter is a niftii file with the actual \
+            image stack. Single channel (preferably uchar) \
+            nifti file is required here.'))
+        input_parameters.add_option('--outline-volume', '-o', default=None,
             type='str', dest='outlineVolume', nargs=2,
-            help='Outline label driving the registration')
-        input_parameters.add_option('--referenceVolume', '-r', default=None,
+            metavar="FLOAT_0-1 NIFTI_FILE",
+            help=r('Outline label driving the registration. \
+            This is an optional parameter. The first value has to be a float \
+            ranging from 0 to 1 denoting the weight of similarity metric \
+            based on this particular image stack. The second value is \
+            a niftii file compatible with the one provided as the \
+            \'--input-volume\' containing a binary mask showing which \
+            parts of the image represent the brain tissue and which does not.'))
+        input_parameters.add_option('--reference-volume', '-r', default=None,
             type='str', dest='referenceVolume', nargs=2,
-            help='Reference volume to register slices to')
-        input_parameters.add_option('--maskedVolume', '-m', default=None,
+            metavar="FLOAT_0-1 NIFTI_FILE",
+            help=r('External image stack to drive the deformable \
+            reconstruction. The first value is the weight of the similarity \
+            metric based on this particular image stack. The second value \
+            is a niftii file file compatible with the one provided as the \
+            \'--input-volume\' containing an external reference image used \
+            to drive the deformable reconstruction. \
+            This is an optional parameter.'))
+        input_parameters.add_option('--masked-volume', '-m', default=None,
             type='str', dest='maskedVolume', nargs=2,
-            help='Custom slice mask for driving the registration')
-        input_parameters.add_option('--maskedVolumeFile', default=None,
-            type='str', dest='maskedVolumeFile',
+            metavar="FLOAT_0-1 NIFTI_FILE",
+            help=r('Custom slice mask for driving the registration (optional).\
+            The behaviour of the feature is slightly complicated and, \
+            for the time being, is described in documentation of the \
+            \'_get_outliers_registration_assignment\' function \
+            (use grep to find it).'))
+        input_parameters.add_option('--masked-volume-file', default=None,
+            type='str', dest='maskedVolumeFile', metavar="NIFTI_FILE",
             help=r('File determining fixed and moving slices for \
-            custom registration.'))
-        input_parameters.add_option('--registerSubset', default=None, type='str',
-            dest='registerSubset',  help='registerSubset')
-        input_parameters.add_option('--outputNaming', default="_", type='str',
+            custom registration. Check out the \'--masked-volume\' \
+            description for details.'))
+        input_parameters.add_option('--register-subset', default=None, type='str',
+            dest='registerSubset', metavar="TXT_FILE",
+            help=r('Optional parameter. \
+            Limit the indexes of the images used in the reconstruction \
+            process to a specified subset. Please provide a txt file in \
+            which each line contains an index of a section. Only one index \
+            per line is allowed.'))
+        input_parameters.add_option('--output-naming', default="_",
+            type='str', metavar="STR",
             dest='outputNaming', help=r("Ouput naming scheme for all \
-            the results"))
+            the results."))
 
         parser.add_option_group(input_parameters)
 
         workflow_settings = \
             OptionGroup(parser, 'Options for controlling the workflow.')
 
-        workflow_settings.add_option('--startFromIteration', default=0,
-            type='int', dest='startFromIteration',
-            help='Iteration number from which the calculations will start.')
-        workflow_settings.add_option('--skipTransformations', default=False,
+        workflow_settings.add_option('--start-from-iteration', default=0,
+            type='int', dest='startFromIteration', metavar="INT",
+            help=r('Iteration number from which the calculations will start.\
+            To make this option work, calculations for the previous iterations\
+            have to be already present in the working directory.'))
+        workflow_settings.add_option('--skip-transformations', default=False,
             dest='skipTransformations', action='store_const', const=True,
-            help='Skip transformations.')
-        workflow_settings.add_option('--skipSlicePreprocess', default=False,
+            help=r('Skip transformations. The part of the workflow in which \
+            the transformations are calculated is not executed.'))
+        workflow_settings.add_option('--skip-preprocessing', default=False,
             dest='skipSlicePreprocess', action='store_const', const=True,
-            help='Skip slice preprocessing.')
-        workflow_settings.add_option('--stackFinalDeformation',
+            help=r('Skip slice preprocessing. THe part of the workflow in which\
+            preprocessing of the input images will not be executed.'))
+        workflow_settings.add_option('--stack-final-transformation',
             default=False, const=True,
             dest='stackFinalDeformation', action='store_const',
-            help='Stack filnal deformation fileld.')
+            help=r('Merges displacement fields obtained during the individual \
+            iterations of the reconstruction process into a single \
+            displacement fiels. This is also performed for the inverse \
+            displacement field as well. You probably want this option \
+            to be active almost all times.'))
         parser.add_option_group(workflow_settings)
 
         registration_parameters = \
             OptionGroup(parser, 'Registration parameters.')
 
-        registration_parameters.add_option('--ants-image-metric', default='CC',
-            type='str', dest='antsImageMetric',
-            help='ANTS image to image metric. See ANTS documentation.')
+        registration_parameters.add_option('--ants-image-metric',
+            type='choice', default='CC', choices=["CC", "MI", "MSQ"],
+            dest='antsImageMetric', metavar="STR",
+            help=r('ANTS image to image metric. See ANTS documentation.\
+            Allowed options: CC, MI, MSQ.'))
         registration_parameters.add_option('--ants-image-metric-opt', default=8,
-            type='int', dest='antsImageMetricOpt',
-            help='Parameter of ANTS i2i metric.')
-        registration_parameters.add_option('--antsTransformation', default=0.15,
-            type='float', dest='antsTransformation',
-            help='Tranformations gradient step.')
-        registration_parameters.add_option('--antsRegularizationType',
+            type='int', dest='antsImageMetricOpt', metavar="INT",
+            help=r('Parameter of ANTS i2i metric.\
+            See the ANTS documentation.'))
+        registration_parameters.add_option('--ants-gradient-step', default=0.15,
+            type='float', dest='antsTransformation', metavar="FLOAT",
+            help=r('Tranformations gradient step. See the ANTS documentation.'))
+        registration_parameters.add_option('--ants-regularization-type',
             default='Gauss', type='str', dest='antsRegularizationType',
-            help='Ants regulatization type.')
-        registration_parameters.add_option('--antsRegularization',
+            help=r('Ants regulatization type. See the ANTS documentation.'))
+        registration_parameters.add_option('--ants-regularization',
             default=[3.0, 1.0],
             type='float', nargs=2, dest='antsRegularization',
-            help='Ants regulatization.')
-        registration_parameters.add_option('--antsIterations', type='str',
+            help='Ants regulatization. See the ANTS documentation.')
+        registration_parameters.add_option('--ants-iterations', type='str',
+            metavar="INT_X_INT_ETC.",
             default="1000x1000x1000x1000x1000", dest='antsIterations',
-            help='Number of deformable registration iterations.')
-        registration_parameters.add_option('--planeSpacing', default=1.,
-            type='float', dest='planeSpacing',
-            help='In plane pixel size. Assuming isotropic pixel size.')
+            help=r('Number of deformable registration iterations (optional). \
+            Provide a series of integers joined with the \'x\' character.\
+            For example: \'1000x1000x1000x0\'.\
+            Also, dee the ANTS documentation for more details.'))
+        registration_parameters.add_option('--plane-spacing', default=1.,
+            type='float', dest='planeSpacing', metavar="FLOAT",
+            help=r('Resolution of the individual section \
+            assuming isotropic pixel size in milimiters per pixel. \
+            Deafults to 1 mm/px.'))
 
         parser.add_option_group(registration_parameters)
 

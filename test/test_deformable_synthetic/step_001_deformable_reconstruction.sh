@@ -20,21 +20,21 @@ c3d deformed_stack.nii.gz \
     -o input_for_deformable_reconstruction.nii.gz
 
 pos_deformable_histology_reconstruction \
-    --inputVolume 1 input_for_deformable_reconstruction.nii.gz \
-    --slicingPlane ${SLICING_PLANE_INDEX} \
-    --planeSpacing ${SOURCE_SPACING} \
-    --startSlice ${IDX_FIRST_SLICE} \
-    --endSlice ${IDX_LAST_SLICE} \
+    --input-volume 1 input_for_deformable_reconstruction.nii.gz \
+    --slicing-plane ${SLICING_PLANE_INDEX} \
+    --plane-spacing ${SOURCE_SPACING} \
+    --start-slice ${IDX_FIRST_SLICE} \
+    --end-slice ${IDX_LAST_SLICE} \
     --iterations 12 \
     --neighbourhood 1 \
-    --outputNaming output_ \
+    --output-naming output_ \
     --ants-image-metric CC \
     --ants-image-metric-opt 4 \
-    --antsTransformation 0.01 \
-    --antsRegularization 2.0 1.0 \
-    --antsIterations 1000x1000x1000x1000 \
+    --ants-gradient-step 0.01 \
+    --ants-regularization 2.0 1.0 \
+    --ants-iterations 1000x1000x1000x1000 \
     --loglevel DEBUG \
-    --stackFinalDeformation \
+    --stack-final-transformation \
     --work-dir ${DIR_DEFORMABLE_RECONSTRUCTION} 
     
 cp -v ${DIR_DEFORMABLE_RECONSTRUCTION}/08_intermediate_results/intermediate_output__0011.nii.gz \

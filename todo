@@ -1,3 +1,5 @@
+#TODO: pos deformable reconstruction description for the REGISTER SUBSET feature
+
 - Increase the code coverage in the possum/deformable_histology_iterations.py
 - additional tests:
     - test invert multichannel
@@ -5,6 +7,9 @@
 
     - sequential alignment:
        - force section skipping
+
+- pos deformable reconstruction -shiftFinalIndexes test , masked-volume test
+- pos deformable reconstruction --maskedVolumeFile --masked-volume --register-subset, start-from-iteration
 
 - pos_wrappers todos.
 - Update the virtual machine.
