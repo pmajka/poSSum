@@ -95,7 +95,6 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             self._logger.error(r("The index of the first slice has to\
                 greater than the index of the last section"))
 
-
     def _overrideDefaults(self):
         super(self.__class__, self)._overrideDefaults()
 
@@ -537,7 +536,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         parser = output_volume_workflow._getCommandLineParser()
 
         input_parameters = \
-            OptionGroup(parser, 'Input images and parameters.')
+            OptionGroup(parser, 'Input images and parameters')
 
         input_parameters.add_option('--slicing-plane', default=1,
             type='int', dest='slicing_plane', metavar="INT",
@@ -576,7 +575,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
             help='Number of iterations. Please provide a positive \
             integer here. This in an oblitatory parameter.')
         input_parameters.add_option('--input-volume', '-i', default=None,
-            type='str', dest='inputVolume', nargs=2,\
+            type='str', dest='inputVolume', nargs=2,
             metavar="FLOAT_0-1 NIFTI_FILE",
             help=r('Input volume which undergoes smooth nonlinear \
             reconstruction. This is an obligatory parameter. \
@@ -635,7 +634,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         parser.add_option_group(input_parameters)
 
         workflow_settings = \
-            OptionGroup(parser, 'Options for controlling the workflow.')
+            OptionGroup(parser, 'Options for controlling the workflow')
 
         workflow_settings.add_option('--start-from-iteration', default=0,
             type='int', dest='startFromIteration', metavar="INT",
@@ -661,7 +660,7 @@ class deformable_reconstruction_workflow(output_volume_workflow):
         parser.add_option_group(workflow_settings)
 
         registration_parameters = \
-            OptionGroup(parser, 'Registration parameters.')
+            OptionGroup(parser, 'Registration parameters')
 
         registration_parameters.add_option('--ants-image-metric',
             type='choice', default='CC', choices=["CC", "MI", "MSQ"],
