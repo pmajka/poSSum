@@ -168,7 +168,7 @@ class preprocess_image_workflow(pos_wrapper_skel.enclosed_workflow):
         self._image_dim = len(self._collapsed.GetSpacing())
 
         assert (self._image_dim == 2), "Number of dimensions should be 2!"
-        self._logger.debug("Determined image dimensionality: %d", \
+        self._logger.debug("Determined image dimensionality: %d",
                            self._image_dim)
 
         # If the number of components is higher than one, it means we are
