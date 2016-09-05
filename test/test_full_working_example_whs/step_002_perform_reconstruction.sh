@@ -176,9 +176,9 @@ done
 # And now, simply reslice the source rgb images:
 pos_stack_warp_image_multi_transform \
     --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED}/ \
-    --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED}/ \
-    --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
+    --fixed-image-input-directory ${DIR_SLICE_TO_SLICE_MASKED}/ \
+    --moving-image-input-directory ${DIR_SLICE_TO_SLICE_MASKED}/ \
+    --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
     --volumeFilename rgb_after_pairwise.nii.gz \

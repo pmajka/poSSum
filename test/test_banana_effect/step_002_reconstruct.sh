@@ -97,10 +97,10 @@ pos_coarse_fine \
 
 pos_stack_warp_image_multi_transform  \
     --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --fixedImageInputDirectory 006_sections_to_shape_prior/ \
-    --movingImageInputDirectory 006_sections_to_shape_prior/ \
-    --appendTransformation 0 007_sequential_alignment/ct_m%04d_f0110_Affine.txt \
-    --appendTransformation 1 008_coarse_to_fine/01_smooth/%04d.txt \
+    --fixed-image-input-directory 006_sections_to_shape_prior/ \
+    --moving-image-input-directory 006_sections_to_shape_prior/ \
+    --append-transformation 0 007_sequential_alignment/ct_m%04d_f0110_Affine.txt \
+    --append-transformation 1 008_coarse_to_fine/01_smooth/%04d.txt \
         ${OV_SETTINGS} \
     --output-volumes-directory . \
     --volumeFilename coarse_to_fine.nii.gz \

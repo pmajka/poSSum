@@ -43,11 +43,11 @@ rm -rfv input_for_deformable_reconstruction.nii.gz
 
 pos_stack_warp_image_multi_transform \
     --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
-    --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
-    --appendTransformation 0 ${DIR_DEFORMABLE_RECONSTRUCTION}/10_rescaled_deformation/%04d.nii.gz \
-    --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
-    --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
+    --fixed-image-input-directory ${DIR_SLICE_TO_SLICE_MASKED} \
+    --moving-image-input-directory ${DIR_SLICE_TO_SLICE_MASKED} \
+    --append-transformation 0 ${DIR_DEFORMABLE_RECONSTRUCTION}/10_rescaled_deformation/%04d.nii.gz \
+    --append-transformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
+    --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
     --volumeFilename final_image.nii.gz \
@@ -57,11 +57,11 @@ pos_stack_warp_image_multi_transform \
 
 pos_stack_warp_image_multi_transform \
     --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
-    --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
-    --appendTransformation 0 ${DIR_DEFORMABLE_RECONSTRUCTION}/10_rescaled_deformation/%04d.nii.gz \
-    --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
-    --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
+    --fixed-image-input-directory ${DIR_SLICE_TO_SLICE_MASK} \
+    --moving-image-input-directory ${DIR_SLICE_TO_SLICE_MASK} \
+    --append-transformation 0 ${DIR_DEFORMABLE_RECONSTRUCTION}/10_rescaled_deformation/%04d.nii.gz \
+    --append-transformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
+    --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
     --volumeFilename final_image_mask.nii.gz \
@@ -71,10 +71,10 @@ pos_stack_warp_image_multi_transform \
 
 pos_stack_warp_image_multi_transform \
     --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
-    --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASKED} \
-    --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
-    --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
+    --fixed-image-input-directory ${DIR_SLICE_TO_SLICE_MASKED} \
+    --moving-image-input-directory ${DIR_SLICE_TO_SLICE_MASKED} \
+    --append-transformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
+    --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
     --volumeFilename final_image_coarse_to_fine.nii.gz \
@@ -84,10 +84,10 @@ pos_stack_warp_image_multi_transform \
 
 pos_stack_warp_image_multi_transform \
     --slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --fixedImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
-    --movingImageInputDirectory ${DIR_SLICE_TO_SLICE_MASK} \
-    --appendTransformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
-    --appendTransformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
+    --fixed-image-input-directory ${DIR_SLICE_TO_SLICE_MASK} \
+    --moving-image-input-directory ${DIR_SLICE_TO_SLICE_MASK} \
+    --append-transformation 0 ${DIR_SEQUENTIAL_ALIGNMENT_TRANSFORMS}/ct_m%04d_f${SEQ_REF_LONG}_Affine.txt \
+    --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
     --volumeFilename final_image_mask_coarse_to_fine.nii.gz \

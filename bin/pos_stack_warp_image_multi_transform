@@ -58,7 +58,7 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         assert self.options.transformSpec is not None, \
            r("At least one transformation is required in the \
              transformation chain. Please supply at least one \
-             --appendTransformation option")
+             --append-transformation option")
 
         # Since, in some, rare cases, the transformation indexing is different
         # than the actual slice indexing there is a possibility to specify a
@@ -94,13 +94,13 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         # Check for the fixed images directory
         assert self.options.fixedImageInputDirectory is not None,\
             self._logger.error(r("Fixed images directory is a obligatory \
-            parameters. Please supply the '--fixedImageInputDirectory' \
+            parameters. Please supply the '--fixed-image-input-directory' \
             parameter."))
 
         # And for the moving images directory
         assert self.options.movingImageInputDirectory is not None,\
             self._logger.error(r("Fixed images directory is a obligatory \
-            parameters. Please supply the '--movingImageInputDirectory' \
+            parameters. Please supply the '--moving-image-input-directory' \
             parameter."))
 
     def _overrideDefaults(self):
@@ -491,17 +491,17 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         obligatory_options.add_option('--slices-range', default=None,
             type='int', dest='sliceRange', nargs=2,
             help='[Required] Index of the fist and the last images in the stack.')
-        obligatory_options.add_option('--transformationsRange', default=None,
+        obligatory_options.add_option('--transformations-range', default=None,
             type='int', dest='transformationsRange', nargs=2,
             help='[Optional] The first and the last transformation index.')
         obligatory_options.add_option('--transformations-directory', default=None,
             dest='transformationsDirectory', action='store',
             help='Store transformations in given directory instead of using default one.')
-        obligatory_options.add_option('--fixedImageInputDirectory', default=None,
+        obligatory_options.add_option('--fixed-image-input-directory', default=None,
             type='str', dest='fixedImageInputDirectory', help='')
-        obligatory_options.add_option('--movingImageInputDirectory', default=None,
+        obligatory_options.add_option('--moving-image-input-directory', default=None,
             type='str', dest='movingImageInputDirectory', help='')
-        obligatory_options.add_option('--appendTransformation', default=None,
+        obligatory_options.add_option('--append-transformation', default=None,
             type='str', action='append',  nargs=2,
             dest='transformSpec', help='')
 
