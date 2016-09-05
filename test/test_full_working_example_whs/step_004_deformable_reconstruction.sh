@@ -50,7 +50,7 @@ pos_stack_warp_image_multi_transform \
     --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
-    --volumeFilename final_image.nii.gz \
+    --volume-filename final_image.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_image \
     --cleanup
@@ -64,7 +64,7 @@ pos_stack_warp_image_multi_transform \
     --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
-    --volumeFilename final_image_mask.nii.gz \
+    --volume-filename final_image_mask.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_mask \
     --cleanup
@@ -77,7 +77,7 @@ pos_stack_warp_image_multi_transform \
     --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
-    --volumeFilename final_image_coarse_to_fine.nii.gz \
+    --volume-filename final_image_coarse_to_fine.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_image \
     --cleanup
@@ -90,7 +90,7 @@ pos_stack_warp_image_multi_transform \
     --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
-    --volumeFilename final_image_mask_coarse_to_fine.nii.gz \
+    --volume-filename final_image_mask_coarse_to_fine.nii.gz \
     --loglevel DEBUG \
     --work-dir __stack__final_mask \
     --cleanup

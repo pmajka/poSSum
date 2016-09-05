@@ -181,7 +181,7 @@ pos_stack_warp_image_multi_transform \
     --append-transformation 0 ${DIR_FINAL_PAIRWISE}/%04d.txt \
     ${OV_SETTINGS} \
     --output-volumes-directory . \
-    --volumeFilename rgb_after_pairwise.nii.gz \
+    --volume-filename rgb_after_pairwise.nii.gz \
     --work-dir __pairwise__rgb_after_pairwise \
     --loglevel DEBUG \
     --cleanup

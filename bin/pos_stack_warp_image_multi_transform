@@ -508,20 +508,20 @@ class stack_warp_image_multi_transform(output_volume_workflow):
         workflow_settings = \
             OptionGroup(parser, 'Workflow execution settings')
 
-        workflow_settings.add_option('--skipReslice', default=False,
+        workflow_settings.add_option('--skip-reslice', default=False,
             dest='skipReslice', action='store_const', const=True,
             help='Supress reslicing the images.')
-        workflow_settings.add_option('--skipComposeTransformations', default=False,
+        workflow_settings.add_option('--skip-compose-transformations', default=False,
             dest='skipComposeTransformations', action='store_const', const=True,
             help='Suppress merging the transformation.')
-        workflow_settings.add_option('--skipOutputVolumes', default=False,
+        workflow_settings.add_option('--skip-output-volumes', default=False,
             dest='skipOutputVolumes', action='store_const', const=True,
             help='Supress generating color volume')
         workflow_settings.add_option('--output-volumes-directory', default=None,
             dest='outputVolumesDirectory', action='store',
             help=r('Store output volumes in given directory instead \
                    of using default one.'))
-        workflow_settings.add_option('--volumeFilename', default=False,
+        workflow_settings.add_option('--volume-filename', default=False,
             dest='volumeFilename', type='str',
             help='Filename for the output grayscale volume')
 
@@ -538,10 +538,10 @@ class stack_warp_image_multi_transform(output_volume_workflow):
                 while for the Bspline interpolation put BS. \
                 No other string will be accepted.'))
         # TODO: Try to provide the reslice background option.
-        image_processing_options.add_option('--regionOrigin',
+        image_processing_options.add_option('--region-origin',
             dest='regionOrigin', default=None, type='int', nargs=2,
             help='Region origin in voxels (2 values)')
-        image_processing_options.add_option('--regionSize',
+        image_processing_options.add_option('--region-size',
             dest='regionSize', default=None, type='int', nargs=2,
             help='Region size in voxels (2 values)')
 

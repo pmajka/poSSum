@@ -103,7 +103,7 @@ pos_stack_warp_image_multi_transform  \
     --append-transformation 1 008_coarse_to_fine/01_smooth/%04d.txt \
         ${OV_SETTINGS} \
     --output-volumes-directory . \
-    --volumeFilename coarse_to_fine.nii.gz \
+    --volume-filename coarse_to_fine.nii.gz \
     --loglevel DEBUG \
     --cleanup
 
