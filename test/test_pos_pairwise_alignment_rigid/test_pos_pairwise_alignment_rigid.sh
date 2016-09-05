@@ -117,10 +117,10 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \
-    --fixedImageResize 2.0 \
-    --movingImageResize 2.0 \
-    --registrationColorChannelMovingImage red \
-    --registrationColorChannelFixedImage red \
+    --fixed-image-resize 2.0 \
+    --moving-image-resize 2.0 \
+    --registration-color-channel-moving-image red \
+    --registration-color-channel-fixed-image red \
     --grayscale-volume-filename test_5_gray.nii.gz\
     --multichannel-volume-filename test_5_color.nii.gz\
     -d /dev/shm/x/
@@ -133,8 +133,8 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \
-    --fixedImageResize 2.0 \
-    --movingImageResize 2.0 \
+    --fixed-image-resize 2.0 \
+    --moving-image-resize 2.0 \
     --median-filter-radius 2 2 \
     --grayscale-volume-filename test_6_gray.nii.gz\
     --multichannel-volume-filename test_6_color.nii.gz\

@@ -1053,19 +1053,19 @@ class pairwiseRegistration(output_volume_workflow):
             type='int', dest='fixedSlicesRange', nargs = 2,
             help='Range of fixed slices (for preprocessing). By default the same as fixed slice range.')
 
-        parser.add_option('--fixedImageResize',  default=None,
+        parser.add_option('--fixed-image-resize',  default=None,
             type='float', dest='fixedImageResize',
             action='store', nargs=1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
-        parser.add_option('--movingImageResize', default=None,
+        parser.add_option('--moving-image-resize', default=None,
             type='float', dest='movingImageResize',
             action='store', nargs=1, help='Resampling ratio (optional). Allows to alter registration speed and accuracy.')
 
-        parser.add_option('--registrationColorChannelMovingImage', default='blue',
+        parser.add_option('--registration-color-channel-moving-image', default='blue',
             type='str', dest='registrationColorChannelMovingImage',
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
             grayscale input images. Possible values: r/red, g/green, b/blue.')
-        parser.add_option('--registrationColorChannelFixedImage', default='red',
+        parser.add_option('--registration-color-channel-fixed-image', default='red',
             type='str', dest='registrationColorChannelFixedImage',
             help='In rgb images - color channel on which \
             registration will be performed. Has no meaning for \
