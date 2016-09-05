@@ -12,13 +12,8 @@
 - pos deformable reconstruction --maskedVolumeFile --masked-volume --register-subset, start-from-iteration
 
 - pos_wrappers todos.
-- Update the virtual machine.
 - Put all orientation presets into a single file
 - http://www.itk.org/Doxygen/html/Examples_2DataRepresentation_2Image_2Image4_8cxx-example.html#_a1
 
 - some clever method to determine if given section is empty or if it does contain some non-background pixels
   (replacement for pos_wrappers.image_voxel_count_wrapper)
-
-
-!!!!!!!!!!!Create custom directories (e.g. output volumes or output transforms 
-if they do not exist!
