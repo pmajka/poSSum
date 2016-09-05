@@ -78,11 +78,11 @@ class pairwiseRegistration(output_volume_workflow):
         # Obviously, we need to load the images in order to process them.
         assert self.options.fixedImagesDir, \
             self._logger.error(r("No fixed input images directory is provided.\
-            Please provide the input images directory (--fixedImagesDir)"))
+            Please provide the input images directory (--fixed-images-dir)"))
         assert self.options.movingImagesDir, \
             self._logger.error(r("No moving input images directory is\
             provided. Please provide the input images directory \
-            (--movingImagesDir)"))
+            (--moving-images-dir)"))
 
         # Note that it is ok to set both, the fixed and moving imags
         # directories to the same directories. When this is usefull? Well,
@@ -93,7 +93,7 @@ class pairwiseRegistration(output_volume_workflow):
         # a given stack to some other images from the same stack. I can't think
         # of any applications using this trick but it is doable and pretty
         # clever in my opinion. Secon application of this trick of
-        # --fixedImagesDir --movingImagesDir is when you use landmarks to drive
+        # --fixed-images-dir --moving-images-dir is when you use landmarks to drive
         # the registration (to be implemented - remove this remark once this is
         # implemented). In this situation the fixed image stack is not really
         # usefull as the registration will be driven by landmarks and the fixed
@@ -101,7 +101,7 @@ class pairwiseRegistration(output_volume_workflow):
         # (which might be useful). If you a) use landmarks to drive the
         # registration and b) reslice the moving images in the space of the
         # moving image itself then the fixed image stack is redundant and you
-        # should do --fixedImagesDir = --movingImagesDir.
+        # should do --fixed-images-dir = --moving-images-dir.
 
         assert (type(self.options.fixedLandmarksDir) == \
                 type(self.options.movingLandmarksDir)), \
@@ -1021,12 +1021,12 @@ class pairwiseRegistration(output_volume_workflow):
         parser = output_volume_workflow._getCommandLineParser()
 
 
-        parser.add_option('--fixedImagesDir', default=None,
+        parser.add_option('--fixed-images-dir', default=None,
             type='str', dest='fixedImagesDir', help=r('Directory containing \
             imaged used as a reference images during the a) registration \
             and b) reslicing process. This parameter has to be provided \
             regardless the registration mode (intensity images / landmarks).'))
-        parser.add_option('--movingImagesDir', default=None,
+        parser.add_option('--moving-images-dir', default=None,
             type='str', dest='movingImagesDir', help='')
         parser.add_option('--fixed-landmarks-directory', default=None,
             type='str', dest='fixedLandmarksDir', help=r('Directory with \

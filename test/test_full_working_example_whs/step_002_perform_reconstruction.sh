@@ -125,8 +125,8 @@ do
 	    --moving-slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
 	    --fixed-slices-range  ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
 	    --reslice-backgorund ${RESLICE_BACKGROUND} \
-	    --fixedImagesDir ${DIR_REF} \
-	    --movingImagesDir ${DIR_COARSE_ALIGNMENT}/${DIR_PAIRWISE_ITERATION}${ii}/exp/ \
+	    --fixed-images-dir ${DIR_REF} \
+	    --moving-images-dir ${DIR_COARSE_ALIGNMENT}/${DIR_PAIRWISE_ITERATION}${ii}/exp/ \
 	    --output-volumes-directory ${DIR_WORK}/ \
 	    --grayscale-volume-filename slices_to_reference_${ii}.nii.gz \
 	    --transformations-directory ${DIR_TRANSF}/ \

@@ -35,8 +35,8 @@ pos_pairwise_registration \
     --moving-slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --fixed-slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --reslice-backgorund 0 \
-    --fixedImagesDir 003_shape_prior_sections/ \
-    --movingImagesDir 004_distorted_sections/ \
+    --fixed-images-dir 003_shape_prior_sections/ \
+    --moving-images-dir 004_distorted_sections/ \
     --output-volumes-directory . \
     --transformations-directory 005_pairwise_alignment/ \
     --grayscale-volume-filename sections_to_shape_prior.nii.gz \

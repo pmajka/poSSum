@@ -51,8 +51,8 @@ rm -rfv *.nii.gz
 # Start the calculations
 
 pos_pairwise_registration \
-    --fixedImagesDir fixed/ \
-    --movingImagesDir moving/ \
+    --fixed-images-dir fixed/ \
+    --moving-images-dir moving/ \
     --moving-slices-range 0 9 \
     --fixed-slices-range 0 9  \
     --output-volumes-directory . \
@@ -62,8 +62,8 @@ pos_pairwise_registration \
     -d /dev/shm/x/
 
 pos_pairwise_registration \
-    --fixedImagesDir fixed/ \
-    --movingImagesDir moving/ \
+    --fixed-images-dir fixed/ \
+    --moving-images-dir moving/ \
     --moving-slices-range 0 9 \
     --fixed-slices-range 0 9  \
     --output-volumes-directory . \
@@ -76,8 +76,8 @@ pos_pairwise_registration \
     -d /dev/shm/x/
 
 pos_pairwise_registration \
-    --fixedImagesDir fixed/ \
-    --movingImagesDir moving/ \
+    --fixed-images-dir fixed/ \
+    --moving-images-dir moving/ \
     --moving-slices-range 0 9 \
     --fixed-slices-range 0 9  \
     --output-volumes-directory . \
@@ -90,8 +90,8 @@ pos_pairwise_registration \
     -d /dev/shm/x/
 
 pos_pairwise_registration \
-    --fixedImagesDir fixed/ \
-    --movingImagesDir moving/ \
+    --fixed-images-dir fixed/ \
+    --moving-images-dir moving/ \
     --moving-slices-range 0 9 \
     --fixed-slices-range 0 9  \
     --output-volumes-directory . \
@@ -104,8 +104,8 @@ pos_pairwise_registration \
     -d /dev/shm/x/
 
 pos_pairwise_registration \
-    --fixedImagesDir fixed/ \
-    --movingImagesDir moving/ \
+    --fixed-images-dir fixed/ \
+    --moving-images-dir moving/ \
     --moving-slices-range 0 9 \
     --fixed-slices-range 0 9  \
     --output-volumes-directory . \
@@ -119,8 +119,8 @@ pos_pairwise_registration \
     -d /dev/shm/x/
 
 pos_pairwise_registration \
-    --fixedImagesDir fixed/ \
-    --movingImagesDir moving/ \
+    --fixed-images-dir fixed/ \
+    --moving-images-dir moving/ \
     --moving-slices-range 0 9 \
     --fixed-slices-range 0 9  \
     --output-volumes-directory . \
