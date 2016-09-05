@@ -122,8 +122,8 @@ do
 	pos_pairwise_registration \
 	    --work-dir __pairwise__$iteration \
 	    --ants-image-metric CC \
-	    --movingSlicesRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-	    --fixedSlicesRange  ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+	    --moving-slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+	    --fixed-slices-range  ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
 	    --reslice-backgorund ${RESLICE_BACKGROUND} \
 	    --fixedImagesDir ${DIR_REF} \
 	    --movingImagesDir ${DIR_COARSE_ALIGNMENT}/${DIR_PAIRWISE_ITERATION}${ii}/exp/ \

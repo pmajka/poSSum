@@ -53,8 +53,8 @@ rm -rfv *.nii.gz
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --grayscale-volume-filename test_1_gray.nii.gz\
@@ -64,8 +64,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --skip-preprocessing \
@@ -78,8 +78,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --skip-preprocessing \
@@ -92,8 +92,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --skip-preprocessing \
@@ -106,8 +106,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --fixed-image-resize 2.0 \
@@ -121,8 +121,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --fixed-image-resize 2.0 \

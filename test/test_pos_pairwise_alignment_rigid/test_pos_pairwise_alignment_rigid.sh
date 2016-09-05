@@ -55,8 +55,8 @@ rm -rfv *.nii.gz
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --use-rigid-affine \
     --output-volumes-directory . \
     --loglevel DEBUG  \
@@ -67,8 +67,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --use-rigid-affine \
     --output-volumes-directory . \
     --loglevel DEBUG  \
@@ -82,8 +82,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \
@@ -97,8 +97,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \
@@ -112,8 +112,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \
@@ -128,8 +128,8 @@ pos_pairwise_registration \
 pos_pairwise_registration \
     --fixedImagesDir fixed/ \
     --movingImagesDir moving/ \
-    --movingSlicesRange 0 9 \
-    --fixedSlicesRange 0 9  \
+    --moving-slices-range 0 9 \
+    --fixed-slices-range 0 9  \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \

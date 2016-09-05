@@ -32,8 +32,8 @@ pos_slice_volume \
 pos_pairwise_registration \
     --median-filter-radius 2 2 \
     --ants-image-metric MI \
-    --movingSlicesRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
-    --fixedSlicesRange ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --moving-slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
+    --fixed-slices-range ${IDX_FIRST_SLICE} ${IDX_LAST_SLICE} \
     --reslice-backgorund 0 \
     --fixedImagesDir 003_shape_prior_sections/ \
     --movingImagesDir 004_distorted_sections/ \

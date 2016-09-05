@@ -66,12 +66,12 @@ class pairwiseRegistration(output_volume_workflow):
         # Ok, the first thing to check is to make sure that both slice ranges
         # are provided: the moving slice range and the fixed slice range
         assert self.options.fixedSlicesRange, \
-            self._logger.error(r("Fixed slices range (`--fixedSlicesRange`) \
+            self._logger.error(r("Fixed slices range (`--fixed-slices-range`) \
             is obligatory. Please provide the fixed slices range. "))
 
         assert self.options.movingSlicesRange, \
             self._logger.error(r("Moving range parameters \
-            (`--movingSlicesRange`) are required. Please provide \
+            (`--moving-slices-range`) are required. Please provide \
             the moving slices range."))
 
         # Validate, if an input images directory is provided,
@@ -1046,10 +1046,10 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--image-pairs-assignment-file', default=None,
             type='str', dest='imagePairsAssignmentFile',
             help='File carrying assignment of a fixed image to corresponding moving image.')
-        parser.add_option('--movingSlicesRange', default=None,
+        parser.add_option('--moving-slices-range', default=None,
             type='int', dest='movingSlicesRange', nargs = 2,
             help='Range of moving slices (for preprocessing). By default the same as fixed slice range.')
-        parser.add_option('--fixedSlicesRange', default=None,
+        parser.add_option('--fixed-slices-range', default=None,
             type='int', dest='fixedSlicesRange', nargs = 2,
             help='Range of fixed slices (for preprocessing). By default the same as fixed slice range.')
 
