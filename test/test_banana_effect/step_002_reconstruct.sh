@@ -42,7 +42,7 @@ pos_pairwise_registration \
     --grayscale-volume-filename sections_to_shape_prior.nii.gz \
     --skipColorReslice \
         ${OV_SETTINGS} \
-    --affineGradientDescent 0.5 0.95 0.0001 0.0001 \
+    --affine-gradient-descent 0.5 0.95 0.0001 0.0001 \
     --use-rigid-affine \
     --disable-moments \
     --loglevel DEBUG \

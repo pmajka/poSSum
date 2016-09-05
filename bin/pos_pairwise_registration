@@ -1043,7 +1043,7 @@ class pairwiseRegistration(output_volume_workflow):
             Use with "--fixed-landmarks-directory" only. Forces \
             "--disable-moments".'))
 
-        parser.add_option('--imagePairsAssignmentFile', default=None,
+        parser.add_option('--image-pairs-assignment-file', default=None,
             type='str', dest='imagePairsAssignmentFile',
             help='File carrying assignment of a fixed image to corresponding moving image.')
         parser.add_option('--movingSlicesRange', default=None,
@@ -1089,7 +1089,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--skipPreprocessing', default=False,
             dest='skipPreprocessing', action='store_const', const=True,
             help='Supress preprocessing images.')
-        parser.add_option('--skipGrayReslice', default=False,
+        parser.add_option('--skip-gray-reslice', default=False,
             dest='skipGrayReslice', action='store_const', const=True,
             help='Supress generating grayscale volume')
         parser.add_option('--skipColorReslice', default=False,
@@ -1098,7 +1098,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--skipTransformGeneration', default=False,
             dest='skipTranasformGeneration', action='store_const', const=True,
             help='Supress generating transforms.')
-        parser.add_option('--skipOutputVolumes', default=False,
+        parser.add_option('--skip-output-volumes', default=False,
             dest='skipOutputVolumes', action='store_const', const=True,
             help='Supress generating volumes.')
         parser.add_option('--output-volumes-directory', default=None,
@@ -1125,7 +1125,7 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--ants-image-metric-opt', default=32,
             type='int', dest='antsImageMetricOpt',
             help='Parameter of ANTS i2i metric.')
-        parser.add_option('--affineGradientDescent', default=None,
+        parser.add_option('--affine-gradient-descent', default=None,
                 type='float', dest='affineGradientDescent', nargs=4,
                 help=r('Grandient descent step coefficients. Values are \
                 passed directly to ANTS as \
@@ -1141,21 +1141,22 @@ class pairwiseRegistration(output_volume_workflow):
             help='Filename for the output multichannel volume.')
 
         additionalStackReslice = OptionGroup(parser, 'Settings for reslicing additional image stacks')
-        additionalStackReslice.add_option('--additionalMovingImagesDirectory', default=None,
+        additionalStackReslice.add_option('--additional-moving-images-directory', default=None,
                 dest='additionalMovingImagesDirectory', type='str',
                 action='append', help='')
-        additionalStackReslice.add_option('--additionalInvertMultichannel', default=None,
+        additionalStackReslice.add_option('--additional-invert-multichannel', default=None,
                 dest='additionalInvertMultichannel', type='int',
                 action='append', help='')
-        additionalStackReslice.add_option('--additionalMultichannelVolume', default=None,
+        additionalStackReslice.add_option('--additional-multichannel-volume', default=None,
                 dest='additionalMultichannelVolume', type='str',
                 action='append', help='')
-        additionalStackReslice.add_option('--additionalInterpolation', default=None,
+        additionalStackReslice.add_option('--additional-interpolation', default=None,
                 dest='additionalInterpolation', type='str',
                 action='append', help='')
-        additionalStackReslice.add_option('--additionalInterpolationBackground', default=None,
+        additionalStackReslice.add_option('--additional-interpolation-background', default=None,
                 dest='additionalInterpolationBackground', type='float',
                 action='append', help='')
+        print " ".join(map(lambda x: x.get_opt_string() + " "+ " ".join(x._short_opts), parser._get_all_options()))
 
         parser.add_option_group(additionalStackReslice)
 
