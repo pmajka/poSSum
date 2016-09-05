@@ -69,7 +69,7 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --skipPreprocessing \
-    --skipTransformGeneration \
+    --skip-transform-generation \
     --reslice-backgorund 255 \
     --grayscale-volume-filename test_2_gray.nii.gz\
     --multichannel-volume-filename test_2_color.nii.gz\
@@ -83,7 +83,7 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --skipPreprocessing \
-    --skipTransformGeneration \
+    --skip-transform-generation \
     --output-volume-roi 64 64 64 64 \
     --grayscale-volume-filename test_3_gray.nii.gz\
     --multichannel-volume-filename test_3_color.nii.gz\
@@ -97,7 +97,7 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --loglevel DEBUG  \
     --skipPreprocessing \
-    --skipTransformGeneration \
+    --skip-transform-generation \
     --output-volume-roi 0 0 64 64 \
     --grayscale-volume-filename test_4_gray.nii.gz\
     --multichannel-volume-filename test_4_color.nii.gz\

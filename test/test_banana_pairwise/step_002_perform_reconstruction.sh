@@ -128,7 +128,7 @@ do
             --output-volumes-directory ${DIR_WORK}/ \
             --grayscale-volume-filename slices_to_reference_${ii}.nii.gz \
             --transformations-directory ${DIR_TRANSF}/ \
-            --skipColorReslice \
+            --skip-color-reslice \
             ${OV_SETTINGS} \
             --loglevel DEBUG \
             --use-rigid-affine \

@@ -1092,10 +1092,10 @@ class pairwiseRegistration(output_volume_workflow):
         parser.add_option('--skip-gray-reslice', default=False,
             dest='skipGrayReslice', action='store_const', const=True,
             help='Supress generating grayscale volume')
-        parser.add_option('--skipColorReslice', default=False,
+        parser.add_option('--skip-color-reslice', default=False,
             dest='skipColorReslice', action='store_const', const=True,
             help='Supress generating RGB volume.')
-        parser.add_option('--skipTransformGeneration', default=False,
+        parser.add_option('--skip-transform-generation', default=False,
             dest='skipTranasformGeneration', action='store_const', const=True,
             help='Supress generating transforms.')
         parser.add_option('--skip-output-volumes', default=False,

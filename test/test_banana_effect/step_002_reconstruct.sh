@@ -40,7 +40,7 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --transformations-directory 005_pairwise_alignment/ \
     --grayscale-volume-filename sections_to_shape_prior.nii.gz \
-    --skipColorReslice \
+    --skip-color-reslice \
         ${OV_SETTINGS} \
     --affine-gradient-descent 0.5 0.95 0.0001 0.0001 \
     --use-rigid-affine \

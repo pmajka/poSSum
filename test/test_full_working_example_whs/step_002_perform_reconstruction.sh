@@ -130,7 +130,7 @@ do
 	    --output-volumes-directory ${DIR_WORK}/ \
 	    --grayscale-volume-filename slices_to_reference_${ii}.nii.gz \
 	    --transformations-directory ${DIR_TRANSF}/ \
-	    --skipColorReslice \
+	    --skip-color-reslice \
 	    --enable-moments \
 	    ${OV_SETTINGS} \
 	    --loglevel DEBUG \
