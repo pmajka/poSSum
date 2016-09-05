@@ -72,7 +72,7 @@ pos_pairwise_registration \
     --use-rigid-affine \
     --output-volumes-directory . \
     --loglevel DEBUG  \
-    --skipPreprocessing \
+    --skip-preprocessing \
     --skipTransformGeneration \
     --reslice-backgorund 255 \
     --grayscale-volume-filename test_2_gray.nii.gz\
@@ -87,7 +87,7 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \
-    --skipPreprocessing \
+    --skip-preprocessing \
     --skipTransformGeneration \
     --output-volume-roi 64 64 64 64 \
     --grayscale-volume-filename test_3_gray.nii.gz\
@@ -102,7 +102,7 @@ pos_pairwise_registration \
     --output-volumes-directory . \
     --use-rigid-affine \
     --loglevel DEBUG  \
-    --skipPreprocessing \
+    --skip-preprocessing \
     --skipTransformGeneration \
     --output-volume-roi 0 0 64 64 \
     --grayscale-volume-filename test_4_gray.nii.gz\

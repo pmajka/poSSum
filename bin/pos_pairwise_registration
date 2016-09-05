@@ -1086,7 +1086,7 @@ class pairwiseRegistration(output_volume_workflow):
             type='int', dest='outputVolumeROI',  nargs=4,
             help='ROI of the output volume - in respect to registration ROI.')
 
-        parser.add_option('--skipPreprocessing', default=False,
+        parser.add_option('--skip-preprocessing', default=False,
             dest='skipPreprocessing', action='store_const', const=True,
             help='Supress preprocessing images.')
         parser.add_option('--skip-gray-reslice', default=False,
