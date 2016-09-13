@@ -883,8 +883,211 @@ _pos_deformable_histology_reconstruction()
 #       COMPREPLY=( $(compgen -W "int-x-radius_int-y-radius" -- ${cur}) )
 #       return 0
 #   fi
-#
 
+_pos_pairwise_registration()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    opts="--help -h --loglevel --log-filename --cpus \
+    --specimen-id -d --work-dir \
+    --dry-run --disable-shared-memory \
+    --archive-work-dir \
+    \
+    --output-volume-origin \
+    --output-volume-scalar-type \
+    --output-volume-spacing \
+    --output-volume-resample \
+    --output-volume-permute-axes \
+    --output-volume-orientation \
+    --output-volume-interpolation \
+    --output-volume-filp-axes \
+    --output-volume-roi \
+    \
+    --fixed-images-dir \
+    --moving-images-dir \
+    \
+    --fixed-landmarks-directory \
+    --moving-landmarks-directory \
+    \
+    --image-pairs-assignment-file \
+    --moving-slices-range \
+    --fixed-slices-range \
+    \
+    --fixed-image-resize \
+    --moving-image-resize \
+    \
+    --registration-color-channel-moving-image \
+    --registration-color-channel-fixed-image \
+    \
+    --reslice-interpolation \
+    --reslice-backgorund \
+    \
+    --median-filter-radius \
+    --invert-multichannel \
+    \
+    --skip-preprocessing \
+    --skip-gray-reslice \
+    --skip-color-reslice \
+    --skip-transform-generation \
+    --skip-output-volumes \
+    --output-volumes-directory \
+    \
+    --enable-moments \
+    --disable-moments \
+    \
+    --ants-image-metric \
+    --use-rigid-affine \
+    --ants-image-metric-opt \
+    --affine-gradient-descent \
+    --transformations-directory \
+    --grayscale-volume-filename \
+    --multichannel-volume-filename \
+    --cleanup"
+
+    if [[ ${prev} == 'pos_pairwise_registration' ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--loglevel' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_LOGLEVEL_OPTIONS}" -- ${cur}) )
+        return 
+    fi
+
+    if [ ${prev} == '--log-filename' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '-d' ] || \
+       [ ${prev} == '--work-dir' ] || \
+       [ ${prev} == '--archive-work-dir' ] || \
+       [ ${prev} == '--fixed-images-dir' ] || \
+       [ ${prev} == '--moving-images-dir' ] || \
+       [ ${prev} == '--fixed-landmarks-directory' ] || \
+       [ ${prev} == '--moving-landmarks-directory' ] || \
+       [ ${prev} == '--transformations-directory' ] || \
+       [ ${prev} == '--output-volumes-directory' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o nospace  -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-origin' ] ; then
+        COMPREPLY=( $(compgen -W "ox_float oy_float oz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-scalar-type' ] || [ ${prev} == '--type' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_DATA_TYPES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-spacing' ] ; then
+        COMPREPLY=( $(compgen -W "sx_float sy_float sz_float" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-resample' ] || [ ${prev} == '--resample' ] ; then
+        COMPREPLY=( $(compgen -W "rx_float_0-1 ry_float_0-1 rz_float_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-permute-axes' ] ; then
+        COMPREPLY=( $(compgen -W "three_ints_0_1_2" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-orientation' ] || [ ${prev} == '--orientation' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_ORIENTATION_CODES}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-interpolation' ]; then
+        COMPREPLY=( $(compgen -W "${POS_INTERPOLATION_OPTIONS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--output-volume-filp-axes' ] ; then
+        COMPREPLY=( $(compgen -W "flip_x_0-1 flip_y_0-1 flip_z_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--extract-roi' ] ; then
+        COMPREPLY=( $(compgen -W "ox_oy_sx_sy_in_pixels" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--median-filter-radius' ] ; then
+        COMPREPLY=( $(compgen -W "int-x-radius_int-y-radius" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--registration-color-channel-moving-image' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_IMAGEMAGICK_COLOR_CHANNELS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--registration-color-channel-fixed-image' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_IMAGEMAGICK_COLOR_CHANNELS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--reslice-backgorund' ]; then
+        COMPREPLY=( $(compgen -W "integer_0-255 0 1 255" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--reslice-interpolation' ]; then
+        COMPREPLY=( $(compgen -W "${POS_INTERPOLATION_OPTIONS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--fixed-image-resize' ] || [ ${prev} == '--moving-image-resize' ]; then
+        COMPREPLY=( $(compgen -W "float_0-1" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--moving-slices-range' ] || [ ${prev} == '--fixed-slices-range' ] ; then
+        COMPREPLY=( $(compgen -W "start_space_end" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--ants-image-metric' ] ; then
+        COMPREPLY=( $(compgen -W "${POS_ANTS_IMAGE_METRICS}" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--ants-image-metric-opt' ] ; then
+        COMPREPLY=( $(compgen -W "int_depends_on_particular_metric" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--affine-gradient-descent' ] ; then
+        COMPREPLY=( $(compgen -W "maximum_step_length-x-relaxation_factor-x-minimum_step_length-x-translation_scales" -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--grayscale-volume-filename' ] || \
+        [ ${prev} == '--multichannel-volume-filename' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs  -f -X '!*.nii.gz' -- ${cur}) )
+        return 0
+    fi
+
+    if [ ${prev} == '--image-pairs-assignment-file' ] ; then
+        COMPREPLY=( $(compgen -o plusdirs -o dirnames -o nospace -f -- ${cur}) )
+        return 0
+    fi
+}
+
+complete -F _pos_pairwise_registration pos_pairwise_registration
 complete -F _pos_slice_volume pos_slice_volume
 complete -F _pos_stack_sections pos_stack_sections
 complete -F _pos_process_source_images pos_process_source_images
@@ -896,7 +1099,5 @@ complete -F _pos_coarse_fine pos_coarse_fine
 complete -F _pos_sequential_alignment pos_sequential_alignment
 complete -F _pos_deformable_histology_reconstruction pos_deformable_histology_reconstruction
 
-
 # MedianFilter.py*
-# pos_pairwise_registration*
 # pos_stack_warp_image_multi_transform*
