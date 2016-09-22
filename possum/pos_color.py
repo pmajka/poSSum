@@ -121,6 +121,7 @@ def float_colour_to_int(color, maxValue=255.):
 
 
 class pos_color(object):
+
     """
     Color object. Class representing a color :) A versatile way of manipulating
     color information.

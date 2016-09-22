@@ -10,7 +10,7 @@ __email__ = "pmajka@nencki.gov.pl"
 class snap_label(object):
 
     def __init__(self, idx, (r, g, b), transparency, label_visibility,
-            mesh_visibility, description):
+                 mesh_visibility, description):
         """
         All parameters are required.
 
@@ -196,7 +196,7 @@ class snap_label(object):
 
         # And then generate the label object
         label = snap_label(idx, (r, g, b), transparency,
-                label_visibility, mesh_visibility, description)
+                           label_visibility, mesh_visibility, description)
         return label
 
     def __str__(self):
@@ -298,6 +298,7 @@ ITKSNAP_DESCRIPTION_FILE_HEADER = \
 #    IDX:   Label mesh visibility (0 or 1)
 #  LABEL:   Label description
 ################################################"""
+
 
 class snap_label_description(object):
 
@@ -406,7 +407,7 @@ class snap_label_description(object):
     def __str__(self):
         labels = sorted(self.values(), key=lambda x: x.idx)
         return ITKSNAP_DESCRIPTION_FILE_HEADER + "\n" + \
-               "\n".join(map(str, labels))
+            "\n".join(map(str, labels))
 
     def __setitem__(self, key, value):
         assert key == value.idx, \
@@ -485,7 +486,7 @@ class snap_label_description(object):
 
         # Determine on which line the header ends
         first_row = len(filter(lambda x: csvfile[x][0] == "#",
-                           range(len(csvfile))))
+                               range(len(csvfile))))
         reader = csv.reader(csvfile[first_row:], dialect="spaces")
 
         # We will collect label in this list

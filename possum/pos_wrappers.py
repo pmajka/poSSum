@@ -2,12 +2,13 @@ import copy
 import subprocess as sub
 
 from pos_parameters import string_parameter, value_parameter, filename_parameter, \
-                ants_transformation_parameter, vector_parameter, list_parameter, \
+    ants_transformation_parameter, vector_parameter, list_parameter, \
                 switch_parameter, ants_regularization_parameter, boolean_parameter
 import pos_parameters
 
 
 class generic_wrapper(object):
+
     """
     A generic command line wrapper class. Actually, it is of no use and should
     be subclassed. This class provides only general mechanisms for executing
@@ -45,7 +46,7 @@ class generic_wrapper(object):
     def __str__(self):
         replacement = dict(map(lambda (k, v): (k, str(v)), self.p.iteritems()))
         return " ".join(self._template.format(**replacement).strip().split())
-        #return self._template.format(**replacement).strip()
+        # return self._template.format(**replacement).strip()
 
     def __call__(self, *args, **kwargs):
         print "Executing: %s" % str(self)
@@ -53,8 +54,8 @@ class generic_wrapper(object):
         # Tested against execution of multiple commands
         # http://stackoverflow.com/questions/359347/execute-commands-sequentially-in-python
         stdout, stderr = sub.Popen(str(self), stdout=sub.PIPE,
-                            stderr=sub.PIPE, shell=True,
-                            close_fds=True).communicate()
+                                   stderr=sub.PIPE, shell=True,
+                                   close_fds=True).communicate()
         print stdout.strip()
         print stderr.strip()
 
@@ -72,6 +73,7 @@ class generic_wrapper(object):
 
 
 class touch_wrapper(generic_wrapper):
+
     """
     A very simple ``touch`` bash command wrapper.
 
@@ -128,6 +130,7 @@ class touch_wrapper(generic_wrapper):
 
 
 class mkdir_wrapper(generic_wrapper):
+
     """
      A very simple ``mkdir`` bash command wrapper with default
      -p option.
@@ -203,6 +206,7 @@ class mkdir_wrapper(generic_wrapper):
 
 
 class rmdir_wrapper(generic_wrapper):
+
     """
      A very simple ``rm`` bash command wrapper with default
      -rfv options.
@@ -270,7 +274,6 @@ class rmdir_wrapper(generic_wrapper):
     TypeError: argument 2 to map() must support iteration
     """
 
-
     _template = """rm -rfv {dir_list}"""
 
     _parameters = {
@@ -279,6 +282,7 @@ class rmdir_wrapper(generic_wrapper):
 
 
 class copy_wrapper(generic_wrapper):
+
     """
     A very simple ``cp`` bash command wrapper with default
      -rfv options.
@@ -358,6 +362,7 @@ class copy_wrapper(generic_wrapper):
 
 
 class compress_wrapper(generic_wrapper):
+
     """
     A very simple ``tar`` bash command wrapper with default
      -cvvzf options.
@@ -420,6 +425,7 @@ class ants_jacobian(generic_wrapper):
 
 
 class ants_registration(generic_wrapper):
+
     """
     Wrapper for the Advanced Normalization Tools. Tested with the following
     ANTS versions:
@@ -472,17 +478,21 @@ class ants_registration(generic_wrapper):
 
     def __call__(self, *args, **kwargs):
         execution = super(self.__class__, self).__call__(*args, **kwargs)
-        execution['port']['deformable_list'] = [str(self.p['outputNaming'].value) + 'Warp.nii.gz']
+        execution['port']['deformable_list'] = [
+            str(self.p['outputNaming'].value) + 'Warp.nii.gz']
 
         if self.p['affineIterations']:
-            execution['port']['affine_list'] = [str(self.p['outputNaming'].value) + 'Affine.txt']
+            execution['port']['affine_list'] = [
+                str(self.p['outputNaming'].value) + 'Affine.txt']
 
-        execution['port']['moving_image'] = self.p['imageMetrics'].value[0].p['moving_image'].value
+        execution['port']['moving_image'] = self.p[
+            'imageMetrics'].value[0].p['moving_image'].value
 
         return execution
 
 
 class ants_reslice(generic_wrapper):
+
     """
     :note: Be carefull when setting the useNN parameter as it is easy to
     misconfigure the value. The correct way to set the parameter is to use the
@@ -518,6 +528,7 @@ class ants_reslice(generic_wrapper):
 
 
 class ants_intensity_meric(generic_wrapper):
+
     """
     A wrapper for ANTS intensity metric syntax. Note that this wrapper does not
     support point set estimation image-to-image metrics.
@@ -618,6 +629,7 @@ class ants_intensity_meric(generic_wrapper):
 
 
 class ants_point_set_estimation_metric(generic_wrapper):
+
     """
     Wrapper for ANTS Point Set Estimation metric template.  The role of this
     metric is to help in registering the images using labelled volumes instead
@@ -733,6 +745,7 @@ class ants_point_set_estimation_metric(generic_wrapper):
 
 
 class ants_average_affine_transform(generic_wrapper):
+
     """
     AverageAffineTransform ImageDimension output_affine_transform
                    [-R reference_affine_transform]
@@ -800,6 +813,7 @@ class ants_average_affine_transform(generic_wrapper):
 
 
 class ants_compose_multi_transform(generic_wrapper):
+
     """
     >>> ants_compose_multi_transform
     <class 'possum.pos_wrappers.ants_compose_multi_transform'>
@@ -873,6 +887,7 @@ class ants_compose_multi_transform(generic_wrapper):
 
 
 class ants_average_images(generic_wrapper):
+
     """
     >>> ants_average_images
     <class 'possum.pos_wrappers.ants_average_images'>
@@ -913,6 +928,7 @@ class ants_average_images(generic_wrapper):
 
 
 class images_weighted_average(generic_wrapper):
+
     """
     """
     _template = """c{dimension}d  {input_images} -weighted-sum {weights} {output_type} -o {output_image}"""
@@ -932,6 +948,7 @@ class images_weighted_average(generic_wrapper):
 
 
 class average_images(images_weighted_average):
+
     """
     """
     _template = """c{dimension}d  {input_images} -mean -o {output_image}"""
@@ -950,6 +967,7 @@ class average_images(images_weighted_average):
 
 
 class chain_affine_transforms(generic_wrapper):
+
     """
     Wrapper for ANTS ComposeMultiTransform program. Merges transforms generated
     with ANTS and, possibly, other transforms ITK transforms. The results may
@@ -991,6 +1009,7 @@ class chain_affine_transforms(generic_wrapper):
 
 
 class stack_and_reorient_wrapper(generic_wrapper):
+
     """
     A wraper for a swiss army kife for reorienting, stacking, permuting and
     flipping input volumes. For more details please check manual for
@@ -1112,6 +1131,7 @@ class stack_and_reorient_wrapper(generic_wrapper):
 
 
 class alignment_preprocessor_wrapper(generic_wrapper):
+
     """
     A wrapper for the `pos_preprocess_image` script. Since the script itself
     provides an extensive documentation, the detailed description of command
@@ -1233,6 +1253,7 @@ class alignment_preprocessor_wrapper(generic_wrapper):
 
 
 class command_warp_rgb_slice(generic_wrapper):
+
     """
     A flexible RGB image __affine__ reslice wrapper. The wrapper is designed to
     work solely with the 8bit, three channel (RGB) images. Since the input
@@ -1375,6 +1396,7 @@ class command_warp_rgb_slice(generic_wrapper):
 
 
 class command_warp_grayscale_image(generic_wrapper):
+
     """
     A special instance of reslice grayscale image dedicated for the sequential
     alignment script.
@@ -1494,6 +1516,7 @@ class command_warp_grayscale_image(generic_wrapper):
 
 
 class image_similarity_wrapper(generic_wrapper):
+
     """
     Calculates image similarity between two grayscale images using a provided
     similarity metric and applying optional affine transformation to the moving image.
@@ -1587,6 +1610,7 @@ class image_similarity_wrapper(generic_wrapper):
 
 
 class split_multichannel_image(generic_wrapper):
+
     """
     Split the individual image into its components. By default the images are
     converted to the uchar type.
@@ -1642,10 +1666,11 @@ class split_multichannel_image(generic_wrapper):
         'input_image': pos_parameters.filename_parameter('input_image', None),
         'output_type': pos_parameters.string_parameter('output_type', 'uchar', str_template='-type {_value}'),
         'output_components': pos_parameters.list_parameter('output_components', [], str_template='{_list}')
-        }
+    }
 
 
 class merge_components(generic_wrapper):
+
     """
     Merges the individual components of the multichannel image into actual
     multichannel image. The individual components are deleted afterwards.
@@ -1738,10 +1763,11 @@ class merge_components(generic_wrapper):
         'components_no': pos_parameters.value_parameter('components_no', 3),
         'output_image': pos_parameters.filename_parameter('output_image', None),
         'other_files_remove': pos_parameters.list_parameter('other_files_remove', [], str_template='{_list}')
-        }
+    }
 
 
 class image_voxel_count_wrapper(generic_wrapper):
+
     """
     Determines the amount (sum or integral) of non-background pixels in the
     provided image.  The backgorund color can be customized. The wrapper
@@ -1817,13 +1843,14 @@ class image_voxel_count_wrapper(generic_wrapper):
     _parameters = {
         'dimension': pos_parameters.value_parameter('dimension', 2),
         'image': pos_parameters.filename_parameter('image', False),
-        'background' : pos_parameters.value_parameter('shift', 0, '{_value}'),
-        'voxel_sum' : pos_parameters.boolean_parameter('voxel-sum', None, str_template='-{_name}'),
-        'voxel_integral' : pos_parameters.boolean_parameter('voxel-integral', None, str_template='-{_name}')
+        'background': pos_parameters.value_parameter('shift', 0, '{_value}'),
+        'voxel_sum': pos_parameters.boolean_parameter('voxel-sum', None, str_template='-{_name}'),
+        'voxel_integral': pos_parameters.boolean_parameter('voxel-integral', None, str_template='-{_name}')
     }
 
 
 class align_by_center_of_gravity(generic_wrapper):
+
     """
     Calculates a transformation between two images so that the images' centres
     of gravity matches.
@@ -1862,6 +1889,7 @@ class align_by_center_of_gravity(generic_wrapper):
 
 
 class slice_volume_wrapper(generic_wrapper):
+
     """
     Wrapper for the pos_slice_volume script. Provides basic functionality of
     the full script.
@@ -1967,18 +1995,19 @@ class slice_volume_wrapper(generic_wrapper):
             -r {start_slice} {end_slice} {step} \
             {shift_indexes}"""
 
-    _parameters = { \
-            'input_image' : filename_parameter('input_image', None),
-            'output_naming' : filename_parameter('output_naming', "%04d.nii.gz"),
-            'slicing_axis' : value_parameter('slicing_axis', 1),
-            'start_slice' : value_parameter('start_slice', None),
-            'end_slice' : value_parameter('end_slice', None),
-            'step' : value_parameter('step', 1),
-            'shift_indexes' : value_parameter('output-filenames-offset', None, str_template="--{_name} {_value}")
-            }
+    _parameters = {
+            'input_image': filename_parameter('input_image', None),
+            'output_naming': filename_parameter('output_naming', "%04d.nii.gz"),
+            'slicing_axis': value_parameter('slicing_axis', 1),
+            'start_slice': value_parameter('start_slice', None),
+            'end_slice': value_parameter('end_slice', None),
+            'step': value_parameter('step', 1),
+            'shift_indexes': value_parameter('output-filenames-offset', None, str_template="--{_name} {_value}")
+    }
 
 
 class get_affine_from_landmarks_wrapper(generic_wrapper):
+
     """
     Wrapper for ANTSUseLandmarkImagesToGetAffineTransform from the ANTS
     package. Calculates affine or rigid transformation based on set of two

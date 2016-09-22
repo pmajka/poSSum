@@ -75,7 +75,7 @@ def setup_logging(log_filename=None, log_level='WARNING'):
 
     # Intialize the logging module.
     logging.basicConfig(
-            level=getattr(logging, log_level),
+        level=getattr(logging, log_level),
             filename=log_filename,
             format='%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s',
             datefmt='%m/%d/%Y %H:%M:%S')
