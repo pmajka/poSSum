@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script is to be execyted from the Makefile only
+# This script is to be executed from the Makefile only
 
 git --version;
 GIT_IS_AVAILABLE=${?};
