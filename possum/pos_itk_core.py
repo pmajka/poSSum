@@ -29,6 +29,7 @@ io_component_type_to_type = {
 io_component_string_name_to_image_type = {
     ('scalar', 'short', 3): itk.Image.SS3,
         ('scalar', 'unsigned_short', 3): itk.Image.US3,
+        ('scalar', 'unsigned_int', 3): itk.Image.US3,
         ('scalar', 'unsigned_char', 3): itk.Image.UC3,
         ('scalar', 'float', 3): itk.Image.F3,
         ('scalar', 'short', 2): itk.Image.SS2,
