@@ -11,7 +11,7 @@ import hashlib
 import math
 
 from PIL import Image
-
+Image.MAX_IMAGE_PIXELS = None
 
 _ROW_OF_THE_FIRST_SLICE = 14 - 1
 _DEFAULT_PADDING_ROUNDING = 100
