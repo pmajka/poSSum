@@ -55,7 +55,7 @@ class input_image_padding(pos_wrappers.generic_wrapper):
 
     _parameters = {
         'input_image': pos_parameters.filename_parameter('input_image', None),
-        'invert': pos_parameters.string_parameter('invert', None, "-{_name}"),
+        'invert': pos_parameters.string_parameter('invert', None, "-negate"),
         'background': pos_parameters.string_parameter('background', "white", "-{_name} {_value}"),
         'gravity': pos_parameters.string_parameter('gravity', "NorthWest", "-{_name} {_value}"),
         'extent': pos_parameters.vector_parameter('extent', None, "-{_name} {_list}"),
